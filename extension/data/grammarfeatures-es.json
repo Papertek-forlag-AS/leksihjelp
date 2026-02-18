@@ -1,0 +1,101 @@
+{
+  "language": "Spanish",
+  "languageNative": "Español",
+  "presets": [
+    { "id": "none", "name": "Ingen", "features": [] },
+    { "id": "basic", "name": "Enkel", "features": ["grammar_present", "grammar_articles", "grammar_plural"] },
+    { "id": "extended", "name": "Utvidet", "features": ["grammar_present", "grammar_preterito", "grammar_articles", "grammar_plural", "grammar_comparative", "grammar_superlative"] },
+    { "id": "all", "name": "Alt", "features": ["grammar_present", "grammar_preterito", "grammar_articles", "grammar_plural", "grammar_comparative", "grammar_superlative"] }
+  ],
+  "features": [
+    {
+      "id": "grammar_present",
+      "name": "Presente",
+      "nameEn": "Present Tense",
+      "description": "Nåtid - bøyning av verb i presens",
+      "descriptionEn": "Present tense verb conjugations",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.presente"
+    },
+    {
+      "id": "grammar_preterito",
+      "name": "Pretérito indefinido",
+      "nameEn": "Simple Past",
+      "description": "Enkel fortid",
+      "descriptionEn": "Simple past tense",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.preterito"
+    },
+    {
+      "id": "grammar_articles",
+      "name": "Artículos",
+      "nameEn": "Articles",
+      "description": "Bestemte (el/la/los/las) og ubestemte (un/una) artikler",
+      "descriptionEn": "Definite and indefinite articles",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "genus"
+    },
+    {
+      "id": "grammar_plural",
+      "name": "Plural",
+      "nameEn": "Plural",
+      "description": "Flertallsformer",
+      "descriptionEn": "Plural forms",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "plural"
+    },
+    {
+      "id": "grammar_comparative",
+      "name": "Comparativo",
+      "nameEn": "Comparative",
+      "description": "Gradbøyning komparativ",
+      "descriptionEn": "Comparative forms",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "comparison.comparativo"
+    },
+    {
+      "id": "grammar_superlative",
+      "name": "Superlativo",
+      "nameEn": "Superlative",
+      "description": "Gradbøyning superlativ",
+      "descriptionEn": "Superlative forms",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "comparison.superlativo"
+    }
+  ],
+  "categories": [
+    {
+      "id": "verbs",
+      "name": "Verbos",
+      "nameEn": "Verbs"
+    },
+    {
+      "id": "nouns",
+      "name": "Sustantivos",
+      "nameEn": "Nouns"
+    },
+    {
+      "id": "adjectives",
+      "name": "Adjetivos",
+      "nameEn": "Adjectives"
+    }
+  ]
+}

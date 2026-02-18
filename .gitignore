@@ -1,0 +1,20 @@
+node_modules/
+.vercel/
+.env
+.env.local
+*.log
+.DS_Store
+Thumbs.db
+.vercel
+.env*.local
+
+# Firebase service account keys — NEVER commit
+*-firebase-adminsdk-*.json
+firebase-*.json
+serviceAccount*.json
+
+# Extension zip — distribute via GitHub Releases
+*.zip
+
+# Claude Code settings
+.claude/

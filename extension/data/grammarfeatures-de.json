@@ -1,0 +1,212 @@
+{
+  "language": "German",
+  "languageNative": "Deutsch",
+  "presets": [
+    { "id": "none", "name": "Ingen", "features": [] },
+    { "id": "basic", "name": "Enkel", "features": ["grammar_present", "grammar_pronouns_ich_du", "grammar_articles", "grammar_plural"] },
+    { "id": "extended", "name": "Utvidet", "features": ["grammar_present", "grammar_preteritum", "grammar_pronouns_singular_wir", "grammar_articles", "grammar_plural", "grammar_accusative_indefinite", "grammar_accusative_definite", "grammar_comparative", "grammar_superlative"] },
+    { "id": "all", "name": "Alt", "features": ["grammar_present", "grammar_preteritum", "grammar_perfektum", "grammar_pronouns_ich_du", "grammar_pronouns_singular_wir", "grammar_pronouns_all", "grammar_articles", "grammar_plural", "grammar_accusative_indefinite", "grammar_accusative_definite", "grammar_dative", "grammar_comparative", "grammar_superlative", "grammar_adjective_declension"] }
+  ],
+  "features": [
+    {
+      "id": "grammar_present",
+      "name": "Presens",
+      "nameEn": "Present Tense",
+      "description": "Nåtid - bøyning av verb i presens",
+      "descriptionEn": "Present tense verb conjugations",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.presens"
+    },
+    {
+      "id": "grammar_preteritum",
+      "name": "Preteritum",
+      "nameEn": "Simple Past",
+      "description": "Fortid - bøyning av verb i preteritum",
+      "descriptionEn": "Simple past tense verb conjugations",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.preteritum"
+    },
+    {
+      "id": "grammar_perfektum",
+      "name": "Perfektum",
+      "nameEn": "Present Perfect",
+      "description": "Sammensatt fortid med haben/sein + partisipp",
+      "descriptionEn": "Present perfect tense with haben/sein + past participle",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.perfektum"
+    },
+    {
+      "id": "grammar_pronouns_ich_du",
+      "name": "Pronomen: ich/du",
+      "nameEn": "Pronouns: ich/du",
+      "description": "Bare ich og du pronomenformer",
+      "descriptionEn": "Only ich and du pronoun forms",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "filterPronouns": [
+        "ich",
+        "du"
+      ]
+    },
+    {
+      "id": "grammar_pronouns_singular_wir",
+      "name": "Pronomen: entall + wir",
+      "nameEn": "Pronouns: singular + wir",
+      "description": "ich, du, er/sie/es og wir",
+      "descriptionEn": "ich, du, er/sie/es and wir",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "filterPronouns": [
+        "ich",
+        "du",
+        "er/sie/es",
+        "wir"
+      ]
+    },
+    {
+      "id": "grammar_pronouns_all",
+      "name": "Alle pronomen",
+      "nameEn": "All Pronouns",
+      "description": "Alle personlige pronomen",
+      "descriptionEn": "All personal pronouns",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "filterPronouns": [
+        "ich",
+        "du",
+        "er/sie/es",
+        "wir",
+        "ihr",
+        "sie/Sie"
+      ]
+    },
+    {
+      "id": "grammar_articles",
+      "name": "Artikler",
+      "nameEn": "Articles",
+      "description": "Bestemte (der/die/das) og ubestemte (ein/eine) artikler",
+      "descriptionEn": "Definite (der/die/das) and indefinite (ein/eine) articles",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "genus"
+    },
+    {
+      "id": "grammar_plural",
+      "name": "Flertall",
+      "nameEn": "Plural",
+      "description": "Flertallsformer av substantiv",
+      "descriptionEn": "Plural forms of nouns",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "plural"
+    },
+    {
+      "id": "grammar_accusative_indefinite",
+      "name": "Akkusativ ubestemt",
+      "nameEn": "Accusative Indefinite",
+      "description": "Akkusativ med ubestemt artikkel (einen/eine/ein)",
+      "descriptionEn": "Accusative case with indefinite article",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.akkusativ.ubestemt"
+    },
+    {
+      "id": "grammar_accusative_definite",
+      "name": "Akkusativ bestemt",
+      "nameEn": "Accusative Definite",
+      "description": "Akkusativ med bestemt artikkel (den/die/das)",
+      "descriptionEn": "Accusative case with definite article",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.akkusativ.bestemt"
+    },
+    {
+      "id": "grammar_dative",
+      "name": "Dativ",
+      "nameEn": "Dative",
+      "description": "Dativ kasus (dem/der/dem, einem/einer/einem)",
+      "descriptionEn": "Dative case",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.dativ"
+    },
+    {
+      "id": "grammar_comparative",
+      "name": "Komparativ",
+      "nameEn": "Comparative",
+      "description": "Gradbøyning komparativ (größer, besser)",
+      "descriptionEn": "Comparative adjective forms (bigger, better)",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "comparison.komparativ"
+    },
+    {
+      "id": "grammar_superlative",
+      "name": "Superlativ",
+      "nameEn": "Superlative",
+      "description": "Gradbøyning superlativ (am größten, am besten)",
+      "descriptionEn": "Superlative adjective forms (biggest, best)",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "comparison.superlativ"
+    },
+    {
+      "id": "grammar_adjective_declension",
+      "name": "Adjektivbøyning",
+      "nameEn": "Adjective Declension",
+      "description": "Adjektivendelser etter artikkel og kasus",
+      "descriptionEn": "Adjective endings based on article and case",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "declension"
+    }
+  ],
+  "categories": [
+    {
+      "id": "verbs",
+      "name": "Verb",
+      "nameEn": "Verbs"
+    },
+    {
+      "id": "nouns",
+      "name": "Substantiv",
+      "nameEn": "Nouns"
+    },
+    {
+      "id": "adjectives",
+      "name": "Adjektiv",
+      "nameEn": "Adjectives"
+    }
+  ]
+}

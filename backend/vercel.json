@@ -1,0 +1,26 @@
+{
+  "functions": {
+    "api/download.js": {
+      "includeFiles": "public/lexi-extension.zip",
+      "maxDuration": 30,
+      "memory": 1024
+    },
+    "api/webhooks/stripe.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/lexi-extension.zip", "destination": "/api/download" },
+    { "source": "/vilkar", "destination": "/vilkar.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/create-charges",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/check-stripe-expiry",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}

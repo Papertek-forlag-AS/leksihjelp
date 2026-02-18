@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nb">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leksihjelp - Test Mode</title>
+    <link rel="stylesheet" href="../styles/popup.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .app {
+            /* Force dimensions to match typical popup size */
+            width: 350px;
+            height: 500px;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+            /* Ensure base background is white */
+            overflow: hidden;
+            /* Popup usually clips content */
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">📖</span>
+                <h1>Leksihjelp</h1>
+            </div>
+            <button id="settings-btn" class="icon-btn" title="Innstillinger">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- Main View: Dictionary -->
+        <section id="view-dictionary" class="view active">
+            <div class="search-container">
+                <div class="search-box glass">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.35-4.35" />
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Søk etter ord..." autocomplete="off">
+                    <button id="search-clear" class="search-clear hidden">&times;</button>
+                </div>
+                <div class="search-direction glass-subtle">
+                    <button id="dir-no-target" class="dir-btn active" title="Norsk → Målspråk">
+                        NO → <span class="target-lang-code">ES</span>
+                    </button>
+                    <button id="dir-target-no" class="dir-btn" title="Målspråk → Norsk">
+                        <span class="target-lang-code">ES</span> → NO
+                    </button>
+                </div>
+            </div>
+
+            <div id="search-results" class="results">
+                <div class="results-placeholder">
+                    <p>Skriv et ord for å søke i ordboken</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings View -->
+        <section id="view-settings" class="view">
+            <div class="settings-back">
+                <button id="settings-back-btn" class="text-btn">← Tilbake</button>
+            </div>
+
+            <div class="settings-group glass">
+                <h3>Språk</h3>
+                <p class="settings-note">Velg målspråk (krever omstart)</p>
+                <select id="setting-language" class="glass-input">
+                    <option value="es">Spansk</option>
+                    <option value="de">Tysk</option>
+                    <option value="fr">Fransk</option>
+                </select>
+            </div>
+
+            <div class="settings-group glass">
+                <h3>Tilgangskode</h3>
+                <p class="settings-note">Skriv inn kode for å låse opp ElevenLabs-uttale</p>
+                <div class="code-input-row">
+                    <input type="text" id="setting-access-code" class="glass-input" placeholder="Skriv inn kode...">
+                    <button id="verify-code-btn" class="btn-primary">Bekreft</button>
+                </div>
+                <div id="code-status" class="code-status"></div>
+            </div>
+
+            <div class="settings-group glass">
+                <h3>Ordforslag</h3>
+                <label class="toggle-row">
+                    <span>Aktiver ordforslag ved skriving</span>
+                    <input type="checkbox" id="setting-prediction" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-group glass">
+                <h3>Grammatikk i ordboken</h3>
+                <p class="settings-note">Velg hvilke grammatikkelementer som skal vises</p>
+                <div id="grammar-features-container">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+            <div class="settings-group glass">
+                <h3>Feide-innlogging</h3>
+                <button id="feide-login-btn" class="btn-secondary" disabled>
+                    Logg inn med Feide (kommer snart)
+                </button>
+            </div>
+        </section>
+
+        <!-- Nav -->
+        <nav class="bottom-nav glass">
+            <button class="nav-btn active" data-view="dictionary" title="Ordbok">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                </svg>
+                <span>Ordbok</span>
+            </button>
+            <button class="nav-btn" data-view="settings" title="Innstillinger">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span>Innstillinger</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="test-mock.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

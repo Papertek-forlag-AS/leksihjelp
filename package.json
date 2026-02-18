@@ -1,0 +1,20 @@
+{
+  "name": "leksihjelp",
+  "version": "1.5.1",
+  "description": "Chrome extension for Norwegian students learning foreign languages",
+  "scripts": {
+    "sync-vocab": "node scripts/sync-vocab.js",
+    "sync-vocab:de": "node scripts/sync-vocab.js de",
+    "sync-vocab:es": "node scripts/sync-vocab.js es",
+    "sync-vocab:fr": "node scripts/sync-vocab.js fr",
+    "sync-vocab:audio": "node scripts/sync-vocab.js --with-audio",
+    "sync-vocab:de:audio": "node scripts/sync-vocab.js de --with-audio",
+    "package": "cd extension && zip -r ../backend/public/lexi-extension.zip . -x '*.DS_Store' -x '*.map' && echo 'Created backend/public/lexi-extension.zip'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Papertek-forlag-AS/leksihjelp"
+  },
+  "author": "Papertek",
+  "license": "MIT"
+}
