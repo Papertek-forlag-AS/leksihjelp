@@ -9,6 +9,7 @@ const BACKEND_URL = 'https://leksihjelp.vercel.app';
 let dictionary = null;
 let currentAudio = null; // Currently playing audio
 let allWords = []; // Flattened array of all words from all banks
+let inflectionIndex = null; // Map: lowercased inflected form -> [{ entry, matchType, matchDetail }]
 let currentLang = 'es';
 let searchDirection = 'no-target'; // 'no-target' or 'target-no'
 let grammarFeatures = null; // Grammar features metadata
@@ -33,6 +34,53 @@ const GENUS_TO_GENDER = {
   n: 'nøytrum',
   pl: 'flertall'
 };
+
+// Norwegian irregular verb forms -> infinitive (without "å" prefix)
+const NORWEGIAN_IRREGULAR_VERBS = {
+  'er': 'være', 'var': 'være',
+  'har': 'ha', 'hadde': 'ha',
+  'kan': 'kunne', 'kunne': 'kunne',
+  'vil': 'ville', 'ville': 'ville',
+  'skal': 'skulle', 'skulle': 'skulle',
+  'må': 'måtte',
+  'vet': 'vite', 'visste': 'vite',
+  'går': 'gå', 'gikk': 'gå',
+  'får': 'få', 'fikk': 'få',
+  'gjør': 'gjøre', 'gjorde': 'gjøre',
+  'ser': 'se', 'så': 'se',
+  'sier': 'si', 'sa': 'si',
+  'tar': 'ta', 'tok': 'ta',
+  'kommer': 'komme', 'kom': 'komme',
+  'finner': 'finne', 'fant': 'finne',
+  'gir': 'gi', 'gav': 'gi',
+  'ligger': 'ligge', 'lå': 'ligge',
+  'sitter': 'sitte', 'satt': 'sitte',
+  'står': 'stå', 'stod': 'stå',
+  'drar': 'dra', 'dro': 'dra',
+  'legger': 'legge', 'la': 'legge',
+  'setter': 'sette', 'satte': 'sette',
+  'skriver': 'skrive', 'skrev': 'skrive',
+  'spiser': 'spise', 'spiste': 'spise',
+  'liker': 'like', 'likte': 'like',
+  'bor': 'bo', 'bodde': 'bo',
+  'heter': 'hete', 'het': 'hete',
+  'snakker': 'snakke', 'snakket': 'snakke',
+  'leser': 'lese', 'leste': 'lese',
+  'lærer': 'lære', 'lærte': 'lære',
+  'synger': 'synge', 'sang': 'synge',
+  'danser': 'danse', 'danset': 'danse',
+  'svømmer': 'svømme',
+  'lager': 'lage', 'lagde': 'lage',
+  'leker': 'leke', 'lekte': 'leke'
+};
+
+function norwegianInfinitive(form) {
+  const lower = form.toLowerCase();
+  if (NORWEGIAN_IRREGULAR_VERBS[lower]) return NORWEGIAN_IRREGULAR_VERBS[lower];
+  // Regular verb heuristic: present "-er" -> infinitive "-e"
+  if (lower.endsWith('er') && lower.length > 3) return lower.slice(0, -1);
+  return null;
+}
 
 // ── Bootstrap ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -69,6 +117,7 @@ async function loadDictionary(lang) {
     if (!res.ok) throw new Error(`Dictionary load failed: ${res.status}`);
     dictionary = await res.json();
     allWords = flattenBanks(dictionary);
+    inflectionIndex = buildInflectionIndex(allWords);
     updateLangLabels();
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -101,6 +150,54 @@ function flattenBanks(dict) {
   }
 
   return words;
+}
+
+function buildInflectionIndex(words) {
+  const index = new Map();
+
+  function addToIndex(key, entry, matchType, matchDetail) {
+    if (!key || key === (entry.word || '').toLowerCase()) return;
+    if (!index.has(key)) index.set(key, []);
+    index.get(key).push({ entry, matchType, matchDetail });
+  }
+
+  for (const entry of words) {
+    // Verb conjugations
+    if (entry.conjugations) {
+      for (const [tenseName, tenseData] of Object.entries(entry.conjugations)) {
+        if (!tenseData?.former) continue;
+        const former = tenseData.former;
+        if (Array.isArray(former)) {
+          for (const form of former) {
+            if (form) addToIndex(form.toLowerCase(), entry, 'conjugation', tenseName);
+          }
+        } else if (typeof former === 'object') {
+          for (const [pronoun, form] of Object.entries(former)) {
+            if (form) addToIndex(form.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
+          }
+        }
+      }
+    }
+
+    // Noun plurals
+    if (entry._bank === 'nounbank') {
+      if (entry.plural) {
+        let p = entry.plural;
+        if (p.startsWith('die ')) p = p.slice(4);
+        addToIndex(p.toLowerCase(), entry, 'plural', null);
+      }
+      if (entry.declension?.flertall) {
+        for (const variant of [entry.declension.flertall.ubestemt, entry.declension.flertall.bestemt]) {
+          if (!variant?.form) continue;
+          let f = variant.form;
+          if (f.startsWith('die ')) f = f.slice(4);
+          addToIndex(f.toLowerCase(), entry, 'plural', null);
+        }
+      }
+    }
+  }
+
+  return index;
 }
 
 function updateLangLabels() {
@@ -351,19 +448,59 @@ function performSearch(query) {
   }
 
   const q = query.toLowerCase();
-  const results = allWords.filter(entry => {
-    // Skip entries without translation (for Norwegian search direction)
-    if (searchDirection === 'no-target') {
-      return entry.translation && entry.translation.toLowerCase().includes(q);
-    } else {
-      return entry.word && entry.word.toLowerCase().includes(q);
-    }
-  });
 
-  // Sort: exact matches first, then starts-with, then includes
-  results.sort((a, b) => {
-    const fieldA = searchDirection === 'no-target' ? a.translation : a.word;
-    const fieldB = searchDirection === 'no-target' ? b.translation : b.word;
+  // Phase 1: Direct matches on base forms (existing behavior)
+  const directResults = [];
+  for (const entry of allWords) {
+    if (searchDirection === 'no-target') {
+      if (entry.translation && entry.translation.toLowerCase().includes(q)) {
+        directResults.push({ entry, inflectionHint: null });
+      }
+    } else {
+      if (entry.word && entry.word.toLowerCase().includes(q)) {
+        directResults.push({ entry, inflectionHint: null });
+      }
+    }
+  }
+
+  // Phase 2: Inflection matches (deduplicated against direct)
+  const inflectionResults = [];
+  const directEntrySet = new Set(directResults.map(r => r.entry));
+
+  if (searchDirection === 'target-no') {
+    if (inflectionIndex) {
+      const matches = inflectionIndex.get(q) || [];
+      for (const match of matches) {
+        if (directEntrySet.has(match.entry)) continue;
+        const hint = match.matchType === 'conjugation'
+          ? `«${query}» → bøyning av «${match.entry.word}»`
+          : `«${query}» → flertall av «${match.entry.word}»`;
+        inflectionResults.push({ entry: match.entry, inflectionHint: hint });
+      }
+    }
+  } else {
+    const infinitive = norwegianInfinitive(q);
+    if (infinitive) {
+      for (const entry of allWords) {
+        if (directEntrySet.has(entry)) continue;
+        if (!entry.translation) continue;
+        const trans = entry.translation.toLowerCase();
+        const stripped = trans.startsWith('å ') ? trans.slice(2) : trans;
+        if (stripped === infinitive || stripped.startsWith(infinitive + ' ')
+            || stripped.startsWith(infinitive + ',') || stripped.includes(', ' + infinitive)) {
+          inflectionResults.push({
+            entry,
+            inflectionHint: `«${query}» → bøyning av «${infinitive}»`
+          });
+        }
+      }
+    }
+  }
+
+  // Phase 3: Sort direct results, split into starts-with vs contains
+  directResults.sort((a, b) => {
+    const fieldA = searchDirection === 'no-target' ? a.entry.translation : a.entry.word;
+    const fieldB = searchDirection === 'no-target' ? b.entry.translation : b.entry.word;
     const la = fieldA.toLowerCase();
     const lb = fieldB.toLowerCase();
     if (la === q && lb !== q) return -1;
@@ -373,7 +510,22 @@ function performSearch(query) {
     return la.localeCompare(lb);
   });
 
-  renderResults(results.slice(0, 50));
+  const directStartsWith = [];
+  const directContains = [];
+  for (const r of directResults) {
+    const field = (searchDirection === 'no-target' ? r.entry.translation : r.entry.word).toLowerCase();
+    if (field === q || field.startsWith(q)) {
+      directStartsWith.push(r);
+    } else {
+      directContains.push(r);
+    }
+  }
+
+  inflectionResults.sort((a, b) => a.entry.word.localeCompare(b.entry.word));
+
+  // Final order: exact/starts-with → inflection matches → contains
+  const combined = [...directStartsWith, ...inflectionResults, ...directContains];
+  renderResults(combined.slice(0, 50));
 }
 
 function renderResults(results) {
@@ -383,7 +535,7 @@ function renderResults(results) {
     return;
   }
 
-  container.innerHTML = results.map(entry => `
+  container.innerHTML = results.map(({ entry, inflectionHint }) => `
     <div class="result-card glass" data-id="${entry._id || ''}">
       <div class="result-basic">
         <div class="result-word-row">
@@ -391,6 +543,7 @@ function renderResults(results) {
           ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="Spill av">${getPlayIcon()}</button>` : ''}
         </div>
         <div class="result-translation">${escapeHtml(entry.translation || '')}</div>
+        ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
         <div class="result-meta">
           <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
           ${entry.gender && isFeatureEnabled('grammar_articles') ? `<span class="result-gender">${escapeHtml(entry.gender)}</span>` : ''}
