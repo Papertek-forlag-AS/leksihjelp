@@ -14,98 +14,287 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: #0b0e1a;
       min-height: 100vh;
       color: #fff;
       line-height: 1.6;
+      overflow-x: hidden;
     }
 
+    /* ── Animated background ── */
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #0d1f3c 70%, #0b0e1a 100%);
+    }
+
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.35;
+      z-index: 0;
+      animation: float 20s ease-in-out infinite;
+    }
+
+    .bg-orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #667eea, transparent 70%);
+      top: -120px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+
+    .bg-orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #764ba2, transparent 70%);
+      bottom: 10%;
+      left: -80px;
+      animation-delay: -7s;
+    }
+
+    .bg-orb-3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, #10b981, transparent 70%);
+      top: 50%;
+      right: -60px;
+      animation-delay: -14s;
+      opacity: 0.2;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.05); }
+      66% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+
+    /* ── Layout ── */
     .container {
-      max-width: 800px;
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 50px 20px;
     }
 
+    /* ── Header ── */
     header {
       text-align: center;
-      margin-bottom: 50px;
+      margin-bottom: 60px;
+      animation: fadeInDown 0.8s ease-out both;
     }
 
     .logo {
       font-size: 64px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      animation: logoFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
     h1 {
       font-size: 3rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
     }
 
     .tagline {
-      font-size: 1.3rem;
-      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.25rem;
+      color: rgba(255, 255, 255, 0.55);
+      font-weight: 300;
     }
 
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: rgba(255, 255, 255, 0.6);
+      color: rgba(255, 255, 255, 0.5);
       text-decoration: none;
-      font-size: 0.95rem;
-      padding: 8px 16px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      transition: color 0.2s, border-color 0.2s;
-      margin-top: 16px;
+      font-size: 0.9rem;
+      padding: 8px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      margin-top: 20px;
+      backdrop-filter: blur(8px);
+      background: rgba(255, 255, 255, 0.04);
     }
 
     .back-link:hover {
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(-3px);
     }
 
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 30px;
-      margin-bottom: 30px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    /* ── Glassmorphism cards ── */
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 36px;
+      margin-bottom: 32px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
 
+    .glass:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    /* ── Scroll reveal animation ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .reveal.visible .stagger { animation: staggerIn 0.5s ease-out both; }
+    .reveal.visible .stagger:nth-child(1) { animation-delay: 0.1s; }
+    .reveal.visible .stagger:nth-child(2) { animation-delay: 0.18s; }
+    .reveal.visible .stagger:nth-child(3) { animation-delay: 0.26s; }
+    .reveal.visible .stagger:nth-child(4) { animation-delay: 0.34s; }
+    .reveal.visible .stagger:nth-child(5) { animation-delay: 0.42s; }
+    .reveal.visible .stagger:nth-child(6) { animation-delay: 0.50s; }
+
+    .stagger { opacity: 0; transform: translateY(12px); }
+
+    @keyframes staggerIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Typography ── */
     h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      color: #a78bfa;
+      font-size: 1.6rem;
+      margin-bottom: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     h3 {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       margin-bottom: 12px;
       color: #c4b5fd;
+      font-weight: 600;
     }
 
     p {
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 14px;
     }
 
+    /* ── Phase labels ── */
+    .phase-label {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .phase-1 {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    .phase-2 {
+      background: rgba(168, 85, 247, 0.15);
+      color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+
+    /* ── Language grid ── */
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .lang-card {
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+      padding: 18px 12px;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.3s ease;
+    }
+
+    .lang-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .lang-card .flag {
+      font-size: 2.2rem;
+      margin-bottom: 6px;
+    }
+
+    .lang-card .name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .lang-card .code {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.35);
+      margin-top: 2px;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+
+    /* ── List items ── */
     ul {
       list-style: none;
       padding: 0;
     }
 
     li {
-      padding: 10px 0;
-      padding-left: 30px;
+      padding: 8px 0;
+      padding-left: 28px;
       position: relative;
-      color: rgba(255, 255, 255, 0.8);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.95rem;
     }
 
     li::before {
@@ -114,60 +303,67 @@
       font-weight: bold;
     }
 
+    .roadmap-item {
+      padding-left: 32px;
+    }
+
     .roadmap-item::before {
-      content: ">";
-      color: #667eea;
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #818cf8;
+      top: 16px;
+      left: 6px;
+      box-shadow: 0 0 8px rgba(129, 140, 248, 0.5);
     }
 
-    .lang-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 14px;
-      margin: 20px 0;
-    }
-
-    .lang-card {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    .lang-card .flag {
-      font-size: 2rem;
-      margin-bottom: 6px;
-    }
-
-    .lang-card .name {
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    .lang-card .code {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.4);
-      margin-top: 2px;
-    }
-
+    /* ── Highlight / info boxes ── */
     .highlight-box {
-      background: rgba(102, 126, 234, 0.1);
-      border: 1px solid rgba(102, 126, 234, 0.25);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
+      background: rgba(99, 102, 241, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 14px;
+      padding: 22px;
+      margin: 24px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #818cf8, transparent);
     }
 
     .highlight-box h3 {
-      color: #93c5fd;
+      color: #a5b4fc;
       margin-bottom: 10px;
     }
 
     .privacy-box {
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      border-radius: 12px;
-      padding: 20px;
-      margin: 20px 0;
+      background: rgba(16, 185, 129, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(16, 185, 129, 0.18);
+      border-radius: 14px;
+      padding: 22px;
+      margin: 24px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .privacy-box::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10b981, transparent);
     }
 
     .privacy-box h3 {
@@ -175,78 +371,134 @@
       margin-bottom: 10px;
     }
 
+    .privacy-box .roadmap-item::before {
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    /* ── Diagram ── */
     .diagram {
-      background: rgba(0, 0, 0, 0.25);
-      border-radius: 10px;
-      padding: 20px;
-      margin: 16px 0;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 22px;
+      margin: 20px 0;
       font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
-      font-size: 0.85rem;
-      line-height: 1.8;
-      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.82rem;
+      line-height: 1.9;
+      color: rgba(255, 255, 255, 0.6);
       overflow-x: auto;
       white-space: pre;
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
-    .phase-label {
-      display: inline-block;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 6px;
-      margin-bottom: 12px;
+    .diagram .keyword {
+      color: #c084fc;
     }
 
-    .phase-1 {
-      background: rgba(102, 126, 234, 0.2);
-      color: #93c5fd;
+    .diagram .value {
+      color: #6ee7b7;
     }
 
-    .phase-2 {
-      background: rgba(167, 139, 250, 0.2);
-      color: #c4b5fd;
+    .diagram .comment {
+      color: rgba(255, 255, 255, 0.3);
     }
 
+    /* ── Vision card accent ── */
+    .vision-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vision-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea, #764ba2, #c084fc);
+    }
+
+    .vision-card h2 {
+      background: linear-gradient(135deg, #c084fc, #f0abfc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Footer ── */
     footer {
       text-align: center;
-      margin-top: 50px;
-      padding: 20px;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.9rem;
+      margin-top: 60px;
+      padding: 24px;
+      color: rgba(255, 255, 255, 0.35);
+      font-size: 0.85rem;
+      animation: fadeInDown 0.8s ease-out 0.3s both;
     }
 
     footer a {
-      color: #a78bfa;
+      color: rgba(167, 139, 250, 0.7);
       text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer a:hover {
+      color: #a78bfa;
     }
 
     .footer-legal {
       margin-top: 12px;
-      font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.72rem;
+      color: rgba(255, 255, 255, 0.2);
       line-height: 1.6;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
     }
 
+    /* ── Responsive ── */
     @media (max-width: 600px) {
       h1 {
-        font-size: 2rem;
+        font-size: 2.2rem;
       }
       .tagline {
-        font-size: 1rem;
+        font-size: 1.05rem;
+      }
+      .glass {
+        padding: 24px 20px;
+        border-radius: 16px;
       }
       .lang-grid {
         grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .lang-card {
+        padding: 14px 8px;
       }
       .diagram {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
+        padding: 16px;
+      }
+      .bg-orb {
+        opacity: 0.2;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .lang-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
   </style>
 </head>
 <body>
+  <!-- Animated background -->
+  <div class="bg-gradient"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
   <div class="container">
     <header>
       <div class="logo">📚</div>
@@ -259,38 +511,38 @@
     </header>
 
     <!-- Section 1: Expanded vocabulary -->
-    <div class="card">
+    <div class="glass reveal">
       <span class="phase-label phase-1">Fase 1</span>
       <h2>Utvidet ordbank og ordbok</h2>
       <p>Vi jobber med en betydelig utvidelse av vokabularet i Leksihjelp. Planen er en egen, separat ordbank som dekker flere norske skriftsprak og fremmedsprak:</p>
 
       <div class="lang-grid">
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇳🇴</div>
           <div class="name">Bokmal</div>
           <div class="code">BM</div>
         </div>
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇳🇴</div>
           <div class="name">Nynorsk</div>
           <div class="code">NN</div>
         </div>
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇩🇪</div>
           <div class="name">Tysk</div>
           <div class="code">DE</div>
         </div>
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇬🇧</div>
           <div class="name">Engelsk</div>
           <div class="code">EN</div>
         </div>
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇫🇷</div>
           <div class="name">Fransk</div>
           <div class="code">FR</div>
         </div>
-        <div class="lang-card">
+        <div class="lang-card stagger">
           <div class="flag">🇪🇸</div>
           <div class="name">Spansk</div>
           <div class="code">SP</div>
@@ -313,7 +565,7 @@
     </div>
 
     <!-- Section 2: Anonymous data contribution -->
-    <div class="card">
+    <div class="glass reveal">
       <span class="phase-label phase-2">Fase 2</span>
       <h2>Anonyme databidrag fra brukere</h2>
       <p>Vi planlegger a la brukere frivillig bidra med data som hjelper oss med a identifisere typiske skrivefeil. Disse dataene vil gjore ordforslag og stavekontroll i Leksihjelp enda bedre over tid.</p>
@@ -333,18 +585,20 @@
           <li class="roadmap-item">Bruker-ID erstattes med en irreversibel hash for det sendes</li>
           <li class="roadmap-item">Ingen personopplysninger lagres sammen med skrivedataene</li>
           <li class="roadmap-item">Selv ikke vi kan spore data tilbake til enkeltbrukere</li>
-          <li class="roadmap-item">All kode er apen kildekode - hvem som helst kan verifisere dette</li>
+          <li class="roadmap-item">All kode er apen kildekode — hvem som helst kan verifisere dette</li>
         </ul>
       </div>
 
-      <div class="diagram">Bruker skriver     Anonymisering         Aggregert database
+      <div class="diagram"><span class="comment">// Slik anonymiseres data:</span>
+
+<span class="keyword">Bruker skriver</span>     Anonymisering         <span class="keyword">Aggregert database</span>
     ord               (hashing)
 
- "Scuhle"  --->  SHA-256(session)  --->  { feil: "Scuhle",
-                  = a7f3b2...             riktig: "Schule",
-                                          antall: 47 }
+ <span class="value">"Scuhle"</span>  --->  SHA-256(session)  --->  { <span class="keyword">feil</span>: <span class="value">"Scuhle"</span>,
+                  = a7f3b2...             <span class="keyword">riktig</span>: <span class="value">"Schule"</span>,
+                                          <span class="keyword">antall</span>: <span class="value">47</span> }
 
- Ingen kobling mellom bruker og data</div>
+<span class="comment"> Ingen kobling mellom bruker og data</span></div>
 
       <h3>Hva dataene brukes til</h3>
       <ul>
@@ -356,10 +610,10 @@
     </div>
 
     <!-- Summary / Vision -->
-    <div class="card">
+    <div class="glass vision-card reveal">
       <h2>Vart mal</h2>
-      <p>Leksihjelp skal vaere det beste gratisverktøyet for norske elever som laerer fremmedsprak. Ved a utvide ordboken, legge til stotte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjore Leksihjelp smartere og mer nyttig for alle - spesielt for elever som sliter med rettskriving.</p>
-      <p style="margin-bottom:0;">Alt vi bygger forblir apen kildekode. Har du ideer eller onsker a bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp" style="color:#a78bfa;">Besok oss pa GitHub</a>.</p>
+      <p>Leksihjelp skal vaere det beste gratisverktøyet for norske elever som laerer fremmedsprak. Ved a utvide ordboken, legge til stotte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjore Leksihjelp smartere og mer nyttig for alle — spesielt for elever som sliter med rettskriving.</p>
+      <p style="margin-bottom:0;">Alt vi bygger forblir apen kildekode. Har du ideer eller onsker a bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp" style="color:#a78bfa;text-decoration:none;border-bottom:1px solid rgba(167,139,250,0.3);transition:border-color 0.2s;">Besok oss pa GitHub</a>.</p>
     </div>
 
     <footer>
@@ -368,5 +622,24 @@
       <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operator av Leksihjelp. Kildekoden til Leksihjelp er lisensiert under MIT-lisensen.</p>
     </footer>
   </div>
+
+  <script>
+    // Scroll-triggered reveal animations
+    (function () {
+      var els = document.querySelectorAll('.reveal');
+      if (!els.length) return;
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      els.forEach(function (el) { observer.observe(el); });
+    })();
+  </script>
 </body>
 </html>
