@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fremtidsplaner - Leksihjelp</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      color: #fff;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .logo {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      font-size: 0.95rem;
+      padding: 8px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      transition: color 0.2s, border-color 0.2s;
+      margin-top: 16px;
+    }
+
+    .back-link:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #a78bfa;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      color: #c4b5fd;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 14px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    li::before {
+      position: absolute;
+      left: 0;
+      font-weight: bold;
+    }
+
+    .roadmap-item::before {
+      content: ">";
+      color: #667eea;
+    }
+
+    .lang-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .lang-card {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .lang-card .flag {
+      font-size: 2rem;
+      margin-bottom: 6px;
+    }
+
+    .lang-card .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .lang-card .code {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 2px;
+    }
+
+    .highlight-box {
+      background: rgba(102, 126, 234, 0.1);
+      border: 1px solid rgba(102, 126, 234, 0.25);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .highlight-box h3 {
+      color: #93c5fd;
+      margin-bottom: 10px;
+    }
+
+    .privacy-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .privacy-box h3 {
+      color: #6ee7b7;
+      margin-bottom: 10px;
+    }
+
+    .diagram {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      padding: 20px;
+      margin: 16px 0;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.7);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .phase-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .phase-1 {
+      background: rgba(102, 126, 234, 0.2);
+      color: #93c5fd;
+    }
+
+    .phase-2 {
+      background: rgba(167, 139, 250, 0.2);
+      color: #c4b5fd;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      padding: 20px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #a78bfa;
+      text-decoration: none;
+    }
+
+    .footer-legal {
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.25);
+      line-height: 1.6;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .tagline {
+        font-size: 1rem;
+      }
+      .lang-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .diagram {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">📚</div>
+      <h1>Fremtidsplaner</h1>
+      <p class="tagline">Hva vi jobber med videre i Leksihjelp</p>
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Tilbake til forsiden
+      </a>
+    </header>
+
+    <!-- Section 1: Expanded vocabulary -->
+    <div class="card">
+      <span class="phase-label phase-1">Fase 1</span>
+      <h2>Utvidet ordbank og ordbok</h2>
+      <p>Vi jobber med en betydelig utvidelse av vokabularet i Leksihjelp. Planen er en egen, separat ordbank som dekker flere norske skriftsprak og fremmedsprak:</p>
+
+      <div class="lang-grid">
+        <div class="lang-card">
+          <div class="flag">🇳🇴</div>
+          <div class="name">Bokmal</div>
+          <div class="code">BM</div>
+        </div>
+        <div class="lang-card">
+          <div class="flag">🇳🇴</div>
+          <div class="name">Nynorsk</div>
+          <div class="code">NN</div>
+        </div>
+        <div class="lang-card">
+          <div class="flag">🇩🇪</div>
+          <div class="name">Tysk</div>
+          <div class="code">DE</div>
+        </div>
+        <div class="lang-card">
+          <div class="flag">🇬🇧</div>
+          <div class="name">Engelsk</div>
+          <div class="code">EN</div>
+        </div>
+        <div class="lang-card">
+          <div class="flag">🇫🇷</div>
+          <div class="name">Fransk</div>
+          <div class="code">FR</div>
+        </div>
+        <div class="lang-card">
+          <div class="flag">🇪🇸</div>
+          <div class="name">Spansk</div>
+          <div class="code">SP</div>
+        </div>
+      </div>
+
+      <h3>Vanlige feil og akseptable svar</h3>
+      <p>Den nye ordbanken vil ikke bare inneholde korrekte former, men ogsa informasjon om vanlige feil og akseptable svar. Dette er spesielt nyttig nar elevene bruker vokabularet til glosetester og andre oppgaver.</p>
+      <ul>
+        <li class="roadmap-item">Oversikt over vanlige skrivefeil knyttet til hvert ord</li>
+        <li class="roadmap-item">Akseptable alternative svar i glosetester (f.eks. synonymer og forenklede former)</li>
+        <li class="roadmap-item">Kontekstbasert gjenkjenning av nesten-riktige svar</li>
+        <li class="roadmap-item">Stotte for bade bokmal og nynorsk som malsprak</li>
+      </ul>
+
+      <div class="highlight-box">
+        <h3>Hvorfor dette er viktig</h3>
+        <p style="margin-bottom:0;">Mange elever opplever at svarene deres blir markert som feil selv om de er akseptable. Ved a kombinere ordbokdata med informasjon om vanlige feil og alternative svar, kan Leksihjelp gi mer rettferdige og nyttige tilbakemeldinger.</p>
+      </div>
+    </div>
+
+    <!-- Section 2: Anonymous data contribution -->
+    <div class="card">
+      <span class="phase-label phase-2">Fase 2</span>
+      <h2>Anonyme databidrag fra brukere</h2>
+      <p>Vi planlegger a la brukere frivillig bidra med data som hjelper oss med a identifisere typiske skrivefeil. Disse dataene vil gjore ordforslag og stavekontroll i Leksihjelp enda bedre over tid.</p>
+
+      <h3>Slik fungerer det</h3>
+      <ul>
+        <li class="roadmap-item">Brukere kan frivillig velge a dele anonymiserte skrivedata</li>
+        <li class="roadmap-item">Bade betalende og gratisbrukere kan bidra</li>
+        <li class="roadmap-item">Data brukes til a forbedre ordforslag og stavekontrollen</li>
+        <li class="roadmap-item">Typiske skrivefeil fra elever med dysleksi er spesielt verdifulle</li>
+      </ul>
+
+      <div class="privacy-box">
+        <h3>100 % anonymt med hashing</h3>
+        <p>Personvern er svaert viktig for oss. All data som samles inn blir fullstendig anonymisert ved hjelp av hashing (enveis-kryptering). Det betyr at det er teknisk umulig a koble skrivedata tilbake til en bestemt bruker.</p>
+        <ul>
+          <li class="roadmap-item">Bruker-ID erstattes med en irreversibel hash for det sendes</li>
+          <li class="roadmap-item">Ingen personopplysninger lagres sammen med skrivedataene</li>
+          <li class="roadmap-item">Selv ikke vi kan spore data tilbake til enkeltbrukere</li>
+          <li class="roadmap-item">All kode er apen kildekode - hvem som helst kan verifisere dette</li>
+        </ul>
+      </div>
+
+      <div class="diagram">Bruker skriver     Anonymisering         Aggregert database
+    ord               (hashing)
+
+ "Scuhle"  --->  SHA-256(session)  --->  { feil: "Scuhle",
+                  = a7f3b2...             riktig: "Schule",
+                                          antall: 47 }
+
+ Ingen kobling mellom bruker og data</div>
+
+      <h3>Hva dataene brukes til</h3>
+      <ul>
+        <li class="roadmap-item">Smartere ordforslag som forstår vanlige skrivefeil</li>
+        <li class="roadmap-item">Bedre stavekontroll tilpasset norske elever</li>
+        <li class="roadmap-item">Identifisering av systematiske feilmonstre pa tvers av sprak</li>
+        <li class="roadmap-item">Forbedring av ordboken med reelle bruksbehov</li>
+      </ul>
+    </div>
+
+    <!-- Summary / Vision -->
+    <div class="card">
+      <h2>Vart mal</h2>
+      <p>Leksihjelp skal vaere det beste gratisverktøyet for norske elever som laerer fremmedsprak. Ved a utvide ordboken, legge til stotte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjore Leksihjelp smartere og mer nyttig for alle - spesielt for elever som sliter med rettskriving.</p>
+      <p style="margin-bottom:0;">Alt vi bygger forblir apen kildekode. Har du ideer eller onsker a bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp" style="color:#a78bfa;">Besok oss pa GitHub</a>.</p>
+    </div>
+
+    <footer>
+      <p>Utviklet av <a href="https://papertek.no">Papertek forlag AS</a> — <a href="https://github.com/Papertek-forlag-AS/leksihjelp">apen kildekode</a> (MIT-lisens)</p>
+      <p style="margin-top: 8px;"><a href="/vilkar">Salgsbetingelser</a></p>
+      <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operator av Leksihjelp. Kildekoden til Leksihjelp er lisensiert under MIT-lisensen.</p>
+    </footer>
+  </div>
+</body>
+</html>
