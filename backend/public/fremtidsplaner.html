@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="nb">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fremtidsplaner - Leksihjelp</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-    <style>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
@@ -55,7 +57,7 @@
     .logo {
       font-size: 56px;
       margin-bottom: 20px;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
     }
 
     h1 {
@@ -124,22 +126,56 @@
       transform: translateY(0);
     }
 
-    .stagger { opacity: 0; transform: translateY(12px); }
-    .reveal.visible .stagger { animation: staggerIn 0.5s ease-out both; }
-    .reveal.visible .stagger:nth-child(1) { animation-delay: 0.1s; }
-    .reveal.visible .stagger:nth-child(2) { animation-delay: 0.18s; }
-    .reveal.visible .stagger:nth-child(3) { animation-delay: 0.26s; }
-    .reveal.visible .stagger:nth-child(4) { animation-delay: 0.34s; }
-    .reveal.visible .stagger:nth-child(5) { animation-delay: 0.42s; }
-    .reveal.visible .stagger:nth-child(6) { animation-delay: 0.50s; }
+    .stagger {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    .reveal.visible .stagger {
+      animation: staggerIn 0.5s ease-out both;
+    }
+
+    .reveal.visible .stagger:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .reveal.visible .stagger:nth-child(2) {
+      animation-delay: 0.18s;
+    }
+
+    .reveal.visible .stagger:nth-child(3) {
+      animation-delay: 0.26s;
+    }
+
+    .reveal.visible .stagger:nth-child(4) {
+      animation-delay: 0.34s;
+    }
+
+    .reveal.visible .stagger:nth-child(5) {
+      animation-delay: 0.42s;
+    }
+
+    .reveal.visible .stagger:nth-child(6) {
+      animation-delay: 0.50s;
+    }
 
     @keyframes staggerIn {
-      to { opacity: 1; transform: translateY(0); }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* ── Typography ── */
@@ -206,7 +242,7 @@
     .lang-card .flag {
       font-size: 2.2rem;
       margin-bottom: 12px;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
     }
 
     .lang-card .name {
@@ -249,7 +285,8 @@
     }
 
     /* ── Highlight / info boxes ── */
-    .highlight-box, .privacy-box {
+    .highlight-box,
+    .privacy-box {
       background: rgba(0, 0, 0, 0.2);
       border: 1px solid var(--card-border);
       border-radius: 12px;
@@ -258,7 +295,8 @@
       position: relative;
     }
 
-    .highlight-box h3, .privacy-box h3 {
+    .highlight-box h3,
+    .privacy-box h3 {
       color: #fff;
     }
 
@@ -294,7 +332,7 @@
       position: relative;
       overflow: hidden;
       border: 1px solid rgba(59, 130, 246, 0.3);
-      background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0.2) 100%);
+      background: linear-gradient(180deg, rgba(59, 130, 246, 0.08) 0%, rgba(0, 0, 0, 0.2) 100%);
     }
 
     /* ── Footer ── */
@@ -333,22 +371,26 @@
       h1 {
         font-size: 2.5rem;
       }
+
       .container {
         padding: 40px 16px;
       }
+
       .lang-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
       }
+
       .lang-card {
         padding: 16px 12px;
       }
+
       .diagram {
         font-size: 0.75rem;
         padding: 16px;
       }
     }
-    
+
     @media (max-width: 480px) {
       .lang-grid {
         grid-template-columns: 1fr;
@@ -356,8 +398,9 @@
     }
   </style>
 </head>
+
 <body>
-  
+
 
   <div class="container">
     <header>
@@ -365,7 +408,11 @@
       <h1>Fremtidsplaner</h1>
       <p class="tagline">Hva vi jobber med videre i Leksihjelp</p>
       <a href="/" class="back-link">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
         Tilbake til forsiden
       </a>
     </header>
@@ -374,12 +421,13 @@
     <div class="glass reveal">
       <span class="phase-label phase-1">Fase 1</span>
       <h2>Utvidet ordbank og ordbok</h2>
-      <p>Vi jobber med en betydelig utvidelse av vokabularet i Leksihjelp. Planen er en egen, separat ordbank som dekker flere norske skriftsprak og fremmedsprak:</p>
+      <p>Vi jobber med en betydelig utvidelse av vokabularet i Leksihjelp. Planen er en egen, separat ordbank som dekker
+        flere norske skriftspråk og fremmedspråk:</p>
 
       <div class="lang-grid">
         <div class="lang-card stagger">
           <div class="flag">🇳🇴</div>
-          <div class="name">Bokmal</div>
+          <div class="name">Bokmål</div>
           <div class="code">BM</div>
         </div>
         <div class="lang-card stagger">
@@ -410,17 +458,20 @@
       </div>
 
       <h3>Vanlige feil og akseptable svar</h3>
-      <p>Den nye ordbanken vil ikke bare inneholde korrekte former, men ogsa informasjon om vanlige feil og akseptable svar. Dette er spesielt nyttig nar elevene bruker vokabularet til glosetester og andre oppgaver.</p>
+      <p>Den nye ordbanken vil ikke bare inneholde korrekte former, men også informasjon om vanlige feil og akseptable
+        svar. Dette er spesielt nyttig når elevene bruker vokabularet til glosetester og andre oppgaver.</p>
       <ul>
         <li class="roadmap-item">Oversikt over vanlige skrivefeil knyttet til hvert ord</li>
         <li class="roadmap-item">Akseptable alternative svar i glosetester (f.eks. synonymer og forenklede former)</li>
         <li class="roadmap-item">Kontekstbasert gjenkjenning av nesten-riktige svar</li>
-        <li class="roadmap-item">Stotte for bade bokmal og nynorsk som malsprak</li>
+        <li class="roadmap-item">Støtte for både bokmål og nynorsk som målspråk</li>
       </ul>
 
       <div class="highlight-box">
         <h3>Hvorfor dette er viktig</h3>
-        <p style="margin-bottom:0;color:var(--text-secondary);">Mange elever opplever at svarene deres blir markert som feil selv om de er akseptable. Ved a kombinere ordbokdata med informasjon om vanlige feil og alternative svar, kan Leksihjelp gi mer rettferdige og nyttige tilbakemeldinger.</p>
+        <p style="margin-bottom:0;color:var(--text-secondary);">Mange elever opplever at svarene deres blir markert som
+          feil selv om de er akseptable. Ved å kombinere ordbokdata med informasjon om vanlige feil og alternative svar,
+          kan Leksihjelp gi mer rettferdige og nyttige tilbakemeldinger.</p>
       </div>
     </div>
 
@@ -428,58 +479,69 @@
     <div class="glass reveal">
       <span class="phase-label phase-2">Fase 2</span>
       <h2>Anonyme databidrag fra brukere</h2>
-      <p>Vi planlegger a la brukere frivillig bidra med data som hjelper oss med a identifisere typiske skrivefeil. Disse dataene vil gjore ordforslag og stavekontroll i Leksihjelp enda bedre over tid.</p>
+      <p>Vi planlegger å la brukere frivillig bidra med data som hjelper oss med å identifisere typiske skrivefeil.
+        Disse dataene vil gjøre ordforslag og stavekontroll i Leksihjelp enda bedre over tid.</p>
 
       <h3>Slik fungerer det</h3>
       <ul>
-        <li class="roadmap-item">Brukere kan frivillig velge a dele anonymiserte skrivedata</li>
-        <li class="roadmap-item">Bade betalende og gratisbrukere kan bidra</li>
-        <li class="roadmap-item">Data brukes til a forbedre ordforslag og stavekontrollen</li>
+        <li class="roadmap-item">Brukere kan frivillig velge å dele anonymiserte skrivedata</li>
+        <li class="roadmap-item">Både betalende og gratisbrukere kan bidra</li>
+        <li class="roadmap-item">Data brukes til å forbedre ordforslag og stavekontrollen</li>
         <li class="roadmap-item">Typiske skrivefeil fra elever med dysleksi er spesielt verdifulle</li>
       </ul>
 
       <div class="privacy-box">
         <h3>100 % anonymt med hashing</h3>
-        <p>Personvern er svaert viktig for oss. All data som samles inn blir fullstendig anonymisert ved hjelp av hashing (enveis-kryptering). Det betyr at det er teknisk umulig a koble skrivedata tilbake til en bestemt bruker.</p>
+        <p>Personvern er svært viktig for oss. All data som samles inn blir fullstendig anonymisert ved hjelp av hashing
+          (enveis-kryptering). Det betyr at det er teknisk umulig å koble skrivedata tilbake til en bestemt bruker.</p>
         <ul>
-          <li class="roadmap-item">Bruker-ID erstattes med en irreversibel hash for det sendes</li>
+          <li class="roadmap-item">Bruker-ID erstattes med en irreversibel hash før det sendes</li>
           <li class="roadmap-item">Ingen personopplysninger lagres sammen med skrivedataene</li>
           <li class="roadmap-item">Selv ikke vi kan spore data tilbake til enkeltbrukere</li>
-          <li class="roadmap-item">All kode er apen kildekode — hvem som helst kan verifisere dette</li>
+          <li class="roadmap-item">All kode er åpen kildekode — hvem som helst kan verifisere dette</li>
         </ul>
       </div>
 
       <div class="diagram"><span class="comment">// Slik anonymiseres data:</span>
 
-<span class="keyword">Bruker skriver</span>     Anonymisering         <span class="keyword">Aggregert database</span>
-    ord               (hashing)
+        <span class="keyword">Bruker skriver</span> Anonymisering <span class="keyword">Aggregert database</span>
+        ord (hashing)
 
- <span class="value">"Scuhle"</span>  --->  SHA-256(session)  --->  { <span class="keyword">feil</span>: <span class="value">"Scuhle"</span>,
-                  = a7f3b2...             <span class="keyword">riktig</span>: <span class="value">"Schule"</span>,
-                                          <span class="keyword">antall</span>: <span class="value">47</span> }
+        <span class="value">"Scuhle"</span> ---> SHA-256(session) ---> { <span class="keyword">feil</span>: <span
+          class="value">"Scuhle"</span>,
+        = a7f3b2... <span class="keyword">riktig</span>: <span class="value">"Schule"</span>,
+        <span class="keyword">antall</span>: <span class="value">47</span> }
 
-<span class="comment"> Ingen kobling mellom bruker og data</span></div>
+        <span class="comment"> Ingen kobling mellom bruker og data</span>
+      </div>
 
       <h3>Hva dataene brukes til</h3>
       <ul>
         <li class="roadmap-item">Smartere ordforslag som forstår vanlige skrivefeil</li>
         <li class="roadmap-item">Bedre stavekontroll tilpasset norske elever</li>
-        <li class="roadmap-item">Identifisering av systematiske feilmonstre pa tvers av sprak</li>
+        <li class="roadmap-item">Identifisering av systematiske feilmønstre på tvers av språk</li>
         <li class="roadmap-item">Forbedring av ordboken med reelle bruksbehov</li>
       </ul>
     </div>
 
     <!-- Summary / Vision -->
     <div class="glass vision-card reveal">
-      <h2>Vart mal</h2>
-      <p>Leksihjelp skal vaere det beste gratisverktøyet for norske elever som laerer fremmedsprak. Ved a utvide ordboken, legge til stotte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjore Leksihjelp smartere og mer nyttig for alle — spesielt for elever som sliter med rettskriving.</p>
-      <p style="margin-bottom:0;color:var(--text-secondary);">Alt vi bygger forblir apen kildekode. Har du ideer eller onsker a bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp" style="color:#3b82f6;text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s;">Besok oss pa GitHub</a>.</p>
+      <h2>Vårt mål</h2>
+      <p>Leksihjelp skal være det beste gratisverktøyet for norske elever som lærer fremmedspråk. Ved å utvide ordboken,
+        legge til støtte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjøre Leksihjelp smartere og mer
+        nyttig for alle — spesielt for elever som sliter med rettskriving.</p>
+      <p style="margin-bottom:0;color:var(--text-secondary);">Alt vi bygger forblir åpen kildekode. Har du ideer eller
+        ønsker å bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp"
+          style="color:#3b82f6;text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s;">Besøk
+          oss på GitHub</a>.</p>
     </div>
 
     <footer>
-      <p>Utviklet av <a href="https://papertek.no">Papertek forlag AS</a> — <a href="https://github.com/Papertek-forlag-AS/leksihjelp">apen kildekode</a> (MIT-lisens)</p>
+      <p>Utviklet av <a href="https://papertek.no">Papertek forlag AS</a> — <a
+          href="https://github.com/Papertek-forlag-AS/leksihjelp">åpen kildekode</a> (MIT-lisens)</p>
       <p style="margin-top: 8px;"><a href="/vilkar">Salgsbetingelser</a></p>
-      <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operator av Leksihjelp. Kildekoden til Leksihjelp er lisensiert under MIT-lisensen.</p>
+      <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operatør av Leksihjelp. Kildekoden til
+        Leksihjelp er lisensiert under MIT-lisensen.</p>
     </footer>
   </div>
 
@@ -502,4 +564,5 @@
     })();
   </script>
 </body>
+
 </html>
