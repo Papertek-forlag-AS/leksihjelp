@@ -1,11 +1,31 @@
-<!DOCTYPE html>
-<html lang="nb">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fremtidsplaner - Leksihjelp</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
-    <style>
+import re
+import sys
+
+# 1. Update index.html
+with open('/Users/geirforbord/Papertek/leksihjelp/backend/public/index.html', 'r', encoding='utf-8') as f:
+    index_content = f.read()
+
+new_section = """    <div class="card" style="text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0.2) 100%);">
+      <h2>Veien videre</h2>
+      <p style="margin-bottom: 24px;">Vi jobber kontinuerlig med å forbedre Leksihjelp. Vil du vite mer om våre fremtidsplaner med ny ordbank og smarte anonyme stavekontroller?</p>
+      <a href="/fremtidsplaner" class="github-link" style="display: inline-flex; justify-content: center; background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Se våre fremtidsplaner
+      </a>
+    </div>
+
+    <footer>"""
+
+index_content = index_content.replace('    <footer>', new_section)
+
+with open('/Users/geirforbord/Papertek/leksihjelp/backend/public/index.html', 'w', encoding='utf-8') as f:
+    f.write(index_content)
+
+# 2. Update fremtidsplaner.html
+with open('/Users/geirforbord/Papertek/leksihjelp/backend/public/fremtidsplaner.html', 'r', encoding='utf-8') as f:
+    fremtidsplaner_content = f.read()
+
+new_style = """  <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
     :root {
@@ -354,152 +374,22 @@
         grid-template-columns: 1fr;
       }
     }
-  </style>
-</head>
-<body>
-  
+  </style>"""
 
-  <div class="container">
-    <header>
-      <div class="logo">📚</div>
-      <h1>Fremtidsplaner</h1>
-      <p class="tagline">Hva vi jobber med videre i Leksihjelp</p>
-      <a href="/" class="back-link">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-        Tilbake til forsiden
-      </a>
-    </header>
+fremtidsplaner_content = re.sub(r'<style>.*?</style>', new_style, fremtidsplaner_content, flags=re.DOTALL)
 
-    <!-- Section 1: Expanded vocabulary -->
-    <div class="glass reveal">
-      <span class="phase-label phase-1">Fase 1</span>
-      <h2>Utvidet ordbank og ordbok</h2>
-      <p>Vi jobber med en betydelig utvidelse av vokabularet i Leksihjelp. Planen er en egen, separat ordbank som dekker flere norske skriftsprak og fremmedsprak:</p>
+# Remove the old animated background elements
+bg_elements_pattern = r'<!-- Animated background -->\s*<div class="bg-gradient"></div>\s*<div class="bg-orb bg-orb-1"></div>\s*<div class="bg-orb bg-orb-2"></div>\s*<div class="bg-orb bg-orb-3"></div>'
+fremtidsplaner_content = re.sub(bg_elements_pattern, '', fremtidsplaner_content, flags=re.DOTALL)
 
-      <div class="lang-grid">
-        <div class="lang-card stagger">
-          <div class="flag">🇳🇴</div>
-          <div class="name">Bokmal</div>
-          <div class="code">BM</div>
-        </div>
-        <div class="lang-card stagger">
-          <div class="flag">🇳🇴</div>
-          <div class="name">Nynorsk</div>
-          <div class="code">NN</div>
-        </div>
-        <div class="lang-card stagger">
-          <div class="flag">🇩🇪</div>
-          <div class="name">Tysk</div>
-          <div class="code">DE</div>
-        </div>
-        <div class="lang-card stagger">
-          <div class="flag">🇬🇧</div>
-          <div class="name">Engelsk</div>
-          <div class="code">EN</div>
-        </div>
-        <div class="lang-card stagger">
-          <div class="flag">🇫🇷</div>
-          <div class="name">Fransk</div>
-          <div class="code">FR</div>
-        </div>
-        <div class="lang-card stagger">
-          <div class="flag">🇪🇸</div>
-          <div class="name">Spansk</div>
-          <div class="code">SP</div>
-        </div>
-      </div>
+# Make inline modifications in fremtidsplaner content
+# There's a link at the bottom with purple styling: `style="color:#a78bfa;text-decoration:none;border-bottom:1px solid rgba(167,139,250,0.3);transition:border-color 0.2s;"`
+fremtidsplaner_content = fremtidsplaner_content.replace(
+    'style="color:#a78bfa;text-decoration:none;border-bottom:1px solid rgba(167,139,250,0.3);transition:border-color 0.2s;"',
+    'style="color:#3b82f6;text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s;"'
+).replace('<p style="margin-bottom:0;">', '<p style="margin-bottom:0;color:var(--text-secondary);">')
 
-      <h3>Vanlige feil og akseptable svar</h3>
-      <p>Den nye ordbanken vil ikke bare inneholde korrekte former, men ogsa informasjon om vanlige feil og akseptable svar. Dette er spesielt nyttig nar elevene bruker vokabularet til glosetester og andre oppgaver.</p>
-      <ul>
-        <li class="roadmap-item">Oversikt over vanlige skrivefeil knyttet til hvert ord</li>
-        <li class="roadmap-item">Akseptable alternative svar i glosetester (f.eks. synonymer og forenklede former)</li>
-        <li class="roadmap-item">Kontekstbasert gjenkjenning av nesten-riktige svar</li>
-        <li class="roadmap-item">Stotte for bade bokmal og nynorsk som malsprak</li>
-      </ul>
+with open('/Users/geirforbord/Papertek/leksihjelp/backend/public/fremtidsplaner.html', 'w', encoding='utf-8') as f:
+    f.write(fremtidsplaner_content)
 
-      <div class="highlight-box">
-        <h3>Hvorfor dette er viktig</h3>
-        <p style="margin-bottom:0;color:var(--text-secondary);">Mange elever opplever at svarene deres blir markert som feil selv om de er akseptable. Ved a kombinere ordbokdata med informasjon om vanlige feil og alternative svar, kan Leksihjelp gi mer rettferdige og nyttige tilbakemeldinger.</p>
-      </div>
-    </div>
-
-    <!-- Section 2: Anonymous data contribution -->
-    <div class="glass reveal">
-      <span class="phase-label phase-2">Fase 2</span>
-      <h2>Anonyme databidrag fra brukere</h2>
-      <p>Vi planlegger a la brukere frivillig bidra med data som hjelper oss med a identifisere typiske skrivefeil. Disse dataene vil gjore ordforslag og stavekontroll i Leksihjelp enda bedre over tid.</p>
-
-      <h3>Slik fungerer det</h3>
-      <ul>
-        <li class="roadmap-item">Brukere kan frivillig velge a dele anonymiserte skrivedata</li>
-        <li class="roadmap-item">Bade betalende og gratisbrukere kan bidra</li>
-        <li class="roadmap-item">Data brukes til a forbedre ordforslag og stavekontrollen</li>
-        <li class="roadmap-item">Typiske skrivefeil fra elever med dysleksi er spesielt verdifulle</li>
-      </ul>
-
-      <div class="privacy-box">
-        <h3>100 % anonymt med hashing</h3>
-        <p>Personvern er svaert viktig for oss. All data som samles inn blir fullstendig anonymisert ved hjelp av hashing (enveis-kryptering). Det betyr at det er teknisk umulig a koble skrivedata tilbake til en bestemt bruker.</p>
-        <ul>
-          <li class="roadmap-item">Bruker-ID erstattes med en irreversibel hash for det sendes</li>
-          <li class="roadmap-item">Ingen personopplysninger lagres sammen med skrivedataene</li>
-          <li class="roadmap-item">Selv ikke vi kan spore data tilbake til enkeltbrukere</li>
-          <li class="roadmap-item">All kode er apen kildekode — hvem som helst kan verifisere dette</li>
-        </ul>
-      </div>
-
-      <div class="diagram"><span class="comment">// Slik anonymiseres data:</span>
-
-<span class="keyword">Bruker skriver</span>     Anonymisering         <span class="keyword">Aggregert database</span>
-    ord               (hashing)
-
- <span class="value">"Scuhle"</span>  --->  SHA-256(session)  --->  { <span class="keyword">feil</span>: <span class="value">"Scuhle"</span>,
-                  = a7f3b2...             <span class="keyword">riktig</span>: <span class="value">"Schule"</span>,
-                                          <span class="keyword">antall</span>: <span class="value">47</span> }
-
-<span class="comment"> Ingen kobling mellom bruker og data</span></div>
-
-      <h3>Hva dataene brukes til</h3>
-      <ul>
-        <li class="roadmap-item">Smartere ordforslag som forstår vanlige skrivefeil</li>
-        <li class="roadmap-item">Bedre stavekontroll tilpasset norske elever</li>
-        <li class="roadmap-item">Identifisering av systematiske feilmonstre pa tvers av sprak</li>
-        <li class="roadmap-item">Forbedring av ordboken med reelle bruksbehov</li>
-      </ul>
-    </div>
-
-    <!-- Summary / Vision -->
-    <div class="glass vision-card reveal">
-      <h2>Vart mal</h2>
-      <p>Leksihjelp skal vaere det beste gratisverktøyet for norske elever som laerer fremmedsprak. Ved a utvide ordboken, legge til stotte for vanlige feil, og la brukere bidra anonymt med data, kan vi gjore Leksihjelp smartere og mer nyttig for alle — spesielt for elever som sliter med rettskriving.</p>
-      <p style="margin-bottom:0;color:var(--text-secondary);">Alt vi bygger forblir apen kildekode. Har du ideer eller onsker a bidra? <a href="https://github.com/Papertek-forlag-AS/leksihjelp" style="color:#3b82f6;text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s;">Besok oss pa GitHub</a>.</p>
-    </div>
-
-    <footer>
-      <p>Utviklet av <a href="https://papertek.no">Papertek forlag AS</a> — <a href="https://github.com/Papertek-forlag-AS/leksihjelp">apen kildekode</a> (MIT-lisens)</p>
-      <p style="margin-top: 8px;"><a href="/vilkar">Salgsbetingelser</a></p>
-      <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operator av Leksihjelp. Kildekoden til Leksihjelp er lisensiert under MIT-lisensen.</p>
-    </footer>
-  </div>
-
-  <script>
-    // Scroll-triggered reveal animations
-    (function () {
-      var els = document.querySelectorAll('.reveal');
-      if (!els.length) return;
-
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.12 });
-
-      els.forEach(function (el) { observer.observe(el); });
-    })();
-  </script>
-</body>
-</html>
+print("Done patching.")
