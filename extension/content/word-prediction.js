@@ -288,32 +288,28 @@
             }
           }
 
-          // Add noun case forms
+          // Add noun case forms (v2.0 format)
           if (bank === 'nounbank' && entry.cases) {
             for (const [caseName, caseData] of Object.entries(entry.cases)) {
-              // Skip akkusativ/dativ if those features are disabled
+              // Feature gating per case
               if (caseName === 'akkusativ' && !isFeatureEnabled('grammar_accusative_nouns')) continue;
               if (caseName === 'dativ' && !isFeatureEnabled('grammar_dative')) continue;
+              if (caseName === 'genitiv' && !isFeatureEnabled('grammar_genitiv')) continue;
 
-              // Add definite form
-              if (caseData.bestemt) {
-                wordList.push({
-                  word: caseData.bestemt.toLowerCase(),
-                  display: caseData.bestemt,
-                  translation: `${entry.word} (${caseName})`,
-                  type: 'case',
-                  baseWord: entry.word
-                });
-              }
-              // Add indefinite form
-              if (caseData.ubestemt) {
-                wordList.push({
-                  word: caseData.ubestemt.toLowerCase(),
-                  display: caseData.ubestemt,
-                  translation: `${entry.word} (${caseName})`,
-                  type: 'case',
-                  baseWord: entry.word
-                });
+              if (!caseData.forms) continue;
+
+              for (const [number, numberForms] of Object.entries(caseData.forms)) {
+                if (!numberForms) continue; // plurale tantum: singular is null
+                for (const [article, form] of Object.entries(numberForms)) {
+                  if (!form) continue;
+                  wordList.push({
+                    word: form.toLowerCase(),
+                    display: form,
+                    translation: `${entry.word} (${caseName} ${number})`,
+                    type: 'case',
+                    baseWord: entry.word
+                  });
+                }
               }
             }
           }
