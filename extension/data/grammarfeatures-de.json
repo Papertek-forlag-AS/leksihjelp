@@ -1,15 +1,9 @@
 {
   "language": "German",
   "languageNative": "Deutsch",
-  "presets": [
-    { "id": "none", "name": "Ingen", "features": [] },
-    { "id": "basic", "name": "Enkel", "features": ["grammar_present", "grammar_pronouns_ich_du", "grammar_articles", "grammar_plural"] },
-    { "id": "extended", "name": "Utvidet", "features": ["grammar_present", "grammar_preteritum", "grammar_pronouns_singular_wir", "grammar_articles", "grammar_plural", "grammar_accusative_indefinite", "grammar_accusative_definite", "grammar_comparative", "grammar_superlative"] },
-    { "id": "all", "name": "Alt", "features": ["grammar_present", "grammar_preteritum", "grammar_perfektum", "grammar_pronouns_ich_du", "grammar_pronouns_singular_wir", "grammar_pronouns_all", "grammar_articles", "grammar_plural", "grammar_accusative_indefinite", "grammar_accusative_definite", "grammar_dative", "grammar_comparative", "grammar_superlative", "grammar_adjective_declension"] }
-  ],
   "features": [
     {
-      "id": "grammar_present",
+      "id": "grammar_presens",
       "name": "Presens",
       "nameEn": "Present Tense",
       "description": "Nåtid - bøyning av verb i presens",
@@ -129,7 +123,7 @@
       "appliesTo": [
         "noun"
       ],
-      "dataPath": "cases.akkusativ.ubestemt"
+      "dataPath": "cases.akkusativ.forms.singular.indefinite"
     },
     {
       "id": "grammar_accusative_definite",
@@ -141,7 +135,7 @@
       "appliesTo": [
         "noun"
       ],
-      "dataPath": "cases.akkusativ.bestemt"
+      "dataPath": "cases.akkusativ.forms.singular.definite"
     },
     {
       "id": "grammar_dative",
@@ -154,6 +148,31 @@
         "noun"
       ],
       "dataPath": "cases.dativ"
+    },
+    {
+      "id": "grammar_noun_declension",
+      "name": "Kasusbøyning",
+      "nameEn": "Noun Declension",
+      "description": "Kasusbøyning av substantiv (nominativ, akkusativ, dativ, genitiv)",
+      "descriptionEn": "Noun case declension (nominative, accusative, dative, genitive)",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases"
+    },
+    {
+      "id": "grammar_genitiv",
+      "name": "Genitiv",
+      "nameEn": "Genitive Case",
+      "description": "Genitivbøyning av substantiv (des/der/des)",
+      "descriptionEn": "Genitive case declension of nouns",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.genitiv",
+      "dependsOn": "grammar_noun_declension"
     },
     {
       "id": "grammar_comparative",
@@ -190,6 +209,19 @@
         "adjective"
       ],
       "dataPath": "declension"
+    },
+    {
+      "id": "grammar_adjective_genitive",
+      "name": "Adjektivbøyning genitiv",
+      "nameEn": "Adjective Declension Genitive",
+      "description": "Adjektivendelser i genitiv",
+      "descriptionEn": "Adjective endings in genitive case",
+      "category": "adjectives",
+      "appliesTo": [
+        "adjective"
+      ],
+      "dataPath": "declension",
+      "dependsOn": "grammar_adjective_declension"
     }
   ],
   "categories": [
