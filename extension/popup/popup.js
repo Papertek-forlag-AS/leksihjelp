@@ -195,6 +195,27 @@ function buildInflectionIndex(words) {
         }
       }
     }
+
+    // Noun case forms (v2.0: cases.{case}.forms.{number}.{article})
+    if (entry._bank === 'nounbank' && entry.cases) {
+      for (const [caseName, caseData] of Object.entries(entry.cases)) {
+        if (!caseData?.forms) continue;
+        for (const [number, numberForms] of Object.entries(caseData.forms)) {
+          if (!numberForms) continue; // plurale tantum: singular is null
+          for (const [article, form] of Object.entries(numberForms)) {
+            if (!form) continue;
+            // Index full form e.g. "den hund" for exact match
+            const fullForm = form.toLowerCase();
+            addToIndex(fullForm, entry, 'case', `${caseName} ${number} ${article}`);
+            // Also index bare noun without article prefix for bare search
+            const parts = form.split(' ');
+            if (parts.length > 1) {
+              addToIndex(parts[parts.length - 1].toLowerCase(), entry, 'case', `${caseName} ${number} ${article}`);
+            }
+          }
+        }
+      }
+    }
   }
 
   return index;
@@ -760,50 +781,56 @@ function renderConjugationTable(forms) {
 }
 
 /**
- * Render noun cases based on enabled features
+ * Render noun cases based on enabled features (v2.0 format)
  */
 function renderNounCases(entry) {
   if (!entry.cases) return '';
 
-  const sections = [];
+  const caseConfig = [
+    { key: 'nominativ', label: 'Nominativ', feature: null },
+    { key: 'akkusativ', label: 'Akkusativ', feature: ['grammar_accusative_indefinite', 'grammar_accusative_definite', 'grammar_accusative_nouns'] },
+    { key: 'dativ', label: 'Dativ', feature: ['grammar_dative'] },
+    { key: 'genitiv', label: 'Genitiv', feature: ['grammar_genitiv'] }
+  ];
 
-  // Akkusativ
-  if (entry.cases.akkusativ) {
-    if (isFeatureEnabled('grammar_accusative_indefinite') && entry.cases.akkusativ.ubestemt) {
-      sections.push(`
-        <div class="expanded-section">
-          <h4>Akkusativ (ubestemt)</h4>
-          <p>${escapeHtml(entry.cases.akkusativ.ubestemt)}</p>
-        </div>
-      `);
-    }
-    if (isFeatureEnabled('grammar_accusative_definite') && entry.cases.akkusativ.bestemt) {
-      sections.push(`
-        <div class="expanded-section">
-          <h4>Akkusativ (bestemt)</h4>
-          <p>${escapeHtml(entry.cases.akkusativ.bestemt)}</p>
-        </div>
-      `);
-    }
-  }
+  // Filter to enabled cases
+  const enabledCases = caseConfig.filter(c => {
+    if (!c.feature) return true; // nominativ always shown
+    return c.feature.some(f => isFeatureEnabled(f));
+  });
 
-  // Dativ
-  if (isFeatureEnabled('grammar_dative') && entry.cases.dativ) {
-    const dativ = entry.cases.dativ;
-    const parts = [];
-    if (dativ.bestemt) parts.push(`bestemt: ${dativ.bestemt}`);
-    if (dativ.ubestemt) parts.push(`ubestemt: ${dativ.ubestemt}`);
-    if (parts.length > 0) {
-      sections.push(`
-        <div class="expanded-section">
-          <h4>Dativ</h4>
-          <p>${escapeHtml(parts.join(', '))}</p>
-        </div>
-      `);
-    }
-  }
+  if (enabledCases.length <= 1) return ''; // Only nominativ — no table needed
 
-  return sections.join('');
+  const rows = enabledCases.map(c => {
+    const caseData = entry.cases[c.key];
+    const singular = caseData?.forms?.singular || {};
+    const plural = caseData?.forms?.plural || {};
+    return `<tr>
+      <td><strong>${c.label}</strong></td>
+      <td>${escapeHtml(singular.definite || '-')}</td>
+      <td>${escapeHtml(singular.indefinite || '-')}</td>
+      <td>${escapeHtml(plural.definite || '-')}</td>
+      <td>${escapeHtml(plural.indefinite || '-')}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="expanded-section">
+      <h4>Bøyning (kasus)</h4>
+      <table class="conjugation-table declension-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Bestemt ent.</th>
+            <th>Ubestemt ent.</th>
+            <th>Bestemt fl.</th>
+            <th>Ubestemt fl.</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
 }
 
 /**
