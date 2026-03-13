@@ -35,6 +35,26 @@ chrome.runtime.onInstalled.addListener((details) => {
       title: 'Les opp "%s" med Leksihjelp',
       contexts: ['selection']
     });
+
+    chrome.contextMenus.create({
+      id: 'lexi-separator',
+      type: 'separator',
+      contexts: ['editable']
+    });
+
+    chrome.contextMenus.create({
+      id: 'lexi-toggle-predictions',
+      title: 'Pause ordforslag',
+      contexts: ['editable']
+    });
+  });
+
+  // Set initial context menu title based on stored pause state
+  chrome.storage.local.get('lexiPaused', (result) => {
+    const paused = result.lexiPaused || false;
+    chrome.contextMenus.update('lexi-toggle-predictions', {
+      title: paused ? 'Fortsett ordforslag' : 'Pause ordforslag'
+    }).catch(() => {});
   });
 });
 
@@ -58,6 +78,25 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     chrome.tabs.sendMessage(tab.id, {
       type: 'PLAY_TTS',
       text: info.selectionText
+    });
+  }
+
+  if (info.menuItemId === 'lexi-toggle-predictions') {
+    chrome.storage.local.get('lexiPaused', (result) => {
+      const newState = !result.lexiPaused;
+      chrome.storage.local.set({ lexiPaused: newState });
+      // Update context menu title
+      chrome.contextMenus.update('lexi-toggle-predictions', {
+        title: newState ? 'Fortsett ordforslag' : 'Pause ordforslag'
+      });
+      // Broadcast to all tabs
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach(t => {
+          if (t.id) {
+            chrome.tabs.sendMessage(t.id, { type: 'LEXI_PAUSED', paused: newState }).catch(() => {});
+          }
+        });
+      });
     });
   }
 });
@@ -105,6 +144,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         }
       });
     });
+    // Keep context menu title in sync
+    if (msg.type === 'LEXI_PAUSED') {
+      chrome.contextMenus.update('lexi-toggle-predictions', {
+        title: msg.paused ? 'Fortsett ordforslag' : 'Pause ordforslag'
+      }).catch(() => {});
+    }
   }
 
   // Verify access code

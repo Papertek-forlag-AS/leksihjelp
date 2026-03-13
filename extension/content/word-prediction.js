@@ -822,7 +822,17 @@
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
-    }).join('') + '<div class="lh-pred-hint">Tab for å velge</div>';
+    }).join('') + '<div class="lh-pred-footer"><span class="lh-pred-hint">Tab for å velge</span><button class="lh-pred-pause" title="Pause ordforslag">⏸</button></div>';
+
+    // Attach pause button handler
+    const pauseBtn = dropdown.querySelector('.lh-pred-pause');
+    if (pauseBtn) {
+      pauseBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePause();
+      });
+    }
 
     // Attach click handlers — preventDefault keeps focus in the editor,
     // stopPropagation prevents CKEditor from seeing the click and blurring.
@@ -869,6 +879,14 @@
         dropdown.style.left = (window.innerWidth - dRect.width - 8) + 'px';
       }
     });
+  }
+
+  function togglePause() {
+    lexiPaused = !lexiPaused;
+    chrome.storage.local.set({ lexiPaused });
+    // Broadcast to other tabs via the service worker
+    chrome.runtime.sendMessage({ type: 'LEXI_PAUSED', paused: lexiPaused });
+    hideDropdown();
   }
 
   function hideDropdown() {
