@@ -437,6 +437,16 @@ body {
   font-weight: 500;
 }
 
+.result-cefr {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(17, 180, 154, 0.08);
+  color: #11B49A;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
 /* Conjugation table */
 .conjugation-table {
   width: 100%;

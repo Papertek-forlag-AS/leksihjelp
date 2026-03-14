@@ -7,8 +7,10 @@
 const BACKEND_URL = 'https://leksihjelp.no';
 
 let dictionary = null;
+let nbDictionary = null; // Norwegian bokmål dictionary for two-way lookups
 let currentAudio = null; // Currently playing audio
 let allWords = []; // Flattened array of all words from all banks
+let nbWords = []; // Flattened Norwegian words
 let inflectionIndex = null; // Map: lowercased inflected form -> [{ entry, matchType, matchDetail }]
 let currentLang = 'es';
 let searchDirection = 'no-target'; // 'no-target' or 'target-no'
@@ -119,6 +121,22 @@ async function loadDictionary(lang) {
     allWords = flattenBanks(dictionary);
     inflectionIndex = buildInflectionIndex(allWords);
     updateLangLabels();
+
+    // Also load Norwegian dictionary for two-way lookups
+    if (lang !== 'nb' && lang !== 'nn') {
+      try {
+        const nbUrl = chrome.runtime.getURL('data/nb.json');
+        const nbRes = await fetch(nbUrl);
+        if (nbRes.ok) {
+          nbDictionary = await nbRes.json();
+          nbWords = flattenBanks(nbDictionary);
+        }
+      } catch {
+        // nb.json not available — two-way lookups won't work, but that's OK
+        nbDictionary = null;
+        nbWords = [];
+      }
+    }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
   }
@@ -470,7 +488,7 @@ function performSearch(query) {
 
   const q = query.toLowerCase();
 
-  // Phase 1: Direct matches on base forms (existing behavior)
+  // Phase 1: Direct matches on base forms
   const directResults = [];
   for (const entry of allWords) {
     if (searchDirection === 'no-target') {
@@ -480,6 +498,38 @@ function performSearch(query) {
     } else {
       if (entry.word && entry.word.toLowerCase().includes(q)) {
         directResults.push({ entry, inflectionHint: null });
+      }
+    }
+  }
+
+  // Phase 1b: Two-way lookup via Norwegian dictionary's linkedTo
+  // When searching no→target, also search nb words and follow links to target language
+  if (searchDirection === 'no-target' && nbWords.length > 0) {
+    const directEntryWords = new Set(directResults.map(r => r.entry.word?.toLowerCase()));
+
+    for (const nbEntry of nbWords) {
+      if (!nbEntry.word || !nbEntry.word.toLowerCase().includes(q)) continue;
+      if (!nbEntry.linkedTo) continue;
+
+      // Follow link to the target language
+      const link = nbEntry.linkedTo[currentLang];
+      if (!link?.primary) continue;
+
+      // Find the target entry in our dictionary
+      const targetWordId = link.primary;
+      for (const bank of Object.keys(BANK_TO_POS)) {
+        const targetEntry = dictionary[bank]?.[targetWordId];
+        if (targetEntry && !directEntryWords.has(targetEntry.word?.toLowerCase())) {
+          // Build a result entry with the Norwegian word as context
+          const flatEntry = allWords.find(w => w.word === targetEntry.word);
+          if (flatEntry) {
+            directResults.push({
+              entry: flatEntry,
+              inflectionHint: `«${nbEntry.word}» → ${flatEntry.word}`
+            });
+            directEntryWords.add(flatEntry.word?.toLowerCase());
+          }
+        }
       }
     }
   }
@@ -520,8 +570,8 @@ function performSearch(query) {
 
   // Phase 3: Sort direct results, split into starts-with vs contains
   directResults.sort((a, b) => {
-    const fieldA = searchDirection === 'no-target' ? a.entry.translation : a.entry.word;
-    const fieldB = searchDirection === 'no-target' ? b.entry.translation : b.entry.word;
+    const fieldA = searchDirection === 'no-target' ? (a.entry.translation || '') : a.entry.word;
+    const fieldB = searchDirection === 'no-target' ? (b.entry.translation || '') : b.entry.word;
     const la = fieldA.toLowerCase();
     const lb = fieldB.toLowerCase();
     if (la === q && lb !== q) return -1;
@@ -534,7 +584,7 @@ function performSearch(query) {
   const directStartsWith = [];
   const directContains = [];
   for (const r of directResults) {
-    const field = (searchDirection === 'no-target' ? r.entry.translation : r.entry.word).toLowerCase();
+    const field = (searchDirection === 'no-target' ? (r.entry.translation || '') : r.entry.word).toLowerCase();
     if (field === q || field.startsWith(q)) {
       directStartsWith.push(r);
     } else {
@@ -569,6 +619,7 @@ function renderResults(results) {
           <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
           ${entry.gender && isFeatureEnabled('grammar_articles') ? `<span class="result-gender">${escapeHtml(entry.gender)}</span>` : ''}
           ${entry.plural && isFeatureEnabled('grammar_plural') ? `<span class="result-plural">${escapeHtml(entry.plural)}</span>` : ''}
+          ${entry.cefr ? `<span class="result-cefr">${escapeHtml(entry.cefr)}</span>` : ''}
         </div>
       </div>
       <button class="explore-btn">Utforsk mer ▾</button>
@@ -579,17 +630,7 @@ function renderResults(results) {
             <p>${entry.synonyms.map(s => escapeHtml(s)).join(', ')}</p>
           </div>
         ` : ''}
-        ${entry.examples && entry.examples.length ? `
-          <div class="expanded-section">
-            <h4>Eksempler</h4>
-            ${entry.examples.map(ex => `
-              <div class="example">
-                <p class="example-sentence">"${escapeHtml(ex.sentence)}"</p>
-                <p class="example-translation">${escapeHtml(ex.translation)}</p>
-              </div>
-            `).join('')}
-          </div>
-        ` : ''}
+        ${renderExamples(entry)}
         ${entry.grammar ? `
           <div class="expanded-section">
             <h4>Grammatikk</h4>
@@ -701,6 +742,50 @@ function getPauseIcon() {
 /**
  * Render verb conjugations based on enabled features
  */
+function renderExamples(entry) {
+  // Collect examples from entry directly and from linkedTo
+  const examples = [];
+
+  if (entry.examples && entry.examples.length) {
+    for (const ex of entry.examples) {
+      // Examples may have source/target (from links) or sentence/translation (legacy)
+      examples.push({
+        sentence: ex.sentence || ex.source || '',
+        translation: ex.translation || ex.target || ''
+      });
+    }
+  }
+
+  // Also check linkedTo for additional examples
+  if (entry.linkedTo) {
+    const nbLink = entry.linkedTo.nb || entry.linkedTo.nn;
+    if (nbLink?.examples) {
+      for (const ex of nbLink.examples) {
+        const sentence = ex.source || ex.sentence || '';
+        const translation = ex.target || ex.translation || '';
+        // Avoid duplicates
+        if (sentence && !examples.some(e => e.sentence === sentence)) {
+          examples.push({ sentence, translation });
+        }
+      }
+    }
+  }
+
+  if (examples.length === 0) return '';
+
+  return `
+    <div class="expanded-section">
+      <h4>Eksempler</h4>
+      ${examples.map(ex => `
+        <div class="example">
+          <p class="example-sentence">"${escapeHtml(ex.sentence)}"</p>
+          <p class="example-translation">${escapeHtml(ex.translation)}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function renderVerbConjugations(entry) {
   if (!entry.conjugations) return '';
 
