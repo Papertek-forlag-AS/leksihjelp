@@ -3,10 +3,10 @@
   "languageNative": "Deutsch",
   "features": [
     {
-      "id": "grammar_presens",
+      "id": "grammar_de_presens",
       "name": "Presens",
       "nameEn": "Present Tense",
-      "description": "Nåtid - bøyning av verb i presens",
+      "description": "Nåtid — bøyning av verb i presens",
       "descriptionEn": "Present tense verb conjugations",
       "category": "verbs",
       "appliesTo": [
@@ -15,10 +15,10 @@
       "dataPath": "conjugations.presens"
     },
     {
-      "id": "grammar_preteritum",
+      "id": "grammar_de_preteritum",
       "name": "Preteritum",
       "nameEn": "Simple Past",
-      "description": "Fortid - bøyning av verb i preteritum",
+      "description": "Fortid — bøyning av verb i preteritum",
       "descriptionEn": "Simple past tense verb conjugations",
       "category": "verbs",
       "appliesTo": [
@@ -27,7 +27,7 @@
       "dataPath": "conjugations.preteritum"
     },
     {
-      "id": "grammar_perfektum",
+      "id": "grammar_de_perfektum",
       "name": "Perfektum",
       "nameEn": "Present Perfect",
       "description": "Sammensatt fortid med haben/sein + partisipp",
@@ -39,62 +39,23 @@
       "dataPath": "conjugations.perfektum"
     },
     {
-      "id": "grammar_pronouns_ich_du",
-      "name": "Pronomen: ich/du",
-      "nameEn": "Pronouns: ich/du",
-      "description": "Bare ich og du pronomenformer",
-      "descriptionEn": "Only ich and du pronoun forms",
+      "id": "grammar_de_verb_class",
+      "name": "Verbklasse",
+      "nameEn": "Verb Class",
+      "description": "Svak, sterk eller uregelmessig",
+      "descriptionEn": "Weak, strong, or irregular",
       "category": "verbs",
       "appliesTo": [
         "verb"
       ],
-      "filterPronouns": [
-        "ich",
-        "du"
-      ]
+      "dataPath": "verbClass"
     },
     {
-      "id": "grammar_pronouns_singular_wir",
-      "name": "Pronomen: entall + wir",
-      "nameEn": "Pronouns: singular + wir",
-      "description": "ich, du, er/sie/es og wir",
-      "descriptionEn": "ich, du, er/sie/es and wir",
-      "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
-      "filterPronouns": [
-        "ich",
-        "du",
-        "er/sie/es",
-        "wir"
-      ]
-    },
-    {
-      "id": "grammar_pronouns_all",
-      "name": "Alle pronomen",
-      "nameEn": "All Pronouns",
-      "description": "Alle personlige pronomen",
-      "descriptionEn": "All personal pronouns",
-      "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
-      "filterPronouns": [
-        "ich",
-        "du",
-        "er/sie/es",
-        "wir",
-        "ihr",
-        "sie/Sie"
-      ]
-    },
-    {
-      "id": "grammar_articles",
+      "id": "grammar_de_genus",
       "name": "Artikler",
-      "nameEn": "Articles",
-      "description": "Bestemte (der/die/das) og ubestemte (ein/eine) artikler",
-      "descriptionEn": "Definite (der/die/das) and indefinite (ein/eine) articles",
+      "nameEn": "Articles/Gender",
+      "description": "Grammatisk kjønn med bestemte (der/die/das) og ubestemte (ein/eine) artikler",
+      "descriptionEn": "Grammatical gender with definite (der/die/das) and indefinite (ein/eine) articles",
       "category": "nouns",
       "appliesTo": [
         "noun"
@@ -102,7 +63,7 @@
       "dataPath": "genus"
     },
     {
-      "id": "grammar_plural",
+      "id": "grammar_de_plural",
       "name": "Flertall",
       "nameEn": "Plural",
       "description": "Flertallsformer av substantiv",
@@ -114,43 +75,7 @@
       "dataPath": "plural"
     },
     {
-      "id": "grammar_accusative_indefinite",
-      "name": "Akkusativ ubestemt",
-      "nameEn": "Accusative Indefinite",
-      "description": "Akkusativ med ubestemt artikkel (einen/eine/ein)",
-      "descriptionEn": "Accusative case with indefinite article",
-      "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
-      "dataPath": "cases.akkusativ.forms.singular.indefinite"
-    },
-    {
-      "id": "grammar_accusative_definite",
-      "name": "Akkusativ bestemt",
-      "nameEn": "Accusative Definite",
-      "description": "Akkusativ med bestemt artikkel (den/die/das)",
-      "descriptionEn": "Accusative case with definite article",
-      "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
-      "dataPath": "cases.akkusativ.forms.singular.definite"
-    },
-    {
-      "id": "grammar_dative",
-      "name": "Dativ",
-      "nameEn": "Dative",
-      "description": "Dativ kasus (dem/der/dem, einem/einer/einem)",
-      "descriptionEn": "Dative case",
-      "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
-      "dataPath": "cases.dativ"
-    },
-    {
-      "id": "grammar_noun_declension",
+      "id": "grammar_de_cases",
       "name": "Kasusbøyning",
       "nameEn": "Noun Declension",
       "description": "Kasusbøyning av substantiv (nominativ, akkusativ, dativ, genitiv)",
@@ -162,66 +87,76 @@
       "dataPath": "cases"
     },
     {
-      "id": "grammar_genitiv",
-      "name": "Genitiv",
-      "nameEn": "Genitive Case",
-      "description": "Genitivbøyning av substantiv (des/der/des)",
-      "descriptionEn": "Genitive case declension of nouns",
+      "id": "grammar_de_akkusativ",
+      "name": "Akkusativ",
+      "nameEn": "Accusative Case",
+      "description": "Akkusativ kasus (den/die/das, einen/eine/ein)",
+      "descriptionEn": "Accusative case forms",
       "category": "nouns",
       "appliesTo": [
         "noun"
       ],
-      "dataPath": "cases.genitiv",
-      "dependsOn": "grammar_noun_declension"
+      "dataPath": "cases.akkusativ"
     },
     {
-      "id": "grammar_comparative",
+      "id": "grammar_de_dativ",
+      "name": "Dativ",
+      "nameEn": "Dative Case",
+      "description": "Dativ kasus (dem/der/dem, einem/einer/einem)",
+      "descriptionEn": "Dative case forms",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.dativ"
+    },
+    {
+      "id": "grammar_de_genitiv",
+      "name": "Genitiv",
+      "nameEn": "Genitive Case",
+      "description": "Genitiv kasus (des/der/des)",
+      "descriptionEn": "Genitive case forms",
+      "category": "nouns",
+      "appliesTo": [
+        "noun"
+      ],
+      "dataPath": "cases.genitiv"
+    },
+    {
+      "id": "grammar_de_komparativ",
       "name": "Komparativ",
       "nameEn": "Comparative",
       "description": "Gradbøyning komparativ (größer, besser)",
       "descriptionEn": "Comparative adjective forms (bigger, better)",
       "category": "adjectives",
       "appliesTo": [
-        "adjective"
+        "adj"
       ],
       "dataPath": "comparison.komparativ"
     },
     {
-      "id": "grammar_superlative",
+      "id": "grammar_de_superlativ",
       "name": "Superlativ",
       "nameEn": "Superlative",
       "description": "Gradbøyning superlativ (am größten, am besten)",
       "descriptionEn": "Superlative adjective forms (biggest, best)",
       "category": "adjectives",
       "appliesTo": [
-        "adjective"
+        "adj"
       ],
       "dataPath": "comparison.superlativ"
     },
     {
-      "id": "grammar_adjective_declension",
+      "id": "grammar_de_adj_declension",
       "name": "Adjektivbøyning",
       "nameEn": "Adjective Declension",
       "description": "Adjektivendelser etter artikkel og kasus",
       "descriptionEn": "Adjective endings based on article and case",
       "category": "adjectives",
       "appliesTo": [
-        "adjective"
+        "adj"
       ],
       "dataPath": "declension"
-    },
-    {
-      "id": "grammar_adjective_genitive",
-      "name": "Adjektivbøyning genitiv",
-      "nameEn": "Adjective Declension Genitive",
-      "description": "Adjektivendelser i genitiv",
-      "descriptionEn": "Adjective endings in genitive case",
-      "category": "adjectives",
-      "appliesTo": [
-        "adjective"
-      ],
-      "dataPath": "declension",
-      "dependsOn": "grammar_adjective_declension"
     }
   ],
   "categories": [

@@ -1,0 +1,22 @@
+{
+  "language": "English",
+  "languageNative": "English",
+  "features": [],
+  "categories": [
+    {
+      "id": "verbs",
+      "name": "Verbs",
+      "nameEn": "Verbs"
+    },
+    {
+      "id": "nouns",
+      "name": "Nouns",
+      "nameEn": "Nouns"
+    },
+    {
+      "id": "adjectives",
+      "name": "Adjectives",
+      "nameEn": "Adjectives"
+    }
+  ]
+}

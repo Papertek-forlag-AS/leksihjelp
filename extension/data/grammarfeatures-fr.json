@@ -3,35 +3,23 @@
   "languageNative": "Français",
   "features": [
     {
-      "id": "grammar_present",
+      "id": "grammar_fr_presens",
       "name": "Présent",
       "nameEn": "Present Tense",
-      "description": "Nåtid - bøyning av verb i presens",
+      "description": "Nåtid — bøyning av verb i presens",
       "descriptionEn": "Present tense verb conjugations",
       "category": "verbs",
       "appliesTo": [
         "verb"
       ],
-      "dataPath": "conjugations.present"
+      "dataPath": "conjugations.presens"
     },
     {
-      "id": "grammar_passe_compose",
-      "name": "Passé composé",
-      "nameEn": "Present Perfect",
-      "description": "Sammensatt fortid",
-      "descriptionEn": "Present perfect tense",
-      "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
-      "dataPath": "conjugations.passe_compose"
-    },
-    {
-      "id": "grammar_articles",
+      "id": "grammar_fr_genus",
       "name": "Articles",
-      "nameEn": "Articles",
-      "description": "Bestemte (le/la/les) og ubestemte (un/une) artikler",
-      "descriptionEn": "Definite and indefinite articles",
+      "nameEn": "Articles/Gender",
+      "description": "Grammatisk kjønn med bestemte (le/la/les) og ubestemte (un/une) artikler",
+      "descriptionEn": "Grammatical gender with definite and indefinite articles",
       "category": "nouns",
       "appliesTo": [
         "noun"
@@ -39,7 +27,7 @@
       "dataPath": "genus"
     },
     {
-      "id": "grammar_plural",
+      "id": "grammar_fr_plural",
       "name": "Pluriel",
       "nameEn": "Plural",
       "description": "Flertallsformer",
@@ -49,30 +37,6 @@
         "noun"
       ],
       "dataPath": "plural"
-    },
-    {
-      "id": "grammar_comparative",
-      "name": "Comparatif",
-      "nameEn": "Comparative",
-      "description": "Gradbøyning komparativ",
-      "descriptionEn": "Comparative forms",
-      "category": "adjectives",
-      "appliesTo": [
-        "adjective"
-      ],
-      "dataPath": "comparison.comparatif"
-    },
-    {
-      "id": "grammar_superlative",
-      "name": "Superlatif",
-      "nameEn": "Superlative",
-      "description": "Gradbøyning superlativ",
-      "descriptionEn": "Superlative forms",
-      "category": "adjectives",
-      "appliesTo": [
-        "adjective"
-      ],
-      "dataPath": "comparison.superlatif"
     }
   ],
   "categories": [

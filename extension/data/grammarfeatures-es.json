@@ -3,35 +3,23 @@
   "languageNative": "Español",
   "features": [
     {
-      "id": "grammar_present",
+      "id": "grammar_es_presens",
       "name": "Presente",
       "nameEn": "Present Tense",
-      "description": "Nåtid - bøyning av verb i presens",
+      "description": "Nåtid — bøyning av verb i presens",
       "descriptionEn": "Present tense verb conjugations",
       "category": "verbs",
       "appliesTo": [
         "verb"
       ],
-      "dataPath": "conjugations.presente"
+      "dataPath": "conjugations.presens"
     },
     {
-      "id": "grammar_preterito",
-      "name": "Pretérito indefinido",
-      "nameEn": "Simple Past",
-      "description": "Enkel fortid",
-      "descriptionEn": "Simple past tense",
-      "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
-      "dataPath": "conjugations.preterito"
-    },
-    {
-      "id": "grammar_articles",
+      "id": "grammar_es_genus",
       "name": "Artículos",
-      "nameEn": "Articles",
-      "description": "Bestemte (el/la/los/las) og ubestemte (un/una) artikler",
-      "descriptionEn": "Definite and indefinite articles",
+      "nameEn": "Articles/Gender",
+      "description": "Grammatisk kjønn med bestemte (el/la/los/las) og ubestemte (un/una) artikler",
+      "descriptionEn": "Grammatical gender with definite and indefinite articles",
       "category": "nouns",
       "appliesTo": [
         "noun"
@@ -39,7 +27,7 @@
       "dataPath": "genus"
     },
     {
-      "id": "grammar_plural",
+      "id": "grammar_es_plural",
       "name": "Plural",
       "nameEn": "Plural",
       "description": "Flertallsformer",
@@ -49,30 +37,6 @@
         "noun"
       ],
       "dataPath": "plural"
-    },
-    {
-      "id": "grammar_comparative",
-      "name": "Comparativo",
-      "nameEn": "Comparative",
-      "description": "Gradbøyning komparativ",
-      "descriptionEn": "Comparative forms",
-      "category": "adjectives",
-      "appliesTo": [
-        "adjective"
-      ],
-      "dataPath": "comparison.comparativo"
-    },
-    {
-      "id": "grammar_superlative",
-      "name": "Superlativo",
-      "nameEn": "Superlative",
-      "description": "Gradbøyning superlativ",
-      "descriptionEn": "Superlative forms",
-      "category": "adjectives",
-      "appliesTo": [
-        "adjective"
-      ],
-      "dataPath": "comparison.superlativo"
     }
   ],
   "categories": [
