@@ -181,12 +181,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Use the with-timestamps endpoint for word-level sync
     const elevenLabsRes = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voice}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${voice}/with-timestamps`,
       {
         method: 'POST',
         headers: {
-          'Accept': 'audio/mpeg',
           'Content-Type': 'application/json',
           'xi-api-key': apiKey
         },
@@ -211,12 +211,61 @@ export default async function handler(req, res) {
       });
     }
 
-    // Stream audio back
-    res.setHeader('Content-Type', 'audio/mpeg');
-    const buffer = await elevenLabsRes.arrayBuffer();
-    return res.send(Buffer.from(buffer));
+    const data = await elevenLabsRes.json();
+
+    // Derive word-level timing from character-level alignment
+    const wordTimings = deriveWordTimings(data.alignment);
+
+    // Return audio (base64) + word timings as JSON
+    res.setHeader('Content-Type', 'application/json');
+    return res.json({
+      audioBase64: data.audio_base64,
+      wordTimings,
+    });
   } catch (err) {
     console.error('TTS proxy error:', err);
     return res.status(500).json({ error: 'Intern serverfeil' });
   }
+}
+
+/**
+ * Derive word-level timing from ElevenLabs character-level alignment.
+ */
+function deriveWordTimings(alignment) {
+  if (!alignment || !alignment.characters) return [];
+
+  const words = [];
+  let currentWord = '';
+  let wordStart = null;
+  let wordEnd = null;
+
+  for (let i = 0; i < alignment.characters.length; i++) {
+    const char = alignment.characters[i];
+    const isLast = i === alignment.characters.length - 1;
+    const isSpace = char === ' ' || char === '\n' || char === '\t';
+
+    if (isSpace || isLast) {
+      if (isLast && !isSpace) {
+        currentWord += char;
+        wordEnd = alignment.character_end_times_seconds[i];
+      }
+      if (currentWord) {
+        words.push({
+          word: currentWord,
+          start: wordStart,
+          end: wordEnd
+        });
+      }
+      currentWord = '';
+      wordStart = null;
+    } else {
+      if (wordStart === null) {
+        wordStart = alignment.character_start_times_seconds[i];
+      }
+      wordEnd = alignment.character_end_times_seconds[i];
+      currentWord += char;
+    }
+  }
+
+  return words;
 }

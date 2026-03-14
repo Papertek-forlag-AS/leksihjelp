@@ -8,7 +8,7 @@
 (function () {
   'use strict';
 
-  const BACKEND_URL = 'https://leksihjelp.vercel.app';
+  const BACKEND_URL = 'https://leksihjelp.no';
 
   // Predefined ElevenLabs voices per language
   const ELEVENLABS_VOICES = {
@@ -65,20 +65,22 @@
 
   // Font size settings
   const FONT_SIZE_MIN = 12;
-  const FONT_SIZE_MAX = 24;
+  const FONT_SIZE_MAX = 36;
   const FONT_SIZE_STEP = 1;
   const FONT_SIZE_DEFAULT = 15;
   let widgetFontSize = FONT_SIZE_DEFAULT;
+  let fontSizeMode = 'auto'; // 'auto' or 'fixed'
 
   // ── Init ──
   init();
 
   async function init() {
-    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize']);
+    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize', 'fontSizeMode']);
     isAuthenticated = stored.isAuthenticated || false;
     currentLang = stored.language || 'es';
     lexiPaused = stored.lexiPaused || false;
     widgetFontSize = stored.widgetFontSize || FONT_SIZE_DEFAULT;
+    fontSizeMode = stored.fontSizeMode || 'auto';
 
     createWidget();
     attachListeners();
@@ -135,6 +137,7 @@
       </div>
       <div class="lh-text-area-wrapper">
         <div class="lh-font-controls">
+          <button class="lh-font-btn lh-font-mode" title="Bytt mellom auto og fast skriftstørrelse">Auto</button>
           <button class="lh-font-btn lh-font-decrease" title="Mindre skrift">A&minus;</button>
           <button class="lh-font-btn lh-font-increase" title="Større skrift">A+</button>
         </div>
@@ -165,8 +168,17 @@
     });
 
     // Font size controls
-    widget.querySelector('.lh-font-decrease').addEventListener('click', () => adjustFontSize(-FONT_SIZE_STEP));
-    widget.querySelector('.lh-font-increase').addEventListener('click', () => adjustFontSize(FONT_SIZE_STEP));
+    widget.querySelector('.lh-font-decrease').addEventListener('click', () => {
+      fontSizeMode = 'fixed';
+      adjustFontSize(-FONT_SIZE_STEP);
+      updateFontModeButton();
+    });
+    widget.querySelector('.lh-font-increase').addEventListener('click', () => {
+      fontSizeMode = 'fixed';
+      adjustFontSize(FONT_SIZE_STEP);
+      updateFontModeButton();
+    });
+    widget.querySelector('.lh-font-mode').addEventListener('click', toggleFontMode);
 
     // Language toggle buttons
     widget.querySelectorAll('.lh-lang-btn').forEach(btn => {
@@ -215,6 +227,66 @@
     document.addEventListener('mouseup', () => {
       if (isDragging) justDragged = true;
       isDragging = false;
+    });
+
+    // ── Resize handles ──
+    const resizeRight = document.createElement('div');
+    resizeRight.className = 'lh-resize-handle lh-resize-right';
+    widget.appendChild(resizeRight);
+
+    const resizeBottom = document.createElement('div');
+    resizeBottom.className = 'lh-resize-handle lh-resize-bottom';
+    widget.appendChild(resizeBottom);
+
+    const resizeCorner = document.createElement('div');
+    resizeCorner.className = 'lh-resize-handle lh-resize-corner';
+    widget.appendChild(resizeCorner);
+
+    let isResizing = false;
+    let resizeType = '';
+    let resizeStartX = 0;
+    let resizeStartY = 0;
+    let resizeStartW = 0;
+    let resizeStartH = 0;
+
+    function startResize(e, type) {
+      isResizing = true;
+      resizeType = type;
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+      resizeStartW = widget.offsetWidth;
+      resizeStartH = widget.offsetHeight;
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    resizeRight.addEventListener('mousedown', (e) => startResize(e, 'right'));
+    resizeBottom.addEventListener('mousedown', (e) => startResize(e, 'bottom'));
+    resizeCorner.addEventListener('mousedown', (e) => startResize(e, 'corner'));
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const dx = e.clientX - resizeStartX;
+      const dy = e.clientY - resizeStartY;
+
+      if (resizeType === 'right' || resizeType === 'corner') {
+        const newW = Math.max(280, Math.min(window.innerWidth * 0.9, resizeStartW + dx));
+        widget.style.setProperty('width', newW + 'px', 'important');
+        widget.style.setProperty('min-width', newW + 'px', 'important');
+        widget.style.setProperty('max-width', newW + 'px', 'important');
+      }
+      if (resizeType === 'bottom' || resizeType === 'corner') {
+        const newH = Math.max(200, Math.min(window.innerHeight * 0.9, resizeStartH + dy));
+        widget.style.setProperty('max-height', newH + 'px', 'important');
+        widget.style.setProperty('height', newH + 'px', 'important');
+      }
+      widget.classList.add('resized');
+      applyAutoFontSize();
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) justDragged = true;
+      isResizing = false;
     });
 
   }
@@ -284,25 +356,74 @@
       widget.style.removeProperty('top');
     }
 
+    // Reset size if not manually resized
+    if (!widget.classList.contains('resized')) {
+      widget.style.removeProperty('width');
+      widget.style.removeProperty('min-width');
+      widget.style.removeProperty('max-width');
+      widget.style.removeProperty('height');
+      widget.style.removeProperty('max-height');
+    }
+
+    updateFontModeButton();
+
     // Show widget (CSS positions it at bottom center unless dragged)
     widget.classList.add('visible');
   }
 
   function hideWidget() {
     widget.classList.remove('visible');
+    widget.classList.remove('resized');
+    widget.style.removeProperty('width');
+    widget.style.removeProperty('min-width');
+    widget.style.removeProperty('max-width');
+    widget.style.removeProperty('height');
+    widget.style.removeProperty('max-height');
     stopPlayback();
     removeWordHighlight();
   }
 
   // ── Text Area Population ──
+  function calculateAutoFontSize(textLength, widgetWidth) {
+    // Factor in both text length and available width
+    // Wider widget = can use larger font, narrower = smaller font
+    const w = widgetWidth || 420;
+    const widthFactor = Math.min(1, w / 500); // 0.56 at 280px, 1.0 at 500px+
+
+    let baseSize;
+    if (textLength <= 20) baseSize = 32;
+    else if (textLength <= 50) baseSize = 28;
+    else if (textLength <= 100) baseSize = 24;
+    else if (textLength <= 200) baseSize = 22;
+    else if (textLength <= 500) baseSize = 19;
+    else if (textLength <= 1000) baseSize = 17;
+    else baseSize = 15;
+
+    // Scale by widget width, but never below 13px
+    return Math.max(13, Math.round(baseSize * widthFactor));
+  }
+
+  function applyAutoFontSize() {
+    if (fontSizeMode !== 'auto' || !selectedText) return;
+    const textArea = widget.querySelector('.lh-text-area');
+    if (!textArea) return;
+    const autoSize = calculateAutoFontSize(selectedText.length, widget.offsetWidth);
+    textArea.style.fontSize = autoSize + 'px';
+  }
+
   function populateTextArea(text) {
     const textArea = widget.querySelector('.lh-text-area');
     textArea.innerHTML = '';
     widgetWordSpans = [];
     wordCharPositions = [];
 
-    // Apply stored font size
-    textArea.style.fontSize = widgetFontSize + 'px';
+    // Apply font size based on mode
+    if (fontSizeMode === 'auto') {
+      const autoSize = calculateAutoFontSize(text.length, widget.offsetWidth);
+      textArea.style.fontSize = autoSize + 'px';
+    } else {
+      textArea.style.fontSize = widgetFontSize + 'px';
+    }
 
     // Split by whitespace, preserving whitespace segments
     const segments = text.split(/(\s+)/);
@@ -343,7 +464,25 @@
       textArea.style.fontSize = widgetFontSize + 'px';
     }
     // Persist preference
-    chrome.storage.local.set({ widgetFontSize });
+    chrome.storage.local.set({ widgetFontSize, fontSizeMode });
+  }
+
+  function toggleFontMode() {
+    fontSizeMode = fontSizeMode === 'auto' ? 'fixed' : 'auto';
+    chrome.storage.local.set({ fontSizeMode });
+    updateFontModeButton();
+    // Re-render text with new mode
+    if (selectedText) populateTextArea(selectedText);
+  }
+
+  function updateFontModeButton() {
+    const btn = widget?.querySelector('.lh-font-mode');
+    if (btn) {
+      btn.textContent = fontSizeMode === 'auto' ? 'Auto' : 'Fast';
+      btn.title = fontSizeMode === 'auto'
+        ? 'Automatisk skriftstørrelse (klikk for fast)'
+        : 'Fast skriftstørrelse (klikk for auto)';
+    }
   }
 
   // ── Word-by-Word Highlighting (in-widget) ──
@@ -367,17 +506,19 @@
 
   function autoScrollToWord(span) {
     if (!widget) return;
+    const textArea = widget.querySelector('.lh-text-area');
+    if (!textArea) return;
 
     const spanRect = span.getBoundingClientRect();
-    const widgetRect = widget.getBoundingClientRect();
+    const areaRect = textArea.getBoundingClientRect();
 
     // If the word is below the visible area, scroll down
-    if (spanRect.bottom > widgetRect.bottom) {
-      widget.scrollTop += (spanRect.bottom - widgetRect.bottom) + 8;
+    if (spanRect.bottom > areaRect.bottom) {
+      textArea.scrollTop += (spanRect.bottom - areaRect.bottom) + 8;
     }
     // If the word is above the visible area, scroll up
-    else if (spanRect.top < widgetRect.top) {
-      widget.scrollTop -= (widgetRect.top - spanRect.top) + 8;
+    else if (spanRect.top < areaRect.top) {
+      textArea.scrollTop -= (areaRect.top - spanRect.top) + 8;
     }
   }
 
@@ -443,6 +584,49 @@
     wordTimingInterval = requestAnimationFrame(updateHighlight);
   }
 
+  // Start precise word highlighting using real ElevenLabs timing data
+  function startPreciseWordHighlight(audio, wordTimings) {
+    if (!wordTimings || wordTimings.length === 0 || widgetWordSpans.length === 0) return;
+
+    let lastHighlightedIndex = -1;
+
+    function updateHighlight() {
+      if (!currentAudio) {
+        removeWordHighlight();
+        return;
+      }
+
+      const currentTime = audio.currentTime;
+
+      // Find which word should be highlighted based on real timing
+      let wordIndex = wordTimings.findIndex(
+        w => currentTime >= w.start && currentTime < w.end
+      );
+
+      // If past all words, highlight last word
+      if (wordIndex === -1 && wordTimings.length > 0 &&
+          currentTime >= wordTimings[wordTimings.length - 1].start) {
+        wordIndex = wordTimings.length - 1;
+      }
+
+      // Clamp to widget word span count (in case of mismatch)
+      if (wordIndex >= widgetWordSpans.length) {
+        wordIndex = widgetWordSpans.length - 1;
+      }
+
+      if (wordIndex !== -1 && wordIndex !== lastHighlightedIndex) {
+        highlightWordInWidget(wordIndex);
+        lastHighlightedIndex = wordIndex;
+      }
+
+      if (!audio.paused && !audio.ended) {
+        wordTimingInterval = requestAnimationFrame(updateHighlight);
+      }
+    }
+
+    wordTimingInterval = requestAnimationFrame(updateHighlight);
+  }
+
   function updateVoiceOptions() {
     const select = widget.querySelector('#lh-voice');
     select.innerHTML = '';
@@ -491,8 +675,8 @@
       badge.style.color = '#16a34a';
     } else {
       badge.textContent = 'Nettleser-uttale (gratis)';
-      badge.style.background = 'rgba(99, 102, 241, 0.1)';
-      badge.style.color = '#6366f1';
+      badge.style.background = 'rgba(17, 180, 154, 0.1)';
+      badge.style.color = '#11B49A';
     }
   }
 
@@ -544,21 +728,29 @@
         body.code = stored.accessCode;
       }
 
-      const res = await fetch(`${BACKEND_URL}/api/tts`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(body)
+      // Use chrome.runtime.sendMessage to route through service worker
+      // Content scripts in MV3 fetch with the page's origin, which may be blocked
+      const ttsResult = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'FETCH_TTS', url: `${BACKEND_URL}/api/tts`, headers, body },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              resolve(response);
+            }
+          }
+        );
       });
 
-      if (!res.ok) {
-        const errBody = await res.text();
-        console.error('TTS response:', res.status, errBody);
+      if (ttsResult.error) {
+        // Re-create an error-like object with the response details
+        const errBody = ttsResult.errorBody || '';
+        console.error('TTS response:', ttsResult.status, errBody);
 
-        // Handle specific error cases
         try {
           const errJson = JSON.parse(errBody);
           if (errJson.quotaExceeded) {
-            // Quota exceeded — fall back to browser TTS with notice
             console.log('TTS character quota exceeded, falling back to browser TTS');
             updateModeBadgeQuota();
             throw new Error('quota_exceeded');
@@ -567,7 +759,6 @@
             throw new Error('subscription_required');
           }
           if (errJson.tokenExpired) {
-            // Clear expired token
             chrome.storage.local.set({ sessionToken: null, isAuthenticated: false });
             throw new Error('token_expired');
           }
@@ -579,20 +770,22 @@
           }
         }
 
-        throw new Error(`TTS ${res.status}: ${errBody}`);
+        throw new Error(`TTS ${ttsResult.status}: ${errBody}`);
       }
 
-      const blob = await res.blob();
+      // Convert base64 audio back to blob
+      const audioBytes = Uint8Array.from(atob(ttsResult.audioBase64), c => c.charCodeAt(0));
+      const blob = new Blob([audioBytes], { type: 'audio/mpeg' });
       const blobUrl = URL.createObjectURL(blob);
       currentAudio = new Audio(blobUrl);
-      currentAudio.playbackRate = 1; // Speed is applied server-side
+      currentAudio.playbackRate = 1;
 
-      // Start word highlighting when audio metadata is loaded
-      currentAudio.addEventListener('loadedmetadata', () => {
-        if (currentAudio && currentAudio.duration && currentAudio.duration > 0) {
-          startWordHighlightTimer(currentAudio);
-        }
-      });
+      // Use real word timings from ElevenLabs for precise highlighting
+      if (ttsResult.wordTimings && ttsResult.wordTimings.length > 0) {
+        currentAudio.addEventListener('loadedmetadata', () => {
+          startPreciseWordHighlight(currentAudio, ttsResult.wordTimings);
+        });
+      }
 
       currentAudio.play();
 
@@ -780,14 +973,14 @@
     if (match) {
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#6366f1;">Leksihjelp — Oppslag</span>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">Leksihjelp — Oppslag</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
-        <div style="font-size:20px;font-weight:700;color:#6366f1;margin-bottom:2px;">${escapeHtml(match.word)}</div>
+        <div style="font-size:20px;font-weight:700;color:#11B49A;margin-bottom:2px;">${escapeHtml(match.word)}</div>
         <div style="font-size:15px;margin-bottom:6px;">${escapeHtml(match.translation)}</div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
-          <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(99,102,241,0.08);color:#6366f1;font-weight:500;">${escapeHtml(match.partOfSpeech)}</span>
-          ${match.gender ? `<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(99,102,241,0.08);color:#6366f1;font-weight:500;">${escapeHtml(match.gender)}</span>` : ''}
+          <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.partOfSpeech)}</span>
+          ${match.gender ? `<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.gender)}</span>` : ''}
         </div>
         ${match.examples.length ? `<div style="font-style:italic;font-size:13px;color:#475569;margin-bottom:4px;">"${escapeHtml(match.examples[0].sentence)}"</div><div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">${escapeHtml(match.examples[0].translation)}</div>` : ''}
         ${match.grammar ? `<div style="font-size:12px;color:#64748b;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06);"><strong>Grammatikk:</strong> ${escapeHtml(match.grammar)}</div>` : ''}
@@ -795,7 +988,7 @@
     } else {
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#6366f1;">Leksihjelp — Oppslag</span>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">Leksihjelp — Oppslag</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
         <div style="text-align:center;padding:16px 0;color:#94a3b8;">

@@ -7,7 +7,7 @@
  * - Extension install/setup
  */
 
-const BACKEND_URL = 'https://leksihjelp.vercel.app';
+const BACKEND_URL = 'https://leksihjelp.no';
 
 // ── Install / Update ──
 chrome.runtime.onInstalled.addListener((details) => {
@@ -157,6 +157,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     verifyCode(msg.code).then(sendResponse);
     return true; // async
   }
+
+  // Vipps login — run in service worker so popup can close without breaking the flow
+  if (msg.type === 'START_VIPPS_LOGIN') {
+    handleVippsLogin().then(sendResponse);
+    return true; // async
+  }
+
+  // TTS fetch — route through service worker to avoid content script CORS issues
+  if (msg.type === 'FETCH_TTS') {
+    handleTtsFetch(msg.url, msg.headers, msg.body).then(sendResponse);
+    return true; // async
+  }
 });
 
 // ── Code verification (legacy) ──
@@ -177,6 +189,86 @@ async function verifyCode(code) {
   } catch {
     // Server unreachable — no offline fallback
     return { valid: false, offline: true };
+  }
+}
+
+// ── TTS fetch (routes through service worker to avoid content script CORS) ──
+async function handleTtsFetch(url, headers, body) {
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const errorBody = await res.text();
+      return { error: true, status: res.status, errorBody };
+    }
+
+    // Backend now returns JSON with audioBase64 + wordTimings
+    const data = await res.json();
+    return { error: false, audioBase64: data.audioBase64, wordTimings: data.wordTimings };
+  } catch (err) {
+    return { error: true, status: 0, errorBody: err.message };
+  }
+}
+
+// ── Vipps login (runs in service worker to survive popup close) ──
+async function handleVippsLogin() {
+  try {
+    const redirectUrl = chrome.identity.getRedirectURL('vipps');
+    const authUrl = `${BACKEND_URL}/api/auth/vipps-login?source=extension&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+
+    const responseUrl = await new Promise((resolve, reject) => {
+      chrome.identity.launchWebAuthFlow(
+        { url: authUrl, interactive: true },
+        (callbackUrl) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(callbackUrl);
+          }
+        }
+      );
+    });
+
+    const url = new URL(responseUrl);
+    const code = url.searchParams.get('code');
+    const error = url.searchParams.get('error') || url.searchParams.get('login_error');
+
+    if (error) throw new Error(`Vipps error: ${error}`);
+    if (!code) throw new Error('No code received');
+
+    // Exchange code for session token
+    const res = await fetch(`${BACKEND_URL}/api/auth/exchange-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Lexi-Client': 'lexi-extension'
+      },
+      body: JSON.stringify({ code })
+    });
+
+    if (!res.ok) throw new Error(`Exchange failed: ${res.status}`);
+
+    const data = await res.json();
+    const user = data.user || {};
+    const isActive = user.subscriptionStatus === 'active';
+
+    await chrome.storage.local.set({
+      sessionToken: data.token,
+      userName: user.name || '',
+      userEmail: user.email || '',
+      subscriptionStatus: user.subscriptionStatus || 'none',
+      quotaBalance: user.quotaBalance ?? 10000,
+      quotaMaxBalance: user.quotaMaxBalance || 20000,
+      isAuthenticated: isActive
+    });
+
+    return { success: true, user };
+  } catch (err) {
+    return { success: false, error: err.message };
   }
 }
 

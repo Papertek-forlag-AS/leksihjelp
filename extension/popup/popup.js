@@ -4,7 +4,7 @@
  * Adapted to use Papertek Vocabulary API bank-based structure
  */
 
-const BACKEND_URL = 'https://leksihjelp.vercel.app';
+const BACKEND_URL = 'https://leksihjelp.no';
 
 let dictionary = null;
 let currentAudio = null; // Currently playing audio
@@ -301,7 +301,7 @@ async function loadGrammarFeatures(lang) {
     if (stored && stored[lang]) {
       enabledFeatures = new Set(stored[lang]);
     } else {
-      const basicPreset = grammarFeatures.presets.find(p => p.id === 'basic');
+      const basicPreset = grammarFeatures.presets?.find(p => p.id === 'basic');
       enabledFeatures = basicPreset ? getPresetFeatures(basicPreset) : new Set(grammarFeatures.features.map(f => f.id));
     }
   } catch (e) {
@@ -1067,6 +1067,9 @@ async function initAuth() {
   if (subscribeBtn) subscribeBtn.addEventListener('click', subscribe);
   if (subscribeYearlyBtn) subscribeYearlyBtn.addEventListener('click', subscribeYearly);
 
+  const topupBtn = document.getElementById('topup-btn');
+  if (topupBtn) topupBtn.addEventListener('click', buyTopup);
+
   // Check existing session
   await checkSession();
 }
@@ -1077,64 +1080,14 @@ async function loginWithVipps() {
   loginBtn.textContent = 'Åpner Vipps...';
 
   try {
-    // Use chrome.identity to launch an OAuth flow
-    const redirectUrl = chrome.identity.getRedirectURL('vipps');
-    // Pass the extension's redirect URL so the server knows where to redirect back
-    const authUrl = `${BACKEND_URL}/api/auth/vipps-login?source=extension&redirect_uri=${encodeURIComponent(redirectUrl)}`;
+    // Delegate to service worker so the flow survives popup closing
+    const result = await chrome.runtime.sendMessage({ type: 'START_VIPPS_LOGIN' });
 
-    const responseUrl = await Promise.race([
-      new Promise((resolve, reject) => {
-        chrome.identity.launchWebAuthFlow(
-          { url: authUrl, interactive: true },
-          (callbackUrl) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
-            } else {
-              resolve(callbackUrl);
-            }
-          }
-        );
-      }),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Innlogging tok for lang tid. Prøv igjen.')), 120_000)
-      )
-    ]);
-
-    // Extract the authorization code from the callback URL
-    const url = new URL(responseUrl);
-    const code = url.searchParams.get('code');
-    const error = url.searchParams.get('error') || url.searchParams.get('login_error');
-
-    if (error) {
-      throw new Error(`Vipps error: ${error}`);
+    if (result?.success) {
+      await handleLoginSuccess(null, result.user);
+    } else {
+      throw new Error(result?.error || 'Login failed');
     }
-
-    if (!code) {
-      // Maybe we got a token directly (from the callback redirect)
-      const token = url.searchParams.get('token');
-      if (token) {
-        await handleLoginSuccess(token);
-        return;
-      }
-      throw new Error('No code or token received');
-    }
-
-    // Exchange code for session token
-    const res = await fetch(`${BACKEND_URL}/api/auth/exchange-code`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Lexi-Client': 'lexi-extension'
-      },
-      body: JSON.stringify({ code })
-    });
-
-    if (!res.ok) {
-      throw new Error(`Exchange failed: ${res.status}`);
-    }
-
-    const data = await res.json();
-    await handleLoginSuccess(data.token, data.user);
   } catch (err) {
     console.error('Vipps login failed:', err);
     loginBtn.disabled = false;
@@ -1153,16 +1106,17 @@ async function loginWithVipps() {
 }
 
 async function handleLoginSuccess(token, user) {
-  await chromeStorageSet({
-    sessionToken: token,
+  const updates = {
     userName: user?.name || '',
     userEmail: user?.email || '',
     subscriptionStatus: user?.subscriptionStatus || 'none',
     quotaBalance: user?.quotaBalance ?? 10000,
     quotaMaxBalance: user?.quotaMaxBalance || 20000,
-    // Keep isAuthenticated for backward compat (true when subscription active)
     isAuthenticated: user?.subscriptionStatus === 'active'
-  });
+  };
+  // Only set token if provided (service worker login stores it directly)
+  if (token) updates.sessionToken = token;
+  await chromeStorageSet(updates);
 
   chrome.runtime.sendMessage({
     type: 'AUTH_CHANGED',
@@ -1270,11 +1224,20 @@ async function updateAuthUI() {
     if (usageText) usageText.textContent = `${quotaBalance.toLocaleString('nb-NO')} tegn`;
     if (usageFill) {
       usageFill.style.width = `${pct}%`;
-      // Green when plenty, orange when low, red when critical
       let colorClass = 'usage-bar-fill';
-      if (quotaBalance < 500) colorClass += ' critical';
-      else if (quotaBalance < 2000) colorClass += ' warning';
+      if (quotaBalance < 2000) colorClass += ' critical';
+      else if (quotaBalance < 10000) colorClass += ' warning';
       usageFill.className = colorClass;
+    }
+
+    // Show top-up button when below 10k chars
+    const topupBtn = document.getElementById('topup-btn');
+    if (topupBtn) {
+      if (quotaBalance < 10000) {
+        topupBtn.classList.remove('hidden');
+      } else {
+        topupBtn.classList.add('hidden');
+      }
     }
   } else {
     usageSection?.classList.add('hidden');
@@ -1308,18 +1271,48 @@ async function subscribe() {
   } catch (err) {
     console.error('Subscribe failed:', err);
     subscribeBtn.disabled = false;
-    subscribeBtn.textContent = 'Abonner — 29 kr/mnd (Vipps)';
+    subscribeBtn.textContent = 'Abonner — 49 kr/mnd (Vipps)';
   }
 }
 
 async function subscribeYearly() {
   const btn = document.getElementById('subscribe-yearly-btn');
   btn.disabled = true;
-  btn.textContent = 'Åpner betaling...';
+  btn.textContent = 'Åpner Vipps...';
 
   try {
     const token = await chromeStorageGet('sessionToken');
-    const res = await fetch(`${BACKEND_URL}/api/auth/create-checkout`, {
+    const res = await fetch(`${BACKEND_URL}/api/auth/subscribe`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Lexi-Client': 'lexi-extension'
+      },
+      body: JSON.stringify({ plan: 'yearly' })
+    });
+
+    if (!res.ok) throw new Error(`Subscribe failed: ${res.status}`);
+
+    const data = await res.json();
+    if (data.vippsConfirmationUrl) {
+      chrome.tabs.create({ url: data.vippsConfirmationUrl });
+    }
+  } catch (err) {
+    console.error('Yearly subscribe failed:', err);
+    btn.disabled = false;
+    btn.textContent = 'Betal 490 kr/år (Vipps)';
+  }
+}
+
+async function buyTopup() {
+  const btn = document.getElementById('topup-btn');
+  btn.disabled = true;
+  btn.textContent = 'Åpner Vipps...';
+
+  try {
+    const token = await chromeStorageGet('sessionToken');
+    const res = await fetch(`${BACKEND_URL}/api/auth/topup`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -1328,17 +1321,19 @@ async function subscribeYearly() {
       }
     });
 
-    if (!res.ok) throw new Error(`Checkout failed: ${res.status}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Topup failed: ${res.status}`);
+    }
 
     const data = await res.json();
-    if (data.checkoutUrl) {
-      // Open Stripe Checkout in a new tab
-      chrome.tabs.create({ url: data.checkoutUrl });
+    if (data.vippsConfirmationUrl) {
+      chrome.tabs.create({ url: data.vippsConfirmationUrl });
     }
   } catch (err) {
-    console.error('Yearly subscribe failed:', err);
+    console.error('Topup failed:', err);
     btn.disabled = false;
-    btn.textContent = 'Betal 290 kr/år (kort)';
+    btn.textContent = 'Kjøp 50 000 tegn — 49 kr (Vipps)';
   }
 }
 

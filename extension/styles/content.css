@@ -19,9 +19,8 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
   color: #1e293b;
-  max-height: 70vh;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  max-height: 80vh;
+  overflow: visible;
   transition: opacity 0.2s, transform 0.2s;
   /* Position at bottom center */
   left: 50% !important;
@@ -161,8 +160,10 @@
 #lexi-tts-widget .lh-text-area {
   font-size: 15px;
   color: #1e293b;
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 40px;
+  max-height: 50vh;
+  overflow-y: auto;
   padding: 8px 10px;
   padding-right: 56px;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -295,6 +296,56 @@
   color: #11B49A;
   font-weight: 500;
   text-align: center;
+}
+
+/* ── Resize Handles ── */
+#lexi-tts-widget .lh-resize-handle {
+  position: absolute;
+  z-index: 10;
+}
+
+#lexi-tts-widget .lh-resize-right {
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+#lexi-tts-widget .lh-resize-bottom {
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+#lexi-tts-widget .lh-resize-corner {
+  bottom: -3px;
+  right: -3px;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+}
+
+#lexi-tts-widget .lh-resize-corner::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgba(0, 0, 0, 0.15);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
+}
+
+/* ── Font mode button ── */
+#lexi-tts-widget .lh-font-mode {
+  width: auto;
+  padding: 0 5px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 /* ── Word Prediction Dropdown ── */

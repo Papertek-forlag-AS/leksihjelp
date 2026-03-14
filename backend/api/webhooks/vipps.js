@@ -73,9 +73,10 @@ function verifyWebhookSignature(req, rawBody, secret) {
 
   const signedString = `POST\n${pathAndQuery}\n${msDate};${host};${contentHash}`;
 
-  // 4. Compute expected HMAC-SHA256
+  // 4. Compute expected HMAC-SHA256 (secret is Base64-encoded from webhook registration)
+  const secretBuffer = Buffer.from(secret, 'base64');
   const expectedSignature = crypto
-    .createHmac('sha256', secret)
+    .createHmac('sha256', secretBuffer)
     .update(signedString)
     .digest('base64');
 

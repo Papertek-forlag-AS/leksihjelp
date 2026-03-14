@@ -1,27 +1,26 @@
 /**
  * Leksihjelp — Quota Rollover System
  *
- * Manages monthly character quotas for TTS usage with rollover.
- * Unused characters carry forward to the next month, capped at 2× monthly allowance.
+ * Manages monthly character quotas for TTS usage with school-year rollover.
+ * Unused characters accumulate throughout the school year (Aug–Jun),
+ * then reset on July 1 (summer break).
  *
  * Firestore user fields:
  *   quotaBalance          — Remaining characters (decrements on use)
  *   quotaLastTopUp        — ISO date string of last monthly top-up
- *   quotaMonthlyAllowance — Characters added per month (default: 10000)
- *   quotaMaxBalance       — Maximum balance cap (default: 20000 = 2× monthly)
+ *   quotaMonthlyAllowance — Characters added per month (default: 50000)
+ *   quotaMaxBalance       — Maximum balance cap (default: 500000 = full school year)
  */
 
 // ── Defaults ──
 
-const DEFAULT_MONTHLY_ALLOWANCE = 10_000;
-const DEFAULT_MAX_BALANCE = 20_000; // 2× monthly allowance
+const DEFAULT_MONTHLY_ALLOWANCE = 50_000;
+const DEFAULT_MAX_BALANCE = 500_000; // ~10 months accumulation
 
 // ── Helpers ──
 
 /**
  * Get the first day of the month for a given date (midnight UTC).
- * @param {Date} date
- * @returns {Date}
  */
 export function firstOfMonth(date) {
   return new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
@@ -29,9 +28,6 @@ export function firstOfMonth(date) {
 
 /**
  * Check if two dates are in different calendar months (UTC).
- * @param {Date|string} lastDate
- * @param {Date|string} nowDate
- * @returns {boolean}
  */
 export function isNewMonth(lastDate, nowDate) {
   const last = new Date(lastDate);
@@ -40,18 +36,23 @@ export function isNewMonth(lastDate, nowDate) {
          last.getUTCMonth() !== now.getUTCMonth();
 }
 
+/**
+ * Check if a summer reset is needed.
+ * Resets on July 1 each year. If lastTopUp is before July 1 of the current
+ * year and now is July or later, a reset is due.
+ */
+function needsSummerReset(lastTopUp, now) {
+  const julyFirst = new Date(Date.UTC(now.getUTCFullYear(), 6, 1)); // Month 6 = July
+  return lastTopUp < julyFirst && now >= julyFirst;
+}
+
 // ── Core ──
 
 /**
- * Recalculate a user's quota balance with monthly rollover.
+ * Recalculate a user's quota balance with monthly top-up and summer reset.
  *
- * Call this on every session check and before TTS usage.
- * If a new month has started since the last top-up, adds the monthly allowance
- * to the existing balance (capped at maxBalance).
- *
- * @param {Object} userData — Firestore user document data
- * @returns {{ quotaBalance: number, quotaLastTopUp: string, quotaMonthlyAllowance: number, quotaMaxBalance: number, needsUpdate: boolean, updateFields: Object } | null}
- *   Returns null if no update is needed; otherwise returns the new values and the Firestore update payload.
+ * - Each new month: adds monthly allowance to balance (capped at max)
+ * - July 1: resets balance to monthly allowance (summer break reset)
  */
 export function recalculateQuota(userData) {
   const now = new Date();
@@ -61,10 +62,17 @@ export function recalculateQuota(userData) {
   const lastTopUp = userData.quotaLastTopUp ? new Date(userData.quotaLastTopUp) : null;
 
   if (!lastTopUp || isNewMonth(lastTopUp, now)) {
-    // New month — add monthly allowance to current balance
     const currentBalance = userData.quotaBalance || 0;
-    const newBalance = Math.min(currentBalance + monthlyAllowance, maxBalance);
     const newTopUp = firstOfMonth(now).toISOString();
+
+    let newBalance;
+    if (lastTopUp && needsSummerReset(lastTopUp, now)) {
+      // Summer reset — start fresh with monthly allowance
+      newBalance = monthlyAllowance;
+    } else {
+      // Regular month — add allowance to existing balance
+      newBalance = Math.min(currentBalance + monthlyAllowance, maxBalance);
+    }
 
     return {
       quotaBalance: newBalance,
@@ -79,21 +87,17 @@ export function recalculateQuota(userData) {
     };
   }
 
-  // No update needed — current month, balance is fine
   return null;
 }
 
 /**
  * Get the initial quota fields for a brand-new user.
- *
- * @param {number} [monthlyAllowance=10000]
- * @returns {Object} Fields to set on the user document
  */
 export function getInitialQuotaFields(monthlyAllowance = DEFAULT_MONTHLY_ALLOWANCE) {
   return {
     quotaBalance: monthlyAllowance,
     quotaLastTopUp: firstOfMonth(new Date()).toISOString(),
     quotaMonthlyAllowance: monthlyAllowance,
-    quotaMaxBalance: monthlyAllowance * 2,
+    quotaMaxBalance: DEFAULT_MAX_BALANCE,
   };
 }

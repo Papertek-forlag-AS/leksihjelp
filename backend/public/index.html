@@ -668,20 +668,19 @@
             <div id="web-usage-bar" style="height:100%;background:#22c55e;border-radius:3px;transition:width 0.3s;">
             </div>
           </div>
-          <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-top:4px;">Ubrukte tegn overføres til neste
-            måned</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">Ubrukte tegn samles opp til sommerferien</div>
         </div>
         <div id="web-subscribe-section" style="display:none;margin-bottom:12px;">
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <a href="#" id="web-subscribe-btn"
-              style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Abonner
-              — 29 kr/mnd</a>
+              style="display:inline-flex;align-items:center;gap:8px;background:var(--charcoal-blue);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Abonner
+              — 49 kr/mnd (Vipps)</a>
             <a href="#" id="web-subscribe-yearly-btn"
-              style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#635bff,#7c3aed);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Betal
-              290 kr/år</a>
+              style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--accent);color:var(--charcoal-blue);text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Betal
+              490 kr/år (Vipps)</a>
           </div>
-          <p style="margin-top:6px;font-size:0.85rem;color:rgba(255,255,255,0.5);">Inkl. 10 000 tegn naturlig uttale per
-            mnd (ubrukte tegn overføres)</p>
+          <p style="margin-top:6px;font-size:0.85rem;color:var(--text-secondary);">Inkl. 50 000 tegn naturlig uttale per
+            mnd (ubrukte tegn samles opp til sommerferien)</p>
         </div>
         <button id="web-logout-btn"
           style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">Logg
@@ -719,12 +718,13 @@
         </div>
         <div class="pricing-tier tier-premium">
           <h3>Premium uttale</h3>
-          <div class="pricing-price">29 kr <span>/mnd</span></div>
+          <div class="pricing-price">49 kr <span>/mnd</span></div>
           <ul class="pricing-details">
             <li>Alt i gratisversjonen</li>
             <li>Naturlige AI-stemmer (ElevenLabs)</li>
-            <li>10 000 tegn per måned</li>
-            <li>Ubrukte tegn overføres</li>
+            <li>50 000 tegn per måned</li>
+            <li>Ubrukte tegn samles opp til sommerferien</li>
+            <li>490 kr/år (spar 15%)</li>
           </ul>
         </div>
       </div>
@@ -822,15 +822,15 @@
           const usageDiv = document.getElementById('web-usage');
           usageDiv.style.display = 'block';
           const balance = user.quotaBalance ?? 0;
-          const maxBal = user.quotaMaxBalance || 20000;
+          const maxBal = user.quotaMaxBalance || 500000;
           const pct = Math.min(100, (balance / maxBal) * 100);
           document.getElementById('web-usage-text').textContent =
             `${balance.toLocaleString('nb-NO')} tegn`;
           const bar = document.getElementById('web-usage-bar');
           bar.style.width = pct + '%';
           // Color: green → orange → red based on remaining
-          if (balance < 500) bar.style.background = '#ef4444';
-          else if (balance < 2000) bar.style.background = '#f59e0b';
+          if (balance < 2000) bar.style.background = '#ef4444';
+          else if (balance < 10000) bar.style.background = '#f59e0b';
           else bar.style.background = '#22c55e';
         } else if (user.subscriptionStatus === 'pending') {
           badge.textContent = 'Abonnement venter';
@@ -873,22 +873,23 @@
         }
       });
 
-      // Subscribe (Stripe yearly)
+      // Subscribe (Vipps yearly)
       document.getElementById('web-subscribe-yearly-btn')?.addEventListener('click', async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('lexi_token');
         if (!token) return;
         try {
-          const res = await fetch(`${API}/api/auth/create-checkout`, {
+          const res = await fetch(`${API}/api/auth/subscribe`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ plan: 'yearly' })
           });
           const data = await res.json();
-          if (data.checkoutUrl) {
-            window.location.href = data.checkoutUrl;
+          if (data.vippsConfirmationUrl) {
+            window.location.href = data.vippsConfirmationUrl;
           }
         } catch (err) {
           console.error('Yearly subscribe error:', err);

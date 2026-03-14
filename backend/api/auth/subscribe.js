@@ -59,6 +59,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Du har allerede et aktivt abonnement' });
     }
 
+    // Determine plan (monthly or yearly)
+    const plan = req.body?.plan || 'monthly';
+    const isYearly = plan === 'yearly';
+    const amount = isYearly ? 49000 : 4900; // 490.00 or 49.00 NOK in øre
+
     // Create Vipps Recurring agreement
     const { apiBase, merchantSerialNumber } = getVippsConfig();
     const accessToken = await getVippsAccessToken();
@@ -69,19 +74,21 @@ export default async function handler(req, res) {
 
     const agreementBody = {
       pricing: {
-        type: 'LEGACY', // Fixed-price subscription (correct for Recurring v3, default type)
-        amount: 2900, // 29.00 NOK in øre
+        type: 'LEGACY',
+        amount,
         currency: 'NOK',
       },
       interval: {
-        unit: 'MONTH',
+        unit: isYearly ? 'YEAR' : 'MONTH',
         count: 1,
       },
       merchantRedirectUrl: `${SITE_URL}/api/auth/subscribe-callback?agreementId=${encodeURIComponent(agreementId)}`,
       merchantAgreementUrl: `${SITE_URL}/vilkar`,
       phoneNumber: userData.phone || undefined,
-      productName: 'Leksihjelp — ElevenLabs uttale',
-      productDescription: 'Månedlig abonnement for naturlig uttale (10 000 tegn/mnd)',
+      productName: isYearly ? 'Leksihjelp — Årsabonnement' : 'Leksihjelp — Månedsabonnement',
+      productDescription: isYearly
+        ? 'Årsabonnement for naturlig uttale (50 000 tegn/mnd, spar 15%)'
+        : 'Månedlig abonnement for naturlig uttale (50 000 tegn/mnd)',
     };
 
     const vippsRes = await fetch(
@@ -109,7 +116,8 @@ export default async function handler(req, res) {
       agreementId: vippsData.agreementId || agreementId,
       userId: payload.sub,
       status: 'PENDING',
-      amount: 2900,
+      plan: isYearly ? 'yearly' : 'monthly',
+      amount,
       createdAt: new Date().toISOString(),
       startDate: null,
       nextChargeDate: null,
@@ -118,6 +126,7 @@ export default async function handler(req, res) {
     // Update user with pending subscription
     await db.collection('users').doc(payload.sub).update({
       subscriptionStatus: 'pending',
+      subscriptionType: isYearly ? 'vipps_yearly' : 'vipps_monthly',
       agreementId: vippsData.agreementId || agreementId,
     });
 
