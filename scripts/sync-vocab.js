@@ -1,16 +1,24 @@
 #!/usr/bin/env node
 
 /**
- * Vocabulary Sync Script
+ * Vocabulary Sync Script (v3)
  *
- * Fetches vocabulary data from the Papertek API and writes to extension/data/*.json
+ * Fetches vocabulary data from the Papertek Vocabulary API v3 (lexicon)
+ * and writes to extension/data/*.json
+ *
+ * v3 provides:
+ *   - All data in a single lookup (no separate translations fetch)
+ *   - Bidirectional links (linkedTo) with examples
+ *   - Typos and acceptedForms for fuzzy matching
+ *   - Norwegian (nb, nn) and English (en) vocabularies
+ *   - Grammar features from manifest
  *
  * Usage:
  *   node scripts/sync-vocab.js                    # Sync all languages (no audio)
  *   node scripts/sync-vocab.js de                 # Sync only German
- *   node scripts/sync-vocab.js --with-audio       # Sync all languages with audio ZIP files
+ *   node scripts/sync-vocab.js --with-audio       # Sync all with audio
  *   node scripts/sync-vocab.js de --with-audio    # Sync German with audio
- *   node scripts/sync-vocab.js --with-audio --force-audio  # Re-download audio even if exists
+ *   node scripts/sync-vocab.js --with-audio --force-audio  # Re-download audio
  */
 
 const fs = require('fs');
@@ -18,36 +26,26 @@ const path = require('path');
 const { execSync } = require('child_process');
 
 // Configuration
-const API_BASE = process.env.PAPERTEK_API_BASE || 'https://www.papertek.no';
+const V3_API_BASE = process.env.PAPERTEK_VOCAB_API || 'https://papertek-vocabulary.vercel.app/api/vocab';
+const LEGACY_API_BASE = process.env.PAPERTEK_API_BASE || 'https://www.papertek.no';
 const OUTPUT_DIR = path.join(__dirname, '..', 'extension', 'data');
 const AUDIO_DIR = path.join(__dirname, '..', 'extension', 'audio');
 
-// Audio ZIP download URLs
+// Audio ZIP download URLs (from legacy API)
 const AUDIO_ZIPS = {
-  de: `${API_BASE}/shared/vocabulary/downloads/audio-de.zip`,
-  es: `${API_BASE}/shared/vocabulary/downloads/audio-es.zip`,
-  fr: `${API_BASE}/shared/vocabulary/downloads/audio-fr.zip`
+  de: `${LEGACY_API_BASE}/shared/vocabulary/downloads/audio-de.zip`,
+  es: `${LEGACY_API_BASE}/shared/vocabulary/downloads/audio-es.zip`,
+  fr: `${LEGACY_API_BASE}/shared/vocabulary/downloads/audio-fr.zip`
 };
 
-const LANGUAGES = {
-  de: {
-    code: 'de',
-    name: 'Tysk',
-    coreEndpoint: '/api/vocab/v1/core/german',
-    translationEndpoint: '/api/vocab/v1/translations/de-nb'
-  },
-  es: {
-    code: 'es',
-    name: 'Spansk',
-    coreEndpoint: '/api/vocab/v1/core/spanish',
-    translationEndpoint: '/api/vocab/v1/translations/es-nb'
-  },
-  fr: {
-    code: 'fr',
-    name: 'Fransk',
-    coreEndpoint: '/api/vocab/v1/core/french',
-    translationEndpoint: '/api/vocab/v1/translations/fr-nb'
-  }
+// Language display names
+const LANG_NAMES = {
+  de: 'Tysk',
+  es: 'Spansk',
+  fr: 'Fransk',
+  nb: 'Norsk bokmål',
+  nn: 'Norsk nynorsk',
+  en: 'Engelsk'
 };
 
 const BANKS = [
@@ -70,24 +68,216 @@ async function fetchJson(url) {
 }
 
 /**
- * Download and extract audio ZIP file for a language
+ * Fetch the v3 manifest to discover languages, banks, and grammar features.
+ */
+async function fetchManifest() {
+  console.log('Fetching v3 manifest...');
+  const manifest = await fetchJson(`${V3_API_BASE}/v3/manifest`);
+  console.log(`  Languages: ${Object.keys(manifest.languages).join(', ')}`);
+  console.log(`  Link pairs: ${manifest.links.length}`);
+  return manifest;
+}
+
+/**
+ * Collect all word IDs from the v3 search endpoint by querying each letter.
+ * Deduplicates results across queries.
+ */
+async function collectAllWordIds(langCode) {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyzäöüáéíóúàèùâêîôûçñ'.split('');
+  const allIds = new Set();
+
+  for (const letter of alphabet) {
+    try {
+      const res = await fetchJson(`${V3_API_BASE}/v3/search/${langCode}?q=${encodeURIComponent(letter)}&limit=10000`);
+      for (const r of res.results) {
+        allIds.add(r.id);
+      }
+    } catch {
+      // Some letters may return 0 results, that's fine
+    }
+  }
+
+  return [...allIds];
+}
+
+/**
+ * Fetch all word entries for a language via v3 lookup.
+ */
+async function fetchAllEntries(langCode, manifest) {
+  const langInfo = manifest.languages[langCode];
+  if (!langInfo) {
+    throw new Error(`Language ${langCode} not found in manifest`);
+  }
+
+  console.log(`  Total words in API: ${langInfo.totalWords}`);
+
+  // Collect all word IDs via search
+  console.log('  Collecting word IDs...');
+  const allIds = await collectAllWordIds(langCode);
+  console.log(`  Found ${allIds.length} unique word IDs`);
+
+  // Fetch full lookups in batches
+  const BATCH_SIZE = 50;
+  const entries = {};
+
+  for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
+    const batch = allIds.slice(i, i + BATCH_SIZE);
+    const lookups = await Promise.all(
+      batch.map(id =>
+        fetchJson(`${V3_API_BASE}/v3/lookup/${langCode}/${id}`)
+          .catch(err => {
+            console.warn(`    Warning: Failed to fetch ${id}: ${err.message}`);
+            return null;
+          })
+      )
+    );
+
+    for (const entry of lookups) {
+      if (!entry || !entry._meta) continue;
+      entries[entry._meta.wordId] = entry;
+    }
+
+    const progress = Math.min(allIds.length, i + BATCH_SIZE);
+    process.stdout.write(`\r  Fetching entries: ${progress}/${allIds.length}`);
+  }
+  console.log('');
+
+  return entries;
+}
+
+/**
+ * Organize entries into banks and build the extension-compatible data structure.
+ */
+function buildLanguageData(langCode, entries, manifest, nbEntries = null) {
+  const result = {
+    _metadata: {
+      language: langCode,
+      languageName: LANG_NAMES[langCode] || langCode,
+      generatedAt: new Date().toISOString(),
+      source: 'papertek-api-v3',
+      apiBase: V3_API_BASE
+    }
+  };
+
+  let totalWords = 0;
+
+  for (const bank of BANKS) {
+    result[bank] = {};
+  }
+
+  for (const [wordId, entry] of Object.entries(entries)) {
+    const bank = entry._meta?.bank;
+    if (!bank || !result[bank]) continue;
+
+    // Remove _meta and _generatedFrom from the entry (extension doesn't need them)
+    const { _meta, _generatedFrom, _enriched, ...cleanEntry } = entry;
+
+    // Extract translation from linkedTo for foreign languages (link to nb)
+    if (langCode !== 'nb' && langCode !== 'nn' && cleanEntry.linkedTo) {
+      const nbLink = cleanEntry.linkedTo.nb || cleanEntry.linkedTo.nn;
+      if (nbLink) {
+        // Resolve translation from linked Norwegian word
+        if (!cleanEntry.translation && nbLink.primary) {
+          // Look up the Norwegian entry to get the actual word
+          const nbWordId = nbLink.primary;
+          if (nbEntries && nbEntries[nbWordId]) {
+            cleanEntry.translation = nbEntries[nbWordId].word || null;
+          } else {
+            // Fallback: extract word from ID (e.g., "hus_noun" → "hus")
+            cleanEntry.translation = nbWordId.replace(/_[a-z]+$/, '');
+          }
+        }
+        // Copy examples from link if entry doesn't have its own
+        if ((!cleanEntry.examples || cleanEntry.examples.length === 0) && nbLink.examples) {
+          cleanEntry.examples = nbLink.examples;
+        }
+        // Copy explanation from link
+        if (!cleanEntry.explanation && nbLink.explanation) {
+          cleanEntry.explanation = { _description: nbLink.explanation };
+        }
+      }
+    }
+
+    result[bank][wordId] = cleanEntry;
+    totalWords++;
+  }
+
+  // Log bank counts
+  for (const bank of BANKS) {
+    const count = Object.keys(result[bank]).length;
+    if (count > 0) {
+      console.log(`  ${bank}: ${count} words`);
+    } else {
+      delete result[bank]; // Don't include empty banks
+    }
+  }
+
+  result._metadata.totalWords = totalWords;
+  return result;
+}
+
+/**
+ * Sync grammar features from the v3 manifest.
+ */
+function syncGrammarFeaturesFromManifest(langCode, manifest) {
+  console.log(`  Syncing grammar features...`);
+
+  const grammarData = manifest.grammarFeatures?.[langCode];
+  if (!grammarData) {
+    console.log(`  No grammar features in manifest for ${langCode}`);
+    // Fall back to v1 grammar features for existing languages
+    return syncLegacyGrammarFeatures(langCode);
+  }
+
+  const outputPath = path.join(OUTPUT_DIR, `grammarfeatures-${langCode}.json`);
+  fs.writeFileSync(outputPath, JSON.stringify(grammarData, null, 2));
+  const count = grammarData.features ? grammarData.features.length : 0;
+  console.log(`  Written ${count} grammar features to grammarfeatures-${langCode}.json`);
+  return grammarData;
+}
+
+/**
+ * Fall back to v1 grammar features endpoint for languages not yet in v3 manifest.
+ */
+async function syncLegacyGrammarFeatures(langCode) {
+  const outputPath = path.join(OUTPUT_DIR, `grammarfeatures-${langCode}.json`);
+
+  // If file already exists, keep it
+  if (fs.existsSync(outputPath)) {
+    console.log(`  Using existing grammarfeatures-${langCode}.json`);
+    return JSON.parse(fs.readFileSync(outputPath, 'utf-8'));
+  }
+
+  console.log(`  Fetching legacy grammar features for ${langCode}...`);
+  try {
+    const features = await fetchJson(`${LEGACY_API_BASE}/api/vocab/v1/grammarfeatures?language=${langCode}`);
+    fs.writeFileSync(outputPath, JSON.stringify(features, null, 2));
+    const count = features.features ? features.features.length : 0;
+    console.log(`  Written ${count} features (legacy) to grammarfeatures-${langCode}.json`);
+    return features;
+  } catch (error) {
+    console.error(`  Error fetching legacy grammar features: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Download and extract audio ZIP file for a language.
  */
 async function syncAudioFiles(langCode) {
   const zipUrl = AUDIO_ZIPS[langCode];
   if (!zipUrl) {
-    console.log(`\n  No audio ZIP available for ${langCode}`);
+    console.log(`  No audio ZIP available for ${langCode}`);
     return;
   }
 
-  console.log(`\n  Syncing audio files...`);
+  console.log(`  Syncing audio files...`);
 
-  // Ensure audio directory exists
   const langAudioDir = path.join(AUDIO_DIR, langCode);
   if (!fs.existsSync(langAudioDir)) {
     fs.mkdirSync(langAudioDir, { recursive: true });
   }
 
-  // Check if audio files already exist
   const existingFiles = fs.existsSync(langAudioDir) ? fs.readdirSync(langAudioDir) : [];
   if (existingFiles.length > 0 && !forceAudio) {
     console.log(`  Audio folder already has ${existingFiles.length} files (skipping)`);
@@ -98,7 +288,6 @@ async function syncAudioFiles(langCode) {
   const zipPath = path.join(AUDIO_DIR, `audio-${langCode}.zip`);
 
   try {
-    // Download ZIP file
     console.log(`  Downloading ${zipUrl}...`);
     const response = await fetch(zipUrl);
     if (!response.ok) {
@@ -110,133 +299,66 @@ async function syncAudioFiles(langCode) {
     const sizeMB = (buffer.byteLength / 1024 / 1024).toFixed(1);
     console.log(`  Downloaded ${sizeMB} MB`);
 
-    // Extract ZIP file
     console.log(`  Extracting to ${langAudioDir}...`);
     execSync(`unzip -o -q "${zipPath}" -d "${langAudioDir}"`, { stdio: 'pipe' });
 
-    // Count extracted files
     const extractedFiles = fs.readdirSync(langAudioDir).filter(f => f.endsWith('.mp3'));
     console.log(`  Extracted ${extractedFiles.length} audio files`);
 
-    // Clean up ZIP file
     fs.unlinkSync(zipPath);
     console.log(`  Audio sync complete`);
-
   } catch (error) {
     console.error(`  Error syncing audio: ${error.message}`);
-    // Clean up partial ZIP if it exists
     if (fs.existsSync(zipPath)) {
       fs.unlinkSync(zipPath);
     }
   }
 }
 
-async function syncGrammarFeatures(langCode) {
-  console.log(`\nSyncing grammar features for ${langCode}...`);
+/**
+ * Sync a single language.
+ */
+// Cache for Norwegian entries (used for translation resolution)
+let nbEntriesCache = null;
 
-  try {
-    const features = await fetchJson(`${API_BASE}/api/vocab/v1/grammarfeatures?language=${langCode}`);
-
-    // Write to file
-    const outputPath = path.join(OUTPUT_DIR, `grammarfeatures-${langCode}.json`);
-    fs.writeFileSync(outputPath, JSON.stringify(features, null, 2));
-    const count = features.features ? features.features.length : 0;
-    console.log(`  Written ${count} features to ${outputPath}`);
-
-    return features;
-  } catch (error) {
-    console.error(`  Error fetching grammar features: ${error.message}`);
-    return null;
-  }
+async function ensureNbEntries(manifest) {
+  if (nbEntriesCache) return nbEntriesCache;
+  if (!manifest.languages.nb) return null;
+  console.log('\nPre-fetching Norwegian (nb) entries for translation resolution...');
+  nbEntriesCache = await fetchAllEntries('nb', manifest);
+  return nbEntriesCache;
 }
 
-async function syncLanguage(langConfig, withAudio = false) {
-  console.log(`\nSyncing ${langConfig.name} (${langConfig.code})...`);
+async function syncLanguage(langCode, manifest, withAudio = false) {
+  console.log(`\nSyncing ${LANG_NAMES[langCode] || langCode} (${langCode})...`);
 
-  // Fetch core vocabulary
-  console.log(`  Fetching core vocabulary...`);
-  let coreData;
-  try {
-    coreData = await fetchJson(`${API_BASE}${langConfig.coreEndpoint}`);
-  } catch (error) {
-    console.error(`  Error fetching core data: ${error.message}`);
-    return null;
+  // For foreign languages, pre-fetch Norwegian entries for translation
+  let nbEntries = null;
+  if (langCode !== 'nb' && langCode !== 'nn') {
+    nbEntries = await ensureNbEntries(manifest);
   }
 
-  // Fetch translations
-  console.log(`  Fetching translations...`);
-  let translationData;
-  try {
-    translationData = await fetchJson(`${API_BASE}${langConfig.translationEndpoint}`);
-  } catch (error) {
-    console.error(`  Error fetching translations: ${error.message}`);
-    // Continue without translations - we can still use core data
-    translationData = {};
-  }
+  // Fetch all entries from v3
+  const entries = await fetchAllEntries(langCode, manifest);
 
-  // Fetch grammar features
-  await syncGrammarFeatures(langConfig.code);
-
-  // Build merged structure
-  const result = {
-    _metadata: {
-      language: langConfig.code,
-      languageName: langConfig.name,
-      generatedAt: new Date().toISOString(),
-      source: 'papertek-api',
-      apiBase: API_BASE
-    }
-  };
-
-  let totalWords = 0;
-
-  for (const bank of BANKS) {
-    const coreBank = coreData[bank];
-    const transBank = translationData[bank] || {};
-
-    if (coreBank && typeof coreBank === 'object') {
-      result[bank] = {};
-
-      for (const [wordId, wordData] of Object.entries(coreBank)) {
-        // Skip metadata entries
-        if (wordId.startsWith('_')) continue;
-
-        // Merge core data with translation
-        const translation = transBank[wordId] || {};
-
-        result[bank][wordId] = {
-          ...wordData,
-          // Add translation fields
-          translation: translation.translation || null,
-          explanation: translation.explanation || null,
-          synonyms: translation.synonyms || [],
-          examples: translation.examples || []
-        };
-
-        totalWords++;
-      }
-
-      const bankCount = Object.keys(result[bank]).length;
-      if (bankCount > 0) {
-        console.log(`  ${bank}: ${bankCount} words`);
-      }
-    }
-  }
-
-  result._metadata.totalWords = totalWords;
+  // Build extension-compatible data structure
+  const data = buildLanguageData(langCode, entries, manifest, nbEntries);
 
   // Write to file
-  const outputPath = path.join(OUTPUT_DIR, `${langConfig.code}.json`);
-  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2));
-  console.log(`  Written to ${outputPath}`);
-  console.log(`  Total: ${totalWords} words`);
+  const outputPath = path.join(OUTPUT_DIR, `${langCode}.json`);
+  fs.writeFileSync(outputPath, JSON.stringify(data, null, 2));
+  console.log(`  Written to ${langCode}.json`);
+  console.log(`  Total: ${data._metadata.totalWords} words`);
 
-  // Sync audio files if requested
+  // Sync grammar features
+  syncGrammarFeaturesFromManifest(langCode, manifest);
+
+  // Sync audio if requested
   if (withAudio) {
-    await syncAudioFiles(langConfig.code);
+    await syncAudioFiles(langCode);
   }
 
-  return result;
+  return data;
 }
 
 // Global flag for force re-download
@@ -250,22 +372,28 @@ async function main() {
   forceAudio = args.includes('--force-audio');
   const langArgs = args.filter(arg => !arg.startsWith('--'));
 
+  // Fetch manifest
+  const manifest = await fetchManifest();
+  const availableLangs = Object.keys(manifest.languages);
+
   // Determine which languages to sync
   let langsToSync;
   if (langArgs.length === 0) {
-    langsToSync = Object.keys(LANGUAGES);
+    // Default: sync the languages used by the extension (de, es, fr)
+    // Add nb for Norwegian support
+    langsToSync = ['de', 'es', 'fr', 'nb'].filter(l => availableLangs.includes(l));
   } else {
-    langsToSync = langArgs.filter(arg => LANGUAGES[arg]);
+    langsToSync = langArgs.filter(arg => availableLangs.includes(arg));
     if (langsToSync.length === 0) {
       console.error(`Unknown language(s): ${langArgs.join(', ')}`);
-      console.error(`Available: ${Object.keys(LANGUAGES).join(', ')}`);
+      console.error(`Available: ${availableLangs.join(', ')}`);
       process.exit(1);
     }
   }
 
-  console.log('Papertek Vocabulary Sync');
-  console.log('========================');
-  console.log(`API: ${API_BASE}`);
+  console.log('\nPapertek Vocabulary Sync (v3)');
+  console.log('=============================');
+  console.log(`API: ${V3_API_BASE}`);
   console.log(`Languages: ${langsToSync.join(', ')}`);
   console.log(`Audio: ${withAudio ? 'Yes' : 'No (use --with-audio to include)'}`);
 
@@ -276,7 +404,7 @@ async function main() {
 
   // Sync each language
   for (const lang of langsToSync) {
-    await syncLanguage(LANGUAGES[lang], withAudio);
+    await syncLanguage(lang, manifest, withAudio);
   }
 
   console.log('\nDone!');
