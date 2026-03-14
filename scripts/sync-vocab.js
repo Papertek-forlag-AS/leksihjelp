@@ -79,10 +79,21 @@ async function fetchManifest() {
 }
 
 /**
- * Collect all word IDs from the v3 search endpoint by querying each letter.
- * Deduplicates results across queries.
+ * Collect all word IDs using the bulk list endpoint (preferred)
+ * or fall back to letter-by-letter search.
  */
 async function collectAllWordIds(langCode) {
+  // Try bulk list endpoint first
+  try {
+    const res = await fetchJson(`${V3_API_BASE}/v3/list/${langCode}`);
+    if (res.ids && res.ids.length > 0) {
+      return res.ids;
+    }
+  } catch {
+    console.log('  Bulk list not available, falling back to letter search...');
+  }
+
+  // Fallback: search by each letter
   const alphabet = 'abcdefghijklmnopqrstuvwxyzäöüáéíóúàèùâêîôûçñ'.split('');
   const allIds = new Set();
 
