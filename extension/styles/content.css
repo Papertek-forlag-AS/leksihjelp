@@ -405,6 +405,14 @@
   flex-shrink: 0;
 }
 
+#lexi-prediction-dropdown .lh-pred-typo {
+  font-size: 9px;
+  color: #f59e0b;
+  font-weight: 500;
+  font-style: italic;
+  margin-left: 4px;
+}
+
 #lexi-prediction-dropdown .lh-pred-translation {
   font-size: 11px;
   color: #94a3b8;

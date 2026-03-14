@@ -246,6 +246,35 @@
             });
           }
 
+          // Add known typos — when student types a common misspelling,
+          // suggest the correct word with high priority
+          if (entry.typos && Array.isArray(entry.typos)) {
+            for (const typo of entry.typos) {
+              wordList.push({
+                word: typo.toLowerCase(),
+                display: entry.word,  // Show the correct word
+                translation: translation,
+                type: 'typo',
+                bank: bank,
+                baseWord: entry.word
+              });
+            }
+          }
+
+          // Add accepted forms — alternative valid spellings
+          if (entry.acceptedForms && Array.isArray(entry.acceptedForms)) {
+            for (const form of entry.acceptedForms) {
+              wordList.push({
+                word: form.toLowerCase(),
+                display: form,
+                translation: `${entry.word} (${translation || ''})`,
+                type: 'accepted',
+                bank: bank,
+                baseWord: entry.word
+              });
+            }
+          }
+
           // Add conjugated verb forms
           if (bank === 'verbbank' && entry.conjugations) {
             for (const [tense, tenseData] of Object.entries(entry.conjugations)) {
@@ -724,6 +753,11 @@
   }
 
   function applyBoosts(entry, score, scored, pronounContext, hasModalVerb) {
+    // Typo matches: student typed a known misspelling → strongly boost the correction
+    if (entry.type === 'typo') {
+      score += 150;
+    }
+
     // Boost recently used words
     if (recentWordsSet.has(entry.word)) {
       score += 50;
@@ -816,9 +850,10 @@
 
     dropdown.innerHTML = suggestions.map((s, i) => {
       const posLabel = s.bank ? BANK_TO_POS_SHORT[s.bank] || '' : '';
+      const typoHint = s.type === 'typo' ? '<span class="lh-pred-typo">mente du?</span>' : '';
       return `
       <div class="lh-pred-item ${i === 0 ? 'selected' : ''}" data-word="${escapeAttr(s.display)}">
-        <span class="lh-pred-word">${escapeHtml(s.display)}</span>
+        <span class="lh-pred-word">${escapeHtml(s.display)}${typoHint}</span>
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
