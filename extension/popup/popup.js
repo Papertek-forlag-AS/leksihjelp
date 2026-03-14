@@ -255,8 +255,8 @@ function updateLangLabels() {
   const dirTargetNo = document.getElementById('dir-target-no');
   if (dirNoTarget && dirTargetNo) {
     if (currentLang === 'nn') {
-      dirNoTarget.innerHTML = `BM → <span class="target-lang-code">NN</span>`;
-      dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → BM`;
+      dirNoTarget.innerHTML = `NB → <span class="target-lang-code">NN</span>`;
+      dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → NB`;
     } else {
       dirNoTarget.innerHTML = `NO → <span class="target-lang-code">${code}</span>`;
       dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → NO`;
@@ -437,7 +437,26 @@ async function initGrammarSettings() {
  * Check if a grammar feature is enabled
  */
 function isFeatureEnabled(featureId) {
-  return enabledFeatures.has(featureId);
+  if (enabledFeatures.has(featureId)) return true;
+  // Also check language-specific variants (e.g., grammar_articles → grammar_nb_genus)
+  const langPrefix = `grammar_${currentLang}_`;
+  // Map generic feature IDs to language-specific equivalents
+  const genericToLangMap = {
+    'grammar_articles': [`${langPrefix}genus`],
+    'grammar_plural': [`${langPrefix}flertall`, `${langPrefix}fleirtal`],
+    'grammar_present': [`${langPrefix}presens`],
+    'grammar_preteritum': [`${langPrefix}preteritum`],
+    'grammar_perfektum': [`${langPrefix}perfektum`],
+    'grammar_comparative': [`${langPrefix}komparativ`],
+    'grammar_superlative': [`${langPrefix}superlativ`],
+    'grammar_noun_declension': [`${langPrefix}noun_forms`, `${langPrefix}bestemt_form`],
+    'grammar_adjective_declension': [`${langPrefix}adj_declension`],
+  };
+  const langIds = genericToLangMap[featureId];
+  if (langIds) {
+    return langIds.some(id => enabledFeatures.has(id));
+  }
+  return false;
 }
 
 /**
@@ -811,9 +830,9 @@ function renderVerbConjugations(entry) {
 
   // Map of conjugation keys to feature IDs and display names (supports multiple languages)
   const tenseConfig = [
-    { keys: ['presens', 'presente'], featureIds: ['grammar_present'], name: 'Presens' },
-    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito'], name: 'Preteritum' },
-    { keys: ['perfektum', 'perfecto'], featureIds: ['grammar_perfektum', 'grammar_perfecto'], name: 'Perfektum' }
+    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], name: 'Presens' },
+    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], name: 'Preteritum' },
+    { keys: ['perfektum', 'perfecto'], featureIds: ['grammar_perfektum', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], name: 'Perfektum' }
   ];
 
   for (const config of tenseConfig) {

@@ -83,7 +83,22 @@
   }
 
   function isFeatureEnabled(featureId) {
-    return enabledFeatures.size === 0 || enabledFeatures.has(featureId);
+    if (enabledFeatures.size === 0) return true;
+    if (enabledFeatures.has(featureId)) return true;
+    // Check language-specific variants
+    const langPrefix = `grammar_${currentLang}_`;
+    const genericToLangMap = {
+      'grammar_articles': [`${langPrefix}genus`],
+      'grammar_plural': [`${langPrefix}flertall`, `${langPrefix}fleirtal`],
+      'grammar_present': [`${langPrefix}presens`],
+      'grammar_preteritum': [`${langPrefix}preteritum`],
+      'grammar_perfektum': [`${langPrefix}perfektum`],
+      'grammar_comparative': [`${langPrefix}komparativ`],
+      'grammar_superlative': [`${langPrefix}superlativ`],
+    };
+    const langIds = genericToLangMap[featureId];
+    if (langIds) return langIds.some(id => enabledFeatures.has(id));
+    return false;
   }
 
   function getAllowedPronouns() {
