@@ -172,28 +172,48 @@ function buildLanguageData(langCode, entries, manifest, nbEntries = null) {
     // Remove _meta and _generatedFrom from the entry (extension doesn't need them)
     const { _meta, _generatedFrom, _enriched, ...cleanEntry } = entry;
 
-    // Extract translation from linkedTo for foreign languages (link to nb)
-    if (langCode !== 'nb' && langCode !== 'nn' && cleanEntry.linkedTo) {
-      const nbLink = cleanEntry.linkedTo.nb || cleanEntry.linkedTo.nn;
-      if (nbLink) {
-        // Resolve translation from linked Norwegian word
-        if (!cleanEntry.translation && nbLink.primary) {
-          // Look up the Norwegian entry to get the actual word
-          const nbWordId = nbLink.primary;
-          if (nbEntries && nbEntries[nbWordId]) {
-            cleanEntry.translation = nbEntries[nbWordId].word || null;
+    // Resolve translations from linkedTo
+    if (cleanEntry.linkedTo) {
+      if (langCode === 'nn') {
+        // Nynorsk → resolve translation from bokmål link
+        const nbLink = cleanEntry.linkedTo.nb;
+        if (nbLink?.primary && !cleanEntry.translation) {
+          if (nbEntries && nbEntries[nbLink.primary]) {
+            cleanEntry.translation = nbEntries[nbLink.primary].word || null;
           } else {
-            // Fallback: extract word from ID (e.g., "hus_noun" → "hus")
-            cleanEntry.translation = nbWordId.replace(/_[a-z]+$/, '');
+            cleanEntry.translation = nbLink.primary.replace(/_[a-z]+$/, '');
           }
         }
-        // Copy examples from link if entry doesn't have its own
-        if ((!cleanEntry.examples || cleanEntry.examples.length === 0) && nbLink.examples) {
+      } else if (langCode === 'en') {
+        // English → resolve translation from bokmål link
+        const nbLink = cleanEntry.linkedTo.nb || cleanEntry.linkedTo.nn;
+        if (nbLink?.primary && !cleanEntry.translation) {
+          if (nbEntries && nbEntries[nbLink.primary]) {
+            cleanEntry.translation = nbEntries[nbLink.primary].word || null;
+          } else {
+            cleanEntry.translation = nbLink.primary.replace(/_[a-z]+$/, '');
+          }
+        }
+        if ((!cleanEntry.examples || cleanEntry.examples.length === 0) && nbLink?.examples) {
           cleanEntry.examples = nbLink.examples;
         }
-        // Copy explanation from link
-        if (!cleanEntry.explanation && nbLink.explanation) {
-          cleanEntry.explanation = { _description: nbLink.explanation };
+      } else if (langCode !== 'nb') {
+        // Foreign languages (de, es, fr) → resolve from nb link
+        const nbLink = cleanEntry.linkedTo.nb || cleanEntry.linkedTo.nn;
+        if (nbLink) {
+          if (!cleanEntry.translation && nbLink.primary) {
+            if (nbEntries && nbEntries[nbLink.primary]) {
+              cleanEntry.translation = nbEntries[nbLink.primary].word || null;
+            } else {
+              cleanEntry.translation = nbLink.primary.replace(/_[a-z]+$/, '');
+            }
+          }
+          if ((!cleanEntry.examples || cleanEntry.examples.length === 0) && nbLink.examples) {
+            cleanEntry.examples = nbLink.examples;
+          }
+          if (!cleanEntry.explanation && nbLink.explanation) {
+            cleanEntry.explanation = { _description: nbLink.explanation };
+          }
         }
       }
     }
@@ -332,9 +352,9 @@ async function ensureNbEntries(manifest) {
 async function syncLanguage(langCode, manifest, withAudio = false) {
   console.log(`\nSyncing ${LANG_NAMES[langCode] || langCode} (${langCode})...`);
 
-  // For foreign languages, pre-fetch Norwegian entries for translation
+  // Pre-fetch Norwegian entries for translation resolution (all languages except nb itself)
   let nbEntries = null;
-  if (langCode !== 'nb' && langCode !== 'nn') {
+  if (langCode !== 'nb') {
     nbEntries = await ensureNbEntries(manifest);
   }
 
@@ -379,9 +399,8 @@ async function main() {
   // Determine which languages to sync
   let langsToSync;
   if (langArgs.length === 0) {
-    // Default: sync the languages used by the extension (de, es, fr)
-    // Add nb for Norwegian support
-    langsToSync = ['de', 'es', 'fr', 'nb'].filter(l => availableLangs.includes(l));
+    // Default: sync all languages used by the extension
+    langsToSync = ['de', 'es', 'fr', 'en', 'nb', 'nn'].filter(l => availableLangs.includes(l));
   } else {
     langsToSync = langArgs.filter(arg => availableLangs.includes(arg));
     if (langsToSync.length === 0) {

@@ -122,8 +122,10 @@ async function loadDictionary(lang) {
     inflectionIndex = buildInflectionIndex(allWords);
     updateLangLabels();
 
-    // Also load Norwegian dictionary for two-way lookups
-    if (lang !== 'nb' && lang !== 'nn') {
+    // Load Norwegian dictionary for two-way lookups
+    // For nn target: nb is the "source" language
+    // For other targets: nb provides reverse lookup
+    if (lang !== 'nb') {
       try {
         const nbUrl = chrome.runtime.getURL('data/nb.json');
         const nbRes = await fetch(nbUrl);
@@ -132,10 +134,12 @@ async function loadDictionary(lang) {
           nbWords = flattenBanks(nbDictionary);
         }
       } catch {
-        // nb.json not available — two-way lookups won't work, but that's OK
         nbDictionary = null;
         nbWords = [];
       }
+    } else {
+      nbDictionary = null;
+      nbWords = [];
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -245,6 +249,19 @@ function updateLangLabels() {
   document.querySelectorAll('.target-lang-code').forEach(el => {
     el.textContent = code;
   });
+
+  // Update direction button labels for special languages
+  const dirNoTarget = document.getElementById('dir-no-target');
+  const dirTargetNo = document.getElementById('dir-target-no');
+  if (dirNoTarget && dirTargetNo) {
+    if (currentLang === 'nn') {
+      dirNoTarget.innerHTML = `BM → <span class="target-lang-code">NN</span>`;
+      dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → BM`;
+    } else {
+      dirNoTarget.innerHTML = `NO → <span class="target-lang-code">${code}</span>`;
+      dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → NO`;
+    }
+  }
 }
 
 // ── Grammar Features ────────────────────────────────────────

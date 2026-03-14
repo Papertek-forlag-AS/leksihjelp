@@ -27,6 +27,11 @@
       { id: 'onwK4e9ZLuTAKqWW03F9', name: 'Henri (maskulin)' },
       { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Sophie (feminin)' }
     ],
+    en: [
+      { id: 'ThT5KcBeYPX3keUQqHPh', name: 'Emily (feminin)' },
+      { id: 'VR6AewLTigWG4xSOukaG', name: 'James (maskulin)' },
+      { id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Sophie (feminin)' }
+    ],
     no: [
       { id: '2dhHLsmg0MVma2t041qT', name: 'Johannes (maskulin)' },
       { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah (feminin)' },
@@ -39,6 +44,8 @@
     es: 'Spansk',
     de: 'Tysk',
     fr: 'Fransk',
+    en: 'Engelsk',
+    nn: 'Nynorsk',
     no: 'Norsk'
   };
 
@@ -47,7 +54,9 @@
     es: 'es',
     de: 'de',
     fr: 'fr',
-    no: 'nb' // Norwegian Bokmål
+    en: 'en',
+    nn: 'nb', // Nynorsk uses same voice as Bokmål
+    no: 'nb'
   };
 
   let widget = null;
