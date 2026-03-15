@@ -247,6 +247,32 @@ async function loadLanguageData(lang) {
   }
 }
 
+async function updateLanguageListStatus() {
+  const buttons = document.querySelectorAll('.lang-option');
+  for (const btn of buttons) {
+    const lang = btn.dataset.lang;
+    const statusEl = btn.querySelector('.lang-option-status');
+    const isBundled = BUNDLED_LANGUAGES.has(lang);
+    const isActive = lang === currentLang;
+
+    btn.classList.toggle('active', isActive);
+
+    if (isBundled) {
+      statusEl.textContent = '';
+      statusEl.className = 'lang-option-status';
+    } else if (window.__lexiVocabStore) {
+      const version = await window.__lexiVocabStore.getCachedVersion(lang);
+      if (version) {
+        statusEl.textContent = '';
+        statusEl.className = 'lang-option-status';
+      } else {
+        statusEl.textContent = 'last ned';
+        statusEl.className = 'lang-option-status needs-download';
+      }
+    }
+  }
+}
+
 function showDownloadStatus(lang, message) {
   const container = document.getElementById('search-results');
   if (!container) return;
@@ -1138,15 +1164,49 @@ async function initSettings() {
   const predEnabled = await chromeStorageGet('predictionEnabled');
   predictionToggle.checked = predEnabled !== false;
 
-  // Language change
-  langSelect.addEventListener('change', async () => {
-    currentLang = langSelect.value;
-    await chromeStorageSet({ language: currentLang });
-    await loadDictionary(currentLang);
-    await loadGrammarFeatures(currentLang);
-    initGrammarSettings(); // Rebuild grammar settings UI
-    // Notify content scripts
-    chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+  // Initialize language list with download status
+  await updateLanguageListStatus();
+
+  // Language list buttons
+  document.querySelectorAll('.lang-option').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const lang = btn.dataset.lang;
+      if (btn.classList.contains('downloading')) return;
+
+      // Update active state
+      document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Update hidden select for compat
+      langSelect.value = lang;
+
+      // If not cached and not bundled, show downloading state
+      const isBundled = BUNDLED_LANGUAGES.has(lang);
+      let needsDownload = false;
+      if (!isBundled && window.__lexiVocabStore) {
+        const cached = await window.__lexiVocabStore.getCachedVersion(lang);
+        needsDownload = !cached;
+      }
+
+      if (needsDownload) {
+        btn.classList.add('downloading');
+        const statusEl = btn.querySelector('.lang-option-status');
+        statusEl.textContent = 'Laster ned...';
+        statusEl.className = 'lang-option-status downloading';
+      }
+
+      // Switch language
+      currentLang = lang;
+      await chromeStorageSet({ language: currentLang });
+      await loadDictionary(currentLang);
+      await loadGrammarFeatures(currentLang);
+      initGrammarSettings();
+      chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+
+      // Update status after download completes
+      btn.classList.remove('downloading');
+      await updateLanguageListStatus();
+    });
   });
 
   // Access code verification

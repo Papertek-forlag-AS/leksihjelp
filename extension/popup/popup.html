@@ -113,9 +113,17 @@
       <div class="settings-group glass">
         <h3>Språk</h3>
         <p class="settings-note">Velg målspråk</p>
-        <select id="setting-language" class="glass-input">
-          <option value="es">Spansk</option>
+        <div id="language-list" class="language-list">
+          <button class="lang-option" data-lang="de"><span class="lang-option-flag">🇩🇪</span><span class="lang-option-name">Tysk</span><span class="lang-option-status"></span></button>
+          <button class="lang-option" data-lang="es"><span class="lang-option-flag">🇪🇸</span><span class="lang-option-name">Spansk</span><span class="lang-option-status"></span></button>
+          <button class="lang-option" data-lang="fr"><span class="lang-option-flag">🇫🇷</span><span class="lang-option-name">Fransk</span><span class="lang-option-status"></span></button>
+          <button class="lang-option" data-lang="en"><span class="lang-option-flag">🇬🇧</span><span class="lang-option-name">Engelsk</span><span class="lang-option-status"></span></button>
+          <button class="lang-option" data-lang="nn"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name">Nynorsk</span><span class="lang-option-status"></span></button>
+        </div>
+        <!-- Hidden select for backward compat -->
+        <select id="setting-language" class="hidden">
           <option value="de">Tysk</option>
+          <option value="es">Spansk</option>
           <option value="fr">Fransk</option>
           <option value="en">Engelsk</option>
           <option value="nn">Nynorsk</option>
