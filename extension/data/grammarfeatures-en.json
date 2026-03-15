@@ -1,7 +1,80 @@
 {
   "language": "English",
   "languageNative": "English",
-  "features": [],
+  "features": [
+    {
+      "id": "grammar_en_present",
+      "name": "Present Tense",
+      "nameEn": "Present Tense",
+      "description": "Nåtid — bøyning av verb i presens (I eat, he eats)",
+      "descriptionEn": "Present tense verb conjugations",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.present"
+    },
+    {
+      "id": "grammar_en_past",
+      "name": "Past Tense",
+      "nameEn": "Past Tense",
+      "description": "Fortid — enkel fortid (I ate, he went)",
+      "descriptionEn": "Simple past tense forms",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.past"
+    },
+    {
+      "id": "grammar_en_perfect",
+      "name": "Perfect Tense",
+      "nameEn": "Perfect Tense",
+      "description": "Perfektum — partisippformer (eaten, gone, written)",
+      "descriptionEn": "Past participle and present participle forms",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.perfect"
+    },
+    {
+      "id": "grammar_en_verb_class",
+      "name": "Verb Class",
+      "nameEn": "Verb Class",
+      "description": "Regelrett eller uregelrett verb",
+      "descriptionEn": "Regular or irregular verb",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "verbClass"
+    },
+    {
+      "id": "grammar_en_comparative",
+      "name": "Comparative",
+      "nameEn": "Comparative",
+      "description": "Komparativ form (bigger, more beautiful)",
+      "descriptionEn": "Comparative adjective forms",
+      "category": "adjectives",
+      "appliesTo": [
+        "adj"
+      ],
+      "dataPath": "comparison.comparative"
+    },
+    {
+      "id": "grammar_en_superlative",
+      "name": "Superlative",
+      "nameEn": "Superlative",
+      "description": "Superlativ form (biggest, most beautiful)",
+      "descriptionEn": "Superlative adjective forms",
+      "category": "adjectives",
+      "appliesTo": [
+        "adj"
+      ],
+      "dataPath": "comparison.superlative"
+    }
+  ],
   "categories": [
     {
       "id": "verbs",

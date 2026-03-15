@@ -86,7 +86,16 @@ function norwegianInfinitive(form) {
 
 // ── Bootstrap ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-  currentLang = (await chromeStorageGet('language')) || 'es';
+  currentLang = (await chromeStorageGet('language')) || null;
+
+  // Check if first-run (no language selected yet)
+  if (!currentLang) {
+    await initFirstRunPicker();
+  }
+
+  // If still no language after picker (skipped), default to bundled nb
+  if (!currentLang) currentLang = 'nb';
+
   await loadDictionary(currentLang);
   await loadGrammarFeatures(currentLang);
   initSearch();
@@ -98,6 +107,62 @@ document.addEventListener('DOMContentLoaded', async () => {
   initDarkMode();
   initAuth();
 });
+
+/**
+ * Show language picker for first-run users.
+ * Waits for student to pick a foreign language or skip.
+ */
+async function initFirstRunPicker() {
+  const picker = document.getElementById('language-picker');
+  if (!picker) return;
+
+  return new Promise((resolve) => {
+    picker.classList.remove('hidden');
+
+    // Language buttons
+    picker.querySelectorAll('.lang-pick-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const lang = btn.dataset.lang;
+
+        // Disable all buttons and show progress
+        picker.querySelectorAll('.lang-pick-btn').forEach(b => b.disabled = true);
+        document.getElementById('lang-pick-skip').classList.add('hidden');
+        const progress = document.getElementById('lang-pick-progress');
+        const status = document.getElementById('lang-pick-status');
+        progress.classList.remove('hidden');
+
+        try {
+          // Download the selected language
+          if (window.__lexiVocabStore) {
+            await window.__lexiVocabStore.downloadLanguage(lang, (p) => {
+              status.textContent = p.detail;
+            });
+          }
+
+          // Save selection
+          currentLang = lang;
+          await chromeStorageSet({ language: lang });
+          chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
+
+          picker.classList.add('hidden');
+          resolve();
+        } catch (err) {
+          console.error('Language download failed:', err);
+          status.textContent = 'Nedlasting feilet. Prøv igjen.';
+          picker.querySelectorAll('.lang-pick-btn').forEach(b => b.disabled = false);
+          document.getElementById('lang-pick-skip').classList.remove('hidden');
+          progress.classList.add('hidden');
+        }
+      });
+    });
+
+    // Skip button
+    document.getElementById('lang-pick-skip')?.addEventListener('click', () => {
+      picker.classList.add('hidden');
+      resolve();
+    });
+  });
+}
 
 // ── Storage helpers ────────────────────────────────────────
 function chromeStorageGet(key) {
@@ -140,35 +205,46 @@ async function loadDictionary(lang) {
   }
 }
 
+// Languages bundled in the extension ZIP (always available offline)
+const BUNDLED_LANGUAGES = new Set(['nb', 'nn', 'en']);
+
 /**
  * Load language data from IndexedDB (vocab store) or fall back to bundled file.
- * If not cached, triggers a download from the API.
+ * Foreign languages (de, es, fr) are downloaded on demand.
+ * NB, NN, EN are bundled but also cached in IndexedDB if downloaded from API.
  */
 async function loadLanguageData(lang) {
-  // Try IndexedDB first
+  // Try IndexedDB first (works for all languages)
   if (window.__lexiVocabStore) {
     const cached = await window.__lexiVocabStore.getCachedLanguage(lang);
     if (cached) return cached;
 
-    // Not cached — try to download
-    try {
-      showDownloadStatus(lang, 'Laster ned ordbok...');
-      const data = await window.__lexiVocabStore.downloadLanguage(lang, (progress) => {
-        showDownloadStatus(lang, progress.detail);
-      });
-      hideDownloadStatus();
-      return data;
-    } catch (err) {
-      console.warn(`Download failed for ${lang}, trying bundled file:`, err.message);
-      hideDownloadStatus();
+    // Not cached in IndexedDB — download from API if it's a foreign language
+    if (!BUNDLED_LANGUAGES.has(lang)) {
+      try {
+        showDownloadStatus(lang, 'Laster ned ordbok...');
+        const data = await window.__lexiVocabStore.downloadLanguage(lang, (progress) => {
+          showDownloadStatus(lang, progress.detail);
+        });
+        hideDownloadStatus();
+        return data;
+      } catch (err) {
+        console.warn(`Download failed for ${lang}:`, err.message);
+        hideDownloadStatus();
+        return null;
+      }
     }
   }
 
-  // Fall back to bundled file
-  const url = chrome.runtime.getURL(`data/${lang}.json`);
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  return res.json();
+  // Fall back to bundled file (nb, nn, en)
+  try {
+    const url = chrome.runtime.getURL(`data/${lang}.json`);
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
 function showDownloadStatus(lang, message) {

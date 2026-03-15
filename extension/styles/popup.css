@@ -157,6 +157,93 @@ body {
   display: none;
 }
 
+/* ── Language Picker (first-run) ── */
+.language-picker {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.language-picker.hidden {
+  display: none;
+}
+
+.language-picker-content {
+  padding: 24px;
+  max-width: 320px;
+  text-align: center;
+  width: 100%;
+}
+
+.language-picker-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--heading);
+}
+
+.language-picker-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.lang-pick-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+
+.lang-pick-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.lang-pick-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.lang-pick-flag {
+  font-size: 24px;
+}
+
+.lang-pick-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px;
+  text-decoration: underline;
+}
+
+.btn-link:hover {
+  color: var(--accent);
+}
+
 .pin-overlay-content {
   padding: 20px;
   max-width: 320px;

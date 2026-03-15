@@ -51,6 +51,32 @@
       </div>
     </div>
 
+    <!-- First-run language picker -->
+    <div id="language-picker" class="language-picker hidden">
+      <div class="language-picker-content glass">
+        <h3>Hvilket fremmedspråk lærer du?</h3>
+        <p class="settings-note">Ordboken lastes ned for bruk offline</p>
+        <div class="language-picker-buttons">
+          <button class="lang-pick-btn" data-lang="de">
+            <span class="lang-pick-flag">🇩🇪</span>
+            <span class="lang-pick-name">Tysk</span>
+          </button>
+          <button class="lang-pick-btn" data-lang="es">
+            <span class="lang-pick-flag">🇪🇸</span>
+            <span class="lang-pick-name">Spansk</span>
+          </button>
+          <button class="lang-pick-btn" data-lang="fr">
+            <span class="lang-pick-flag">🇫🇷</span>
+            <span class="lang-pick-name">Fransk</span>
+          </button>
+        </div>
+        <button id="lang-pick-skip" class="btn-link">Velg senere i innstillinger</button>
+        <div id="lang-pick-progress" class="hidden">
+          <p id="lang-pick-status">Laster ned...</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Main View: Dictionary -->
     <section id="view-dictionary" class="view active">
       <div class="search-container">
