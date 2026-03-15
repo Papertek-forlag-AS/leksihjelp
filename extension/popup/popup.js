@@ -249,6 +249,14 @@ async function loadLanguageData(lang) {
 }
 
 async function updateLanguageListStatus() {
+  // Fetch manifest for audio info
+  let manifest = null;
+  try {
+    if (window.__lexiVocabStore) {
+      manifest = await fetch(`${window.__lexiVocabStore.API_BASE}/v3/manifest`).then(r => r.json());
+    }
+  } catch { /* offline */ }
+
   const buttons = document.querySelectorAll('.lang-option');
   for (const btn of buttons) {
     const lang = btn.dataset.lang;
@@ -271,7 +279,65 @@ async function updateLanguageListStatus() {
         statusEl.className = 'lang-option-status needs-download';
       }
     }
+
+    // Audio button
+    const audioBtn = document.querySelector(`.lang-audio-btn[data-lang="${lang}"]`);
+    if (!audioBtn) continue;
+
+    const hasAudioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
+    if (!hasAudioEndpoint) {
+      audioBtn.classList.add('hidden');
+      continue;
+    }
+
+    audioBtn.classList.remove('hidden');
+    const hasAudio = await window.__lexiVocabStore?.hasAudioCached(lang);
+    if (hasAudio) {
+      audioBtn.textContent = '🔊 ✓';
+      audioBtn.className = 'lang-audio-btn downloaded';
+      audioBtn.title = 'Uttale lastet ned';
+    } else {
+      audioBtn.textContent = '🔊';
+      audioBtn.className = 'lang-audio-btn needs-download';
+      audioBtn.title = 'Last ned uttale';
+    }
   }
+
+  // Wire up audio download handlers
+  document.querySelectorAll('.lang-audio-btn').forEach(btn => {
+    // Remove old listeners by cloning
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const lang = newBtn.dataset.lang;
+      if (newBtn.classList.contains('downloaded') || newBtn.classList.contains('downloading')) return;
+
+      const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
+      if (!audioEndpoint || !window.__lexiVocabStore) return;
+
+      newBtn.classList.remove('needs-download');
+      newBtn.classList.add('downloading');
+      newBtn.textContent = '⏳';
+      newBtn.title = 'Laster ned...';
+
+      try {
+        await window.__lexiVocabStore.downloadAudioPack(lang, audioEndpoint, (p) => {
+          newBtn.title = p.detail;
+          if (p.percent) newBtn.textContent = `${p.percent}%`;
+        });
+        newBtn.textContent = '🔊 ✓';
+        newBtn.className = 'lang-audio-btn downloaded';
+        newBtn.title = 'Uttale lastet ned';
+      } catch (err) {
+        console.error('Audio download failed:', err);
+        newBtn.textContent = '🔊 ✗';
+        newBtn.className = 'lang-audio-btn needs-download';
+        newBtn.title = 'Nedlasting feilet — klikk for å prøve igjen';
+      }
+    });
+  });
 }
 
 function showDownloadStatus(lang, message) {
@@ -952,34 +1018,41 @@ function escapeHtml(str) {
 
 // ── Audio Playback ─────────────────────────────────────────
 /**
- * Get audio URL from filename (uses local bundled files)
+ * Play audio for a word — tries IndexedDB cache first, then bundled files
  */
-function getAudioUrl(audioFilename) {
-  if (!dictionary || !dictionary._metadata || !audioFilename) return null;
-  const lang = dictionary._metadata.language;
-  // Use locally bundled audio files
-  return chrome.runtime.getURL(`audio/${lang}/${audioFilename}`);
-}
-
-/**
- * Play audio for a word
- */
-function playAudio(audioFilename, button) {
+async function playAudio(audioFilename, button) {
   // Stop any currently playing audio
   if (currentAudio) {
     currentAudio.pause();
     currentAudio = null;
-    // Reset all play buttons
     document.querySelectorAll('.audio-btn.playing').forEach(btn => {
       btn.classList.remove('playing');
       btn.innerHTML = getPlayIcon();
     });
   }
 
-  const url = getAudioUrl(audioFilename);
-  if (!url) return;
+  if (!audioFilename || !dictionary?._metadata) return;
+  const lang = dictionary._metadata.language;
 
-  currentAudio = new Audio(url);
+  // Try IndexedDB first
+  let audioUrl = null;
+  if (window.__lexiVocabStore) {
+    const blob = await window.__lexiVocabStore.getAudioFile(lang, audioFilename);
+    if (blob) {
+      audioUrl = URL.createObjectURL(blob);
+    }
+  }
+
+  // Fall back to bundled file
+  if (!audioUrl) {
+    try {
+      audioUrl = chrome.runtime.getURL(`audio/${lang}/${audioFilename}`);
+    } catch {
+      return;
+    }
+  }
+
+  currentAudio = new Audio(audioUrl);
 
   button.classList.add('playing');
   button.innerHTML = getPauseIcon();

@@ -14,19 +14,24 @@
   'use strict';
 
   const API_BASE = 'https://papertek-vocabulary.vercel.app/api/vocab';
+  const SITE_BASE = 'https://papertek-vocabulary.vercel.app';
   const DB_NAME = 'leksihjelp-vocab';
-  const DB_VERSION = 1;
-  const STORE_NAME = 'languages';
+  const DB_VERSION = 2;
+  const STORE_LANGUAGES = 'languages';
+  const STORE_AUDIO = 'audio'; // key: "{lang}/{filename}", value: Blob
 
   // ── IndexedDB helpers ──
 
   function openDB() {
     return new Promise((resolve, reject) => {
       const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = () => {
+      req.onupgradeneeded = (event) => {
         const db = req.result;
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'language' });
+        if (!db.objectStoreNames.contains(STORE_LANGUAGES)) {
+          db.createObjectStore(STORE_LANGUAGES, { keyPath: 'language' });
+        }
+        if (!db.objectStoreNames.contains(STORE_AUDIO)) {
+          db.createObjectStore(STORE_AUDIO);
         }
       };
       req.onsuccess = () => resolve(req.result);
@@ -34,37 +39,46 @@
     });
   }
 
-  function dbGet(db, key) {
+  function dbGet(db, key, store = STORE_LANGUAGES) {
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).get(key);
+      const tx = db.transaction(store, 'readonly');
+      const req = tx.objectStore(store).get(key);
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => reject(req.error);
     });
   }
 
-  function dbPut(db, record) {
+  function dbPut(db, record, store = STORE_LANGUAGES) {
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const req = tx.objectStore(STORE_NAME).put(record);
+      const tx = db.transaction(store, 'readwrite');
+      const req = tx.objectStore(store).put(record);
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
     });
   }
 
-  function dbGetAll(db) {
+  function dbPutKV(db, key, value, store) {
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).getAll();
+      const tx = db.transaction(store, 'readwrite');
+      const req = tx.objectStore(store).put(value, key);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function dbGetAll(db, store = STORE_LANGUAGES) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(store, 'readonly');
+      const req = tx.objectStore(store).getAll();
       req.onsuccess = () => resolve(req.result || []);
       req.onerror = () => reject(req.error);
     });
   }
 
-  function dbDelete(db, key) {
+  function dbDelete(db, key, store = STORE_LANGUAGES) {
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      const req = tx.objectStore(STORE_NAME).delete(key);
+      const tx = db.transaction(store, 'readwrite');
+      const req = tx.objectStore(store).delete(key);
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
     });
@@ -256,9 +270,192 @@
     }
   }
 
+  // ── Audio Pack Management ──
+
+  /**
+   * Check if audio is cached for a language.
+   */
+  async function hasAudioCached(lang) {
+    try {
+      const db = await openDB();
+      const record = await dbGet(db, lang);
+      db.close();
+      return !!record?.audioVersion;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get a single audio file blob from cache.
+   */
+  async function getAudioFile(lang, filename) {
+    try {
+      const db = await openDB();
+      const key = `${lang}/${filename}`;
+      const blob = await dbGet(db, key, STORE_AUDIO);
+      db.close();
+      return blob || null;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Download audio pack ZIP, extract, and store each MP3 in IndexedDB.
+   *
+   * @param {string} lang - Language code
+   * @param {string} zipUrl - URL of the ZIP file (from manifest audioEndpoint)
+   * @param {function} [onProgress] - Progress callback ({ status, detail, percent })
+   * @returns {number} Number of audio files stored
+   */
+  async function downloadAudioPack(lang, zipUrl, onProgress) {
+    onProgress?.({ status: 'downloading', detail: 'Laster ned lyd...', percent: 0 });
+
+    // Download ZIP
+    const res = await fetch(`${SITE_BASE}${zipUrl}`);
+    if (!res.ok) throw new Error(`Audio download failed: ${res.status}`);
+
+    const arrayBuffer = await res.arrayBuffer();
+    onProgress?.({ status: 'extracting', detail: 'Pakker ut lydfiler...', percent: 30 });
+
+    // Parse ZIP and decompress all files
+    const files = parseZip(new Uint8Array(arrayBuffer));
+    if (files._decompressPromises?.length) {
+      await Promise.all(files._decompressPromises);
+    }
+    // Filter out failed decompressions
+    const validFiles = files.filter(f => f.data);
+    const totalFiles = validFiles.length;
+
+    onProgress?.({ status: 'saving', detail: `Lagrer ${totalFiles} lydfiler...`, percent: 50 });
+
+    // Store each MP3 in IndexedDB
+    const db = await openDB();
+    const tx = db.transaction(STORE_AUDIO, 'readwrite');
+    const store = tx.objectStore(STORE_AUDIO);
+
+    let saved = 0;
+    for (const file of validFiles) {
+      if (!file.name.endsWith('.mp3')) continue;
+      const key = `${lang}/${file.name}`;
+      const blob = new Blob([file.data], { type: 'audio/mpeg' });
+      store.put(blob, key);
+      saved++;
+
+      if (saved % 100 === 0) {
+        const pct = 50 + Math.round((saved / totalFiles) * 50);
+        onProgress?.({ status: 'saving', detail: `Lagrer lydfiler (${saved}/${totalFiles})...`, percent: pct });
+      }
+    }
+
+    await new Promise((resolve, reject) => {
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+
+    // Update the language record with audio version
+    const manifest = await fetch(`${API_BASE}/v3/manifest`).then(r => r.json()).catch(() => null);
+    const audioVersion = manifest?.languages?.[lang]?.audioVersion || 'unknown';
+
+    const langRecord = await dbGet(db, lang);
+    if (langRecord) {
+      langRecord.audioVersion = audioVersion;
+      langRecord.audioFileCount = saved;
+      await dbPut(db, langRecord);
+    }
+
+    db.close();
+
+    onProgress?.({ status: 'done', detail: `${saved} lydfiler lagret!`, percent: 100 });
+    return saved;
+  }
+
+  /**
+   * Minimal ZIP parser — extracts file names and uncompressed data.
+   * Handles STORE (no compression) and DEFLATE (most common).
+   */
+  function parseZip(data) {
+    const files = [];
+    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
+    let offset = 0;
+
+    while (offset < data.length - 4) {
+      const sig = view.getUint32(offset, true);
+      if (sig !== 0x04034b50) break; // Not a local file header
+
+      const compressionMethod = view.getUint16(offset + 8, true);
+      const compressedSize = view.getUint32(offset + 18, true);
+      const uncompressedSize = view.getUint32(offset + 22, true);
+      const nameLen = view.getUint16(offset + 26, true);
+      const extraLen = view.getUint16(offset + 28, true);
+
+      const nameBytes = data.slice(offset + 30, offset + 30 + nameLen);
+      const name = new TextDecoder().decode(nameBytes);
+
+      const dataStart = offset + 30 + nameLen + extraLen;
+      const compressedData = data.slice(dataStart, dataStart + compressedSize);
+
+      let fileData;
+      if (compressionMethod === 0) {
+        // STORE — no compression
+        fileData = compressedData;
+      } else if (compressionMethod === 8) {
+        // DEFLATE — use DecompressionStream
+        fileData = null; // Will decompress async below
+        files.push({ name, compressedData, uncompressedSize, needsDeflate: true });
+        offset = dataStart + compressedSize;
+        continue;
+      } else {
+        // Unsupported compression — skip
+        offset = dataStart + compressedSize;
+        continue;
+      }
+
+      files.push({ name, data: fileData });
+      offset = dataStart + compressedSize;
+    }
+
+    // Decompress DEFLATE files using DecompressionStream
+    const decompressPromises = files
+      .filter(f => f.needsDeflate)
+      .map(async (f) => {
+        try {
+          const ds = new DecompressionStream('raw');
+          const writer = ds.writable.getWriter();
+          writer.write(f.compressedData);
+          writer.close();
+          const reader = ds.readable.getReader();
+          const chunks = [];
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+          }
+          const totalLen = chunks.reduce((sum, c) => sum + c.length, 0);
+          const result = new Uint8Array(totalLen);
+          let pos = 0;
+          for (const chunk of chunks) {
+            result.set(chunk, pos);
+            pos += chunk.length;
+          }
+          f.data = result;
+          delete f.needsDeflate;
+          delete f.compressedData;
+        } catch {
+          // Decompression failed — remove from list
+          f.data = null;
+        }
+      });
+
+    // Return a promise that resolves when all decompression is done
+    // But since parseZip is called synchronously, we need to handle this differently
+    // Actually, let's make downloadAudioPack await this
+    files._decompressPromises = decompressPromises;
+    return files;
+  }
+
   // ── Expose API ──
-  // In content scripts, this runs in the page context but IndexedDB
-  // accesses the extension's origin when loaded as a content script.
   window.__lexiVocabStore = {
     getCachedLanguage,
     getCachedGrammarFeatures,
@@ -268,6 +465,10 @@
     checkForUpdate,
     getLanguage,
     deleteLanguage,
-    API_BASE
+    hasAudioCached,
+    getAudioFile,
+    downloadAudioPack,
+    API_BASE,
+    SITE_BASE
   };
 })();
