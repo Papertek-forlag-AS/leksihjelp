@@ -309,6 +309,33 @@ body {
   color: var(--accent);
 }
 
+.lang-option-row {
+  display: flex;
+  gap: 4px;
+}
+
+.lang-option-row .lang-option {
+  flex: 1;
+}
+
+.lang-delete-btn {
+  padding: 0 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.4);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.lang-delete-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
 .pin-overlay-content {
   padding: 20px;
   max-width: 320px;

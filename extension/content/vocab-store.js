@@ -271,12 +271,28 @@
   }
 
   /**
-   * Delete a cached language pack.
+   * Delete a cached language pack and its audio files.
    */
   async function deleteLanguage(lang) {
     try {
       const db = await openDB();
+      // Delete vocab record
       await dbDelete(db, lang);
+      // Delete all audio files for this language
+      const tx = db.transaction(STORE_AUDIO, 'readwrite');
+      const store = tx.objectStore(STORE_AUDIO);
+      const cursorReq = store.openCursor();
+      await new Promise((resolve, reject) => {
+        cursorReq.onsuccess = () => {
+          const cursor = cursorReq.result;
+          if (!cursor) { resolve(); return; }
+          if (cursor.key.startsWith(`${lang}/`)) {
+            cursor.delete();
+          }
+          cursor.continue();
+        };
+        cursorReq.onerror = () => reject(cursorReq.error);
+      });
       db.close();
     } catch {
       // Ignore

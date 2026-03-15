@@ -258,21 +258,56 @@ async function updateLanguageListStatus() {
 
     btn.classList.toggle('active', isActive);
 
+    // Delete button (only for downloaded non-bundled languages)
+    const deleteBtn = document.querySelector(`.lang-delete-btn[data-lang="${lang}"]`);
+
     if (isBundled) {
       statusEl.textContent = '';
       statusEl.className = 'lang-option-status';
+      if (deleteBtn) deleteBtn.classList.add('hidden');
     } else if (window.__lexiVocabStore) {
       const version = await window.__lexiVocabStore.getCachedVersion(lang);
       if (version) {
         const hasAudio = await window.__lexiVocabStore.hasAudioCached(lang);
         statusEl.textContent = hasAudio ? '🔊' : '';
         statusEl.className = 'lang-option-status';
+        if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
         statusEl.textContent = 'last ned';
         statusEl.className = 'lang-option-status needs-download';
+        if (deleteBtn) deleteBtn.classList.add('hidden');
       }
     }
   }
+
+  // Wire up delete handlers
+  document.querySelectorAll('.lang-delete-btn').forEach(btn => {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const lang = newBtn.dataset.lang;
+      const langName = LANG_SHORT[lang] || lang;
+
+      if (!confirm(`Vil du slette ${langName}? Ordbok og lydfiler fjernes. Du kan laste ned igjen senere.`)) return;
+
+      await window.__lexiVocabStore?.deleteLanguage(lang);
+
+      // If this was the active language, switch to English
+      if (currentLang === lang) {
+        currentLang = 'en';
+        await chromeStorageSet({ language: currentLang });
+        await loadDictionary(currentLang);
+        await loadGrammarFeatures(currentLang);
+        initGrammarSettings();
+        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+      }
+
+      await updateLanguageListStatus();
+      buildLangSwitcher();
+    });
+  });
 }
 
 function showDownloadStatus(lang, message) {
