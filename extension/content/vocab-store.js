@@ -201,7 +201,7 @@
 
     onProgress?.({ status: 'saving', detail: 'Lagrer...' });
 
-    // Store in IndexedDB
+    // Store vocab in IndexedDB
     const version = data._metadata?.version || null;
     const db = await openDB();
     await dbPut(db, {
@@ -212,6 +212,19 @@
       cachedAt: new Date().toISOString()
     });
     db.close();
+
+    // Also download audio pack if available
+    try {
+      const manifest = await fetch(`${API_BASE}/v3/manifest`).then(r => r.json());
+      const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
+      if (audioEndpoint) {
+        onProgress?.({ status: 'downloading_audio', detail: 'Laster ned uttale...' });
+        await downloadAudioPack(lang, audioEndpoint, onProgress);
+      }
+    } catch (err) {
+      // Audio download failed — vocab still works, just no offline pronunciation
+      console.warn(`Audio download failed for ${lang}:`, err.message);
+    }
 
     onProgress?.({ status: 'done', detail: 'Ferdig!' });
 

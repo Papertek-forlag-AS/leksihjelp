@@ -249,14 +249,6 @@ async function loadLanguageData(lang) {
 }
 
 async function updateLanguageListStatus() {
-  // Fetch manifest for audio info
-  let manifest = null;
-  try {
-    if (window.__lexiVocabStore) {
-      manifest = await fetch(`${window.__lexiVocabStore.API_BASE}/v3/manifest`).then(r => r.json());
-    }
-  } catch { /* offline */ }
-
   const buttons = document.querySelectorAll('.lang-option');
   for (const btn of buttons) {
     const lang = btn.dataset.lang;
@@ -272,72 +264,15 @@ async function updateLanguageListStatus() {
     } else if (window.__lexiVocabStore) {
       const version = await window.__lexiVocabStore.getCachedVersion(lang);
       if (version) {
-        statusEl.textContent = '';
+        const hasAudio = await window.__lexiVocabStore.hasAudioCached(lang);
+        statusEl.textContent = hasAudio ? '🔊' : '';
         statusEl.className = 'lang-option-status';
       } else {
         statusEl.textContent = 'last ned';
         statusEl.className = 'lang-option-status needs-download';
       }
     }
-
-    // Audio button
-    const audioBtn = document.querySelector(`.lang-audio-btn[data-lang="${lang}"]`);
-    if (!audioBtn) continue;
-
-    const hasAudioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
-    if (!hasAudioEndpoint) {
-      audioBtn.classList.add('hidden');
-      continue;
-    }
-
-    audioBtn.classList.remove('hidden');
-    const hasAudio = await window.__lexiVocabStore?.hasAudioCached(lang);
-    if (hasAudio) {
-      audioBtn.textContent = '🔊 ✓';
-      audioBtn.className = 'lang-audio-btn downloaded';
-      audioBtn.title = 'Uttale lastet ned';
-    } else {
-      audioBtn.textContent = '🔊';
-      audioBtn.className = 'lang-audio-btn needs-download';
-      audioBtn.title = 'Last ned uttale';
-    }
   }
-
-  // Wire up audio download handlers
-  document.querySelectorAll('.lang-audio-btn').forEach(btn => {
-    // Remove old listeners by cloning
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-
-    newBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const lang = newBtn.dataset.lang;
-      if (newBtn.classList.contains('downloaded') || newBtn.classList.contains('downloading')) return;
-
-      const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
-      if (!audioEndpoint || !window.__lexiVocabStore) return;
-
-      newBtn.classList.remove('needs-download');
-      newBtn.classList.add('downloading');
-      newBtn.textContent = '⏳';
-      newBtn.title = 'Laster ned...';
-
-      try {
-        await window.__lexiVocabStore.downloadAudioPack(lang, audioEndpoint, (p) => {
-          newBtn.title = p.detail;
-          if (p.percent) newBtn.textContent = `${p.percent}%`;
-        });
-        newBtn.textContent = '🔊 ✓';
-        newBtn.className = 'lang-audio-btn downloaded';
-        newBtn.title = 'Uttale lastet ned';
-      } catch (err) {
-        console.error('Audio download failed:', err);
-        newBtn.textContent = '🔊 ✗';
-        newBtn.className = 'lang-audio-btn needs-download';
-        newBtn.title = 'Nedlasting feilet — klikk for å prøve igjen';
-      }
-    });
-  });
 }
 
 function showDownloadStatus(lang, message) {
