@@ -1256,20 +1256,27 @@ async function initSettings() {
       const lang = btn.dataset.lang;
       if (btn.classList.contains('downloading')) return;
 
-      // Update active state
-      document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Update hidden select for compat
-      langSelect.value = lang;
-
-      // If not cached and not bundled, show downloading state
+      // Check if download is needed
       const isBundled = BUNDLED_LANGUAGES.has(lang);
       let needsDownload = false;
       if (!isBundled && window.__lexiVocabStore) {
         const cached = await window.__lexiVocabStore.getCachedVersion(lang);
         needsDownload = !cached;
       }
+
+      // Confirm download if needed
+      if (needsDownload) {
+        const langName = LANG_SHORT[lang] || lang;
+        const confirmed = confirm(
+          `${langName} er ikke lastet ned ennå.\n\nDette laster ned ordbok og uttale (~30–50 MB).\n\nVil du fortsette?`
+        );
+        if (!confirmed) return;
+      }
+
+      // Update active state
+      document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      langSelect.value = lang;
 
       if (needsDownload) {
         btn.classList.add('downloading');
