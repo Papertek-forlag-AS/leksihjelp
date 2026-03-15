@@ -676,6 +676,79 @@ function initSearch() {
 
   // Focus search on open
   input.focus();
+
+  // Build language switcher
+  buildLangSwitcher();
+}
+
+const LANG_FLAGS = { de: '🇩🇪', es: '🇪🇸', fr: '🇫🇷', en: '🇬🇧', nn: '🇳🇴', nb: '🇳🇴' };
+const LANG_SHORT = { de: 'Tysk', es: 'Spansk', fr: 'Fransk', en: 'Engelsk', nn: 'Nynorsk', nb: 'Bokmål' };
+
+async function buildLangSwitcher() {
+  const container = document.getElementById('lang-switcher');
+  if (!container) return;
+
+  // Collect available languages: bundled + downloaded
+  const available = [];
+
+  // Bundled languages are always available
+  for (const lang of BUNDLED_LANGUAGES) {
+    available.push(lang);
+  }
+
+  // Check IndexedDB for downloaded languages
+  if (window.__lexiVocabStore) {
+    const cached = await window.__lexiVocabStore.listCachedLanguages();
+    for (const c of cached) {
+      if (!available.includes(c.language)) {
+        available.push(c.language);
+      }
+    }
+  }
+
+  // Sort: current language first, then alphabetically
+  available.sort((a, b) => {
+    if (a === currentLang) return -1;
+    if (b === currentLang) return 1;
+    return (LANG_SHORT[a] || a).localeCompare(LANG_SHORT[b] || b);
+  });
+
+  container.innerHTML = available.map(lang => `
+    <button class="lang-switch-btn ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">
+      <span class="lang-switch-flag">${LANG_FLAGS[lang] || ''}</span>
+      ${LANG_SHORT[lang] || lang.toUpperCase()}
+    </button>
+  `).join('');
+
+  // Click handlers
+  container.querySelectorAll('.lang-switch-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const lang = btn.dataset.lang;
+      if (lang === currentLang) return;
+
+      // Update active state
+      container.querySelectorAll('.lang-switch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Switch language
+      currentLang = lang;
+      await chromeStorageSet({ language: currentLang });
+      await loadDictionary(currentLang);
+      await loadGrammarFeatures(currentLang);
+      initGrammarSettings();
+      updateLangLabels();
+      chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+
+      // Re-run search if there's a query
+      const input = document.getElementById('search-input');
+      if (input?.value.trim()) performSearch(input.value.trim());
+
+      // Update settings list too
+      const langSelect = document.getElementById('setting-language');
+      if (langSelect) langSelect.value = currentLang;
+      updateLanguageListStatus();
+    });
+  });
 }
 
 function performSearch(query) {
@@ -1281,7 +1354,10 @@ function initNav() {
   });
 
   settingsBtn.addEventListener('click', () => showView('settings'));
-  settingsBackBtn.addEventListener('click', () => showView('dictionary'));
+  settingsBackBtn.addEventListener('click', () => {
+    showView('dictionary');
+    buildLangSwitcher(); // Refresh in case a new language was downloaded
+  });
 }
 
 // ── Pin (Fest) Button ──────────────────────────────────────

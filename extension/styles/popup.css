@@ -399,6 +399,50 @@ body {
   color: var(--text);
 }
 
+/* ── Language Switcher (front page) ── */
+.lang-switcher {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px 0;
+}
+
+.lang-switcher:empty {
+  display: none;
+}
+
+.lang-switch-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.lang-switch-btn:hover {
+  background: rgba(17, 180, 154, 0.05);
+  border-color: rgba(17, 180, 154, 0.2);
+}
+
+.lang-switch-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.lang-switch-flag {
+  font-size: 14px;
+}
+
 .search-direction {
   display: flex;
   overflow: hidden;
