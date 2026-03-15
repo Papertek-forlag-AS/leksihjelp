@@ -926,12 +926,17 @@
 
   // ── Inline dictionary lookup (context menu) ──
   async function showInlineLookup(word) {
-    // Load dictionary if not cached
+    // Load dictionary from vocab store or bundled file
     let dict = null;
     try {
-      const url = chrome.runtime.getURL(`data/${currentLang}.json`);
-      const res = await fetch(url);
-      dict = await res.json();
+      if (window.__lexiVocabStore) {
+        dict = await window.__lexiVocabStore.getCachedLanguage(currentLang);
+      }
+      if (!dict) {
+        const url = chrome.runtime.getURL(`data/${currentLang}.json`);
+        const res = await fetch(url);
+        dict = await res.json();
+      }
     } catch { return; }
 
     const q = word.toLowerCase().trim();

@@ -69,11 +69,23 @@
 
   async function loadGrammarFeatures(lang) {
     try {
+      // Try vocab store first
+      if (window.__lexiVocabStore) {
+        const cached = await window.__lexiVocabStore.getCachedGrammarFeatures(lang);
+        if (cached) {
+          grammarFeatures = cached;
+          if (enabledFeatures.size === 0 && grammarFeatures?.features) {
+            enabledFeatures = new Set(grammarFeatures.features.map(f => f.id));
+          }
+          return;
+        }
+      }
+
+      // Fall back to bundled file
       const url = chrome.runtime.getURL(`data/grammarfeatures-${lang}.json`);
       const res = await fetch(url);
       grammarFeatures = await res.json();
 
-      // If no stored features, default to all enabled
       if (enabledFeatures.size === 0 && grammarFeatures?.features) {
         enabledFeatures = new Set(grammarFeatures.features.map(f => f.id));
       }
@@ -225,9 +237,19 @@
   // ── Word list ──
   async function loadWordList(lang) {
     try {
-      const url = chrome.runtime.getURL(`data/${lang}.json`);
-      const res = await fetch(url);
-      const data = await res.json();
+      let data = null;
+
+      // Try vocab store first
+      if (window.__lexiVocabStore) {
+        data = await window.__lexiVocabStore.getCachedLanguage(lang);
+      }
+
+      // Fall back to bundled file
+      if (!data) {
+        const url = chrome.runtime.getURL(`data/${lang}.json`);
+        const res = await fetch(url);
+        data = await res.json();
+      }
 
       // Flatten bank-based structure into prediction entries
       wordList = [];

@@ -114,25 +114,19 @@ function chromeStorageSet(obj) {
 // ── Dictionary loading ─────────────────────────────────────
 async function loadDictionary(lang) {
   try {
-    const url = chrome.runtime.getURL(`data/${lang}.json`);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Dictionary load failed: ${res.status}`);
-    dictionary = await res.json();
+    // Try vocab store (IndexedDB) first, fall back to bundled file
+    dictionary = await loadLanguageData(lang);
+    if (!dictionary) throw new Error('No dictionary data');
+
     allWords = flattenBanks(dictionary);
     inflectionIndex = buildInflectionIndex(allWords);
     updateLangLabels();
 
     // Load Norwegian dictionary for two-way lookups
-    // For nn target: nb is the "source" language
-    // For other targets: nb provides reverse lookup
     if (lang !== 'nb') {
       try {
-        const nbUrl = chrome.runtime.getURL('data/nb.json');
-        const nbRes = await fetch(nbUrl);
-        if (nbRes.ok) {
-          nbDictionary = await nbRes.json();
-          nbWords = flattenBanks(nbDictionary);
-        }
+        nbDictionary = await loadLanguageData('nb');
+        nbWords = nbDictionary ? flattenBanks(nbDictionary) : [];
       } catch {
         nbDictionary = null;
         nbWords = [];
@@ -144,6 +138,54 @@ async function loadDictionary(lang) {
   } catch (e) {
     console.error('Failed to load dictionary:', e);
   }
+}
+
+/**
+ * Load language data from IndexedDB (vocab store) or fall back to bundled file.
+ * If not cached, triggers a download from the API.
+ */
+async function loadLanguageData(lang) {
+  // Try IndexedDB first
+  if (window.__lexiVocabStore) {
+    const cached = await window.__lexiVocabStore.getCachedLanguage(lang);
+    if (cached) return cached;
+
+    // Not cached — try to download
+    try {
+      showDownloadStatus(lang, 'Laster ned ordbok...');
+      const data = await window.__lexiVocabStore.downloadLanguage(lang, (progress) => {
+        showDownloadStatus(lang, progress.detail);
+      });
+      hideDownloadStatus();
+      return data;
+    } catch (err) {
+      console.warn(`Download failed for ${lang}, trying bundled file:`, err.message);
+      hideDownloadStatus();
+    }
+  }
+
+  // Fall back to bundled file
+  const url = chrome.runtime.getURL(`data/${lang}.json`);
+  const res = await fetch(url);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+function showDownloadStatus(lang, message) {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+  const langNames = { de: 'Tysk', es: 'Spansk', fr: 'Fransk', en: 'Engelsk', nb: 'Norsk bokmål', nn: 'Nynorsk' };
+  container.innerHTML = `
+    <div class="results-placeholder">
+      <p style="font-weight:600;">${langNames[lang] || lang}</p>
+      <p>${message}</p>
+    </div>`;
+}
+
+function hideDownloadStatus() {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+  container.innerHTML = '<div class="results-placeholder"><p>Skriv et ord for å søke i ordboken</p></div>';
 }
 
 /**
@@ -327,6 +369,24 @@ async function saveAndNotifyGrammarChange() {
 
 async function loadGrammarFeatures(lang) {
   try {
+    // Try vocab store first (grammar features are embedded in language pack)
+    if (window.__lexiVocabStore) {
+      const cached = await window.__lexiVocabStore.getCachedGrammarFeatures(lang);
+      if (cached) {
+        grammarFeatures = cached;
+        // Load enabled features from storage, default to all enabled
+        const stored = await chromeStorageGet('enabledGrammarFeatures');
+        if (stored && stored[lang]) {
+          enabledFeatures = new Set(stored[lang]);
+        } else {
+          const basicPreset = grammarFeatures.presets?.find(p => p.id === 'basic');
+          enabledFeatures = basicPreset ? getPresetFeatures(basicPreset) : new Set(grammarFeatures.features.map(f => f.id));
+        }
+        return;
+      }
+    }
+
+    // Fall back to bundled file
     const url = chrome.runtime.getURL(`data/grammarfeatures-${lang}.json`);
     const res = await fetch(url);
     grammarFeatures = await res.json();
