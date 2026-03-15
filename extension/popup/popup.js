@@ -93,8 +93,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initFirstRunPicker();
   }
 
-  // If still no language after picker (skipped), default to English
-  if (!currentLang) currentLang = 'en';
+  // If still no language after picker (skipped), or if nb was set, default to English
+  // NB is the source language, not a valid target
+  if (!currentLang || currentLang === 'nb') currentLang = 'en';
 
   await loadDictionary(currentLang);
   await loadGrammarFeatures(currentLang);
@@ -691,8 +692,9 @@ async function buildLangSwitcher() {
   // Collect available languages: bundled + downloaded
   const available = [];
 
-  // Bundled languages are always available
+  // Bundled languages are always available (except nb which is the source language)
   for (const lang of BUNDLED_LANGUAGES) {
+    if (lang === 'nb') continue; // NB is always the source, not a target
     available.push(lang);
   }
 
