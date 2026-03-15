@@ -93,8 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initFirstRunPicker();
   }
 
-  // If still no language after picker (skipped), default to bundled nb
-  if (!currentLang) currentLang = 'nb';
+  // If still no language after picker (skipped), default to English
+  if (!currentLang) currentLang = 'en';
 
   await loadDictionary(currentLang);
   await loadGrammarFeatures(currentLang);

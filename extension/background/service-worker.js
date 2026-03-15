@@ -14,8 +14,8 @@ chrome.runtime.onInstalled.addListener((details) => {
   // Set defaults
   chrome.storage.local.get(['language'], (result) => {
     if (!result.language) {
+      // Don't set a default language — let the popup show the first-run picker
       chrome.storage.local.set({
-        language: 'es',
         predictionEnabled: true,
         isAuthenticated: false
       });

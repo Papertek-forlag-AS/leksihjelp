@@ -16,7 +16,7 @@
   let activeElement = null;
   let selectedIndex = -1;
   let enabled = true;
-  let currentLang = 'es';
+  let currentLang = 'en';
   let enabledFeatures = new Set(); // Grammar features enabled by user
   let grammarFeatures = null; // Grammar features metadata
   let lexiPaused = false; // Global pause state
@@ -30,7 +30,7 @@
 
   async function init() {
     const stored = await chromeStorageGet(['language', 'predictionEnabled', 'enabledGrammarFeatures', 'lexiPaused']);
-    currentLang = stored.language || 'es';
+    currentLang = stored.language || 'en';
     enabled = stored.predictionEnabled !== false;
     lexiPaused = stored.lexiPaused || false;
 

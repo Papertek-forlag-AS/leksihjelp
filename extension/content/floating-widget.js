@@ -63,7 +63,7 @@
   let currentAudio = null;
   let currentUtterance = null;
   let isAuthenticated = false;
-  let currentLang = 'es'; // Target language (from settings)
+  let currentLang = 'en'; // Target language (from settings)
   let selectedText = '';
   let readingLang = 'target'; // 'target' or 'no' - which language to read aloud
   let widgetWordSpans = []; // DOM span references for each word in the widget text area
@@ -86,7 +86,7 @@
   async function init() {
     const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize', 'fontSizeMode']);
     isAuthenticated = stored.isAuthenticated || false;
-    currentLang = stored.language || 'es';
+    currentLang = stored.language || 'en';
     lexiPaused = stored.lexiPaused || false;
     widgetFontSize = stored.widgetFontSize || FONT_SIZE_DEFAULT;
     fontSizeMode = stored.fontSizeMode || 'auto';
