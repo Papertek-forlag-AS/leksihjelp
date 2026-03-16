@@ -546,6 +546,7 @@
 
     const totalDuration = audio.duration;
     const totalChars = wordCharPositions.reduce((sum, w) => sum + w.word.length, 0);
+    if (totalChars === 0 || !totalDuration) return;
 
     // Pre-calculate the time range for each word based on character proportion
     let charsSoFar = 0;

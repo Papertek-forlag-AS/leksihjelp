@@ -711,9 +711,11 @@ function initSearch() {
   const dirNoTarget = document.getElementById('dir-no-target');
   const dirTargetNo = document.getElementById('dir-target-no');
 
+  let searchDebounceTimer;
   input.addEventListener('input', () => {
     clearBtn.classList.toggle('hidden', !input.value);
-    performSearch(input.value.trim());
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => performSearch(input.value.trim()), 150);
   });
 
   clearBtn.addEventListener('click', () => {

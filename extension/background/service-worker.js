@@ -63,22 +63,17 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (!tab?.id) return;
 
   if (info.menuItemId === 'lexi-lookup') {
-    // Open popup with the word — since we can't programmatically open popup,
-    // store the word and open a small window, or send to content script
-    chrome.storage.local.set({ pendingLookup: info.selectionText });
-    // Open the popup by simulating action click is not possible in MV3,
-    // so we'll send a message to the content script to show an inline result
     chrome.tabs.sendMessage(tab.id, {
       type: 'LOOKUP_WORD',
       word: info.selectionText
-    });
+    }).catch(() => {});
   }
 
   if (info.menuItemId === 'lexi-tts') {
     chrome.tabs.sendMessage(tab.id, {
       type: 'PLAY_TTS',
       text: info.selectionText
-    });
+    }).catch(() => {});
   }
 
   if (info.menuItemId === 'lexi-toggle-predictions') {
@@ -215,7 +210,12 @@ async function handleTtsFetch(url, headers, body) {
 }
 
 // ── Vipps login (runs in service worker to survive popup close) ──
+let vippsLoginInProgress = false;
 async function handleVippsLogin() {
+  if (vippsLoginInProgress) {
+    return { success: false, error: 'Login already in progress' };
+  }
+  vippsLoginInProgress = true;
   try {
     const redirectUrl = chrome.identity.getRedirectURL('vipps');
     const authUrl = `${BACKEND_URL}/api/auth/vipps-login?source=extension&redirect_uri=${encodeURIComponent(redirectUrl)}`;
@@ -269,6 +269,8 @@ async function handleVippsLogin() {
     return { success: true, user };
   } catch (err) {
     return { success: false, error: err.message };
+  } finally {
+    vippsLoginInProgress = false;
   }
 }
 
