@@ -655,7 +655,7 @@
 
       <!-- Logged out -->
       <div id="web-logged-out">
-        <p style="margin-bottom: 16px; color: rgba(255,255,255,0.7);">Logg inn med Vipps for å administrere abonnementet
+        <p style="margin-bottom: 16px; color: var(--text-secondary);">Logg inn med Vipps for å administrere abonnementet
           ditt og få tilgang til naturlig uttale med ElevenLabs.</p>
         <a href="/api/auth/vipps-login?source=web" class="vipps-btn"
           style="display:inline-flex;align-items:center;gap:10px;background:#ff5b24;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-size:1.1rem;font-weight:700;transition:opacity 0.2s;">
@@ -667,18 +667,18 @@
       <div id="web-logged-in" style="display:none;">
         <div style="margin-bottom:12px;">
           <div id="web-user-name" style="font-size:1.2rem;font-weight:700;"></div>
-          <div id="web-user-email" style="font-size:0.9rem;color:rgba(255,255,255,0.5);"></div>
+          <div id="web-user-email" style="font-size:0.9rem;color:var(--text-secondary);"></div>
         </div>
         <div id="web-sub-badge"
           style="display:inline-block;font-size:0.85rem;font-weight:600;padding:4px 12px;border-radius:12px;margin-bottom:12px;">
         </div>
         <div id="web-usage" style="display:none;margin-bottom:12px;">
           <div
-            style="display:flex;justify-content:space-between;font-size:0.85rem;color:rgba(255,255,255,0.5);margin-bottom:4px;">
+            style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-secondary);margin-bottom:4px;">
             <span>Gjenstående uttale</span>
             <span id="web-usage-text"></span>
           </div>
-          <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+          <div style="height:6px;background:rgba(11,62,68,0.1);border-radius:3px;overflow:hidden;">
             <div id="web-usage-bar" style="height:100%;background:#22c55e;border-radius:3px;transition:width 0.3s;">
             </div>
           </div>
@@ -697,7 +697,7 @@
             mnd (ubrukte tegn samles opp til sommerferien)</p>
         </div>
         <button id="web-logout-btn"
-          style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:8px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">Logg
+          style="background:var(--bg-alt);border:1px solid var(--card-border);color:var(--text-primary);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">Logg
           ut</button>
       </div>
     </div>
@@ -750,7 +750,7 @@
     </div>
 
     <div class="card"
-      style="text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0.2) 100%);">
+      style="text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.03) 100%);">
       <h2>Veien videre</h2>
       <p style="margin-bottom: 24px;">Vi jobber kontinuerlig med å forbedre Leksihjelp. Vil du vite mer om våre
         fremtidsplaner med ny ordbank og smarte anonyme stavekontroller?</p>
