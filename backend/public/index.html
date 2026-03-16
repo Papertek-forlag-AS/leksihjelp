@@ -14,7 +14,7 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
 
     :root {
@@ -111,11 +111,6 @@
       overflow: hidden;
     }
 
-    .card:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border-color: rgba(17, 180, 154, 0.3);
-    }
-
     /* Small decorative accent on cards */
     .card::before {
       content: '';
@@ -129,8 +124,15 @@
       transition: opacity 0.2s ease;
     }
 
-    .card:hover::before {
-      opacity: 1;
+    @media (hover: hover) {
+      .card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: rgba(17, 180, 154, 0.3);
+      }
+
+      .card:hover::before {
+        opacity: 1;
+      }
     }
 
     h2 {
@@ -389,11 +391,13 @@
       transition: transform 0.2s, background-color 0.2s;
     }
 
-    .feature:hover {
-      transform: translateY(-2px);
-      background: #ffffff;
-      border-color: rgba(17, 180, 154, 0.3);
-      box-shadow: 0 4px 12px rgba(11, 62, 68, 0.05);
+    @media (hover: hover) {
+      .feature:hover {
+        transform: translateY(-2px);
+        background: #ffffff;
+        border-color: rgba(17, 180, 154, 0.3);
+        box-shadow: 0 4px 12px rgba(11, 62, 68, 0.05);
+      }
     }
 
     .feature-icon {
@@ -451,11 +455,13 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
-    .github-link:hover {
-      background: var(--bg-alt);
-      border-color: var(--accent);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px rgba(17, 180, 154, 0.1);
+    @media (hover: hover) {
+      .github-link:hover {
+        background: var(--bg-alt);
+        border-color: var(--accent);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(17, 180, 154, 0.1);
+      }
     }
 
     .btn-secondary {
@@ -528,7 +534,7 @@
 <body>
   <div class="container">
     <header>
-      <div class="logo">📚</div>
+      <div class="logo" aria-hidden="true">📚</div>
       <h1>Leksihjelp</h1>
       <p class="tagline">Ordbok, uttale og ordforslag for norske elever — rett i nettleseren</p>
 
@@ -586,32 +592,32 @@
       <h2>Funksjoner</h2>
       <div class="features-grid">
         <div class="feature">
-          <div class="feature-icon">📖</div>
+          <div class="feature-icon" aria-hidden="true">📖</div>
           <div class="feature-title">Toveis ordbok</div>
           <div class="feature-desc">Søk opp ord med bøyninger, kjønn og oversettelser. Søk begge veier mellom norsk og fremmedspråk</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">🔊</div>
+          <div class="feature-icon" aria-hidden="true">🔊</div>
           <div class="feature-title">Uttale med ordsynk</div>
           <div class="feature-desc">Hør naturlig uttale med AI-stemmer. Hvert ord utheves mens det leses opp</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">✨</div>
+          <div class="feature-icon" aria-hidden="true">✨</div>
           <div class="feature-title">Ordforslag</div>
           <div class="feature-desc">Smart autofullfør med stavekontroll som forstår skrivefeil</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">📝</div>
+          <div class="feature-icon" aria-hidden="true">📝</div>
           <div class="feature-title">Grammatikk</div>
           <div class="feature-desc">Velg hvilke grammatiske former du vil se. Tilpass til ditt nivå</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">📦</div>
+          <div class="feature-icon" aria-hidden="true">📦</div>
           <div class="feature-title">Språkpakker</div>
           <div class="feature-desc">Last ned ordbok og uttale-lyd for offline bruk. Fungerer uten nett</div>
         </div>
         <div class="feature">
-          <div class="feature-icon">⌨️</div>
+          <div class="feature-icon" aria-hidden="true">⌨️</div>
           <div class="feature-title">Hurtigtaster</div>
           <div class="feature-desc">Slå opp ord og les tekst høyt med tastatursnarveier og høyreklikkmeny</div>
         </div>
@@ -684,7 +690,8 @@
         <a href="https://github.com/Papertek-forlag-AS/leksihjelp/releases/latest/download/lexi-extension.zip"
           class="btn-secondary" download="lexi-extension.zip">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
           Last ned ZIP
         </a>
