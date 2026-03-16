@@ -490,36 +490,6 @@
       transform: translateY(-2px);
     }
 
-    /* Important overrides for inline styles in HTML */
-    #web-subscribe-btn {
-      background: var(--charcoal-blue) !important;
-      border: 1px solid var(--charcoal-blue) !important;
-    }
-
-    #web-subscribe-btn:hover {
-      background: var(--dark-teal) !important;
-    }
-
-    #web-subscribe-yearly-btn {
-      background: transparent !important;
-      border: 1px solid var(--accent) !important;
-      color: var(--charcoal-blue) !important;
-    }
-
-    #web-subscribe-yearly-btn:hover {
-      background: rgba(17, 180, 154, 0.05) !important;
-    }
-
-    .vipps-btn {
-      background-color: #ff5b24 !important;
-      box-shadow: 0 4px 12px rgba(255, 91, 36, 0.2) !important;
-    }
-
-    .vipps-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(255, 91, 36, 0.3) !important;
-    }
-
     @media (max-width: 768px) {
       .features-grid {
         grid-template-columns: repeat(2, 1fr);
@@ -681,54 +651,18 @@
     </div>
 
     <div class="card" id="account-card">
-      <h2>Min konto</h2>
-
-      <!-- Logged out -->
-      <div id="web-logged-out">
-        <p style="margin-bottom: 16px; color: var(--text-secondary);">Logg inn med Vipps for å administrere abonnementet
-          ditt og få tilgang til naturlig uttale med ElevenLabs.</p>
-        <a href="/api/auth/vipps-login?source=web" class="vipps-btn"
-          style="display:inline-flex;align-items:center;gap:10px;background:#ff5b24;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-size:1.1rem;font-weight:700;transition:opacity 0.2s;">
-          Logg inn med Vipps
-        </a>
-      </div>
-
-      <!-- Logged in -->
-      <div id="web-logged-in" style="display:none;">
-        <div style="margin-bottom:12px;">
-          <div id="web-user-name" style="font-size:1.2rem;font-weight:700;"></div>
-          <div id="web-user-email" style="font-size:0.9rem;color:var(--text-secondary);"></div>
+      <h2>Premium uttale med Vipps</h2>
+      <p>Logg inn med Vipps direkte i utvidelsen for å abonnere på naturlig uttale med ElevenLabs AI-stemmer.
+        Alt av ordbok, ordforslag og grammatikk fungerer helt gratis uten innlogging.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:20px;padding:16px;background:var(--bg-alt);border-radius:12px;border:1px solid var(--card-border);">
+        <svg viewBox="0 0 355 355" width="32" height="32" aria-label="Vipps" role="img" style="flex-shrink:0;">
+          <rect width="355" height="355" rx="78" fill="#FF5B24"/>
+          <path d="M97.34 158.44c6.83 13.18 16.58 24.16 27.66 33.06 15.25 12.21 33.37 20.76 52.43 24.5 11.42 2.23 23.3 2.7 34.81.73 6.18-1.06 12.63-3.03 17.06-7.6 3.39-3.49 5-8.43 4.6-13.28-.42-5.14-3.05-9.83-6.6-13.47-7.15-7.34-17.32-10.93-27.27-12.32-12.87-1.8-26.08-.26-38.56 3.48-8.34 2.5-16.29 6.16-23.49 10.96-2.39 1.59-5.45-.37-4.79-3.11 2.2-9.13 5.46-18.09 10.4-26.12 5.72-9.3 13.6-17.15 22.88-22.88 8.6-5.3 18.3-8.67 28.24-9.75 10.97-1.19 22.12.15 32.47 4 10.68 3.98 20.2 10.58 27.54 19.15 7.85 9.16 13.04 20.44 14.87 32.35 1.97 12.84.32 26.1-4.72 38.12-4.71 11.23-12.62 21.13-22.34 28.52-10.5 7.99-22.96 13.01-35.82 14.95-14.29 2.16-29 .79-42.62-3.85-26.72-9.12-49.82-27.7-64.59-51.14-7.6-12.06-13.08-25.36-15.88-39.37-.74-3.7 4.04-5.91 6.37-2.57.83 1.2 1.73 2.37 2.53 3.62l3.02 4.62Z" fill="#fff"/>
+        </svg>
+        <div>
+          <div style="font-weight:700;color:var(--heading-color);font-size:0.95rem;">Innlogging og abonnement</div>
+          <div style="font-size:0.85rem;color:var(--text-secondary);">Administreres i Leksihjelp-utvidelsen etter installasjon</div>
         </div>
-        <div id="web-sub-badge"
-          style="display:inline-block;font-size:0.85rem;font-weight:600;padding:4px 12px;border-radius:12px;margin-bottom:12px;">
-        </div>
-        <div id="web-usage" style="display:none;margin-bottom:12px;">
-          <div
-            style="display:flex;justify-content:space-between;font-size:0.85rem;color:var(--text-secondary);margin-bottom:4px;">
-            <span>Gjenstående uttale</span>
-            <span id="web-usage-text"></span>
-          </div>
-          <div style="height:6px;background:rgba(11,62,68,0.1);border-radius:3px;overflow:hidden;">
-            <div id="web-usage-bar" style="height:100%;background:#22c55e;border-radius:3px;transition:width 0.3s;">
-            </div>
-          </div>
-          <div style="font-size:0.75rem;color:var(--text-secondary);margin-top:4px;">Ubrukte tegn samles opp til sommerferien</div>
-        </div>
-        <div id="web-subscribe-section" style="display:none;margin-bottom:12px;">
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="#" id="web-subscribe-btn"
-              style="display:inline-flex;align-items:center;gap:8px;background:var(--charcoal-blue);color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Abonner
-              — 49 kr/mnd (Vipps)</a>
-            <a href="#" id="web-subscribe-yearly-btn"
-              style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--accent);color:var(--charcoal-blue);text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">Betal
-              490 kr/år (Vipps)</a>
-          </div>
-          <p style="margin-top:6px;font-size:0.85rem;color:var(--text-secondary);">Inkl. 50 000 tegn naturlig uttale per
-            mnd (ubrukte tegn samles opp til sommerferien)</p>
-        </div>
-        <button id="web-logout-btn"
-          style="background:var(--bg-alt);border:1px solid var(--card-border);color:var(--text-primary);padding:8px 20px;border-radius:8px;cursor:pointer;font-size:0.9rem;">Logg
-          ut</button>
       </div>
     </div>
 
@@ -806,142 +740,6 @@
         til Leksihjelp er lisensiert under MIT-lisensen.</p>
     </footer>
   </div>
-  <script>
-    // Handle OAuth callback and account management
-    (function () {
-      const API = '';  // Same origin
-
-      // Check for token in URL (from Vipps callback)
-      const params = new URLSearchParams(window.location.search);
-      const tokenFromUrl = params.get('token');
-      const loginError = params.get('login_error');
-
-      if (tokenFromUrl) {
-        localStorage.setItem('lexi_token', tokenFromUrl);
-        // Clean URL
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      if (loginError) {
-        console.error('Login error:', loginError);
-        window.history.replaceState({}, '', window.location.pathname);
-      }
-
-      // Check session on load
-      const token = localStorage.getItem('lexi_token');
-      if (token) {
-        checkSession(token);
-      }
-
-      async function checkSession(token) {
-        try {
-          const res = await fetch(`${API}/api/auth/session`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-
-          if (!res.ok) {
-            if (res.status === 401) localStorage.removeItem('lexi_token');
-            return;
-          }
-
-          const data = await res.json();
-          showLoggedIn(data.user);
-        } catch {
-          // Offline — keep cached
-        }
-      }
-
-      function showLoggedIn(user) {
-        document.getElementById('web-logged-out').style.display = 'none';
-        document.getElementById('web-logged-in').style.display = 'block';
-        document.getElementById('web-user-name').textContent = user.name || '';
-        document.getElementById('web-user-email').textContent = user.email || '';
-
-        const badge = document.getElementById('web-sub-badge');
-        if (user.subscriptionStatus === 'active') {
-          badge.textContent = 'Aktivt abonnement';
-          badge.style.background = 'rgba(34,197,94,0.15)';
-          badge.style.color = '#15803d';
-          // Show usage — remaining balance
-          const usageDiv = document.getElementById('web-usage');
-          usageDiv.style.display = 'block';
-          const balance = user.quotaBalance ?? 0;
-          const maxBal = user.quotaMaxBalance || 500000;
-          const pct = Math.min(100, (balance / maxBal) * 100);
-          document.getElementById('web-usage-text').textContent =
-            `${balance.toLocaleString('nb-NO')} tegn`;
-          const bar = document.getElementById('web-usage-bar');
-          bar.style.width = pct + '%';
-          // Color: green → orange → red based on remaining
-          if (balance < 2000) bar.style.background = '#ef4444';
-          else if (balance < 10000) bar.style.background = '#f59e0b';
-          else bar.style.background = '#22c55e';
-        } else if (user.subscriptionStatus === 'pending') {
-          badge.textContent = 'Abonnement venter';
-          badge.style.background = 'rgba(245,158,11,0.15)';
-          badge.style.color = '#b45309';
-        } else {
-          badge.textContent = 'Ikke abonnert';
-          badge.style.background = 'rgba(107,114,128,0.15)';
-          badge.style.color = '#4b5563';
-          document.getElementById('web-subscribe-section').style.display = 'block';
-        }
-      }
-
-      // Logout
-      document.getElementById('web-logout-btn')?.addEventListener('click', () => {
-        localStorage.removeItem('lexi_token');
-        document.getElementById('web-logged-out').style.display = 'block';
-        document.getElementById('web-logged-in').style.display = 'none';
-      });
-
-      // Subscribe (Vipps monthly)
-      document.getElementById('web-subscribe-btn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('lexi_token');
-        if (!token) return;
-        try {
-          const res = await fetch(`${API}/api/auth/subscribe`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          const data = await res.json();
-          if (data.vippsConfirmationUrl) {
-            window.location.href = data.vippsConfirmationUrl;
-          }
-        } catch (err) {
-          console.error('Subscribe error:', err);
-        }
-      });
-
-      // Subscribe (Vipps yearly)
-      document.getElementById('web-subscribe-yearly-btn')?.addEventListener('click', async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('lexi_token');
-        if (!token) return;
-        try {
-          const res = await fetch(`${API}/api/auth/subscribe`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ plan: 'yearly' })
-          });
-          const data = await res.json();
-          if (data.vippsConfirmationUrl) {
-            window.location.href = data.vippsConfirmationUrl;
-          }
-        } catch (err) {
-          console.error('Yearly subscribe error:', err);
-        }
-      });
-    })();
-  </script>
 </body>
 
 </html>
