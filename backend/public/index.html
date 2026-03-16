@@ -4,11 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gratis nettleserutvidelse for norske elever som lærer tysk, spansk, fransk og engelsk. Ordbok, uttale og ordforslag rett i nettleseren.">
+  <meta property="og:title" content="Leksihjelp - Språkhjelp for elever">
+  <meta property="og:description" content="Gratis nettleserutvidelse med ordbok, uttale og ordforslag for norske elever som lærer fremmedspråk.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://leksihjelp.no">
   <title>Leksihjelp - Språkhjelp for elever</title>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
     :root {
       /* Papertek Brand Colors */
@@ -215,11 +222,12 @@
       border: 1px solid var(--card-border);
     }
 
-    .install-steps h3 {
-      color: var(--heading-color);
-      margin-bottom: 16px;
-      font-size: 1.1rem;
-      font-weight: 600;
+    .install-steps summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .install-steps[open] .install-arrow {
+      transform: rotate(90deg);
     }
 
     .install-steps ol {
@@ -533,6 +541,25 @@
         gap: 20px;
       }
     }
+
+    @media (max-width: 480px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .tagline {
+        font-size: 1.05rem;
+      }
+
+      .languages {
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+    }
   </style>
 </head>
 
@@ -638,16 +665,19 @@
 
       <p class="version">Versjon 2.0.0 &bull; Fungerer i Chrome, Edge og Brave</p>
 
-      <div class="install-steps">
-        <h3>Slik installerer du ZIP manuelt:</h3>
-        <ol>
+      <details class="install-steps">
+        <summary style="cursor:pointer;font-family:'Montserrat',sans-serif;font-weight:600;font-size:1.1rem;color:var(--heading-color);list-style:none;display:flex;align-items:center;gap:8px;">
+          <span class="install-arrow" style="transition:transform 0.2s;display:inline-block;">&#9654;</span>
+          Slik installerer du ZIP manuelt
+        </summary>
+        <ol style="margin-top:16px;">
           <li>Last ned og pakk ut ZIP-filen</li>
           <li>Åpne Chrome og gå til <code>chrome://extensions</code></li>
           <li>Slå på <strong>Utviklermodus</strong> (øverst til høyre)</li>
           <li>Klikk <strong>Last inn upakket</strong></li>
           <li>Velg mappen du pakket ut</li>
         </ol>
-      </div>
+      </details>
     </div>
 
     <div class="card" id="account-card">
@@ -752,8 +782,9 @@
     <div class="card"
       style="text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.03) 100%);">
       <h2>Veien videre</h2>
-      <p style="margin-bottom: 24px;">Vi jobber kontinuerlig med å forbedre Leksihjelp. Vil du vite mer om våre
-        fremtidsplaner med ny ordbank og smarte anonyme stavekontroller?</p>
+      <p style="margin-bottom: 24px;">Vi jobber med en utvidet ordbank som inkluderer vanlige skrivefeil og akseptable
+        alternative svar — spesielt nyttig for elever med dysleksi. Vi planlegger også anonyme databidrag
+        slik at Leksihjelp kan bli smartere over tid.</p>
       <a href="/fremtidsplaner" class="github-link"
         style="display: inline-flex; justify-content: center; background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600;">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
@@ -831,7 +862,7 @@
         if (user.subscriptionStatus === 'active') {
           badge.textContent = 'Aktivt abonnement';
           badge.style.background = 'rgba(34,197,94,0.15)';
-          badge.style.color = '#4ade80';
+          badge.style.color = '#15803d';
           // Show usage — remaining balance
           const usageDiv = document.getElementById('web-usage');
           usageDiv.style.display = 'block';
@@ -849,11 +880,11 @@
         } else if (user.subscriptionStatus === 'pending') {
           badge.textContent = 'Abonnement venter';
           badge.style.background = 'rgba(245,158,11,0.15)';
-          badge.style.color = '#fbbf24';
+          badge.style.color = '#b45309';
         } else {
           badge.textContent = 'Ikke abonnert';
           badge.style.background = 'rgba(107,114,128,0.15)';
-          badge.style.color = '#9ca3af';
+          badge.style.color = '#4b5563';
           document.getElementById('web-subscribe-section').style.display = 'block';
         }
       }
