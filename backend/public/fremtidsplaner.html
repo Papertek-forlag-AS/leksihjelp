@@ -10,16 +10,13 @@
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
 
     :root {
       /* Papertek Brand Colors */
       --digital-teal: #11B49A;
       --dark-gray: #3B3B3B;
-      --soft-lime: #D6F07D;
-      --mint: #7CC7A6;
-      --light-teal: #25E085;
       --dark-teal: #0F6A75;
       --charcoal-blue: #0B3E44;
 
@@ -34,6 +31,10 @@
       --accent: var(--digital-teal);
       --accent-hover: var(--dark-teal);
       --success: var(--digital-teal);
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     * {
@@ -118,11 +119,13 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
 
-    .back-link:hover {
-      background: var(--bg-alt);
-      border-color: var(--accent);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 6px rgba(17, 180, 154, 0.1);
+    @media (hover: hover) {
+      .back-link:hover {
+        background: var(--bg-alt);
+        border-color: var(--accent);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(17, 180, 154, 0.1);
+      }
     }
 
     /* ── Glassmorphism cards ── */
@@ -135,11 +138,6 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       position: relative;
-    }
-
-    .glass:hover {
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      border-color: rgba(17, 180, 154, 0.3);
     }
 
     /* Small decorative accent on cards */
@@ -157,8 +155,15 @@
       border-bottom-left-radius: 16px;
     }
 
-    .glass:hover::before {
-      opacity: 1;
+    @media (hover: hover) {
+      .glass:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: rgba(17, 180, 154, 0.3);
+      }
+
+      .glass:hover::before {
+        opacity: 1;
+      }
     }
 
     /* ── Scroll reveal animation ── */
@@ -300,11 +305,13 @@
       transition: all 0.2s;
     }
 
-    .lang-card:hover {
-      background: #ffffff;
-      transform: translateY(-2px);
-      border-color: rgba(17, 180, 154, 0.3);
-      box-shadow: 0 4px 12px rgba(11, 62, 68, 0.05);
+    @media (hover: hover) {
+      .lang-card:hover {
+        background: #ffffff;
+        transform: translateY(-2px);
+        border-color: rgba(17, 180, 154, 0.3);
+        box-shadow: 0 4px 12px rgba(11, 62, 68, 0.05);
+      }
     }
 
     .lang-card .flag {
@@ -475,7 +482,7 @@
 
   <div class="container">
     <header>
-      <div class="logo">📚</div>
+      <div class="logo" aria-hidden="true">📚</div>
       <h1>Fremtidsplaner</h1>
       <p class="tagline">Hva vi har levert og hva vi jobber med videre</p>
       <a href="/" class="back-link">
@@ -497,32 +504,32 @@
 
       <div class="lang-grid">
         <div class="lang-card stagger">
-          <div class="flag">🇳🇴</div>
+          <div class="flag" aria-hidden="true">🇳🇴</div>
           <div class="name">Bokmål</div>
           <div class="code">BM</div>
         </div>
         <div class="lang-card stagger">
-          <div class="flag">🇳🇴</div>
+          <div class="flag" aria-hidden="true">🇳🇴</div>
           <div class="name">Nynorsk</div>
           <div class="code">NN</div>
         </div>
         <div class="lang-card stagger">
-          <div class="flag">🇩🇪</div>
+          <div class="flag" aria-hidden="true">🇩🇪</div>
           <div class="name">Tysk</div>
           <div class="code">DE</div>
         </div>
         <div class="lang-card stagger">
-          <div class="flag">🇬🇧</div>
+          <div class="flag" aria-hidden="true">🇬🇧</div>
           <div class="name">Engelsk</div>
           <div class="code">EN</div>
         </div>
         <div class="lang-card stagger">
-          <div class="flag">🇫🇷</div>
+          <div class="flag" aria-hidden="true">🇫🇷</div>
           <div class="name">Fransk</div>
           <div class="code">FR</div>
         </div>
         <div class="lang-card stagger">
-          <div class="flag">🇪🇸</div>
+          <div class="flag" aria-hidden="true">🇪🇸</div>
           <div class="name">Spansk</div>
           <div class="code">ES</div>
         </div>

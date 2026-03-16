@@ -3,9 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Salgsbetingelser for Leksihjelp premium-uttale abonnement fra Papertek Forlag AS.">
   <title>Salgsbetingelser — Leksihjelp</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --digital-teal: #11B49A;
+      --dark-gray: #3B3B3B;
+      --dark-teal: #0F6A75;
+      --charcoal-blue: #0B3E44;
+
+      --bg-color: #ffffff;
+      --bg-alt: #f9fafb;
+      --card-bg: #ffffff;
+      --card-border: rgba(11, 62, 68, 0.1);
+      --text-primary: var(--dark-gray);
+      --text-secondary: #6b7280;
+      --heading-color: var(--charcoal-blue);
+      --accent: var(--digital-teal);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,67 +37,80 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: var(--bg-color);
       min-height: 100vh;
-      color: #fff;
+      color: var(--text-primary);
       line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--heading-color);
     }
 
     .container {
       max-width: 800px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 48px;
     }
 
-    header a {
-      color: rgba(255, 255, 255, 0.5);
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-
-    header a:hover {
-      color: #a78bfa;
-    }
-
-    h1 {
+    header h1 {
       font-size: 2.2rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
     }
 
     .subtitle {
-      color: rgba(255, 255, 255, 0.5);
+      color: var(--text-secondary);
       font-size: 0.9rem;
     }
 
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--charcoal-blue);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      margin-bottom: 24px;
+      transition: color 0.2s;
+    }
+
+    @media (hover: hover) {
+      .back-link:hover {
+        color: var(--accent);
+      }
+    }
+
     .card {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
       border-radius: 16px;
       padding: 30px;
       margin-bottom: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     }
 
     h2 {
       font-size: 1.3rem;
+      font-weight: 700;
       margin-bottom: 14px;
-      color: #a78bfa;
+      color: var(--heading-color);
     }
 
     p {
       margin-bottom: 12px;
-      color: rgba(255, 255, 255, 0.85);
+      color: var(--text-secondary);
     }
 
     ul {
@@ -83,16 +120,18 @@
 
     li {
       padding: 4px 0;
-      color: rgba(255, 255, 255, 0.85);
+      color: var(--text-secondary);
     }
 
     a {
-      color: #a78bfa;
+      color: var(--accent);
       text-decoration: none;
     }
 
-    a:hover {
-      text-decoration: underline;
+    @media (hover: hover) {
+      a:hover {
+        text-decoration: underline;
+      }
     }
 
     .info-table {
@@ -103,22 +142,44 @@
 
     .info-table td {
       padding: 8px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      color: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid var(--card-border);
+      color: var(--text-secondary);
     }
 
     .info-table td:first-child {
       font-weight: 600;
-      color: #fff;
+      color: var(--text-primary);
       width: 40%;
     }
 
     footer {
       text-align: center;
-      margin-top: 40px;
-      padding: 20px;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 0.85rem;
+      margin-top: 48px;
+      padding: 32px 20px;
+      border-top: 1px solid var(--card-border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--charcoal-blue);
+      font-weight: 500;
+    }
+
+    @media (hover: hover) {
+      footer a:hover {
+        color: var(--accent);
+      }
+    }
+
+    .footer-legal {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      line-height: 1.6;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     @media (max-width: 600px) {
@@ -128,13 +189,23 @@
       .card {
         padding: 20px;
       }
+      .container {
+        padding: 40px 16px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <a href="/">&larr; Tilbake til Leksihjelp</a>
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5" />
+          <path d="M12 19l-7-7 7-7" />
+        </svg>
+        Tilbake til Leksihjelp
+      </a>
       <h1>Salgsbetingelser</h1>
       <p class="subtitle">Sist oppdatert: 13. februar 2026</p>
     </header>
@@ -167,15 +238,16 @@
 
     <div class="card">
       <h2>2. Tjenesten</h2>
-      <p>Leksihjelp er en nettleserutvidelse som hjelper norske elever med å lære fremmedspråk (tysk, spansk, fransk). Tjenesten inkluderer ordbok, ordforslag og uttale.</p>
+      <p>Leksihjelp er en nettleserutvidelse som hjelper norske elever med å lære fremmedspråk (tysk, spansk, fransk, engelsk). Tjenesten inkluderer ordbok, ordforslag og uttale.</p>
       <p><strong>Gratis funksjoner:</strong> Ordbok, ordforslag og nettleser-uttale er alltid gratis og krever ingen innlogging.</p>
-      <p><strong>Premium-uttale (abonnement):</strong> Tilgang til naturlig uttale via ElevenLabs krever et aktivt abonnement. Abonnementet inkluderer inntil 10 000 tegn uttaletjeneste per måned. Ubrukte tegn overføres automatisk til neste måned (se punkt 6). Når kvoten er brukt opp, faller tjenesten automatisk tilbake til gratis nettleser-uttale uten ekstra kostnader.</p>
+      <p><strong>Premium-uttale (abonnement):</strong> Tilgang til naturlig uttale via ElevenLabs krever et aktivt abonnement. Abonnementet inkluderer inntil 50 000 tegn uttaletjeneste per måned. Ubrukte tegn overføres automatisk til neste måned (se punkt 6). Når kvoten er brukt opp, faller tjenesten automatisk tilbake til gratis nettleser-uttale uten ekstra kostnader.</p>
     </div>
 
     <div class="card">
       <h2>3. Pris og betaling</h2>
-      <p><strong>Månedlig abonnement:</strong> 29 kr per måned, inkludert mva. Betaling skjer via Vipps. Beløpet trekkes automatisk hver måned.</p>
-      <p><strong>Årsabonnement:</strong> 290 kr per år, inkludert mva. Engangsbetaling med kort (Visa, Mastercard, Apple Pay, Google Pay) via Stripe. Gir tilgang i 12 måneder fra kjøpsdato. Fornyes ikke automatisk.</p>
+      <p><strong>Månedlig abonnement:</strong> 49 kr per måned, inkludert mva. Betaling skjer via Vipps. Beløpet trekkes automatisk hver måned.</p>
+      <p><strong>Årsabonnement (Vipps):</strong> 490 kr per år, inkludert mva. Betaling via Vipps. Gir tilgang i 12 måneder.</p>
+      <p><strong>Årsabonnement (kort):</strong> 290 kr per år, inkludert mva. Engangsbetaling med kort (Visa, Mastercard, Apple Pay, Google Pay) via Stripe. Gir tilgang i 12 måneder fra kjøpsdato. Fornyes ikke automatisk.</p>
       <p><strong>Prisendringer:</strong> Ved eventuelle prisendringer vil du bli varslet minst 30 dager i forveien. Du kan da velge å si opp abonnementet før den nye prisen trer i kraft.</p>
     </div>
 
@@ -198,9 +270,9 @@
 
     <div class="card">
       <h2>6. Brukskvote og dataoverføring</h2>
-      <p><strong>Månedlig kvote:</strong> Abonnementet inkluderer 10 000 tegn naturlig uttale (ElevenLabs) per kalendermåned.</p>
-      <p><strong>Overføring av ubrukte tegn:</strong> Tegn som ikke er brukt ved utgangen av en måned overføres automatisk til neste måned. Maksimal oppsamlet kvote er begrenset til 20 000 tegn (tilsvarende to måneders forbruk).</p>
-      <p><strong>Kvoteoversikt:</strong> Gjenstående kvote vises i utvidelsens innstillinger og på kontosiden.</p>
+      <p><strong>Månedlig kvote:</strong> Abonnementet inkluderer 50 000 tegn naturlig uttale (ElevenLabs) per kalendermåned.</p>
+      <p><strong>Overføring av ubrukte tegn:</strong> Tegn som ikke er brukt ved utgangen av en måned overføres automatisk til neste måned. Ubrukte tegn samles opp til sommerferien.</p>
+      <p><strong>Kvoteoversikt:</strong> Gjenstående kvote vises i utvidelsens innstillinger.</p>
       <p><strong>Ved oppbrukt kvote:</strong> Når kvoten er brukt opp, faller uttaletjenesten automatisk tilbake til gratis nettleser-uttale. Ny kvote legges til ved starten av neste kalendermåned.</p>
     </div>
 
@@ -236,8 +308,10 @@
     </div>
 
     <footer>
-      <p>&copy; 2026 Papertek Forlag AS &bull; Org.nr 936 217 559</p>
-      <p style="margin-top: 8px;"><a href="/">Tilbake til Leksihjelp</a></p>
+      <p>Utviklet av <a href="https://papertek.no"><strong>Papertek forlag AS</strong></a> — <a
+          href="https://github.com/Papertek-forlag-AS/leksihjelp">åpen kildekode</a> (MIT-lisens)</p>
+      <p style="margin-top: 8px;"><a href="/">Leksihjelp</a> &bull; <a href="/fremtidsplaner">Fremtidsplaner</a></p>
+      <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operatør av Leksihjelp. Org.nr 936 217 559.</p>
     </footer>
   </div>
 </body>
