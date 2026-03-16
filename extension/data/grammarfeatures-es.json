@@ -9,10 +9,38 @@
       "description": "Nåtid — bøyning av verb i presens",
       "descriptionEn": "Present tense verb conjugations",
       "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
+      "appliesTo": ["verb"],
       "dataPath": "conjugations.presens"
+    },
+    {
+      "id": "grammar_es_pronouns_all",
+      "name": "Alle personer",
+      "nameEn": "All persons",
+      "description": "Vis bøyning for alle pronomen (yo, tú, él/ella, nosotros, vosotros, ellos)",
+      "descriptionEn": "Show conjugations for all pronouns",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
+    },
+    {
+      "id": "grammar_es_pronouns_singular_nosotros",
+      "name": "Entall + nosotros",
+      "nameEn": "Singular + nosotros",
+      "description": "Vis bøyning for yo, tú, él/ella/usted og nosotros",
+      "descriptionEn": "Show conjugations for yo, tú, él/ella/usted and nosotros",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
+    },
+    {
+      "id": "grammar_es_pronouns_yo_tu",
+      "name": "Bare yo/tú",
+      "nameEn": "Only yo/tú",
+      "description": "Vis kun bøyning for yo og tú (nybegynnere)",
+      "descriptionEn": "Show only yo and tú conjugations (beginners)",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
     },
     {
       "id": "grammar_es_genus",
@@ -21,9 +49,7 @@
       "description": "Grammatisk kjønn med bestemte (el/la/los/las) og ubestemte (un/una) artikler",
       "descriptionEn": "Grammatical gender with definite and indefinite articles",
       "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
+      "appliesTo": ["noun"],
       "dataPath": "genus"
     },
     {
@@ -33,9 +59,7 @@
       "description": "Flertallsformer",
       "descriptionEn": "Plural forms",
       "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
+      "appliesTo": ["noun"],
       "dataPath": "plural"
     }
   ],

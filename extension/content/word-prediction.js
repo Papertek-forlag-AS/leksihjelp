@@ -44,6 +44,7 @@
     await loadWordList(currentLang);
     createDropdown();
     attachGlobalListeners();
+    if (lexiPaused) updatePauseBadge();
 
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.type === 'LANGUAGE_CHANGED') {
@@ -63,6 +64,7 @@
       if (msg.type === 'LEXI_PAUSED') {
         lexiPaused = msg.paused;
         if (lexiPaused) hideDropdown();
+        updatePauseBadge();
       }
     });
   }
@@ -114,17 +116,34 @@
   }
 
   function getAllowedPronouns() {
-    const pronounFeatures = [
-      { id: 'grammar_pronouns_all', pronouns: ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'] },
-      { id: 'grammar_pronouns_singular_wir', pronouns: ['ich', 'du', 'er/sie/es', 'wir'] },
-      { id: 'grammar_pronouns_ich_du', pronouns: ['ich', 'du'] }
-    ];
-    for (const pf of pronounFeatures) {
-      if (enabledFeatures.has(pf.id)) {
-        return new Set(pf.pronouns);
+    const langPronouns = {
+      de: [
+        { id: 'grammar_pronouns_all', pronouns: ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'] },
+        { id: 'grammar_pronouns_singular_wir', pronouns: ['ich', 'du', 'er/sie/es', 'wir'] },
+        { id: 'grammar_pronouns_ich_du', pronouns: ['ich', 'du'] }
+      ],
+      es: [
+        { id: 'grammar_es_pronouns_all', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'] },
+        { id: 'grammar_es_pronouns_singular_nosotros', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros'] },
+        { id: 'grammar_es_pronouns_yo_tu', pronouns: ['yo', 'tú'] }
+      ],
+      fr: [
+        { id: 'grammar_fr_pronouns_all', pronouns: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles'] },
+        { id: 'grammar_fr_pronouns_singular_nous', pronouns: ['je', 'tu', 'il/elle/on', 'nous'] },
+        { id: 'grammar_fr_pronouns_je_tu', pronouns: ['je', 'tu'] }
+      ]
+    };
+
+    const features = langPronouns[currentLang];
+    if (features) {
+      for (const pf of features) {
+        if (enabledFeatures.has(pf.id)) {
+          return new Set(pf.pronouns);
+        }
       }
+      return new Set(features[0].pronouns);
     }
-    return new Set(['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie']);
+    return null; // No filtering for NB/NN/EN
   }
 
   function chromeStorageGet(keys) {
@@ -138,6 +157,11 @@
     'verbbank', 'nounbank', 'adjectivebank', 'articlesbank',
     'generalbank', 'numbersbank', 'phrasesbank', 'pronounsbank'
   ];
+
+  // Language labels for dropdown footer
+  const LANG_LABELS = {
+    de: 'DE', es: 'ES', fr: 'FR', en: 'EN', nb: 'NB', nn: 'NN'
+  };
 
   // Short part-of-speech labels for dropdown badges
   const BANK_TO_POS_SHORT = {
@@ -244,11 +268,20 @@
         data = await window.__lexiVocabStore.getCachedLanguage(lang);
       }
 
-      // Fall back to bundled file
+      // Fall back to bundled file (only NB/NN/EN are bundled; DE/ES/FR are download-only)
       if (!data) {
-        const url = chrome.runtime.getURL(`data/${lang}.json`);
-        const res = await fetch(url);
-        data = await res.json();
+        const bundledLangs = ['nb', 'nn', 'en'];
+        if (bundledLangs.includes(lang)) {
+          const url = chrome.runtime.getURL(`data/${lang}.json`);
+          const res = await fetch(url);
+          data = await res.json();
+        }
+      }
+
+      if (!data) {
+        wordList = [];
+        prefixIndex.clear();
+        return;
       }
 
       // Flatten bank-based structure into prediction entries
@@ -325,6 +358,8 @@
                   tenseData.former.forEach((form, index) => {
                     if (!form) return;
                     const pronoun = pronounLabels[index] || `${index}`;
+                    // Filter by allowed pronouns (if set)
+                    if (allowedPronouns && !allowedPronouns.has(pronoun)) return;
                     wordList.push({
                       word: form.toLowerCase(),
                       display: form,
@@ -335,21 +370,43 @@
                     });
                   });
                 } else if (typeof tenseData.former === 'object') {
-                  // German: object with pronoun keys
-                  for (const [pronoun, form] of Object.entries(tenseData.former)) {
-                    // Skip pronouns not enabled
-                    if (!allowedPronouns.has(pronoun)) continue;
+                  // Object with keys: German uses pronouns (ich, du, ...),
+                  // NB/NN uses form labels (infinitiv, presens, ...),
+                  // EN uses English pronouns (I, you, he/she, ...)
+                  for (const [key, form] of Object.entries(tenseData.former)) {
+                    // Only apply pronoun filtering for German
+                    if (lang === 'de' && allowedPronouns && !allowedPronouns.has(key)) continue;
 
                     wordList.push({
                       word: form.toLowerCase(),
                       display: form,
-                      translation: `${entry.word} (${pronoun})`,
+                      translation: `${entry.word} (${key})`,
                       type: 'conjugation',
-                      pronoun: pronoun,
+                      pronoun: lang === 'de' ? key : null,
                       baseWord: entry.word
                     });
                   }
                 }
+              }
+
+              // EN perfect tense: participle/present_participle (no former)
+              if (tenseData.participle) {
+                wordList.push({
+                  word: tenseData.participle.toLowerCase(),
+                  display: tenseData.participle,
+                  translation: `${entry.word} (past participle)`,
+                  type: 'conjugation',
+                  baseWord: entry.word
+                });
+              }
+              if (tenseData.present_participle) {
+                wordList.push({
+                  word: tenseData.present_participle.toLowerCase(),
+                  display: tenseData.present_participle,
+                  translation: `${entry.word} (-ing)`,
+                  type: 'conjugation',
+                  baseWord: entry.word
+                });
               }
             }
           }
@@ -380,6 +437,24 @@
             }
           }
 
+          // Add NB/NN noun forms (ubestemt/bestemt × entall/flertall)
+          if (bank === 'nounbank' && entry.forms) {
+            for (const [formType, forms] of Object.entries(entry.forms)) {
+              if (!forms || typeof forms !== 'object') continue;
+              for (const [number, form] of Object.entries(forms)) {
+                if (!form || form.toLowerCase() === (entry.word || '').toLowerCase()) continue;
+                wordList.push({
+                  word: form.toLowerCase(),
+                  display: form,
+                  translation: `${entry.word} (${formType} ${number})`,
+                  type: 'nounform',
+                  bank: bank,
+                  baseWord: entry.word
+                });
+              }
+            }
+          }
+
           // Add plural forms
           if (bank === 'nounbank' && entry.plural && isFeatureEnabled('grammar_plural')) {
             wordList.push({
@@ -395,13 +470,15 @@
           // German: entry.komparativ (string), Spanish/French: entry.comparison.komparativ.form (nested)
           if (bank === 'adjectivebank') {
             const komparativ = entry.komparativ
-              || entry.comparison?.komparativ?.form
+              || entry.comparison?.komparativ?.form || entry.comparison?.komparativ
               || entry.comparison?.comparativo?.form
-              || entry.comparison?.comparatif?.form;
+              || entry.comparison?.comparatif?.form
+              || entry.comparison?.comparative;
             const superlativ = entry.superlativ
-              || entry.comparison?.superlativ?.form
+              || entry.comparison?.superlativ?.form || entry.comparison?.superlativ
               || entry.comparison?.superlativo?.form
-              || entry.comparison?.superlatif?.form;
+              || entry.comparison?.superlatif?.form
+              || entry.comparison?.superlative;
 
             if (komparativ && isFeatureEnabled('grammar_comparative')) {
               wordList.push({
@@ -522,6 +599,7 @@
   }
 
   function runPrediction(el) {
+    if (lexiPaused) return;
     activeElement = el;
     const { currentWord, previousWord, hasModalVerb } = getTextContext(el);
 
@@ -540,7 +618,7 @@
   }
 
   function handleKeydown(e) {
-    if (!dropdown.classList.contains('visible')) return;
+    if (!dropdown || !dropdown.classList.contains('visible')) return;
 
     const items = dropdown.querySelectorAll('.lh-pred-item');
     if (!items.length) return;
@@ -567,7 +645,7 @@
   }
 
   function handleClick(e) {
-    if (dropdown.contains(e.target)) return;
+    if (!dropdown || dropdown.contains(e.target)) return;
     const item = e.target.closest('.lh-pred-item');
     if (item) {
       e.preventDefault();
@@ -790,8 +868,9 @@
   }
 
   function applyBoosts(entry, score, scored, pronounContext, hasModalVerb) {
-    // Typo matches: student typed a known misspelling → strongly boost the correction
-    if (entry.type === 'typo') {
+    // Typo matches: only boost when the match is a prefix/close match (score >= 50),
+    // not a weak substring containment from the phonetic fallback
+    if (entry.type === 'typo' && score >= 50) {
       score += 150;
     }
 
@@ -894,7 +973,17 @@
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
-    }).join('') + '<div class="lh-pred-footer"><span class="lh-pred-hint">Tab for å velge</span><button class="lh-pred-pause" title="Pause ordforslag">⏸</button></div>';
+    }).join('') + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="Bytt språk">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">Tab for å velge</span><button class="lh-pred-pause" title="${lexiPaused ? 'Fortsett ordforslag' : 'Pause ordforslag'}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
+
+    // Attach language switcher handler
+    const langBtn = dropdown.querySelector('.lh-pred-lang');
+    if (langBtn) {
+      langBtn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showLangPicker();
+      });
+    }
 
     // Attach pause button handler
     const pauseBtn = dropdown.querySelector('.lh-pred-pause');
@@ -953,17 +1042,104 @@
     });
   }
 
+  // ── Language picker (inline in dropdown footer) ──
+  const LANG_PICKER_FLAGS = { de: '\uD83C\uDDE9\uD83C\uDDEA', es: '\uD83C\uDDEA\uD83C\uDDF8', fr: '\uD83C\uDDEB\uD83C\uDDF7', en: '\uD83C\uDDEC\uD83C\uDDE7', nb: '\uD83C\uDDF3\uD83C\uDDF4', nn: '\uD83C\uDDF3\uD83C\uDDF4' };
+  const BUNDLED_PREDICTION_LANGS = ['nb', 'nn', 'en'];
+
+  async function getAvailableLangs() {
+    const langs = [...BUNDLED_PREDICTION_LANGS];
+    if (window.__lexiVocabStore) {
+      try {
+        const cached = await window.__lexiVocabStore.listCachedLanguages();
+        for (const c of cached) {
+          if (!langs.includes(c.language)) langs.push(c.language);
+        }
+      } catch {}
+    }
+    return langs;
+  }
+
+  async function showLangPicker() {
+    const langs = await getAvailableLangs();
+    const footer = dropdown.querySelector('.lh-pred-footer');
+    if (!footer) return;
+
+    footer.innerHTML = langs.map(lang =>
+      `<button class="lh-pred-lang-option ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">${LANG_PICKER_FLAGS[lang] || ''} ${LANG_LABELS[lang] || lang.toUpperCase()}</button>`
+    ).join('');
+
+    footer.querySelectorAll('.lh-pred-lang-option').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const lang = btn.dataset.lang;
+        if (lang === currentLang) return;
+        switchPredictionLang(lang);
+      });
+    });
+  }
+
+  async function switchPredictionLang(lang) {
+    currentLang = lang;
+    await chromeStorageSet({ language: lang });
+    await loadGrammarFeatures(lang);
+    await loadRecentWords(lang);
+    await loadWordList(lang);
+    chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
+    hideDropdown();
+    // Re-run prediction with new language
+    if (activeElement) schedulePrediction(activeElement);
+  }
+
+  function chromeStorageSet(obj) {
+    return new Promise(resolve => chrome.storage.local.set(obj, resolve));
+  }
+
   function togglePause() {
     lexiPaused = !lexiPaused;
     chrome.storage.local.set({ lexiPaused });
+    // Cancel any pending prediction timer
+    if (predictionTimer) {
+      clearTimeout(predictionTimer);
+      predictionTimer = null;
+    }
     // Broadcast to other tabs via the service worker
     chrome.runtime.sendMessage({ type: 'LEXI_PAUSED', paused: lexiPaused });
-    hideDropdown();
+    updatePauseBadge();
+    if (lexiPaused) {
+      hideDropdown();
+    } else {
+      // Resuming — re-run prediction on current element if available
+      if (activeElement) schedulePrediction(activeElement);
+    }
   }
 
   function hideDropdown() {
+    if (!dropdown) return;
     dropdown.classList.remove('visible');
     selectedIndex = -1;
+  }
+
+  // ── Pause badge (shows when predictions are paused, allows resume) ──
+  let pauseBadge = null;
+
+  function updatePauseBadge() {
+    if (lexiPaused) {
+      if (!pauseBadge) {
+        pauseBadge = document.createElement('div');
+        pauseBadge.id = 'lexi-pause-badge';
+        pauseBadge.innerHTML = `<img src="${chrome.runtime.getURL('assets/icon-16.png')}" alt=""><span>Ordforslag pauset</span><button title="Fortsett">\u25B6</button>`;
+        pauseBadge.querySelector('button').addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          togglePause();
+        });
+        document.documentElement.appendChild(pauseBadge);
+      }
+      pauseBadge.classList.add('visible');
+    } else {
+      if (pauseBadge) pauseBadge.classList.remove('visible');
+    }
   }
 
   // ── Apply suggestion ──

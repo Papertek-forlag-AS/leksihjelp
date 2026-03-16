@@ -435,12 +435,20 @@ function updateLangLabels() {
   const dirNoTarget = document.getElementById('dir-no-target');
   const dirTargetNo = document.getElementById('dir-target-no');
   if (dirNoTarget && dirTargetNo) {
-    if (currentLang === 'nn') {
-      dirNoTarget.innerHTML = `NB → <span class="target-lang-code">NN</span>`;
-      dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → NB`;
+    if (currentLang === 'nb') {
+      // NB-NB monolingual mode — hide direction toggle
+      dirNoTarget.innerHTML = `<span class="target-lang-code">NB</span> ordbok`;
+      dirTargetNo.style.display = 'none';
+      dirNoTarget.classList.add('active');
     } else {
-      dirNoTarget.innerHTML = `NO → <span class="target-lang-code">${code}</span>`;
-      dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → NO`;
+      dirTargetNo.style.display = '';
+      if (currentLang === 'nn') {
+        dirNoTarget.innerHTML = `NB → <span class="target-lang-code">NN</span>`;
+        dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → NB`;
+      } else {
+        dirNoTarget.innerHTML = `NO → <span class="target-lang-code">${code}</span>`;
+        dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → NO`;
+      }
     }
   }
 }
@@ -662,21 +670,38 @@ function isFeatureEnabled(featureId) {
  * Get the allowed pronouns based on enabled pronoun features
  */
 function getAllowedPronouns() {
-  // Find the most permissive enabled pronoun feature
-  const pronounFeatures = [
-    { id: 'grammar_pronouns_all', pronouns: ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'] },
-    { id: 'grammar_pronouns_singular_wir', pronouns: ['ich', 'du', 'er/sie/es', 'wir'] },
-    { id: 'grammar_pronouns_ich_du', pronouns: ['ich', 'du'] }
-  ];
+  // Language-specific pronoun features (ordered most → least permissive)
+  const langPronouns = {
+    de: [
+      { id: 'grammar_pronouns_all', pronouns: ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'] },
+      { id: 'grammar_pronouns_singular_wir', pronouns: ['ich', 'du', 'er/sie/es', 'wir'] },
+      { id: 'grammar_pronouns_ich_du', pronouns: ['ich', 'du'] }
+    ],
+    es: [
+      { id: 'grammar_es_pronouns_all', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'] },
+      { id: 'grammar_es_pronouns_singular_nosotros', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros'] },
+      { id: 'grammar_es_pronouns_yo_tu', pronouns: ['yo', 'tú'] }
+    ],
+    fr: [
+      { id: 'grammar_fr_pronouns_all', pronouns: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles'] },
+      { id: 'grammar_fr_pronouns_singular_nous', pronouns: ['je', 'tu', 'il/elle/on', 'nous'] },
+      { id: 'grammar_fr_pronouns_je_tu', pronouns: ['je', 'tu'] }
+    ]
+  };
 
-  for (const pf of pronounFeatures) {
-    if (enabledFeatures.has(pf.id)) {
-      return new Set(pf.pronouns);
+  const features = langPronouns[currentLang];
+  if (features) {
+    for (const pf of features) {
+      if (enabledFeatures.has(pf.id)) {
+        return new Set(pf.pronouns);
+      }
     }
+    // Default: all pronouns for this language
+    return new Set(features[0].pronouns);
   }
 
-  // Default: all pronouns if no specific feature is enabled
-  return new Set(['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie']);
+  // Non-pronoun languages (NB, NN, EN) — return empty set (no filtering)
+  return null;
 }
 
 // ── Search ─────────────────────────────────────────────────
@@ -728,9 +753,8 @@ async function buildLangSwitcher() {
   // Collect available languages: bundled + downloaded
   const available = [];
 
-  // Bundled languages are always available (except nb which is the source language)
+  // Bundled languages are always available
   for (const lang of BUNDLED_LANGUAGES) {
-    if (lang === 'nb') continue; // NB is always the source, not a target
     available.push(lang);
   }
 
@@ -948,6 +972,7 @@ function renderResults(results) {
         ` : ''}
         ${renderVerbConjugations(entry)}
         ${renderNounCases(entry)}
+        ${renderNounForms(entry)}
         ${renderAdjectiveComparison(entry)}
       </div>
     </div>
@@ -1108,7 +1133,77 @@ function renderVerbConjugations(entry) {
   const allowedPronouns = getAllowedPronouns();
   const sections = [];
 
-  // Map of conjugation keys to feature IDs and display names (supports multiple languages)
+  // NB/NN verbs: all forms are under conjugations.presens.former as a flat object
+  // (infinitiv, presens, preteritum, perfektum_partisipp, imperativ)
+  const presensData = entry.conjugations.presens;
+  if (presensData?.former?.infinitiv !== undefined) {
+    // This is an NB/NN-style flat verb entry
+    const forms = presensData.former;
+    const labels = {
+      infinitiv: 'Infinitiv',
+      presens: 'Presens',
+      preteritum: 'Preteritum',
+      perfektum_partisipp: 'Perfektum partisipp',
+      imperativ: 'Imperativ'
+    };
+    const rows = Object.entries(labels)
+      .filter(([key]) => forms[key] !== undefined)
+      .map(([key, label]) => `<tr><td>${label}</td><td>${escapeHtml(forms[key])}</td></tr>`)
+      .join('');
+    if (rows) {
+      sections.push(`
+        <div class="expanded-section">
+          <h4>Bøyning</h4>
+          <table class="conjugation-table">${rows}</table>
+        </div>
+      `);
+    }
+    return sections.join('');
+  }
+
+  // EN verbs: uses present, past, perfect tense keys
+  if (entry.conjugations.present || entry.conjugations.past || entry.conjugations.perfect) {
+    const enTenses = [
+      { key: 'present', featureIds: ['grammar_present', 'grammar_en_present'], name: 'Present' },
+      { key: 'past', featureIds: ['grammar_preteritum', 'grammar_en_past'], name: 'Past' },
+      { key: 'perfect', featureIds: ['grammar_perfektum', 'grammar_en_perfect'], name: 'Perfect' }
+    ];
+
+    for (const config of enTenses) {
+      const isEnabled = config.featureIds.some(id => isFeatureEnabled(id));
+      if (!isEnabled) continue;
+
+      const tenseData = entry.conjugations[config.key];
+      if (!tenseData) continue;
+
+      if (tenseData.former) {
+        const rows = Object.entries(tenseData.former)
+          .map(([pronoun, form]) => `<tr><td>${escapeHtml(pronoun)}</td><td>${escapeHtml(form)}</td></tr>`)
+          .join('');
+        if (rows) {
+          sections.push(`
+            <div class="expanded-section">
+              <h4>${config.name}</h4>
+              <table class="conjugation-table">${rows}</table>
+            </div>
+          `);
+        }
+      } else if (tenseData.participle || tenseData.present_participle) {
+        const parts = [];
+        if (tenseData.participle) parts.push(`Past participle: ${escapeHtml(tenseData.participle)}`);
+        if (tenseData.present_participle) parts.push(`Present participle: ${escapeHtml(tenseData.present_participle)}`);
+        sections.push(`
+          <div class="expanded-section">
+            <h4>${config.name}</h4>
+            <p>${parts.join('<br>')}</p>
+          </div>
+        `);
+      }
+    }
+    return sections.join('');
+  }
+
+  // DE/ES/FR verbs: tense-based with pronoun conjugations
   const tenseConfig = [
     { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], name: 'Presens' },
     { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], name: 'Preteritum' },
@@ -1116,11 +1211,9 @@ function renderVerbConjugations(entry) {
   ];
 
   for (const config of tenseConfig) {
-    // Check if any of the feature IDs for this tense are enabled
     const isEnabled = config.featureIds.some(id => isFeatureEnabled(id));
     if (!isEnabled) continue;
 
-    // Find the conjugation data using any of the possible keys
     let tenseData = null;
     for (const key of config.keys) {
       if (entry.conjugations[key]) {
@@ -1131,9 +1224,7 @@ function renderVerbConjugations(entry) {
 
     if (!tenseData) continue;
 
-    // Handle different tense structures
     if (tenseData.former) {
-      // Standard conjugation table (presens, preteritum)
       const filtered = filterPronouns(tenseData.former, allowedPronouns);
       if (Object.keys(filtered).length > 0) {
         sections.push(`
@@ -1144,7 +1235,6 @@ function renderVerbConjugations(entry) {
         `);
       }
     } else if (tenseData.auxiliary || tenseData.participle) {
-      // Perfektum style (auxiliary + participle)
       sections.push(`
         <div class="expanded-section">
           <h4>${config.name}</h4>
@@ -1158,9 +1248,29 @@ function renderVerbConjugations(entry) {
 }
 
 /**
- * Filter conjugation forms by allowed pronouns
+ * Filter conjugation forms by allowed pronouns.
+ * Handles both object (DE) and array (ES/FR) formats.
+ * Returns null-safe: if allowedPronouns is null, returns all forms.
  */
 function filterPronouns(forms, allowedPronouns) {
+  const pronounLabels = { es: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'], fr: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles'] };
+
+  if (Array.isArray(forms)) {
+    // ES/FR: convert array to pronoun-keyed object, optionally filtering
+    const labels = pronounLabels[currentLang] || [];
+    const result = {};
+    forms.forEach((form, i) => {
+      if (!form) return;
+      const pronoun = labels[i] || `${i}`;
+      if (!allowedPronouns || allowedPronouns.has(pronoun)) {
+        result[pronoun] = form;
+      }
+    });
+    return result;
+  }
+
+  // Object (DE/EN): filter by allowed pronouns if set
+  if (!allowedPronouns) return forms;
   const filtered = {};
   for (const [pronoun, form] of Object.entries(forms)) {
     if (allowedPronouns.has(pronoun)) {
@@ -1235,6 +1345,31 @@ function renderNounCases(entry) {
 }
 
 /**
+ * Render NB/NN noun forms (ubestemt/bestemt × entall/flertall) as a 2×2 table
+ */
+function renderNounForms(entry) {
+  if (!entry.forms) return '';
+  const ub = entry.forms.ubestemt;
+  const be = entry.forms.bestemt;
+  if (!ub && !be) return '';
+
+  return `
+    <div class="expanded-section">
+      <h4>Bøyning</h4>
+      <table class="conjugation-table declension-table">
+        <thead>
+          <tr><th></th><th>Entall</th><th>Flertall</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Ubestemt</strong></td><td>${escapeHtml(ub?.entall || '-')}</td><td>${escapeHtml(ub?.flertall || '-')}</td></tr>
+          <tr><td><strong>Bestemt</strong></td><td>${escapeHtml(be?.entall || '-')}</td><td>${escapeHtml(be?.flertall || '-')}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
  * Render adjective comparison forms based on enabled features
  */
 function renderAdjectiveComparison(entry) {
@@ -1242,8 +1377,8 @@ function renderAdjectiveComparison(entry) {
 
   const sections = [];
 
-  // Komparativ (German: komparativ, Spanish: comparativo)
-  const komparativ = entry.comparison.komparativ || entry.comparison.comparativo;
+  // Komparativ (German: komparativ, Spanish: comparativo, English: comparative)
+  const komparativ = entry.comparison.komparativ || entry.comparison.comparativo || entry.comparison.comparative;
   if (isFeatureEnabled('grammar_comparative') && komparativ) {
     sections.push(`
       <div class="expanded-section">
@@ -1253,8 +1388,8 @@ function renderAdjectiveComparison(entry) {
     `);
   }
 
-  // Superlativ (German: superlativ, Spanish: superlativo)
-  const superlativ = entry.comparison.superlativ || entry.comparison.superlativo;
+  // Superlativ (German: superlativ, Spanish: superlativo, English: superlative)
+  const superlativ = entry.comparison.superlativ || entry.comparison.superlativo || entry.comparison.superlative;
   if (isFeatureEnabled('grammar_superlative') && superlativ) {
     sections.push(`
       <div class="expanded-section">
@@ -1402,7 +1537,9 @@ function initNav() {
   }
 
   navBtns.forEach(btn => {
-    btn.addEventListener('click', () => showView(btn.dataset.view));
+    if (btn.dataset.view) {
+      btn.addEventListener('click', () => showView(btn.dataset.view));
+    }
   });
 
   settingsBtn.addEventListener('click', () => showView('settings'));

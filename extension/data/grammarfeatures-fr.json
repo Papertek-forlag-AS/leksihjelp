@@ -9,10 +9,38 @@
       "description": "Nåtid — bøyning av verb i presens",
       "descriptionEn": "Present tense verb conjugations",
       "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
+      "appliesTo": ["verb"],
       "dataPath": "conjugations.presens"
+    },
+    {
+      "id": "grammar_fr_pronouns_all",
+      "name": "Alle personer",
+      "nameEn": "All persons",
+      "description": "Vis bøyning for alle pronomen (je, tu, il/elle, nous, vous, ils/elles)",
+      "descriptionEn": "Show conjugations for all pronouns",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
+    },
+    {
+      "id": "grammar_fr_pronouns_singular_nous",
+      "name": "Entall + nous",
+      "nameEn": "Singular + nous",
+      "description": "Vis bøyning for je, tu, il/elle/on og nous",
+      "descriptionEn": "Show conjugations for je, tu, il/elle/on and nous",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
+    },
+    {
+      "id": "grammar_fr_pronouns_je_tu",
+      "name": "Bare je/tu",
+      "nameEn": "Only je/tu",
+      "description": "Vis kun bøyning for je og tu (nybegynnere)",
+      "descriptionEn": "Show only je and tu conjugations (beginners)",
+      "category": "verbs",
+      "appliesTo": ["verb"],
+      "dataPath": "conjugations"
     },
     {
       "id": "grammar_fr_genus",
@@ -21,9 +49,7 @@
       "description": "Grammatisk kjønn med bestemte (le/la/les) og ubestemte (un/une) artikler",
       "descriptionEn": "Grammatical gender with definite and indefinite articles",
       "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
+      "appliesTo": ["noun"],
       "dataPath": "genus"
     },
     {
@@ -33,9 +59,7 @@
       "description": "Flertallsformer",
       "descriptionEn": "Plural forms",
       "category": "nouns",
-      "appliesTo": [
-        "noun"
-      ],
+      "appliesTo": ["noun"],
       "dataPath": "plural"
     }
   ],
