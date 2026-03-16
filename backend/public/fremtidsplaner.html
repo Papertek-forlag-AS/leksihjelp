@@ -430,8 +430,10 @@
       transition: color 0.2s;
     }
 
-    footer a:hover {
-      color: var(--accent);
+    @media (hover: hover) {
+      footer a:hover {
+        color: var(--accent);
+      }
     }
 
     .footer-legal {
@@ -629,9 +631,10 @@
     </div>
 
     <footer>
-      <p>Utviklet av <a href="https://papertek.no">Papertek forlag AS</a> — <a
+      <p>Utviklet av <a href="https://papertek.no"><strong>Papertek forlag AS</strong></a> — <a
           href="https://github.com/Papertek-forlag-AS/leksihjelp">åpen kildekode</a> (MIT-lisens)</p>
-      <p style="margin-top: 8px;"><a href="/vilkar">Salgsbetingelser</a></p>
+      <p style="margin-top: 8px;"><a href="/">Leksihjelp</a> &bull; <a
+          href="/vilkar">Salgsbetingelser</a></p>
       <p class="footer-legal">Papertek forlag AS er utgiver og kommersiell operatør av Leksihjelp. Kildekoden til
         Leksihjelp er lisensiert under MIT-lisensen.</p>
     </footer>
