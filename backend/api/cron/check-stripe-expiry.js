@@ -35,7 +35,8 @@ export default async function handler(req, res) {
       .get();
 
     let deactivated = 0;
-    const batch = db.batch();
+    let batch = db.batch();
+    let batchCount = 0;
 
     for (const doc of snapshot.docs) {
       const data = doc.data();
@@ -44,11 +45,19 @@ export default async function handler(req, res) {
           subscriptionStatus: 'expired',
         });
         deactivated++;
+        batchCount++;
         console.log(`Deactivating expired Stripe subscription for user ${doc.id}`);
+
+        // Firestore batch limit is 500 writes
+        if (batchCount >= 500) {
+          await batch.commit();
+          batch = db.batch();
+          batchCount = 0;
+        }
       }
     }
 
-    if (deactivated > 0) {
+    if (batchCount > 0) {
       await batch.commit();
     }
 

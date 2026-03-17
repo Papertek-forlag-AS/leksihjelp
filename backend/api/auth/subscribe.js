@@ -61,6 +61,9 @@ export default async function handler(req, res) {
 
     // Determine plan (monthly or yearly)
     const plan = req.body?.plan || 'monthly';
+    if (!['monthly', 'yearly'].includes(plan)) {
+      return res.status(400).json({ error: 'Invalid plan. Must be "monthly" or "yearly".' });
+    }
     const isYearly = plan === 'yearly';
     const amount = isYearly ? 49000 : 4900; // 490.00 or 49.00 NOK in øre
 

@@ -118,8 +118,9 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({
-      message: 'Charges processed',
+    const status = errors > 0 ? 207 : 200;
+    return res.status(status).json({
+      message: errors > 0 ? 'Charges processed with errors' : 'Charges processed',
       chargesCreated,
       errors,
     });

@@ -124,7 +124,7 @@ export default async function handler(req, res) {
       }
     }
 
-    // Atomic quota check + deduction via Firestore transaction
+    // Check quota (read-only) — deduction happens after successful TTS call
     try {
       const quotaResult = await db.runTransaction(async (transaction) => {
         const freshDoc = await transaction.get(userRef);
@@ -137,17 +137,13 @@ export default async function handler(req, res) {
           freshData.quotaBalance = quotaUpdate.quotaBalance;
         }
 
-        const quotaBalance = freshData.quotaBalance ?? 0;
+        const quotaBalance = typeof freshData.quotaBalance === 'number' ? freshData.quotaBalance : 0;
         const quotaMaxBalance = freshData.quotaMaxBalance || 20_000;
 
         // Check quota — is there enough balance for this request?
         if (quotaBalance < text.length) {
           return { exceeded: true, quotaBalance, quotaMaxBalance };
         }
-
-        // Decrement quota balance atomically
-        const newBalance = quotaBalance - text.length;
-        transaction.update(userRef, { quotaBalance: newBalance });
 
         return { exceeded: false };
       });
@@ -212,6 +208,18 @@ export default async function handler(req, res) {
     }
 
     const data = await elevenLabsRes.json();
+
+    // Deduct quota only after successful TTS call (token auth only)
+    if (authMethod === 'token' && userSub) {
+      const db = await getFirestoreDb();
+      const userRef = db.collection('users').doc(userSub);
+      await db.runTransaction(async (transaction) => {
+        const freshDoc = await transaction.get(userRef);
+        const freshData = freshDoc.data();
+        const balance = typeof freshData.quotaBalance === 'number' ? freshData.quotaBalance : 0;
+        transaction.update(userRef, { quotaBalance: Math.max(0, balance - text.length) });
+      });
+    }
 
     // Derive word-level timing from character-level alignment
     const wordTimings = deriveWordTimings(data.alignment);

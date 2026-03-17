@@ -36,6 +36,12 @@ export default async function handler(req, res) {
 
     const topupData = topupDoc.data();
 
+    // Verify userId matches the stored record to prevent crediting wrong user
+    if (topupData.userId && topupData.userId !== userId) {
+      console.error(`topup-callback userId mismatch: query=${userId}, stored=${topupData.userId}`);
+      return redirect(res, `${SITE_URL}/?topup_error=invalid_user`);
+    }
+
     if (topupData.status === 'COMPLETED') {
       // Already credited — just redirect
       return redirect(res, `${SITE_URL}/?topup=success`);
@@ -73,7 +79,7 @@ export default async function handler(req, res) {
 
       // If only authorized, capture the payment
       if (state === 'AUTHORIZED') {
-        await fetch(
+        const captureRes = await fetch(
           `${apiBase}/epayment/v1/payments/${reference}/capture`,
           {
             method: 'POST',
@@ -86,6 +92,9 @@ export default async function handler(req, res) {
             }),
           }
         );
+        if (!captureRes.ok) {
+          console.error(`Topup capture failed for ${reference}:`, captureRes.status);
+        }
       }
 
       // Mark top-up as completed
