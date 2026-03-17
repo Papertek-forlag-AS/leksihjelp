@@ -1108,20 +1108,19 @@ function getPauseIcon() {
 function renderExamples(entry) {
   // Collect examples from entry directly and from linkedTo
   const examples = [];
-  const isMonolingual = currentLang === 'nb';
+  // For Norwegian dictionaries, hide foreign-language translations in examples
+  const hideExampleTranslations = currentLang === 'nb' || currentLang === 'nn';
 
   if (entry.examples && entry.examples.length) {
     for (const ex of entry.examples) {
-      // For monolingual dictionaries, skip examples from other languages
-      // unless the current target language matches
-      if (!isMonolingual || !ex.lang || ex.lang === currentLang) {
+      if (!hideExampleTranslations || !ex.lang || ex.lang === currentLang) {
         examples.push({
           sentence: ex.sentence || ex.source || '',
-          translation: (!isMonolingual) ? (ex.translation || ex.target || '') : '',
+          translation: (!hideExampleTranslations) ? (ex.translation || ex.target || '') : '',
           lang: ex.lang
         });
-      } else if (isMonolingual && ex.lang) {
-        // In monolingual mode, still show the Norwegian sentence but hide foreign translation
+      } else if (hideExampleTranslations && ex.lang) {
+        // Norwegian mode: show the Norwegian sentence but hide foreign translation
         const sentence = ex.sentence || ex.source || '';
         if (sentence) {
           examples.push({ sentence, translation: '', lang: ex.lang });
@@ -1131,7 +1130,7 @@ function renderExamples(entry) {
   }
 
   // Also check linkedTo for additional examples (for target language)
-  if (entry.linkedTo && !isMonolingual) {
+  if (entry.linkedTo && !hideExampleTranslations) {
     const link = entry.linkedTo.nb || entry.linkedTo.nn;
     if (link?.examples) {
       for (const ex of link.examples) {
