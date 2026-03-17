@@ -187,7 +187,7 @@ body {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 4px;
-  color: var(--heading);
+  color: var(--text);
 }
 
 .language-picker-buttons {
@@ -1420,4 +1420,59 @@ select.glass-input {
 
 [data-theme="dark"] .legacy-code-toggle:hover {
   color: var(--text-secondary);
+}
+
+[data-theme="dark"] .result-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .audio-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .audio-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+[data-theme="dark"] .result-word {
+  color: var(--text);
+}
+
+[data-theme="dark"] .explore-btn {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .direction-toggle button {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .direction-toggle button.active {
+  color: var(--text);
+}
+
+[data-theme="dark"] .lang-switcher button {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .lang-switcher button.active {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-theme="dark"] .settings-group h3 {
+  color: var(--text);
+}
+
+[data-theme="dark"] .lang-option {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+[data-theme="dark"] .lang-option:hover {
+  background: rgba(255, 255, 255, 0.08);
 }

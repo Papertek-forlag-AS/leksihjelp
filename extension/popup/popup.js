@@ -807,9 +807,6 @@ async function buildLangSwitcher() {
       const input = document.getElementById('search-input');
       if (input?.value.trim()) performSearch(input.value.trim());
 
-      // Update settings list too
-      const langSelect = document.getElementById('setting-language');
-      if (langSelect) langSelect.value = currentLang;
       updateLanguageListStatus();
     });
   });
@@ -1406,14 +1403,10 @@ function renderAdjectiveComparison(entry) {
 
 // ── Settings ───────────────────────────────────────────────
 async function initSettings() {
-  const langSelect = document.getElementById('setting-language');
   const codeInput = document.getElementById('setting-access-code');
   const verifyBtn = document.getElementById('verify-code-btn');
   const codeStatus = document.getElementById('code-status');
   const predictionToggle = document.getElementById('setting-prediction');
-
-  // Load saved settings
-  langSelect.value = currentLang;
   const savedCode = await chromeStorageGet('accessCode');
   if (savedCode) codeInput.value = savedCode;
   const predEnabled = await chromeStorageGet('predictionEnabled');
