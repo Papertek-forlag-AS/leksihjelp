@@ -96,7 +96,8 @@
       const record = await dbGet(db, lang);
       db.close();
       return record?.data || null;
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: getCachedLanguage failed', e);
       return null;
     }
   }
@@ -110,7 +111,8 @@
       const record = await dbGet(db, lang);
       db.close();
       return record?.grammarFeatures || null;
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: getCachedGrammarFeatures failed', e);
       return null;
     }
   }
@@ -124,7 +126,8 @@
       const record = await dbGet(db, lang);
       db.close();
       return record?.version || null;
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: getCachedVersion failed', e);
       return null;
     }
   }
@@ -143,7 +146,8 @@
         totalWords: r.data?._metadata?.totalWords || 0,
         cachedAt: r.cachedAt
       }));
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: listCachedLanguages failed', e);
       return [];
     }
   }
@@ -256,8 +260,9 @@
         reason: 'new_version',
         newVersion: newEtag
       };
-    } catch {
-      return { needsUpdate: false }; // Offline — use cache
+    } catch (e) {
+      console.warn('Leksihjelp: checkForUpdate failed (offline?)', e);
+      return { needsUpdate: false };
     }
   }
 
@@ -294,8 +299,8 @@
         cursorReq.onerror = () => reject(cursorReq.error);
       });
       db.close();
-    } catch {
-      // Ignore
+    } catch (e) {
+      console.warn('Leksihjelp: deleteLanguage failed', e);
     }
   }
 
@@ -310,7 +315,8 @@
       const record = await dbGet(db, lang);
       db.close();
       return !!record?.audioVersion;
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: hasAudioCached failed', e);
       return false;
     }
   }
@@ -325,7 +331,8 @@
       const blob = await dbGet(db, key, STORE_AUDIO);
       db.close();
       return blob || null;
-    } catch {
+    } catch (e) {
+      console.warn('Leksihjelp: getAudioFile failed', e);
       return null;
     }
   }
@@ -471,8 +478,8 @@
           f.data = result;
           delete f.needsDeflate;
           delete f.compressedData;
-        } catch {
-          // Decompression failed — remove from list
+        } catch (e) {
+          console.warn('Leksihjelp: zip decompression failed for', f.name, e);
           f.data = null;
         }
       });

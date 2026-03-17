@@ -58,8 +58,26 @@ chrome.runtime.onInstalled.addListener((details) => {
   });
 });
 
+// ── Helpers ──
+async function broadcastToAllTabs(msg) {
+  const tabs = await chrome.tabs.query({});
+  for (const tab of tabs) {
+    if (tab.id) chrome.tabs.sendMessage(tab.id, msg).catch(() => {});
+  }
+}
+
+async function togglePause() {
+  const result = await chrome.storage.local.get('lexiPaused');
+  const newState = !result.lexiPaused;
+  await chrome.storage.local.set({ lexiPaused: newState });
+  chrome.contextMenus.update('lexi-toggle-predictions', {
+    title: newState ? 'Fortsett ordforslag' : 'Pause ordforslag'
+  }).catch(() => {});
+  await broadcastToAllTabs({ type: 'LEXI_PAUSED', paused: newState });
+}
+
 // ── Context Menu Click ──
-chrome.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
 
   if (info.menuItemId === 'lexi-lookup') {
@@ -77,22 +95,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
   }
 
   if (info.menuItemId === 'lexi-toggle-predictions') {
-    chrome.storage.local.get('lexiPaused', (result) => {
-      const newState = !result.lexiPaused;
-      chrome.storage.local.set({ lexiPaused: newState });
-      // Update context menu title
-      chrome.contextMenus.update('lexi-toggle-predictions', {
-        title: newState ? 'Fortsett ordforslag' : 'Pause ordforslag'
-      });
-      // Broadcast to all tabs
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach(t => {
-          if (t.id) {
-            chrome.tabs.sendMessage(t.id, { type: 'LEXI_PAUSED', paused: newState }).catch(() => {});
-          }
-        });
-      });
-    });
+    await togglePause();
   }
 });
 
@@ -102,29 +105,15 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (!tab?.id) return;
 
   if (command === 'lookup-selection') {
-    // Get selected text and trigger lookup
     chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_LOOKUP' }).catch(() => {});
   }
 
   if (command === 'read-selection') {
-    // Get selected text and trigger TTS
     chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_TTS' }).catch(() => {});
   }
 
   if (command === 'toggle-pause') {
-    // Toggle pause state
-    chrome.storage.local.get('lexiPaused', (result) => {
-      const newState = !result.lexiPaused;
-      chrome.storage.local.set({ lexiPaused: newState });
-      // Broadcast to all tabs
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach(t => {
-          if (t.id) {
-            chrome.tabs.sendMessage(t.id, { type: 'LEXI_PAUSED', paused: newState }).catch(() => {});
-          }
-        });
-      });
-    });
+    await togglePause();
   }
 });
 
@@ -132,14 +121,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Relay settings changes to all content scripts
   if (msg.type === 'LANGUAGE_CHANGED' || msg.type === 'PREDICTION_TOGGLED' || msg.type === 'AUTH_CHANGED' || msg.type === 'LEXI_PAUSED') {
-    chrome.tabs.query({}, (tabs) => {
-      tabs.forEach(tab => {
-        if (tab.id) {
-          chrome.tabs.sendMessage(tab.id, msg).catch(() => {});
-        }
-      });
-    });
-    // Keep context menu title in sync
+    broadcastToAllTabs(msg);
     if (msg.type === 'LEXI_PAUSED') {
       chrome.contextMenus.update('lexi-toggle-predictions', {
         title: msg.paused ? 'Fortsett ordforslag' : 'Pause ordforslag'
@@ -221,9 +203,11 @@ async function handleVippsLogin() {
     const authUrl = `${BACKEND_URL}/api/auth/vipps-login?source=extension&redirect_uri=${encodeURIComponent(redirectUrl)}`;
 
     const responseUrl = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('Login timed out')), 120_000);
       chrome.identity.launchWebAuthFlow(
         { url: authUrl, interactive: true },
         (callbackUrl) => {
+          clearTimeout(timeout);
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {

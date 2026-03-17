@@ -741,9 +741,11 @@
       // Use chrome.runtime.sendMessage to route through service worker
       // Content scripts in MV3 fetch with the page's origin, which may be blocked
       const ttsResult = await new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error('TTS request timed out')), 30_000);
         chrome.runtime.sendMessage(
           { type: 'FETCH_TTS', url: `${BACKEND_URL}/api/tts`, headers, body },
           (response) => {
+            clearTimeout(timeout);
             if (chrome.runtime.lastError) {
               reject(new Error(chrome.runtime.lastError.message));
             } else {
