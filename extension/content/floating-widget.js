@@ -8,6 +8,8 @@
 (function () {
   'use strict';
 
+  const { t, initI18n, setUiLanguage, getUiLanguage, langName } = self.__lexiI18n;
+
   const BACKEND_URL = 'https://leksihjelp.no';
 
   // Predefined ElevenLabs voices per language
@@ -84,6 +86,7 @@
   init();
 
   async function init() {
+    await initI18n();
     const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize', 'fontSizeMode']);
     isAuthenticated = stored.isAuthenticated || false;
     currentLang = stored.language || 'en';
@@ -98,6 +101,9 @@
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg.type === 'LANGUAGE_CHANGED') currentLang = msg.language;
       if (msg.type === 'AUTH_CHANGED') isAuthenticated = msg.isAuthenticated;
+      if (msg.type === 'UI_LANGUAGE_CHANGED') {
+        setUiLanguage(msg.uiLanguage);
+      }
       if (msg.type === 'LEXI_PAUSED') {
         lexiPaused = msg.paused;
         if (lexiPaused) hideWidget();
@@ -137,28 +143,28 @@
     widget.id = 'lexi-tts-widget';
     widget.innerHTML = `
       <div class="lh-header">
-        <span class="lh-title">Leksihjelp — Uttale</span>
-        <button class="lh-close" title="Lukk">&times;</button>
+        <span class="lh-title">${t('widget_title')}</span>
+        <button class="lh-close" title="${t('widget_close')}">&times;</button>
       </div>
       <div class="lh-lang-toggle">
-        <button class="lh-lang-btn active" data-lang="target" title="Les på målspråket">Målspråk</button>
-        <button class="lh-lang-btn" data-lang="no" title="Les på norsk">Norsk</button>
+        <button class="lh-lang-btn active" data-lang="target" title="${t('widget_read_target')}">${t('widget_target_lang')}</button>
+        <button class="lh-lang-btn" data-lang="no" title="${t('widget_read_norwegian')}">${t('widget_norwegian')}</button>
       </div>
       <div class="lh-text-area-wrapper">
         <div class="lh-font-controls">
-          <button class="lh-font-btn lh-font-mode" title="Bytt mellom auto og fast skriftstørrelse">Auto</button>
-          <button class="lh-font-btn lh-font-decrease" title="Mindre skrift">A&minus;</button>
-          <button class="lh-font-btn lh-font-increase" title="Større skrift">A+</button>
+          <button class="lh-font-btn lh-font-mode" title="${t('widget_font_auto_tooltip')}">${t('widget_font_auto')}</button>
+          <button class="lh-font-btn lh-font-decrease" title="${t('widget_font_smaller')}">A&minus;</button>
+          <button class="lh-font-btn lh-font-increase" title="${t('widget_font_larger')}">A+</button>
         </div>
-        <div class="lh-text-area" role="region" aria-label="Valgt tekst"></div>
+        <div class="lh-text-area" role="region" aria-label="${t('widget_selected_text')}"></div>
       </div>
       <div class="lh-controls">
-        <button class="lh-play-btn" title="Spill av">
+        <button class="lh-play-btn" title="${t('widget_play')}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </button>
         <div class="lh-slider-group">
           <div class="lh-slider-row">
-            <span class="lh-slider-label">Hastighet</span>
+            <span class="lh-slider-label">${t('widget_speed')}</span>
             <input type="range" class="lh-slider" id="lh-speed" min="0.5" max="1.5" step="0.1" value="1.0">
             <span class="lh-speed-value">1.0×</span>
           </div>
@@ -303,7 +309,7 @@
   function updateLangToggleLabels() {
     const targetBtn = widget.querySelector('.lh-lang-btn[data-lang="target"]');
     if (targetBtn) {
-      targetBtn.textContent = LANG_NAMES[currentLang] || 'Målspråk';
+      targetBtn.textContent = langName(currentLang) || t('widget_target_lang');
     }
   }
 
@@ -487,10 +493,10 @@
   function updateFontModeButton() {
     const btn = widget?.querySelector('.lh-font-mode');
     if (btn) {
-      btn.textContent = fontSizeMode === 'auto' ? 'Auto' : 'Fast';
+      btn.textContent = fontSizeMode === 'auto' ? t('widget_font_auto') : t('widget_font_fixed');
       btn.title = fontSizeMode === 'auto'
-        ? 'Automatisk skriftstørrelse (klikk for fast)'
-        : 'Fast skriftstørrelse (klikk for auto)';
+        ? t('widget_font_auto_tooltip')
+        : t('widget_font_fixed_tooltip');
     }
   }
 
@@ -663,7 +669,7 @@
       if (matching.length === 0) {
         const opt = document.createElement('option');
         opt.value = '__default';
-        opt.textContent = 'Standard stemme';
+        opt.textContent = t('widget_default_voice');
         select.appendChild(opt);
       } else {
         matching.forEach((v, i) => {
@@ -680,11 +686,11 @@
   function updateModeBadge() {
     const badge = widget.querySelector('.lh-mode-badge');
     if (isAuthenticated) {
-      badge.textContent = 'ElevenLabs — Naturlig uttale';
+      badge.textContent = t('widget_badge_elevenlabs');
       badge.style.background = 'rgba(34, 197, 94, 0.1)';
       badge.style.color = '#16a34a';
     } else {
-      badge.textContent = 'Nettleser-uttale (gratis)';
+      badge.textContent = t('widget_badge_browser');
       badge.style.background = 'rgba(17, 180, 154, 0.1)';
       badge.style.color = '#11B49A';
     }
@@ -832,7 +838,7 @@
   function updateModeBadgeQuota() {
     const badge = widget.querySelector('.lh-mode-badge');
     if (badge) {
-      badge.textContent = 'Kvoten brukt opp — nettleser-uttale';
+      badge.textContent = t('widget_badge_quota');
       badge.style.background = 'rgba(245, 158, 11, 0.1)';
       badge.style.color = '#d97706';
     }
@@ -907,25 +913,35 @@
     removeWordHighlight();
   }
 
-  // Bank name to Norwegian part of speech mapping
-  const BANK_TO_POS = {
-    verbbank: 'verb',
-    nounbank: 'substantiv',
-    adjectivebank: 'adjektiv',
-    articlesbank: 'artikkel',
-    generalbank: 'ord',
-    numbersbank: 'tall',
-    phrasesbank: 'frase',
-    pronounsbank: 'pronomen'
+  // Bank name to part of speech i18n key mapping
+  const BANK_TO_POS_KEY = {
+    verbbank: 'pos_verb',
+    nounbank: 'pos_noun',
+    adjectivebank: 'pos_adjective',
+    articlesbank: 'pos_article',
+    generalbank: 'pos_general',
+    numbersbank: 'pos_number',
+    phrasesbank: 'pos_phrase',
+    pronounsbank: 'pos_pronoun'
   };
 
-  // Genus to Norwegian gender mapping
-  const GENUS_TO_GENDER = {
-    m: 'maskulin',
-    f: 'feminin',
-    n: 'nøytrum',
-    pl: 'flertall'
+  function bankToPos(bank) {
+    const key = BANK_TO_POS_KEY[bank];
+    return key ? t(key) : bank.replace('bank', '');
+  }
+
+  // Genus to gender i18n key mapping
+  const GENUS_TO_GENDER_KEY = {
+    m: 'gender_masculine',
+    f: 'gender_feminine',
+    n: 'gender_neuter',
+    pl: 'gender_plural'
   };
+
+  function genusToGender(genus) {
+    const key = GENUS_TO_GENDER_KEY[genus];
+    return key ? t(key) : genus;
+  }
 
   // ── Inline dictionary lookup (context menu) ──
   async function showInlineLookup(word) {
@@ -946,7 +962,7 @@
 
     // Search across all banks for the word
     let match = null;
-    const banks = Object.keys(BANK_TO_POS);
+    const banks = Object.keys(BANK_TO_POS_KEY);
     for (const bank of banks) {
       const bankData = dict[bank];
       if (!bankData || typeof bankData !== 'object') continue;
@@ -958,8 +974,8 @@
         if (wordMatch || translationMatch) {
           match = {
             ...entry,
-            partOfSpeech: BANK_TO_POS[bank] || bank.replace('bank', ''),
-            gender: entry.genus ? GENUS_TO_GENDER[entry.genus] || entry.genus : null,
+            partOfSpeech: bankToPos(bank),
+            gender: entry.genus ? genusToGender(entry.genus) : null,
             grammar: entry.explanation?._description || null,
             examples: entry.examples || []
           };
@@ -990,7 +1006,7 @@
     if (match) {
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">Leksihjelp — Oppslag</span>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
         <div style="font-size:20px;font-weight:700;color:#11B49A;margin-bottom:2px;">${escapeHtml(match.word)}</div>
@@ -1000,17 +1016,17 @@
           ${match.gender ? `<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.gender)}</span>` : ''}
         </div>
         ${match.examples.length ? `<div style="font-style:italic;font-size:13px;color:#475569;margin-bottom:4px;">"${escapeHtml(match.examples[0].sentence)}"</div><div style="font-size:12px;color:#94a3b8;margin-bottom:8px;">${escapeHtml(match.examples[0].translation)}</div>` : ''}
-        ${match.grammar ? `<div style="font-size:12px;color:#64748b;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06);"><strong>Grammatikk:</strong> ${escapeHtml(match.grammar)}</div>` : ''}
+        ${match.grammar ? `<div style="font-size:12px;color:#64748b;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06);"><strong>${t('widget_lookup_grammar')}</strong> ${escapeHtml(match.grammar)}</div>` : ''}
       `;
     } else {
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">Leksihjelp — Oppslag</span>
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
         <div style="text-align:center;padding:16px 0;color:#94a3b8;">
           <div style="font-size:15px;margin-bottom:4px;">"${escapeHtml(word)}"</div>
-          <div style="font-size:13px;">Fant ikke ordet i ordboken</div>
+          <div style="font-size:13px;">${t('widget_lookup_not_found')}</div>
         </div>
       `;
     }

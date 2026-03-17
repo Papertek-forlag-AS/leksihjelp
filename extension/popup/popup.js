@@ -5,6 +5,7 @@
  */
 
 const BACKEND_URL = 'https://leksihjelp.no';
+const { t, initI18n, setUiLanguage, getUiLanguage, langName } = self.__lexiI18n;
 
 let dictionary = null;
 let nbDictionary = null; // Norwegian bokmål dictionary for two-way lookups
@@ -29,13 +30,25 @@ const BANK_TO_POS = {
   pronounsbank: 'pronomen'
 };
 
-// Genus to Norwegian gender mapping
+// Genus to gender mapping (kept for reference; use genusToGender() for display)
 const GENUS_TO_GENDER = {
   m: 'maskulin',
   f: 'feminin',
   n: 'nøytrum',
   pl: 'flertall'
 };
+
+function bankToPos(bank) {
+  const keys = { verbbank: 'pos_verb', nounbank: 'pos_noun', adjectivebank: 'pos_adjective',
+    articlesbank: 'pos_article', generalbank: 'pos_general', numbersbank: 'pos_number',
+    phrasesbank: 'pos_phrase', pronounsbank: 'pos_pronoun' };
+  return t(keys[bank] || 'pos_general');
+}
+
+function genusToGender(genus) {
+  const keys = { m: 'gender_m', f: 'gender_f', n: 'gender_n', pl: 'gender_pl' };
+  return keys[genus] ? t(keys[genus]) : genus;
+}
 
 // Norwegian irregular verb forms -> infinitive (without "å" prefix)
 const NORWEGIAN_IRREGULAR_VERBS = {
@@ -84,23 +97,49 @@ function norwegianInfinitive(form) {
   return null;
 }
 
+function applyTranslations() {
+  document.documentElement.lang = getUiLanguage();
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    el.innerHTML = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
+  });
+}
+
 // ── Bootstrap ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
+  await initI18n();
+
+  // Step 1: If no UI language chosen yet, show the UI language picker first
+  const storedUiLang = await chromeStorageGet('uiLanguage');
+  if (!storedUiLang) {
+    await initUiLanguagePicker();
+  }
+
+  applyTranslations();
+
   currentLang = (await chromeStorageGet('language')) || null;
 
-  // Check if first-run (no language selected yet)
+  // Step 2: If no learning language selected yet, show the language picker
   if (!currentLang) {
     await initFirstRunPicker();
   }
 
-  // If still no language after picker (skipped), or if nb was set, default to English
-  // NB is the source language, not a valid target
-  if (!currentLang || currentLang === 'nb') currentLang = 'en';
+  // If still no language after picker (skipped), default to English
+  if (!currentLang) currentLang = 'en';
 
   await loadDictionary(currentLang);
   await loadGrammarFeatures(currentLang);
   initSearch();
   initSettings();
+  initUiLanguageSettings();
   initGrammarSettings();
   initNav();
   initPinButton();
@@ -149,7 +188,7 @@ async function initFirstRunPicker() {
           resolve();
         } catch (err) {
           console.error('Language download failed:', err);
-          status.textContent = 'Nedlasting feilet. Prøv igjen.';
+          status.textContent = t('picker_failed');
           picker.querySelectorAll('.lang-pick-btn').forEach(b => b.disabled = false);
           document.getElementById('lang-pick-skip').classList.remove('hidden');
           progress.classList.add('hidden');
@@ -161,6 +200,73 @@ async function initFirstRunPicker() {
     document.getElementById('lang-pick-skip')?.addEventListener('click', () => {
       picker.classList.add('hidden');
       resolve();
+    });
+  });
+}
+
+/**
+ * Show UI language picker for first-run users (before learning language picker).
+ * This is a polyglot screen — labels are static in all three languages.
+ */
+async function initUiLanguagePicker() {
+  const picker = document.getElementById('ui-language-picker');
+  if (!picker) return;
+
+  return new Promise((resolve) => {
+    picker.classList.remove('hidden');
+
+    picker.querySelectorAll('.ui-lang-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const lang = btn.dataset.uiLang;
+        setUiLanguage(lang);
+        await chromeStorageSet({ uiLanguage: lang });
+        picker.classList.add('hidden');
+        applyTranslations();
+        resolve();
+      });
+    });
+  });
+}
+
+/**
+ * Wire up the UI language selector in settings.
+ * Changing the display language re-renders all UI text.
+ */
+function initUiLanguageSettings() {
+  const container = document.getElementById('ui-language-selector');
+  if (!container) return;
+
+  // Highlight the active UI language
+  const currentUi = getUiLanguage();
+  container.querySelectorAll('.ui-lang-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.uiLang === currentUi);
+
+    btn.addEventListener('click', async () => {
+      const lang = btn.dataset.uiLang;
+      if (lang === getUiLanguage()) return;
+
+      // Update active state
+      container.querySelectorAll('.ui-lang-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Apply new UI language
+      setUiLanguage(lang);
+      await chromeStorageSet({ uiLanguage: lang });
+      applyTranslations();
+
+      // Re-render dynamic sections
+      updateLangLabels();
+      buildLangSwitcher();
+      updateLanguageListStatus();
+      initGrammarSettings();
+      updateAuthUI();
+
+      // Re-run search if there's a query
+      const input = document.getElementById('search-input');
+      if (input?.value.trim()) performSearch(input.value.trim());
+
+      // Broadcast to content scripts and service worker
+      chrome.runtime.sendMessage({ type: 'UI_LANGUAGE_CHANGED', uiLanguage: lang });
     });
   });
 }
@@ -223,7 +329,7 @@ async function loadLanguageData(lang) {
     // Not cached in IndexedDB — download from API if it's a foreign language
     if (!BUNDLED_LANGUAGES.has(lang)) {
       try {
-        showDownloadStatus(lang, 'Laster ned ordbok...');
+        showDownloadStatus(lang, t('settings_downloading'));
         const data = await window.__lexiVocabStore.downloadLanguage(lang, (progress) => {
           showDownloadStatus(lang, progress.detail);
         });
@@ -273,7 +379,7 @@ async function updateLanguageListStatus() {
         statusEl.className = 'lang-option-status';
         if (deleteBtn) deleteBtn.classList.remove('hidden');
       } else {
-        statusEl.textContent = 'last ned';
+        statusEl.textContent = t('settings_needs_download');
         statusEl.className = 'lang-option-status needs-download';
         if (deleteBtn) deleteBtn.classList.add('hidden');
       }
@@ -288,9 +394,8 @@ async function updateLanguageListStatus() {
     newBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const lang = newBtn.dataset.lang;
-      const langName = LANG_SHORT[lang] || lang;
 
-      if (!confirm(`Vil du slette ${langName}? Ordbok og lydfiler fjernes. Du kan laste ned igjen senere.`)) return;
+      if (!confirm(t('settings_delete_confirm', { lang: langName(lang) }))) return;
 
       await window.__lexiVocabStore?.deleteLanguage(lang);
 
@@ -313,10 +418,9 @@ async function updateLanguageListStatus() {
 function showDownloadStatus(lang, message) {
   const container = document.getElementById('search-results');
   if (!container) return;
-  const langNames = { de: 'Tysk', es: 'Spansk', fr: 'Fransk', en: 'Engelsk', nb: 'Norsk bokmål', nn: 'Nynorsk' };
   container.innerHTML = `
     <div class="results-placeholder">
-      <p style="font-weight:600;">${langNames[lang] || lang}</p>
+      <p style="font-weight:600;">${langName(lang)}</p>
       <p>${message}</p>
     </div>`;
 }
@@ -324,7 +428,7 @@ function showDownloadStatus(lang, message) {
 function hideDownloadStatus() {
   const container = document.getElementById('search-results');
   if (!container) return;
-  container.innerHTML = '<div class="results-placeholder"><p>Skriv et ord for å søke i ordboken</p></div>';
+  container.innerHTML = `<div class="results-placeholder"><p>${t('search_placeholder_text')}</p></div>`;
 }
 
 /**
@@ -345,8 +449,8 @@ function flattenBanks(dict) {
         ...entry,
         _bank: bank,
         // Normalize fields for display
-        partOfSpeech: BANK_TO_POS[bank] || bank.replace('bank', ''),
-        gender: entry.genus ? GENUS_TO_GENDER[entry.genus] || entry.genus : null,
+        partOfSpeech: bankToPos(bank),
+        gender: entry.genus ? genusToGender(entry.genus) : null,
         grammar: entry.explanation?._description || null
       });
     }
@@ -427,28 +531,26 @@ function buildInflectionIndex(words) {
 function updateLangLabels() {
   if (!dictionary || !dictionary._metadata) return;
   const code = dictionary._metadata.language.toUpperCase();
+  const uiCode = getUiLanguage().toUpperCase();
+  const isMonolingual = getUiLanguage() === currentLang;
+
   document.querySelectorAll('.target-lang-code').forEach(el => {
     el.textContent = code;
   });
 
-  // Update direction button labels for special languages
+  // Update direction button labels
   const dirNoTarget = document.getElementById('dir-no-target');
   const dirTargetNo = document.getElementById('dir-target-no');
   if (dirNoTarget && dirTargetNo) {
-    if (currentLang === 'nb') {
+    if (isMonolingual) {
       // Monolingual mode — hide direction toggle
-      dirNoTarget.innerHTML = `<span class="target-lang-code">${code}</span> ordbok`;
+      dirNoTarget.innerHTML = `<span class="target-lang-code">${code}</span> ${t('search_monolingual')}`;
       dirTargetNo.style.display = 'none';
       dirNoTarget.classList.add('active');
     } else {
       dirTargetNo.style.display = '';
-      if (currentLang === 'nn') {
-        dirNoTarget.innerHTML = `NB → <span class="target-lang-code">NN</span>`;
-        dirTargetNo.innerHTML = `<span class="target-lang-code">NN</span> → NB`;
-      } else {
-        dirNoTarget.innerHTML = `NO → <span class="target-lang-code">${code}</span>`;
-        dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → NO`;
-      }
+      dirNoTarget.innerHTML = `${uiCode} → <span class="target-lang-code">${code}</span>`;
+      dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → ${uiCode}`;
     }
   }
 }
@@ -746,7 +848,6 @@ function initSearch() {
 }
 
 const LANG_FLAGS = { de: '🇩🇪', es: '🇪🇸', fr: '🇫🇷', en: '🇬🇧', nn: '🇳🇴', nb: '🇳🇴' };
-const LANG_SHORT = { de: 'Tysk', es: 'Spansk', fr: 'Fransk', en: 'Engelsk', nn: 'Nynorsk', nb: 'Bokmål' };
 
 async function buildLangSwitcher() {
   const container = document.getElementById('lang-switcher');
@@ -774,13 +875,13 @@ async function buildLangSwitcher() {
   available.sort((a, b) => {
     if (a === currentLang) return -1;
     if (b === currentLang) return 1;
-    return (LANG_SHORT[a] || a).localeCompare(LANG_SHORT[b] || b);
+    return langName(a).localeCompare(langName(b));
   });
 
   container.innerHTML = available.map(lang => `
     <button class="lang-switch-btn ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">
       <span class="lang-switch-flag">${LANG_FLAGS[lang] || ''}</span>
-      ${LANG_SHORT[lang] || lang.toUpperCase()}
+      ${langName(lang)}
     </button>
   `).join('');
 
@@ -820,8 +921,8 @@ function performSearch(query) {
 
   const q = query.toLowerCase();
 
-  // Monolingual mode: nb/en have no translation field — search by word directly
-  const isMonolingual = currentLang === 'nb';
+  // Monolingual mode: when UI language matches dictionary language (e.g., NB dict with NB UI)
+  const isMonolingual = getUiLanguage() === currentLang;
 
   // Phase 1: Direct matches on base forms
   const directResults = [];
@@ -884,8 +985,8 @@ function performSearch(query) {
       for (const match of matches) {
         if (directEntrySet.has(match.entry)) continue;
         const hint = match.matchType === 'conjugation'
-          ? `«${query}» → bøyning av «${match.entry.word}»`
-          : `«${query}» → flertall av «${match.entry.word}»`;
+          ? t('result_inflection_conjugation', { query, word: match.entry.word })
+          : t('result_inflection_plural', { query, word: match.entry.word });
         inflectionResults.push({ entry: match.entry, inflectionHint: hint });
       }
     }
@@ -901,7 +1002,7 @@ function performSearch(query) {
             || stripped.startsWith(infinitive + ',') || stripped.includes(', ' + infinitive)) {
           inflectionResults.push({
             entry,
-            inflectionHint: `«${query}» → bøyning av «${infinitive}»`
+            inflectionHint: t('result_inflection_conjugation', { query, word: infinitive })
           });
         }
       }
@@ -943,7 +1044,7 @@ function performSearch(query) {
 function renderResults(results) {
   const container = document.getElementById('search-results');
   if (!results.length) {
-    container.innerHTML = '<div class="results-placeholder"><p>Ingen treff</p></div>';
+    container.innerHTML = `<div class="results-placeholder"><p>${t('search_no_results')}</p></div>`;
     return;
   }
 
@@ -952,7 +1053,7 @@ function renderResults(results) {
       <div class="result-basic">
         <div class="result-word-row">
           <span class="result-word">${escapeHtml(entry.word || '')}</span>
-          ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="Spill av">${getPlayIcon()}</button>` : ''}
+          ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="${t('widget_play')}">${getPlayIcon()}</button>` : ''}
         </div>
         <div class="result-translation">${escapeHtml(entry.translation || '')}</div>
         ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
@@ -963,18 +1064,18 @@ function renderResults(results) {
           ${entry.cefr ? `<span class="result-cefr">${escapeHtml(entry.cefr)}</span>` : ''}
         </div>
       </div>
-      <button class="explore-btn">Utforsk mer ▾</button>
+      <button class="explore-btn">${t('result_explore')}</button>
       <div class="result-expanded hidden">
         ${entry.synonyms && entry.synonyms.length ? `
           <div class="expanded-section">
-            <h4>Synonymer</h4>
+            <h4>${t('result_synonyms')}</h4>
             <p>${entry.synonyms.map(s => escapeHtml(s)).join(', ')}</p>
           </div>
         ` : ''}
         ${renderExamples(entry)}
         ${entry.grammar ? `
           <div class="expanded-section">
-            <h4>Grammatikk</h4>
+            <h4>${t('result_grammar')}</h4>
             <p>${escapeHtml(entry.grammar)}</p>
           </div>
         ` : ''}
@@ -992,7 +1093,7 @@ function renderResults(results) {
       const expanded = btn.nextElementSibling;
       const isHidden = expanded.classList.contains('hidden');
       expanded.classList.toggle('hidden');
-      btn.textContent = isHidden ? 'Skjul ▴' : 'Utforsk mer ▾';
+      btn.textContent = isHidden ? t('result_collapse') : t('result_explore');
     });
   });
 
@@ -1010,7 +1111,7 @@ function renderResults(results) {
 
 function showPlaceholder() {
   document.getElementById('search-results').innerHTML =
-    '<div class="results-placeholder"><p>Skriv et ord for å søke i ordboken</p></div>';
+    `<div class="results-placeholder"><p>${t('search_placeholder_text')}</p></div>`;
 }
 
 function escapeHtml(str) {
@@ -1109,7 +1210,9 @@ function renderExamples(entry) {
   // Collect examples from entry directly and from linkedTo
   const examples = [];
   // For Norwegian dictionaries, hide foreign-language translations in examples
-  const hideExampleTranslations = currentLang === 'nb' || currentLang === 'nn';
+  // Hide foreign-language example translations when in monolingual mode
+  const uiLang = getUiLanguage();
+  const hideExampleTranslations = (uiLang === 'nb' || uiLang === 'nn') && (currentLang === 'nb' || currentLang === 'nn');
 
   if (entry.examples && entry.examples.length) {
     for (const ex of entry.examples) {
@@ -1148,7 +1251,7 @@ function renderExamples(entry) {
 
   return `
     <div class="expanded-section">
-      <h4>Eksempler</h4>
+      <h4>${t('result_examples')}</h4>
       ${examples.map(ex => `
         <div class="example">
           <p class="example-sentence">"${escapeHtml(ex.sentence)}"</p>
@@ -1172,11 +1275,11 @@ function renderVerbConjugations(entry) {
     // This is an NB/NN-style flat verb entry
     const forms = presensData.former;
     const labels = {
-      infinitiv: 'Infinitiv',
-      presens: 'Presens',
-      preteritum: 'Preteritum',
-      perfektum_partisipp: 'Perfektum partisipp',
-      imperativ: 'Imperativ'
+      infinitiv: t('tense_infinitive'),
+      presens: t('tense_presens'),
+      preteritum: t('tense_preteritum'),
+      perfektum_partisipp: t('tense_past_participle'),
+      imperativ: t('tense_imperative')
     };
     const rows = Object.entries(labels)
       .filter(([key]) => forms[key] !== undefined)
@@ -1185,7 +1288,7 @@ function renderVerbConjugations(entry) {
     if (rows) {
       sections.push(`
         <div class="expanded-section">
-          <h4>Bøyning</h4>
+          <h4>${t('result_conjugation')}</h4>
           <table class="conjugation-table">${rows}</table>
         </div>
       `);
@@ -1196,9 +1299,9 @@ function renderVerbConjugations(entry) {
   // EN verbs: uses present, past, perfect tense keys
   if (entry.conjugations.present || entry.conjugations.past || entry.conjugations.perfect) {
     const enTenses = [
-      { key: 'present', featureIds: ['grammar_present', 'grammar_en_present'], name: 'Present' },
-      { key: 'past', featureIds: ['grammar_preteritum', 'grammar_en_past'], name: 'Past' },
-      { key: 'perfect', featureIds: ['grammar_perfektum', 'grammar_en_perfect'], name: 'Perfect' }
+      { key: 'present', featureIds: ['grammar_present', 'grammar_en_present'], nameKey: 'tense_presens' },
+      { key: 'past', featureIds: ['grammar_preteritum', 'grammar_en_past'], nameKey: 'tense_preteritum' },
+      { key: 'perfect', featureIds: ['grammar_perfektum', 'grammar_en_perfect'], nameKey: 'tense_perfektum' }
     ];
 
     for (const config of enTenses) {
@@ -1215,18 +1318,18 @@ function renderVerbConjugations(entry) {
         if (rows) {
           sections.push(`
             <div class="expanded-section">
-              <h4>${config.name}</h4>
+              <h4>${t(config.nameKey)}</h4>
               <table class="conjugation-table">${rows}</table>
             </div>
           `);
         }
       } else if (tenseData.participle || tenseData.present_participle) {
         const parts = [];
-        if (tenseData.participle) parts.push(`Past participle: ${escapeHtml(tenseData.participle)}`);
+        if (tenseData.participle) parts.push(`${t('tense_past_participle')}: ${escapeHtml(tenseData.participle)}`);
         if (tenseData.present_participle) parts.push(`Present participle: ${escapeHtml(tenseData.present_participle)}`);
         sections.push(`
           <div class="expanded-section">
-            <h4>${config.name}</h4>
+            <h4>${t(config.nameKey)}</h4>
             <p>${parts.join('<br>')}</p>
           </div>
         `);
@@ -1237,9 +1340,9 @@ function renderVerbConjugations(entry) {
 
   // DE/ES/FR verbs: tense-based with pronoun conjugations
   const tenseConfig = [
-    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], name: 'Presens' },
-    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], name: 'Preteritum' },
-    { keys: ['perfektum', 'perfecto'], featureIds: ['grammar_perfektum', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], name: 'Perfektum' }
+    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], nameKey: 'tense_presens' },
+    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], nameKey: 'tense_preteritum' },
+    { keys: ['perfektum', 'perfecto'], featureIds: ['grammar_perfektum', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], nameKey: 'tense_perfektum' }
   ];
 
   for (const config of tenseConfig) {
@@ -1261,7 +1364,7 @@ function renderVerbConjugations(entry) {
       if (Object.keys(filtered).length > 0) {
         sections.push(`
           <div class="expanded-section">
-            <h4>${config.name}</h4>
+            <h4>${t(config.nameKey)}</h4>
             ${renderConjugationTable(filtered)}
           </div>
         `);
@@ -1269,7 +1372,7 @@ function renderVerbConjugations(entry) {
     } else if (tenseData.auxiliary || tenseData.participle) {
       sections.push(`
         <div class="expanded-section">
-          <h4>${config.name}</h4>
+          <h4>${t(config.nameKey)}</h4>
           <p>${escapeHtml(tenseData.auxiliary || '')} + ${escapeHtml(tenseData.participle || '')}</p>
         </div>
       `);
@@ -1359,15 +1462,15 @@ function renderNounCases(entry) {
 
   return `
     <div class="expanded-section">
-      <h4>Bøyning (kasus)</h4>
+      <h4>${t('result_cases')}</h4>
       <table class="conjugation-table declension-table">
         <thead>
           <tr>
             <th></th>
-            <th>Bestemt ent.</th>
-            <th>Ubestemt ent.</th>
-            <th>Bestemt fl.</th>
-            <th>Ubestemt fl.</th>
+            <th>${t('decl_def_sg')}</th>
+            <th>${t('decl_indef_sg')}</th>
+            <th>${t('decl_def_pl')}</th>
+            <th>${t('decl_indef_pl')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -1387,14 +1490,14 @@ function renderNounForms(entry) {
 
   return `
     <div class="expanded-section">
-      <h4>Bøyning</h4>
+      <h4>${t('result_conjugation')}</h4>
       <table class="conjugation-table declension-table">
         <thead>
-          <tr><th></th><th>Entall</th><th>Flertall</th></tr>
+          <tr><th></th><th>${t('decl_singular')}</th><th>${t('decl_plural')}</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>Ubestemt</strong></td><td>${escapeHtml(ub?.entall || '-')}</td><td>${escapeHtml(ub?.flertall || '-')}</td></tr>
-          <tr><td><strong>Bestemt</strong></td><td>${escapeHtml(be?.entall || '-')}</td><td>${escapeHtml(be?.flertall || '-')}</td></tr>
+          <tr><td><strong>${t('decl_indefinite')}</strong></td><td>${escapeHtml(ub?.entall || '-')}</td><td>${escapeHtml(ub?.flertall || '-')}</td></tr>
+          <tr><td><strong>${t('decl_definite')}</strong></td><td>${escapeHtml(be?.entall || '-')}</td><td>${escapeHtml(be?.flertall || '-')}</td></tr>
         </tbody>
       </table>
     </div>
@@ -1414,7 +1517,7 @@ function renderAdjectiveComparison(entry) {
   if (isFeatureEnabled('grammar_comparative') && komparativ) {
     sections.push(`
       <div class="expanded-section">
-        <h4>Komparativ</h4>
+        <h4>${t('tense_comparative')}</h4>
         <p>${escapeHtml(komparativ)}</p>
       </div>
     `);
@@ -1425,7 +1528,7 @@ function renderAdjectiveComparison(entry) {
   if (isFeatureEnabled('grammar_superlative') && superlativ) {
     sections.push(`
       <div class="expanded-section">
-        <h4>Superlativ</h4>
+        <h4>${t('tense_superlative')}</h4>
         <p>${escapeHtml(superlativ)}</p>
       </div>
     `);
@@ -1464,9 +1567,8 @@ async function initSettings() {
 
       // Confirm download if needed
       if (needsDownload) {
-        const langName = LANG_SHORT[lang] || lang;
         const confirmed = confirm(
-          `${langName} er ikke lastet ned ennå.\n\nDette laster ned ordbok og uttale (~30–50 MB).\n\nVil du fortsette?`
+          t('settings_download_confirm', { lang: langName(lang) })
         );
         if (!confirmed) return;
       }
@@ -1478,7 +1580,7 @@ async function initSettings() {
       if (needsDownload) {
         btn.classList.add('downloading');
         const statusEl = btn.querySelector('.lang-option-status');
-        statusEl.textContent = 'Laster ned...';
+        statusEl.textContent = t('settings_downloading');
         statusEl.className = 'lang-option-status downloading';
       }
 
@@ -1515,28 +1617,28 @@ async function initSettings() {
       });
 
       if (res.status === 429) {
-        codeStatus.textContent = '✗ For mange forsøk. Vent litt og prøv igjen.';
+        codeStatus.textContent = t('settings_code_rate_limited');
         codeStatus.className = 'code-status error';
       } else {
         const data = await res.json();
         if (data.valid) {
           await chromeStorageSet({ accessCode: code, isAuthenticated: true });
-          codeStatus.textContent = '✓ Kode godkjent! ElevenLabs-uttale er aktivert.';
+          codeStatus.textContent = t('settings_code_valid');
           codeStatus.className = 'code-status success';
         } else {
           await chromeStorageSet({ isAuthenticated: false });
-          codeStatus.textContent = '✗ Ugyldig kode.';
+          codeStatus.textContent = t('settings_code_invalid');
           codeStatus.className = 'code-status error';
         }
       }
     } catch {
       // Server unreachable — no offline fallback. Browser TTS still works.
-      codeStatus.innerHTML = '✗ Kunne ikke koble til serveren.<br><span style="font-size:11px;color:var(--text-muted);">Brannmur eller proxy kan blokkere tilkoblingen. Kontakt IT for å godkjenne leksihjelp.vercel.app</span>';
+      codeStatus.innerHTML = `${t('settings_code_offline')}<br><span style="font-size:11px;color:var(--text-muted);">${t('settings_code_offline_hint')}</span>`;
       codeStatus.className = 'code-status error';
     }
 
     verifyBtn.disabled = false;
-    verifyBtn.textContent = 'Bekreft';
+    verifyBtn.textContent = t('settings_code_verify');
   });
 
   // Prediction toggle
@@ -1616,12 +1718,12 @@ async function initPauseButton() {
   const paused = await chromeStorageGet('lexiPaused');
   if (paused) {
     pauseBtn.classList.add('paused');
-    pauseLabel.textContent = 'Start';
+    pauseLabel.textContent = t('nav_start');
   }
 
   pauseBtn.addEventListener('click', async () => {
     const isPaused = pauseBtn.classList.toggle('paused');
-    pauseLabel.textContent = isPaused ? 'Start' : 'Pause';
+    pauseLabel.textContent = isPaused ? t('nav_start') : t('nav_pause');
 
     await chromeStorageSet({ lexiPaused: isPaused });
 
@@ -1686,7 +1788,7 @@ async function initAuth() {
 async function loginWithVipps() {
   const loginBtn = document.getElementById('vipps-login-btn');
   loginBtn.disabled = true;
-  loginBtn.textContent = 'Åpner Vipps...';
+  loginBtn.textContent = t('auth_opening_vipps');
 
   try {
     // Delegate to service worker so the flow survives popup closing
@@ -1700,15 +1802,15 @@ async function loginWithVipps() {
   } catch (err) {
     console.error('Vipps login failed:', err);
     loginBtn.disabled = false;
-    loginBtn.textContent = 'Logg inn med Vipps';
+    loginBtn.textContent = t('auth_login_vipps');
 
     // Show error briefly
     const loggedOut = document.getElementById('auth-logged-out');
     const errorDiv = document.createElement('div');
     errorDiv.className = 'code-status error';
     errorDiv.textContent = err.message.includes('cancelled') || err.message.includes('closed')
-      ? 'Innlogging avbrutt'
-      : 'Innlogging feilet. Prøv igjen.';
+      ? t('auth_login_cancelled')
+      : t('auth_login_failed');
     loggedOut.insertBefore(errorDiv, loggedOut.querySelector('.legacy-code-section'));
     setTimeout(() => errorDiv.remove(), 4000);
   }
@@ -1809,13 +1911,13 @@ async function updateAuthUI() {
   // Subscription badge
   if (badge) {
     if (status === 'active') {
-      badge.textContent = 'Aktivt abonnement';
+      badge.textContent = t('auth_sub_active');
       badge.className = 'subscription-badge active';
     } else if (status === 'pending') {
-      badge.textContent = 'Abonnement venter';
+      badge.textContent = t('auth_sub_pending');
       badge.className = 'subscription-badge pending';
     } else {
-      badge.textContent = 'Ikke abonnert';
+      badge.textContent = t('auth_sub_none');
       badge.className = 'subscription-badge none';
     }
   }
@@ -1830,7 +1932,7 @@ async function updateAuthUI() {
     // Show remaining balance as percentage of max
     const pct = Math.min(100, (quotaBalance / quotaMaxBalance) * 100);
 
-    if (usageText) usageText.textContent = `${quotaBalance.toLocaleString('nb-NO')} tegn`;
+    if (usageText) usageText.textContent = t('auth_usage_chars', { count: quotaBalance.toLocaleString('nb-NO') });
     if (usageFill) {
       usageFill.style.width = `${pct}%`;
       let colorClass = 'usage-bar-fill';
@@ -1858,7 +1960,7 @@ async function subscribe() {
   const subscribeBtn = document.getElementById('subscribe-btn');
   subscribeBtn.disabled = true;
   subscribeBtn.setAttribute('aria-busy', 'true');
-  subscribeBtn.textContent = 'Oppretter abonnement...';
+  subscribeBtn.textContent = t('auth_subscribe_creating');
 
   try {
     const token = await chromeStorageGet('sessionToken');
@@ -1882,7 +1984,7 @@ async function subscribe() {
     console.error('Subscribe failed:', err);
     subscribeBtn.disabled = false;
     subscribeBtn.removeAttribute('aria-busy');
-    subscribeBtn.textContent = 'Abonner — 49 kr/mnd (Vipps)';
+    subscribeBtn.textContent = t('auth_subscribe_monthly');
   }
 }
 
@@ -1890,7 +1992,7 @@ async function subscribeYearly() {
   const btn = document.getElementById('subscribe-yearly-btn');
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
-  btn.textContent = 'Åpner Vipps...';
+  btn.textContent = t('auth_opening_vipps');
 
   try {
     const token = await chromeStorageGet('sessionToken');
@@ -1914,7 +2016,7 @@ async function subscribeYearly() {
     console.error('Yearly subscribe failed:', err);
     btn.disabled = false;
     btn.removeAttribute('aria-busy');
-    btn.textContent = 'Betal 490 kr/år (Vipps)';
+    btn.textContent = t('auth_subscribe_yearly');
   }
 }
 
@@ -1922,7 +2024,7 @@ async function buyTopup() {
   const btn = document.getElementById('topup-btn');
   btn.disabled = true;
   btn.setAttribute('aria-busy', 'true');
-  btn.textContent = 'Åpner Vipps...';
+  btn.textContent = t('auth_topup_opening');
 
   try {
     const token = await chromeStorageGet('sessionToken');
@@ -1948,7 +2050,7 @@ async function buyTopup() {
     console.error('Topup failed:', err);
     btn.disabled = false;
     btn.removeAttribute('aria-busy');
-    btn.textContent = 'Kjøp 50 000 tegn — 49 kr (Vipps)';
+    btn.textContent = t('auth_topup');
   }
 }
 
@@ -1970,6 +2072,6 @@ async function logout() {
   const loginBtn = document.getElementById('vipps-login-btn');
   if (loginBtn) {
     loginBtn.disabled = false;
-    loginBtn.textContent = 'Logg inn med Vipps';
+    loginBtn.textContent = t('auth_login_vipps');
   }
 }

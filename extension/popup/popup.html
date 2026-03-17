@@ -15,13 +15,13 @@
         <h1>Leksihjelp</h1>
       </div>
       <div class="header-actions">
-        <button id="pin-btn" class="icon-btn pin-btn" title="Fest Leksihjelp til verktøylinjen">
+        <button id="pin-btn" class="icon-btn pin-btn" data-i18n-title="pin_title" title="Fest Leksihjelp til verktøylinjen">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L12 6M15.5 7.5L19 4M8.5 7.5L5 4M7 8C7 8 4 12 4 14C4 16 6 17 8 17.5L8 22L10 22L10 17.5C10 17.5 12 18 14 17.5L14 22L16 22L16 17.5C18 17 20 16 20 14C20 12 17 8 17 8L7 8Z"/>
           </svg>
-          <span class="pin-label">Fest</span>
+          <span class="pin-label" data-i18n="pin_label">Fest</span>
         </button>
-        <button id="settings-btn" class="icon-btn" title="Innstillinger" aria-label="Innstillinger">
+        <button id="settings-btn" class="icon-btn" data-i18n-title="settings_title" data-i18n-aria-label="settings_title" title="Innstillinger" aria-label="Innstillinger">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
@@ -32,47 +32,69 @@
     <!-- Pin instructions overlay -->
     <div id="pin-overlay" class="pin-overlay hidden">
       <div class="pin-overlay-content glass">
-        <h3>Fest Leksihjelp til verktøylinjen</h3>
+        <h3 data-i18n="pin_overlay_title">Fest Leksihjelp til verktøylinjen</h3>
         <div class="pin-steps">
           <div class="pin-step">
             <span class="pin-step-num">1</span>
-            <span>Klikk på puslespill-ikonet <strong>&#129513;</strong> i verktøylinjen</span>
+            <span data-i18n="pin_step_1">Klikk på puslespill-ikonet <strong>&#129513;</strong> i verktøylinjen</span>
           </div>
           <div class="pin-step">
             <span class="pin-step-num">2</span>
-            <span>Finn <strong>Leksihjelp</strong> i listen over utvidelser</span>
+            <span data-i18n="pin_step_2">Finn <strong>Leksihjelp</strong> i listen over utvidelser</span>
           </div>
           <div class="pin-step">
             <span class="pin-step-num">3</span>
-            <span>Klikk p&aring; pin-ikonet <strong>&#128204;</strong> ved siden av Leksihjelp</span>
+            <span data-i18n="pin_step_3">Klikk p&aring; pin-ikonet <strong>&#128204;</strong> ved siden av Leksihjelp</span>
           </div>
         </div>
-        <button id="pin-dismiss-btn" class="btn-primary pin-dismiss-btn">Skj&oslash;nte!</button>
+        <button id="pin-dismiss-btn" class="btn-primary pin-dismiss-btn" data-i18n="pin_dismiss">Skj&oslash;nte!</button>
+      </div>
+    </div>
+
+    <!-- First-run UI language picker -->
+    <div id="ui-language-picker" class="language-picker hidden">
+      <div class="language-picker-content glass">
+        <h3 data-i18n="ui_picker_title">Velg språk / Choose language</h3>
+        <p class="settings-note" data-i18n="ui_picker_note">Du kan endre dette senere i innstillinger</p>
+        <div class="language-picker-buttons">
+          <button class="lang-pick-btn ui-lang-btn" data-ui-lang="nb">
+            <span class="lang-pick-flag">🇳🇴</span>
+            <span class="lang-pick-name">Bokmål</span>
+          </button>
+          <button class="lang-pick-btn ui-lang-btn" data-ui-lang="nn">
+            <span class="lang-pick-flag">🇳🇴</span>
+            <span class="lang-pick-name">Nynorsk</span>
+          </button>
+          <button class="lang-pick-btn ui-lang-btn" data-ui-lang="en">
+            <span class="lang-pick-flag">🇬🇧</span>
+            <span class="lang-pick-name">English</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- First-run language picker -->
     <div id="language-picker" class="language-picker hidden">
       <div class="language-picker-content glass">
-        <h3>Hvilket fremmedspråk lærer du?</h3>
-        <p class="settings-note">Ordboken lastes ned for bruk offline</p>
+        <h3 data-i18n="picker_title">Hvilket fremmedspråk lærer du?</h3>
+        <p class="settings-note" data-i18n="picker_note">Ordboken lastes ned for bruk offline</p>
         <div class="language-picker-buttons">
           <button class="lang-pick-btn" data-lang="de">
             <span class="lang-pick-flag">🇩🇪</span>
-            <span class="lang-pick-name">Tysk</span>
+            <span class="lang-pick-name" data-i18n="lang_de">Tysk</span>
           </button>
           <button class="lang-pick-btn" data-lang="es">
             <span class="lang-pick-flag">🇪🇸</span>
-            <span class="lang-pick-name">Spansk</span>
+            <span class="lang-pick-name" data-i18n="lang_es">Spansk</span>
           </button>
           <button class="lang-pick-btn" data-lang="fr">
             <span class="lang-pick-flag">🇫🇷</span>
-            <span class="lang-pick-name">Fransk</span>
+            <span class="lang-pick-name" data-i18n="lang_fr">Fransk</span>
           </button>
         </div>
-        <button id="lang-pick-skip" class="btn-link">Velg senere i innstillinger</button>
+        <button id="lang-pick-skip" class="btn-link" data-i18n="picker_skip">Velg senere i innstillinger</button>
         <div id="lang-pick-progress" class="hidden">
-          <p id="lang-pick-status">Laster ned...</p>
+          <p id="lang-pick-status" data-i18n="picker_downloading">Laster ned...</p>
         </div>
       </div>
     </div>
@@ -84,15 +106,15 @@
           <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          <input type="text" id="search-input" placeholder="Søk etter ord..." autocomplete="off" aria-label="Søk i ordboken">
-          <button id="search-clear" class="search-clear hidden" aria-label="Tøm søk">&times;</button>
+          <input type="text" id="search-input" data-i18n-placeholder="search_placeholder" data-i18n-aria-label="search_aria" placeholder="Søk etter ord..." autocomplete="off" aria-label="Søk i ordboken">
+          <button id="search-clear" class="search-clear hidden" data-i18n-aria-label="search_clear" aria-label="Tøm søk">&times;</button>
         </div>
         <div id="lang-switcher" class="lang-switcher"></div>
         <div class="search-direction glass-subtle">
-          <button id="dir-no-target" class="dir-btn active" title="Norsk → Målspråk">
+          <button id="dir-no-target" class="dir-btn active" data-i18n-title="search_dir_no_target" title="Norsk → Målspråk">
             NO → <span class="target-lang-code">ES</span>
           </button>
-          <button id="dir-target-no" class="dir-btn" title="Målspråk → Norsk">
+          <button id="dir-target-no" class="dir-btn" data-i18n-title="search_dir_target_no" title="Målspråk → Norsk">
             <span class="target-lang-code">ES</span> → NO
           </button>
         </div>
@@ -100,7 +122,7 @@
 
       <div id="search-results" class="results">
         <div class="results-placeholder">
-          <p>Skriv et ord for å søke i ordboken</p>
+          <p data-i18n="search_placeholder_text">Skriv et ord for å søke i ordboken</p>
         </div>
       </div>
     </section>
@@ -108,40 +130,50 @@
     <!-- Settings View -->
     <section id="view-settings" class="view">
       <div class="settings-back">
-        <button id="settings-back-btn" class="text-btn">← Tilbake</button>
+        <button id="settings-back-btn" class="text-btn" data-i18n="settings_back">← Tilbake</button>
       </div>
 
       <div class="settings-group glass">
-        <h3>Språk</h3>
-        <p class="settings-note">Velg språk for ordbok og ordforslag</p>
+        <h3 data-i18n="settings_ui_language_title">Visningsspråk</h3>
+        <p class="settings-note" data-i18n="settings_ui_language_note">Språk for knapper og menyer i Leksihjelp</p>
+        <div id="ui-language-selector" class="language-list">
+          <div class="lang-option-row"><button class="ui-lang-option" data-ui-lang="nb"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name">Bokmål</span></button></div>
+          <div class="lang-option-row"><button class="ui-lang-option" data-ui-lang="nn"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name">Nynorsk</span></button></div>
+          <div class="lang-option-row"><button class="ui-lang-option" data-ui-lang="en"><span class="lang-option-flag">🇬🇧</span><span class="lang-option-name">English</span></button></div>
+        </div>
+      </div>
+
+      <div class="settings-group glass">
+        <h3 data-i18n="settings_language_title">Språk</h3>
+        <p class="settings-note" data-i18n="settings_language_note">Velg språk for ordbok og ordforslag</p>
         <div id="language-list" class="language-list">
-          <div class="lang-option-row"><button class="lang-option" data-lang="de"><span class="lang-option-flag">🇩🇪</span><span class="lang-option-name">Tysk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="de" title="Slett nedlastet språk">✕</button></div>
-          <div class="lang-option-row"><button class="lang-option" data-lang="es"><span class="lang-option-flag">🇪🇸</span><span class="lang-option-name">Spansk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="es" title="Slett nedlastet språk">✕</button></div>
-          <div class="lang-option-row"><button class="lang-option" data-lang="fr"><span class="lang-option-flag">🇫🇷</span><span class="lang-option-name">Fransk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="fr" title="Slett nedlastet språk">✕</button></div>
-          <div class="lang-option-row"><button class="lang-option" data-lang="en"><span class="lang-option-flag">🇬🇧</span><span class="lang-option-name">Engelsk</span><span class="lang-option-status"></span></button></div>
-          <div class="lang-option-row"><button class="lang-option" data-lang="nn"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name">Nynorsk</span><span class="lang-option-status"></span></button></div>
-          <div class="lang-option-row"><button class="lang-option" data-lang="nb"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name">Bokmål</span><span class="lang-option-status"></span></button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="de"><span class="lang-option-flag">🇩🇪</span><span class="lang-option-name" data-i18n="lang_de">Tysk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="de" data-i18n-title="settings_delete_title" title="Slett nedlastet språk">✕</button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="es"><span class="lang-option-flag">🇪🇸</span><span class="lang-option-name" data-i18n="lang_es">Spansk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="es" data-i18n-title="settings_delete_title" title="Slett nedlastet språk">✕</button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="fr"><span class="lang-option-flag">🇫🇷</span><span class="lang-option-name" data-i18n="lang_fr">Fransk</span><span class="lang-option-status"></span></button><button class="lang-delete-btn hidden" data-lang="fr" data-i18n-title="settings_delete_title" title="Slett nedlastet språk">✕</button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="en"><span class="lang-option-flag">🇬🇧</span><span class="lang-option-name" data-i18n="lang_en">Engelsk</span><span class="lang-option-status"></span></button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="nn"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name" data-i18n="lang_nn">Nynorsk</span><span class="lang-option-status"></span></button></div>
+          <div class="lang-option-row"><button class="lang-option" data-lang="nb"><span class="lang-option-flag">🇳🇴</span><span class="lang-option-name" data-i18n="lang_nb">Bokmål</span><span class="lang-option-status"></span></button></div>
         </div>
       </div>
 
       <div class="settings-group glass" id="account-section">
-        <h3>Konto</h3>
+        <h3 data-i18n="settings_account_title">Konto</h3>
 
         <!-- Logged out state -->
         <div id="auth-logged-out">
-          <p class="settings-note">Logg inn med Vipps for ElevenLabs-uttale og abonnement</p>
+          <p class="settings-note" data-i18n="settings_account_note">Logg inn med Vipps for ElevenLabs-uttale og abonnement</p>
           <button id="vipps-login-btn" class="btn-vipps">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-            Logg inn med Vipps
+            <span data-i18n="auth_login_vipps">Logg inn med Vipps</span>
           </button>
 
           <!-- Legacy access code (collapsible) -->
           <details class="legacy-code-section">
-            <summary class="legacy-code-toggle">Har du en tilgangskode?</summary>
+            <summary class="legacy-code-toggle" data-i18n="settings_legacy_code">Har du en tilgangskode?</summary>
             <div class="legacy-code-content">
               <div class="code-input-row">
-                <input type="text" id="setting-access-code" class="glass-input" placeholder="Skriv inn kode...">
-                <button id="verify-code-btn" class="btn-primary">Bekreft</button>
+                <input type="text" id="setting-access-code" class="glass-input" data-i18n-placeholder="settings_code_placeholder" placeholder="Skriv inn kode...">
+                <button id="verify-code-btn" class="btn-primary" data-i18n="settings_code_verify">Bekreft</button>
               </div>
               <div id="code-status" class="code-status"></div>
             </div>
@@ -160,14 +192,14 @@
           <div id="usage-section" class="hidden">
             <div class="usage-bar-container">
               <div class="usage-bar-label">
-                <span>Gjenstående uttale</span>
+                <span data-i18n="auth_usage_label">Gjenstående uttale</span>
                 <span id="usage-text">0 tegn</span>
               </div>
               <div class="usage-bar">
                 <div class="usage-bar-fill" id="usage-bar-fill" style="width: 0%"></div>
               </div>
-              <p class="usage-rollover-note">Ubrukte tegn samles opp til sommerferien</p>
-              <button id="topup-btn" class="btn-topup hidden">
+              <p class="usage-rollover-note" data-i18n="auth_usage_rollover">Ubrukte tegn samles opp til sommerferien</p>
+              <button id="topup-btn" class="btn-topup hidden" data-i18n="auth_topup">
                 Kjøp 50 000 tegn — 49 kr (Vipps)
               </button>
             </div>
@@ -175,39 +207,39 @@
 
           <div id="subscribe-section" class="hidden">
             <div class="subscribe-options">
-              <button id="subscribe-btn" class="btn-primary">
+              <button id="subscribe-btn" class="btn-primary" data-i18n="auth_subscribe_monthly">
                 Abonner — 49 kr/mnd (Vipps)
               </button>
-              <button id="subscribe-yearly-btn" class="btn-secondary-vipps">
+              <button id="subscribe-yearly-btn" class="btn-secondary-vipps" data-i18n="auth_subscribe_yearly">
                 Betal 490 kr/år (Vipps)
               </button>
             </div>
-            <p class="settings-note">Inkl. 50 000 tegn naturlig uttale per måned (ubrukte tegn samles opp til sommerferien)</p>
+            <p class="settings-note" data-i18n="auth_subscribe_note">Inkl. 50 000 tegn naturlig uttale per måned (ubrukte tegn samles opp til sommerferien)</p>
           </div>
 
-          <button id="logout-btn" class="btn-secondary">
+          <button id="logout-btn" class="btn-secondary" data-i18n="auth_logout">
             Logg ut
           </button>
         </div>
       </div>
 
       <div class="settings-group glass">
-        <h3>Ordforslag</h3>
+        <h3 data-i18n="settings_prediction_title">Ordforslag</h3>
         <label class="toggle-row">
-          <span>Aktiver ordforslag ved skriving</span>
+          <span data-i18n="settings_prediction_toggle">Aktiver ordforslag ved skriving</span>
           <input type="checkbox" id="setting-prediction" checked>
           <span class="toggle-slider"></span>
         </label>
       </div>
 
       <div class="settings-group glass">
-        <h3>Grammatikk i ordboken</h3>
-        <p class="settings-note">Hvor mye grammatikk vil du se?</p>
+        <h3 data-i18n="settings_grammar_title">Grammatikk i ordboken</h3>
+        <p class="settings-note" data-i18n="settings_grammar_note">Hvor mye grammatikk vil du se?</p>
         <div id="grammar-preset-selector" class="grammar-preset-row">
           <!-- Populated dynamically: 4 pill buttons -->
         </div>
         <button type="button" id="grammar-customize-toggle" class="grammar-customize-btn">
-          Tilpass selv <span class="grammar-customize-arrow">&#9662;</span>
+          <span data-i18n="settings_grammar_customize">Tilpass selv</span> <span class="grammar-customize-arrow">&#9662;</span>
         </button>
         <div id="grammar-features-container" class="grammar-features-collapsed">
           <!-- Populated dynamically by JS -->
@@ -215,28 +247,28 @@
       </div>
 
       <div class="settings-group glass">
-        <h3>Mørk modus</h3>
+        <h3 data-i18n="settings_darkmode_title">Mørk modus</h3>
         <label class="toggle-row">
-          <span>Bruk mørkt tema</span>
+          <span data-i18n="settings_darkmode_toggle">Bruk mørkt tema</span>
           <input type="checkbox" id="setting-darkmode">
           <span class="toggle-slider"></span>
         </label>
-        <p class="settings-note">Følger systeminnstilling hvis ikke valgt manuelt</p>
+        <p class="settings-note" data-i18n="settings_darkmode_note">Følger systeminnstilling hvis ikke valgt manuelt</p>
       </div>
 
       <div class="settings-group glass">
-        <h3>Hurtigtaster</h3>
+        <h3 data-i18n="settings_shortcuts_title">Hurtigtaster</h3>
         <div class="shortcut-list">
           <div class="shortcut-row">
-            <span>Slå opp markert tekst</span>
+            <span data-i18n="shortcut_lookup">Slå opp markert tekst</span>
             <kbd>Ctrl+Shift+D</kbd>
           </div>
           <div class="shortcut-row">
-            <span>Les opp markert tekst</span>
+            <span data-i18n="shortcut_read">Les opp markert tekst</span>
             <kbd>Ctrl+Shift+S</kbd>
           </div>
           <div class="shortcut-row">
-            <span>Pause/gjenoppta Leksihjelp</span>
+            <span data-i18n="shortcut_pause">Pause/gjenoppta Leksihjelp</span>
             <kbd>Ctrl+Shift+P</kbd>
           </div>
         </div>
@@ -251,26 +283,27 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
-        <span>Ordbok</span>
+        <span data-i18n="nav_dictionary">Ordbok</span>
       </button>
-      <button id="pause-btn" class="nav-btn pause-nav-btn" title="Sett Leksihjelp på pause">
+      <button id="pause-btn" class="nav-btn pause-nav-btn" data-i18n-title="nav_pause_title" title="Sett Leksihjelp på pause">
         <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
         </svg>
         <svg class="play-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="5 3 19 12 5 21 5 3"/>
         </svg>
-        <span class="pause-label">Pause</span>
+        <span class="pause-label" data-i18n="nav_pause">Pause</span>
       </button>
       <button class="nav-btn" data-view="settings" title="Innstillinger">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
-        <span>Innstillinger</span>
+        <span data-i18n="nav_settings">Innstillinger</span>
       </button>
     </nav>
   </div>
 
+  <script src="../i18n/strings.js"></script>
   <script src="../content/vocab-store.js"></script>
   <script src="popup.js"></script>
 </body>

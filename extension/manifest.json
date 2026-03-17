@@ -19,6 +19,7 @@
       "matches": ["<all_urls>"],
       "css": ["styles/content.css"],
       "js": [
+        "i18n/strings.js",
         "content/vocab-store.js",
         "content/floating-widget.js",
         "content/word-prediction.js"

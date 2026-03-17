@@ -1,3 +1,5 @@
+importScripts('../i18n/strings.js');
+
 /**
  * Leksihjelp — Background Service Worker
  *
@@ -8,6 +10,7 @@
  */
 
 const BACKEND_URL = 'https://leksihjelp.no';
+const { t, initI18n, setUiLanguage, getUiLanguage } = self.__lexiI18n;
 
 // ── Install / Update ──
 chrome.runtime.onInstalled.addListener((details) => {
@@ -26,13 +29,13 @@ chrome.runtime.onInstalled.addListener((details) => {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'lexi-lookup',
-      title: 'Slå opp "%s" i Leksihjelp',
+      title: t('ctx_lookup'),
       contexts: ['selection']
     });
 
     chrome.contextMenus.create({
       id: 'lexi-tts',
-      title: 'Les opp "%s" med Leksihjelp',
+      title: t('ctx_read'),
       contexts: ['selection']
     });
 
@@ -44,7 +47,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 
     chrome.contextMenus.create({
       id: 'lexi-toggle-predictions',
-      title: 'Pause ordforslag',
+      title: t('ctx_pause_predictions'),
       contexts: ['editable']
     });
   });
@@ -53,7 +56,7 @@ chrome.runtime.onInstalled.addListener((details) => {
   chrome.storage.local.get('lexiPaused', (result) => {
     const paused = result.lexiPaused || false;
     chrome.contextMenus.update('lexi-toggle-predictions', {
-      title: paused ? 'Fortsett ordforslag' : 'Pause ordforslag'
+      title: paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
     }).catch(() => {});
   });
 });
@@ -71,7 +74,7 @@ async function togglePause() {
   const newState = !result.lexiPaused;
   await chrome.storage.local.set({ lexiPaused: newState });
   chrome.contextMenus.update('lexi-toggle-predictions', {
-    title: newState ? 'Fortsett ordforslag' : 'Pause ordforslag'
+    title: newState ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
   }).catch(() => {});
   await broadcastToAllTabs({ type: 'LEXI_PAUSED', paused: newState });
 }
@@ -124,9 +127,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     broadcastToAllTabs(msg);
     if (msg.type === 'LEXI_PAUSED') {
       chrome.contextMenus.update('lexi-toggle-predictions', {
-        title: msg.paused ? 'Fortsett ordforslag' : 'Pause ordforslag'
+        title: msg.paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
       }).catch(() => {});
     }
+  }
+
+  // UI language changed — update context menu titles
+  if (msg.type === 'UI_LANGUAGE_CHANGED') {
+    setUiLanguage(msg.uiLanguage);
+    chrome.contextMenus.update('lexi-lookup', { title: t('ctx_lookup') }).catch(() => {});
+    chrome.contextMenus.update('lexi-tts', { title: t('ctx_read') }).catch(() => {});
+    chrome.storage.local.get('lexiPaused', (res) => {
+      const paused = res.lexiPaused || false;
+      chrome.contextMenus.update('lexi-toggle-predictions', {
+        title: paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
+      }).catch(() => {});
+    });
   }
 
   // Verify access code
@@ -298,3 +314,6 @@ async function refreshSession() {
 
 // Refresh session on service worker startup
 refreshSession();
+
+// Initialize i18n for service worker
+initI18n();

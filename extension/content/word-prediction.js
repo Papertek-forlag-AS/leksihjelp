@@ -11,6 +11,8 @@
 (function () {
   'use strict';
 
+  const { t, initI18n, setUiLanguage, getUiLanguage } = self.__lexiI18n;
+
   let wordList = [];       // Array of { word, display, translation, type, baseWord, pronoun }
   let dropdown = null;
   let activeElement = null;
@@ -29,6 +31,7 @@
   init();
 
   async function init() {
+    await initI18n();
     const stored = await chromeStorageGet(['language', 'predictionEnabled', 'enabledGrammarFeatures', 'lexiPaused']);
     currentLang = stored.language || 'en';
     enabled = stored.predictionEnabled !== false;
@@ -65,6 +68,9 @@
         lexiPaused = msg.paused;
         if (lexiPaused) hideDropdown();
         updatePauseBadge();
+      }
+      if (msg.type === 'UI_LANGUAGE_CHANGED') {
+        setUiLanguage(msg.uiLanguage);
       }
     });
   }
@@ -163,17 +169,13 @@
     de: 'DE', es: 'ES', fr: 'FR', en: 'EN', nb: 'NB', nn: 'NN'
   };
 
-  // Short part-of-speech labels for dropdown badges
-  const BANK_TO_POS_SHORT = {
-    verbbank: 'verb',
-    nounbank: 'subst.',
-    adjectivebank: 'adj.',
-    articlesbank: 'art.',
-    generalbank: 'ord',
-    numbersbank: 'tall',
-    phrasesbank: 'frase',
-    pronounsbank: 'pron.'
-  };
+  // Short part-of-speech labels for dropdown badges (i18n)
+  function bankToPosShort(bank) {
+    const keys = { verbbank: 'pos_verb_short', nounbank: 'pos_noun_short', adjectivebank: 'pos_adjective_short',
+      articlesbank: 'pos_article_short', generalbank: 'pos_general_short', numbersbank: 'pos_number_short',
+      phrasesbank: 'pos_phrase_short', pronounsbank: 'pos_pronoun_short' };
+    return t(keys[bank] || 'pos_general_short');
+  }
 
   // Pronoun labels per language — maps array index to pronoun string
   // Used to label Spanish/French conjugations where former is an array
@@ -965,15 +967,15 @@
     selectedIndex = 0;
 
     dropdown.innerHTML = suggestions.map((s, i) => {
-      const posLabel = s.bank ? BANK_TO_POS_SHORT[s.bank] || '' : '';
-      const typoHint = s.type === 'typo' ? '<span class="lh-pred-typo">mente du?</span>' : '';
+      const posLabel = s.bank ? bankToPosShort(s.bank) : '';
+      const typoHint = s.type === 'typo' ? `<span class="lh-pred-typo">${escapeHtml(t('pred_typo_hint'))}</span>` : '';
       return `
       <div class="lh-pred-item ${i === 0 ? 'selected' : ''}" data-word="${escapeAttr(s.display)}">
         <span class="lh-pred-word">${escapeHtml(s.display)}${typoHint}</span>
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
-    }).join('') + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="Bytt språk">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">Tab for å velge</span><button class="lh-pred-pause" title="${lexiPaused ? 'Fortsett ordforslag' : 'Pause ordforslag'}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
+    }).join('') + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="${escapeAttr(t('pred_switch_lang'))}">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">${escapeHtml(t('pred_tab_hint'))}</span><button class="lh-pred-pause" title="${escapeAttr(lexiPaused ? t('pred_resume') : t('pred_pause'))}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
 
     // Attach language switcher handler
     const langBtn = dropdown.querySelector('.lh-pred-lang');
@@ -1128,7 +1130,7 @@
       if (!pauseBadge) {
         pauseBadge = document.createElement('div');
         pauseBadge.id = 'lexi-pause-badge';
-        pauseBadge.innerHTML = `<img src="${chrome.runtime.getURL('assets/icon-16.png')}" alt=""><span>Ordforslag pauset</span><button title="Fortsett">\u25B6</button>`;
+        pauseBadge.innerHTML = `<img src="${chrome.runtime.getURL('assets/icon-16.png')}" alt=""><span>${escapeHtml(t('pred_paused'))}</span><button title="${escapeAttr(t('pred_resume_short'))}">\u25B6</button>`;
         pauseBadge.querySelector('button').addEventListener('mousedown', (e) => {
           e.preventDefault();
           e.stopPropagation();
