@@ -46,12 +46,12 @@
     attachGlobalListeners();
     if (lexiPaused) updatePauseBadge();
 
-    chrome.runtime.onMessage.addListener((msg) => {
+    chrome.runtime.onMessage.addListener(async (msg) => {
       if (msg.type === 'LANGUAGE_CHANGED') {
         currentLang = msg.language;
-        loadRecentWords(msg.language);
-        loadGrammarFeatures(msg.language);
-        loadWordList(msg.language);
+        await loadRecentWords(msg.language);
+        await loadGrammarFeatures(msg.language);
+        await loadWordList(msg.language);
       }
       if (msg.type === 'PREDICTION_TOGGLED') {
         enabled = msg.enabled;
@@ -59,7 +59,7 @@
       }
       if (msg.type === 'GRAMMAR_FEATURES_CHANGED') {
         enabledFeatures = new Set(msg.features || []);
-        loadWordList(currentLang); // Rebuild word list with new filters
+        await loadWordList(currentLang); // Rebuild word list with new filters
       }
       if (msg.type === 'LEXI_PAUSED') {
         lexiPaused = msg.paused;

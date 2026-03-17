@@ -938,7 +938,7 @@
         const res = await fetch(url);
         dict = await res.json();
       }
-    } catch { return; }
+    } catch (e) { console.warn('Leksihjelp: inline lookup dictionary load failed', e); return; }
 
     const q = word.toLowerCase().trim();
 

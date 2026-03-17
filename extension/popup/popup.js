@@ -1441,7 +1441,6 @@ async function initSettings() {
       // Update active state
       document.querySelectorAll('.lang-option').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      langSelect.value = lang;
 
       if (needsDownload) {
         btn.classList.add('downloading');
