@@ -1,5 +1,11 @@
 /* ── Leksihjelp Content Script Styles ── */
 
+#lexi-tts-widget :focus-visible,
+#lexi-prediction-dropdown :focus-visible {
+  outline: 2px solid #11B49A;
+  outline-offset: 2px;
+}
+
 /* ── TTS Floating Widget ── */
 #lexi-tts-widget {
   position: fixed;
@@ -557,4 +563,129 @@
 
 #lexi-pause-badge button:hover {
   background: rgba(17, 180, 154, 0.2);
+}
+
+/* ── Dark mode (follows system preference) ── */
+@media (prefers-color-scheme: dark) {
+  #lexi-tts-widget {
+    background: rgba(30, 32, 55, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+    color: #e2e8f0;
+  }
+
+  #lexi-tts-widget .lh-lang-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+  }
+
+  #lexi-tts-widget .lh-lang-btn:hover {
+    background: rgba(17, 180, 154, 0.1);
+  }
+
+  #lexi-tts-widget .lh-close {
+    color: #64748b;
+  }
+
+  #lexi-tts-widget .lh-close:hover {
+    color: #e2e8f0;
+  }
+
+  #lexi-tts-widget .lh-text-area {
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  #lexi-tts-widget .lh-font-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+  }
+
+  #lexi-tts-widget .lh-font-btn:hover {
+    background: rgba(17, 180, 154, 0.15);
+    color: #11B49A;
+  }
+
+  #lexi-tts-widget .lh-word-active {
+    background: rgba(17, 180, 154, 0.3);
+    color: #7CC7A6;
+  }
+
+  #lexi-tts-widget .lh-slider {
+    background: #475569;
+  }
+
+  #lexi-tts-widget .lh-slider::-webkit-slider-thumb {
+    border-color: #1e293b;
+  }
+
+  #lexi-tts-widget .lh-voice-select {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+  }
+
+  #lexi-tts-widget .lh-resize-corner::after {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  #lexi-tts-widget::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  #lexi-prediction-dropdown {
+    background: rgba(30, 32, 55, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  #lexi-prediction-dropdown .lh-pred-item:hover,
+  #lexi-prediction-dropdown .lh-pred-item.selected {
+    background: rgba(17, 180, 154, 0.15);
+  }
+
+  #lexi-prediction-dropdown .lh-pred-word {
+    color: #e2e8f0;
+  }
+
+  #lexi-prediction-dropdown .lh-pred-translation {
+    color: #64748b;
+  }
+
+  #lexi-prediction-dropdown .lh-pred-footer {
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  #lexi-prediction-dropdown .lh-pred-hint {
+    color: #475569;
+  }
+
+  #lexi-prediction-dropdown .lh-pred-pause {
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #64748b;
+  }
+
+  #lexi-prediction-dropdown .lh-pred-lang-option {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+  }
+
+  #lexi-prediction-dropdown .lh-pred-lang-option:hover {
+    background: rgba(17, 180, 154, 0.15);
+  }
+
+  #lexi-prediction-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  #lexi-pause-badge {
+    background: #1e2035;
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: #94a3b8;
+  }
 }

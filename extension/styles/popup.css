@@ -624,7 +624,7 @@ body {
 .result-expanded {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid rgba(99, 102, 241, 0.12);
+  border-top: 1px solid rgba(17, 180, 154, 0.15);
 }
 
 .expanded-section {
@@ -814,11 +814,24 @@ select.glass-input {
   cursor: default;
 }
 
+#subscribe-section .btn-primary {
+  width: 100%;
+  margin-top: 8px;
+}
+
+#logout-btn {
+  margin-top: 10px;
+}
+
+.settings-note {
+  margin-top: 4px;
+}
+
 .btn-secondary {
   padding: 8px 14px;
   background: var(--accent-bg);
   color: var(--accent);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(17, 180, 154, 0.2);
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-weight: 600;
@@ -1137,6 +1150,8 @@ select.glass-input {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  margin-top: 6px;
   padding: 8px 12px;
   border: 1px solid rgba(17, 180, 154, 0.3);
   border-radius: 8px;
@@ -1163,6 +1178,8 @@ select.glass-input {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
+  margin-top: 6px;
   padding: 10px 16px;
   border: 2px solid #11B49A;
   border-radius: 10px;
@@ -1308,13 +1325,13 @@ select.glass-input {
 
 .results::-webkit-scrollbar-thumb,
 #view-settings::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.35);
+  background: rgba(17, 180, 154, 0.35);
   border-radius: 4px;
 }
 
 .results::-webkit-scrollbar-thumb:hover,
 #view-settings::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.55);
+  background: rgba(17, 180, 154, 0.55);
 }
 
 /* ── Dark Mode ── */
@@ -1326,7 +1343,7 @@ select.glass-input {
   --text: #e2e8f0;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --accent-bg: rgba(99, 102, 241, 0.15);
+  --accent-bg: rgba(17, 180, 154, 0.15);
 }
 
 [data-theme="dark"] body {
@@ -1363,7 +1380,7 @@ select.glass-input {
 }
 
 [data-theme="dark"] .result-expanded {
-  border-top-color: rgba(99, 102, 241, 0.2);
+  border-top-color: rgba(17, 180, 154, 0.2);
 }
 
 [data-theme="dark"] .conjugation-table td:first-child {
@@ -1406,7 +1423,7 @@ select.glass-input {
 
 [data-theme="dark"] .btn-secondary {
   background: var(--accent-bg);
-  border-color: rgba(99, 102, 241, 0.3);
+  border-color: rgba(17, 180, 154, 0.3);
 }
 
 [data-theme="dark"] .shortcut-row kbd {
