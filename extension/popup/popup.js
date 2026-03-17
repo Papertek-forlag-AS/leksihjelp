@@ -1011,6 +1011,15 @@ function escapeHtml(str) {
 }
 
 // ── Audio Playback ─────────────────────────────────────────
+let currentAudioBlobUrl = null;
+
+function cleanupAudio() {
+  if (currentAudioBlobUrl) {
+    URL.revokeObjectURL(currentAudioBlobUrl);
+    currentAudioBlobUrl = null;
+  }
+}
+
 /**
  * Play audio for a word — tries IndexedDB cache first, then bundled files
  */
@@ -1018,6 +1027,7 @@ async function playAudio(audioFilename, button) {
   // Stop any currently playing audio
   if (currentAudio) {
     currentAudio.pause();
+    cleanupAudio();
     currentAudio = null;
     document.querySelectorAll('.audio-btn.playing').forEach(btn => {
       btn.classList.remove('playing');
@@ -1034,6 +1044,7 @@ async function playAudio(audioFilename, button) {
     const blob = await window.__lexiVocabStore.getAudioFile(lang, audioFilename);
     if (blob) {
       audioUrl = URL.createObjectURL(blob);
+      currentAudioBlobUrl = audioUrl;
     }
   }
 
@@ -1055,18 +1066,21 @@ async function playAudio(audioFilename, button) {
     console.warn('Audio playback failed:', err);
     button.classList.remove('playing');
     button.innerHTML = getPlayIcon();
+    cleanupAudio();
     currentAudio = null;
   });
 
   currentAudio.addEventListener('ended', () => {
     button.classList.remove('playing');
     button.innerHTML = getPlayIcon();
+    cleanupAudio();
     currentAudio = null;
   });
 
   currentAudio.addEventListener('error', () => {
     button.classList.remove('playing');
     button.innerHTML = getPlayIcon();
+    cleanupAudio();
     currentAudio = null;
   });
 }
@@ -1824,6 +1838,7 @@ async function updateAuthUI() {
 async function subscribe() {
   const subscribeBtn = document.getElementById('subscribe-btn');
   subscribeBtn.disabled = true;
+  subscribeBtn.setAttribute('aria-busy', 'true');
   subscribeBtn.textContent = 'Oppretter abonnement...';
 
   try {
@@ -1847,6 +1862,7 @@ async function subscribe() {
   } catch (err) {
     console.error('Subscribe failed:', err);
     subscribeBtn.disabled = false;
+    subscribeBtn.removeAttribute('aria-busy');
     subscribeBtn.textContent = 'Abonner — 49 kr/mnd (Vipps)';
   }
 }
@@ -1854,6 +1870,7 @@ async function subscribe() {
 async function subscribeYearly() {
   const btn = document.getElementById('subscribe-yearly-btn');
   btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
   btn.textContent = 'Åpner Vipps...';
 
   try {
@@ -1877,6 +1894,7 @@ async function subscribeYearly() {
   } catch (err) {
     console.error('Yearly subscribe failed:', err);
     btn.disabled = false;
+    btn.removeAttribute('aria-busy');
     btn.textContent = 'Betal 490 kr/år (Vipps)';
   }
 }
@@ -1884,6 +1902,7 @@ async function subscribeYearly() {
 async function buyTopup() {
   const btn = document.getElementById('topup-btn');
   btn.disabled = true;
+  btn.setAttribute('aria-busy', 'true');
   btn.textContent = 'Åpner Vipps...';
 
   try {
@@ -1909,6 +1928,7 @@ async function buyTopup() {
   } catch (err) {
     console.error('Topup failed:', err);
     btn.disabled = false;
+    btn.removeAttribute('aria-busy');
     btn.textContent = 'Kjøp 50 000 tegn — 49 kr (Vipps)';
   }
 }
