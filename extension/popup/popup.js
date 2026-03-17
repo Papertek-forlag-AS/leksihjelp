@@ -435,9 +435,9 @@ function updateLangLabels() {
   const dirNoTarget = document.getElementById('dir-no-target');
   const dirTargetNo = document.getElementById('dir-target-no');
   if (dirNoTarget && dirTargetNo) {
-    if (currentLang === 'nb') {
-      // NB-NB monolingual mode — hide direction toggle
-      dirNoTarget.innerHTML = `<span class="target-lang-code">NB</span> ordbok`;
+    if (currentLang === 'nb' || currentLang === 'en') {
+      // Monolingual mode — hide direction toggle
+      dirNoTarget.innerHTML = `<span class="target-lang-code">${code}</span> ordbok`;
       dirTargetNo.style.display = 'none';
       dirNoTarget.classList.add('active');
     } else {
@@ -820,10 +820,18 @@ function performSearch(query) {
 
   const q = query.toLowerCase();
 
+  // Monolingual mode: nb/en have no translation field — search by word directly
+  const isMonolingual = currentLang === 'nb' || currentLang === 'en';
+
   // Phase 1: Direct matches on base forms
   const directResults = [];
   for (const entry of allWords) {
-    if (searchDirection === 'no-target') {
+    if (isMonolingual) {
+      // Monolingual: always search by word
+      if (entry.word && entry.word.toLowerCase().includes(q)) {
+        directResults.push({ entry, inflectionHint: null });
+      }
+    } else if (searchDirection === 'no-target') {
       if (entry.translation && entry.translation.toLowerCase().includes(q)) {
         directResults.push({ entry, inflectionHint: null });
       }
@@ -901,9 +909,10 @@ function performSearch(query) {
   }
 
   // Phase 3: Sort direct results, split into starts-with vs contains
+  const useWord = isMonolingual || searchDirection === 'target-no';
   directResults.sort((a, b) => {
-    const fieldA = searchDirection === 'no-target' ? (a.entry.translation || '') : a.entry.word;
-    const fieldB = searchDirection === 'no-target' ? (b.entry.translation || '') : b.entry.word;
+    const fieldA = useWord ? a.entry.word : (a.entry.translation || '');
+    const fieldB = useWord ? b.entry.word : (b.entry.translation || '');
     const la = fieldA.toLowerCase();
     const lb = fieldB.toLowerCase();
     if (la === q && lb !== q) return -1;
@@ -916,7 +925,7 @@ function performSearch(query) {
   const directStartsWith = [];
   const directContains = [];
   for (const r of directResults) {
-    const field = (searchDirection === 'no-target' ? (r.entry.translation || '') : r.entry.word).toLowerCase();
+    const field = (useWord ? r.entry.word : (r.entry.translation || '')).toLowerCase();
     if (field === q || field.startsWith(q)) {
       directStartsWith.push(r);
     } else {
@@ -1099,22 +1108,33 @@ function getPauseIcon() {
 function renderExamples(entry) {
   // Collect examples from entry directly and from linkedTo
   const examples = [];
+  const isMonolingual = currentLang === 'nb' || currentLang === 'en';
 
   if (entry.examples && entry.examples.length) {
     for (const ex of entry.examples) {
-      // Examples may have source/target (from links) or sentence/translation (legacy)
-      examples.push({
-        sentence: ex.sentence || ex.source || '',
-        translation: ex.translation || ex.target || ''
-      });
+      // For monolingual dictionaries, skip examples from other languages
+      // unless the current target language matches
+      if (!isMonolingual || !ex.lang || ex.lang === currentLang) {
+        examples.push({
+          sentence: ex.sentence || ex.source || '',
+          translation: (!isMonolingual) ? (ex.translation || ex.target || '') : '',
+          lang: ex.lang
+        });
+      } else if (isMonolingual && ex.lang) {
+        // In monolingual mode, still show the Norwegian sentence but hide foreign translation
+        const sentence = ex.sentence || ex.source || '';
+        if (sentence) {
+          examples.push({ sentence, translation: '', lang: ex.lang });
+        }
+      }
     }
   }
 
-  // Also check linkedTo for additional examples
-  if (entry.linkedTo) {
-    const nbLink = entry.linkedTo.nb || entry.linkedTo.nn;
-    if (nbLink?.examples) {
-      for (const ex of nbLink.examples) {
+  // Also check linkedTo for additional examples (for target language)
+  if (entry.linkedTo && !isMonolingual) {
+    const link = entry.linkedTo.nb || entry.linkedTo.nn;
+    if (link?.examples) {
+      for (const ex of link.examples) {
         const sentence = ex.source || ex.sentence || '';
         const translation = ex.target || ex.translation || '';
         // Avoid duplicates
@@ -1133,7 +1153,7 @@ function renderExamples(entry) {
       ${examples.map(ex => `
         <div class="example">
           <p class="example-sentence">"${escapeHtml(ex.sentence)}"</p>
-          <p class="example-translation">${escapeHtml(ex.translation)}</p>
+          ${ex.translation ? `<p class="example-translation">${escapeHtml(ex.translation)}</p>` : ''}
         </div>
       `).join('')}
     </div>
