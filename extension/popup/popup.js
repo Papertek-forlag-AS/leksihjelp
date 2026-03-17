@@ -435,7 +435,7 @@ function updateLangLabels() {
   const dirNoTarget = document.getElementById('dir-no-target');
   const dirTargetNo = document.getElementById('dir-target-no');
   if (dirNoTarget && dirTargetNo) {
-    if (currentLang === 'nb' || currentLang === 'en') {
+    if (currentLang === 'nb') {
       // Monolingual mode — hide direction toggle
       dirNoTarget.innerHTML = `<span class="target-lang-code">${code}</span> ordbok`;
       dirTargetNo.style.display = 'none';
@@ -821,7 +821,7 @@ function performSearch(query) {
   const q = query.toLowerCase();
 
   // Monolingual mode: nb/en have no translation field — search by word directly
-  const isMonolingual = currentLang === 'nb' || currentLang === 'en';
+  const isMonolingual = currentLang === 'nb';
 
   // Phase 1: Direct matches on base forms
   const directResults = [];
@@ -1108,7 +1108,7 @@ function getPauseIcon() {
 function renderExamples(entry) {
   // Collect examples from entry directly and from linkedTo
   const examples = [];
-  const isMonolingual = currentLang === 'nb' || currentLang === 'en';
+  const isMonolingual = currentLang === 'nb';
 
   if (entry.examples && entry.examples.length) {
     for (const ex of entry.examples) {
