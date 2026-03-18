@@ -160,7 +160,7 @@
    * @param {function} [onProgress] - Progress callback ({ status, detail })
    * @returns {object} The language data
    */
-  async function downloadLanguage(lang, onProgress) {
+  async function downloadLanguage(lang, onProgress, options = {}) {
     onProgress?.({ status: 'downloading', detail: `Laster ned ${lang}...` });
 
     const res = await fetch(`${API_BASE}/v3/export/${lang}`);
@@ -176,26 +176,35 @@
     const grammarFeatures = data._grammarFeatures || null;
     delete data._grammarFeatures;
 
-    // Resolve translations from linkedTo.nb into top-level translation field
+    // Resolve translations from linkedTo into top-level translation field.
+    // Prefer the user's Norwegian variant (nn or nb) if specified.
+    const uiLang = options.uiLanguage || 'nb';
+    const preferNn = uiLang === 'nn';
     const banks = Object.keys(data).filter(k => k.endsWith('bank'));
     for (const bank of banks) {
       for (const entry of Object.values(data[bank])) {
         if (!entry.translation) {
-          const nbLink = entry.linkedTo?.nb || entry.linkedTo?.nn;
-          if (nbLink?.translation) {
-            entry.translation = nbLink.translation;
+          const link = preferNn
+            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
+            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
+          if (link?.translation) {
+            entry.translation = link.translation;
           }
         }
         // Also normalize examples from linkedTo if entry has none
         if ((!entry.examples || entry.examples.length === 0) && entry.linkedTo) {
-          const link = entry.linkedTo.nb || entry.linkedTo.nn;
+          const link = preferNn
+            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
+            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
           if (link?.examples) {
             entry.examples = link.examples;
           }
         }
         // Normalize explanation
         if (!entry.explanation && entry.linkedTo) {
-          const link = entry.linkedTo.nb || entry.linkedTo.nn;
+          const link = preferNn
+            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
+            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
           if (link?.explanation) {
             entry.explanation = { _description: link.explanation };
           }
@@ -457,7 +466,7 @@
       .filter(f => f.needsDeflate)
       .map(async (f) => {
         try {
-          const ds = new DecompressionStream('raw');
+          const ds = new DecompressionStream('deflate-raw');
           const writer = ds.writable.getWriter();
           writer.write(f.compressedData);
           writer.close();

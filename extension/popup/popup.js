@@ -8,15 +8,35 @@ const BACKEND_URL = 'https://leksihjelp.no';
 const { t, initI18n, setUiLanguage, getUiLanguage, langName } = self.__lexiI18n;
 
 let dictionary = null;
-let nbDictionary = null; // Norwegian bokmål dictionary for two-way lookups
+let noDictionary = null; // Norwegian dictionary for two-way lookups (nb or nn based on UI)
 let currentAudio = null; // Currently playing audio
 let allWords = []; // Flattened array of all words from all banks
-let nbWords = []; // Flattened Norwegian words
+let noWords = []; // Flattened Norwegian words (nb or nn)
 let inflectionIndex = null; // Map: lowercased inflected form -> [{ entry, matchType, matchDetail }]
 let currentLang = 'es';
 let searchDirection = 'no-target'; // 'no-target' or 'target-no'
 let grammarFeatures = null; // Grammar features metadata
 let enabledFeatures = new Set(); // Set of enabled feature IDs
+
+/**
+ * Get the appropriate Norwegian translation for an entry,
+ * respecting the user's UI language (nb vs nn).
+ * Falls back to entry.translation if no linkedTo data.
+ */
+function getTranslation(entry) {
+  if (!entry) return '';
+  const ui = getUiLanguage();
+  // If UI is nynorsk, prefer the nn link translation
+  if (ui === 'nn' && entry.linkedTo?.nn?.translation) {
+    return entry.linkedTo.nn.translation;
+  }
+  // If UI is bokmål (or default), prefer the nb link translation
+  if (ui === 'nb' && entry.linkedTo?.nb?.translation) {
+    return entry.linkedTo.nb.translation;
+  }
+  // Fallback: use the baked-in translation (typically nb)
+  return entry.translation || '';
+}
 
 // Bank name to Norwegian part of speech mapping
 const BANK_TO_POS = {
@@ -176,7 +196,7 @@ async function initFirstRunPicker() {
           if (window.__lexiVocabStore) {
             await window.__lexiVocabStore.downloadLanguage(lang, (p) => {
               status.textContent = p.detail;
-            });
+            }, { uiLanguage: getUiLanguage() });
           }
 
           // Save selection
@@ -294,18 +314,19 @@ async function loadDictionary(lang) {
     inflectionIndex = buildInflectionIndex(allWords);
     updateLangLabels();
 
-    // Load Norwegian dictionary for two-way lookups
-    if (lang !== 'nb') {
+    // Load Norwegian dictionary for two-way lookups (match UI language: nn or nb)
+    const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
+    if (lang !== noLang) {
       try {
-        nbDictionary = await loadLanguageData('nb');
-        nbWords = nbDictionary ? flattenBanks(nbDictionary) : [];
+        noDictionary = await loadLanguageData(noLang);
+        noWords = noDictionary ? flattenBanks(noDictionary) : [];
       } catch {
-        nbDictionary = null;
-        nbWords = [];
+        noDictionary = null;
+        noWords = [];
       }
     } else {
-      nbDictionary = null;
-      nbWords = [];
+      noDictionary = null;
+      noWords = [];
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -332,7 +353,7 @@ async function loadLanguageData(lang) {
         showDownloadStatus(lang, t('settings_downloading'));
         const data = await window.__lexiVocabStore.downloadLanguage(lang, (progress) => {
           showDownloadStatus(lang, progress.detail);
-        });
+        }, { uiLanguage: getUiLanguage() });
         hideDownloadStatus();
         return data;
       } catch (err) {
@@ -752,12 +773,12 @@ function isFeatureEnabled(featureId) {
   // Map generic feature IDs to language-specific equivalents
   const genericToLangMap = {
     'grammar_articles': [`${langPrefix}genus`],
-    'grammar_plural': [`${langPrefix}flertall`, `${langPrefix}fleirtal`],
-    'grammar_present': [`${langPrefix}presens`],
-    'grammar_preteritum': [`${langPrefix}preteritum`],
-    'grammar_perfektum': [`${langPrefix}perfektum`],
-    'grammar_comparative': [`${langPrefix}komparativ`],
-    'grammar_superlative': [`${langPrefix}superlativ`],
+    'grammar_plural': [`${langPrefix}flertall`, `${langPrefix}fleirtal`, `${langPrefix}plural`],
+    'grammar_present': [`${langPrefix}presens`, `${langPrefix}presente`, `${langPrefix}present`],
+    'grammar_preteritum': [`${langPrefix}preteritum`, `${langPrefix}preterito`],
+    'grammar_perfektum': [`${langPrefix}perfektum`, `${langPrefix}perfecto`, `${langPrefix}passe_compose`],
+    'grammar_comparative': [`${langPrefix}komparativ`, `${langPrefix}comparative`],
+    'grammar_superlative': [`${langPrefix}superlativ`, `${langPrefix}superlative`],
     'grammar_noun_declension': [`${langPrefix}noun_forms`, `${langPrefix}bestemt_form`],
     'grammar_adjective_declension': [`${langPrefix}adj_declension`],
   };
@@ -933,7 +954,8 @@ function performSearch(query) {
         directResults.push({ entry, inflectionHint: null });
       }
     } else if (searchDirection === 'no-target') {
-      if (entry.translation && entry.translation.toLowerCase().includes(q)) {
+      const trans = getTranslation(entry);
+      if (trans && trans.toLowerCase().includes(q)) {
         directResults.push({ entry, inflectionHint: null });
       }
     } else {
@@ -945,15 +967,15 @@ function performSearch(query) {
 
   // Phase 1b: Two-way lookup via Norwegian dictionary's linkedTo
   // When searching no→target, also search nb words and follow links to target language
-  if (searchDirection === 'no-target' && nbWords.length > 0) {
+  if (searchDirection === 'no-target' && noWords.length > 0) {
     const directEntryWords = new Set(directResults.map(r => r.entry.word?.toLowerCase()));
 
-    for (const nbEntry of nbWords) {
-      if (!nbEntry.word || !nbEntry.word.toLowerCase().includes(q)) continue;
-      if (!nbEntry.linkedTo) continue;
+    for (const noEntry of noWords) {
+      if (!noEntry.word || !noEntry.word.toLowerCase().includes(q)) continue;
+      if (!noEntry.linkedTo) continue;
 
       // Follow link to the target language
-      const link = nbEntry.linkedTo[currentLang];
+      const link = noEntry.linkedTo[currentLang];
       if (!link?.primary) continue;
 
       // Find the target entry in our dictionary
@@ -966,7 +988,7 @@ function performSearch(query) {
           if (flatEntry) {
             directResults.push({
               entry: flatEntry,
-              inflectionHint: `«${nbEntry.word}» → ${flatEntry.word}`
+              inflectionHint: `«${noEntry.word}» → ${flatEntry.word}`
             });
             directEntryWords.add(flatEntry.word?.toLowerCase());
           }
@@ -995,8 +1017,9 @@ function performSearch(query) {
     if (infinitive) {
       for (const entry of allWords) {
         if (directEntrySet.has(entry)) continue;
-        if (!entry.translation) continue;
-        const trans = entry.translation.toLowerCase();
+        const entryTrans = getTranslation(entry);
+        if (!entryTrans) continue;
+        const trans = entryTrans.toLowerCase();
         const stripped = trans.startsWith('å ') ? trans.slice(2) : trans;
         if (stripped === infinitive || stripped.startsWith(infinitive + ' ')
             || stripped.startsWith(infinitive + ',') || stripped.includes(', ' + infinitive)) {
@@ -1012,8 +1035,8 @@ function performSearch(query) {
   // Phase 3: Sort direct results, split into starts-with vs contains
   const useWord = isMonolingual || searchDirection === 'target-no';
   directResults.sort((a, b) => {
-    const fieldA = useWord ? a.entry.word : (a.entry.translation || '');
-    const fieldB = useWord ? b.entry.word : (b.entry.translation || '');
+    const fieldA = useWord ? a.entry.word : getTranslation(a.entry);
+    const fieldB = useWord ? b.entry.word : getTranslation(b.entry);
     const la = fieldA.toLowerCase();
     const lb = fieldB.toLowerCase();
     if (la === q && lb !== q) return -1;
@@ -1026,7 +1049,7 @@ function performSearch(query) {
   const directStartsWith = [];
   const directContains = [];
   for (const r of directResults) {
-    const field = (useWord ? r.entry.word : (r.entry.translation || '')).toLowerCase();
+    const field = (useWord ? r.entry.word : getTranslation(r.entry)).toLowerCase();
     if (field === q || field.startsWith(q)) {
       directStartsWith.push(r);
     } else {
@@ -1038,24 +1061,75 @@ function performSearch(query) {
 
   // Final order: exact/starts-with → inflection matches → contains
   const combined = [...directStartsWith, ...inflectionResults, ...directContains];
+
+  // Fallback: if no results and not monolingual, try the opposite direction
+  if (combined.length === 0 && !isMonolingual) {
+    const fallbackResults = [];
+    if (searchDirection === 'no-target') {
+      // Was searching Norwegian translations, try matching target-language words instead
+      for (const entry of allWords) {
+        if (entry.word && entry.word.toLowerCase().includes(q)) {
+          fallbackResults.push({ entry, inflectionHint: null });
+        }
+      }
+      // Also try inflection index
+      if (inflectionIndex) {
+        const fallbackSet = new Set(fallbackResults.map(r => r.entry));
+        const matches = inflectionIndex.get(q) || [];
+        for (const match of matches) {
+          if (fallbackSet.has(match.entry)) continue;
+          const hint = match.matchType === 'conjugation'
+            ? t('result_inflection_conjugation', { query, word: match.entry.word })
+            : t('result_inflection_plural', { query, word: match.entry.word });
+          fallbackResults.push({ entry: match.entry, inflectionHint: hint });
+        }
+      }
+    } else {
+      // Was searching target-language words, try matching Norwegian translations instead
+      for (const entry of allWords) {
+        const trans = getTranslation(entry);
+        if (trans && trans.toLowerCase().includes(q)) {
+          fallbackResults.push({ entry, inflectionHint: null });
+        }
+      }
+    }
+
+    if (fallbackResults.length > 0) {
+      const fbUseWord = searchDirection === 'no-target';
+      fallbackResults.sort((a, b) => {
+        const fieldA = (fbUseWord ? a.entry.word : getTranslation(a.entry)).toLowerCase();
+        const fieldB = (fbUseWord ? b.entry.word : getTranslation(b.entry)).toLowerCase();
+        if (fieldA.startsWith(q) && !fieldB.startsWith(q)) return -1;
+        if (fieldB.startsWith(q) && !fieldA.startsWith(q)) return 1;
+        return fieldA.localeCompare(fieldB);
+      });
+      renderResults(fallbackResults.slice(0, 50), { fallbackHint: true });
+      return;
+    }
+  }
+
   renderResults(combined.slice(0, 50));
 }
 
-function renderResults(results) {
+function renderResults(results, options = {}) {
   const container = document.getElementById('search-results');
   if (!results.length) {
     container.innerHTML = `<div class="results-placeholder"><p>${t('search_no_results')}</p></div>`;
     return;
   }
 
-  container.innerHTML = results.map(({ entry, inflectionHint }) => `
+  const hintHtml = options.fallbackHint
+    ? `<div class="fallback-hint">${t('search_fallback_hint')}</div>`
+    : '';
+
+  container.innerHTML = hintHtml + results.map(({ entry, inflectionHint }) => `
     <div class="result-card glass" data-id="${entry._id || ''}">
       <div class="result-basic">
         <div class="result-word-row">
           <span class="result-word">${escapeHtml(entry.word || '')}</span>
           ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="${t('widget_play')}">${getPlayIcon()}</button>` : ''}
         </div>
-        <div class="result-translation">${escapeHtml(entry.translation || '')}</div>
+        <div class="result-translation">${escapeHtml(getTranslation(entry))}</div>
         ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
         <div class="result-meta">
           <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
@@ -1340,9 +1414,9 @@ function renderVerbConjugations(entry) {
 
   // DE/ES/FR verbs: tense-based with pronoun conjugations
   const tenseConfig = [
-    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], nameKey: 'tense_presens' },
-    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], nameKey: 'tense_preteritum' },
-    { keys: ['perfektum', 'perfecto'], featureIds: ['grammar_perfektum', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], nameKey: 'tense_perfektum' }
+    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_de_presens', 'grammar_es_presente', 'grammar_fr_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], nameKey: 'tense_presens' },
+    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_de_preteritum', 'grammar_es_preterito', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], nameKey: 'tense_preteritum' },
+    { keys: ['perfektum', 'perfecto', 'passe_compose'], featureIds: ['grammar_perfektum', 'grammar_de_perfektum', 'grammar_es_perfecto', 'grammar_fr_passe_compose', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], nameKey: 'tense_perfektum' }
   ];
 
   for (const config of tenseConfig) {

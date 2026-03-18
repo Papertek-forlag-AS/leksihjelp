@@ -546,3 +546,40 @@ These are the student's native language dictionaries, used for monolingual looku
 2. Add feature definitions for all `*` (future) features — they can exist in the features list even if no vocabulary data uses them yet. Leksihjelp will simply toggle them without effect until data is available.
 3. The default preset for new users should be `basic` (Leksihjelp already falls back to this in `loadGrammarFeatures()`)
 4. After updating, Leksihjelp syncs via `npm run sync-vocab` and the presets will appear as pill buttons in the grammar settings
+
+---
+
+## Implementation log
+
+### 2026-03-17 — Papertek Vocabulary updated
+
+**File changed:** `vocabulary/lexicon/grammar-features.json`
+
+**Presets added** (4 per language × 6 languages = 24 presets):
+All preset arrays from this spec were added verbatim for nb, nn, de, es, fr, en.
+
+**Feature IDs renamed** (to use target-language tense names instead of Norwegian):
+- `grammar_es_presens` → `grammar_es_presente`
+- `grammar_es_preteritum` → `grammar_es_preterito`
+- `grammar_es_perfektum` → `grammar_es_perfecto`
+- `grammar_fr_presens` → `grammar_fr_present`
+
+**Future placeholder features added:**
+- **de (5):** futurum, imperativ, konjunktiv, passiv, pronoun_cases
+- **es (9):** imperfecto, futuro, imperativo, subjuntivo, gerundio, condicional, pronouns_all, pronouns_singular_nosotros, pronouns_yo_tu, adj_placement, adj_agreement
+- **fr (12):** futur_simple, imperatif, subjonctif, conditionnel, plus_que_parfait, verb_group, pronouns_all, pronouns_singular_nous, pronouns_je_tu, partitif, adj_placement, adj_agreement
+- **en (8):** continuous, future, passive, conditional, irregular, plural, genitive, countable
+- **nb (1):** passiv  ·  **nn (1):** passiv
+
+**New category added:** `pronouns` for German (for `grammar_de_pronoun_cases`)
+
+**Features removed** (not in spec, were in previous file):
+- `grammar_es_noun_forms`, `grammar_fr_noun_forms` — not part of preset system
+- `grammar_fr_verb_class` — replaced by `grammar_fr_verb_group` (future)
+
+### 2026-03-17 — Leksihjelp extension updated
+
+**File changed:** `extension/popup/popup.js`
+
+- `genericToLangMap` updated to resolve both old and new feature IDs (e.g., `presens` and `presente` for Spanish, `present` for French)
+- `tenseConfig` array updated with explicit language-prefixed feature IDs for de/es/fr and added `passe_compose` as a conjugation key for French perfektum
