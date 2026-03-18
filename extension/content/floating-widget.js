@@ -10,6 +10,15 @@
 
   const { t, initI18n, setUiLanguage, getUiLanguage, langName } = self.__lexiI18n;
 
+  /** Pick the right Norwegian translation based on UI language (nn vs nb). */
+  function getTranslation(entry) {
+    if (!entry) return '';
+    const ui = getUiLanguage();
+    if (ui === 'nn' && entry.linkedTo?.nn?.translation) return entry.linkedTo.nn.translation;
+    if (ui === 'nb' && entry.linkedTo?.nb?.translation) return entry.linkedTo.nb.translation;
+    return entry.translation || '';
+  }
+
   const BACKEND_URL = 'https://leksihjelp.no';
 
   // Predefined ElevenLabs voices per language
@@ -970,10 +979,12 @@
       for (const entry of Object.values(bankData)) {
         if (!entry.word) continue;
         const wordMatch = entry.word.toLowerCase() === q;
-        const translationMatch = entry.translation && entry.translation.toLowerCase() === q;
+        const entryTrans = getTranslation(entry);
+        const translationMatch = entryTrans && entryTrans.toLowerCase() === q;
         if (wordMatch || translationMatch) {
           match = {
             ...entry,
+            translation: getTranslation(entry),
             partOfSpeech: bankToPos(bank),
             gender: entry.genus ? genusToGender(entry.genus) : null,
             grammar: entry.explanation?._description || null,
