@@ -119,6 +119,9 @@ const _STRINGS = {
     settings_download_confirm: '{lang} er ikke lastet ned ennå.\n\nDette laster ned ordbok og uttale (~30–50 MB).\n\nVil du fortsette?',
     settings_downloading: 'Laster ned...',
     settings_needs_download: 'last ned',
+    settings_download_audio: '🔊↓',
+    settings_download_audio_title: 'Last ned uttale',
+    settings_download_audio_confirm: 'Last ned uttale for {lang}? (~45 MB)',
 
     settings_account_title: 'Konto',
     settings_account_note: 'Logg inn med Vipps for ElevenLabs-uttale og abonnement',
@@ -314,6 +317,9 @@ const _STRINGS = {
     settings_download_confirm: '{lang} er ikkje lasta ned enno.\n\nDette lastar ned ordbok og uttale (~30–50 MB).\n\nVil du halde fram?',
     settings_downloading: 'Lastar ned...',
     settings_needs_download: 'last ned',
+    settings_download_audio: '🔊↓',
+    settings_download_audio_title: 'Last ned uttale',
+    settings_download_audio_confirm: 'Last ned uttale for {lang}? (~45 MB)',
 
     settings_account_title: 'Konto',
     settings_account_note: 'Logg inn med Vipps for ElevenLabs-uttale og abonnement',
@@ -502,6 +508,9 @@ const _STRINGS = {
     settings_download_confirm: '{lang} has not been downloaded yet.\n\nThis downloads dictionary and pronunciation (~30–50 MB).\n\nContinue?',
     settings_downloading: 'Downloading...',
     settings_needs_download: 'download',
+    settings_download_audio: '🔊↓',
+    settings_download_audio_title: 'Download pronunciation',
+    settings_download_audio_confirm: 'Download pronunciation for {lang}? (~45 MB)',
 
     settings_account_title: 'Account',
     settings_account_note: 'Log in with Vipps for ElevenLabs pronunciation and subscription',

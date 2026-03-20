@@ -375,6 +375,28 @@ async function loadLanguageData(lang) {
   }
 }
 
+/**
+ * Download audio pack for a bundled language if not already cached.
+ * Runs in background — does not block dictionary loading.
+ */
+async function ensureAudioPack(lang) {
+  try {
+    const hasAudio = await window.__lexiVocabStore.hasAudioCached(lang);
+    if (hasAudio) return;
+
+    const manifest = await fetch(`${window.__lexiVocabStore.API_BASE}/v3/manifest`).then(r => r.json());
+    const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
+    if (!audioEndpoint) return;
+
+    console.log(`Leksihjelp: Downloading audio pack for ${lang}...`);
+    await window.__lexiVocabStore.downloadAudioPack(lang, audioEndpoint);
+    console.log(`Leksihjelp: Audio pack for ${lang} downloaded`);
+    updateLanguageListStatus();
+  } catch (err) {
+    console.warn(`Leksihjelp: Audio download for ${lang} failed:`, err.message);
+  }
+}
+
 async function updateLanguageListStatus() {
   const buttons = document.querySelectorAll('.lang-option');
   for (const btn of buttons) {
@@ -389,9 +411,43 @@ async function updateLanguageListStatus() {
     const deleteBtn = document.querySelector(`.lang-delete-btn[data-lang="${lang}"]`);
 
     if (isBundled) {
-      statusEl.textContent = '';
-      statusEl.className = 'lang-option-status';
       if (deleteBtn) deleteBtn.classList.add('hidden');
+      // Check if audio is cached for bundled languages
+      if (window.__lexiVocabStore) {
+        const hasAudio = await window.__lexiVocabStore.hasAudioCached(lang);
+        if (hasAudio) {
+          statusEl.textContent = '🔊';
+          statusEl.className = 'lang-option-status';
+        } else {
+          statusEl.textContent = t('settings_download_audio') || '🔊↓';
+          statusEl.className = 'lang-option-status download-audio';
+          statusEl.title = t('settings_download_audio_title') || 'Last ned uttale';
+          statusEl.style.cursor = 'pointer';
+          // Clone to remove old listeners
+          const newStatus = statusEl.cloneNode(true);
+          statusEl.replaceWith(newStatus);
+          newStatus.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            if (newStatus.classList.contains('downloading')) return;
+            const confirmed = confirm(t('settings_download_audio_confirm', { lang: langName(lang) }) || `Last ned uttale for ${langName(lang)}? (~45 MB)`);
+            if (!confirmed) return;
+            newStatus.classList.add('downloading');
+            newStatus.textContent = t('settings_downloading') || '...';
+            try {
+              await ensureAudioPack(lang);
+              newStatus.textContent = '🔊';
+              newStatus.className = 'lang-option-status';
+              newStatus.style.cursor = '';
+            } catch {
+              newStatus.textContent = t('settings_download_audio') || '🔊↓';
+              newStatus.classList.remove('downloading');
+            }
+          });
+        }
+      } else {
+        statusEl.textContent = '';
+        statusEl.className = 'lang-option-status';
+      }
     } else if (window.__lexiVocabStore) {
       const version = await window.__lexiVocabStore.getCachedVersion(lang);
       if (version) {
@@ -1221,24 +1277,58 @@ async function playAudio(audioFilename, button) {
 
   if (!audioFilename || !dictionary?._metadata) return;
   const lang = dictionary._metadata.language;
+  // NN and NB share pronunciation — try both
+  const langsToTry = lang === 'nn' ? ['nn', 'nb'] : lang === 'nb' ? ['nb', 'nn'] : [lang];
 
-  // Try IndexedDB first
+  // Try IndexedDB first (check each language variant)
   let audioUrl = null;
   if (window.__lexiVocabStore) {
-    const blob = await window.__lexiVocabStore.getAudioFile(lang, audioFilename);
-    if (blob) {
-      audioUrl = URL.createObjectURL(blob);
-      currentAudioBlobUrl = audioUrl;
+    for (const tryLang of langsToTry) {
+      const blob = await window.__lexiVocabStore.getAudioFile(tryLang, audioFilename);
+      if (blob) {
+        audioUrl = URL.createObjectURL(blob);
+        currentAudioBlobUrl = audioUrl;
+        break;
+      }
     }
   }
 
-  // Fall back to bundled file
+  // Fall back to bundled file — verify it exists before playing
   if (!audioUrl) {
-    try {
-      audioUrl = chrome.runtime.getURL(`audio/${lang}/${audioFilename}`);
-    } catch {
-      return;
+    for (const tryLang of langsToTry) {
+      try {
+        const url = chrome.runtime.getURL(`audio/${tryLang}/${audioFilename}`);
+        const check = await fetch(url, { method: 'HEAD' });
+        if (check.ok) {
+          audioUrl = url;
+          break;
+        }
+      } catch {
+        // Not found, try next
+      }
     }
+  }
+
+  // No file audio — fall back to browser TTS
+  if (!audioUrl) {
+    const wordEl = button.closest('.result-word-row')?.querySelector('.result-word');
+    const word = wordEl?.textContent?.trim();
+    if (word && window.speechSynthesis) {
+      const VOICE_LANGS = { de: 'de', es: 'es', fr: 'fr', en: 'en', nb: 'nb', nn: 'nb', no: 'nb' };
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = VOICE_LANGS[lang] || 'nb';
+      const voices = synth.getVoices();
+      const match = voices.find(v => v.lang.startsWith(utterance.lang));
+      if (match) utterance.voice = match;
+      button.classList.add('playing');
+      button.innerHTML = getPauseIcon();
+      utterance.onend = () => { button.classList.remove('playing'); button.innerHTML = getPlayIcon(); };
+      utterance.onerror = () => { button.classList.remove('playing'); button.innerHTML = getPlayIcon(); };
+      synth.speak(utterance);
+    }
+    return;
   }
 
   currentAudio = new Audio(audioUrl);
