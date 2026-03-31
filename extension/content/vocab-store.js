@@ -84,6 +84,22 @@
     });
   }
 
+  // ── Content script detection ──
+  // Content scripts run on the web page's origin, so IndexedDB returns the
+  // page's database — not the extension's. Detect this and proxy read
+  // requests through the service worker which runs on the extension origin.
+  const _isExtensionOrigin = (typeof location !== 'undefined' && location.protocol === 'chrome-extension:');
+  const _proxyCache = new Map(); // in-memory cache to avoid repeated message passing
+
+  function _sendMessageAsync(msg) {
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(msg, (response) => {
+        if (chrome.runtime.lastError) { resolve(null); return; }
+        resolve(response ?? null);
+      });
+    });
+  }
+
   // ── Public API ──
 
   /**
@@ -91,6 +107,13 @@
    * Returns the full data object or null if not cached.
    */
   async function getCachedLanguage(lang) {
+    if (!_isExtensionOrigin) {
+      const cacheKey = `lang:${lang}`;
+      if (_proxyCache.has(cacheKey)) return _proxyCache.get(cacheKey);
+      const data = await _sendMessageAsync({ type: 'VOCAB_GET_CACHED', language: lang });
+      if (data) _proxyCache.set(cacheKey, data);
+      return data;
+    }
     try {
       const db = await openDB();
       const record = await dbGet(db, lang);
@@ -106,6 +129,13 @@
    * Get cached grammar features for a language.
    */
   async function getCachedGrammarFeatures(lang) {
+    if (!_isExtensionOrigin) {
+      const cacheKey = `grammar:${lang}`;
+      if (_proxyCache.has(cacheKey)) return _proxyCache.get(cacheKey);
+      const data = await _sendMessageAsync({ type: 'VOCAB_GET_GRAMMAR', language: lang });
+      if (data) _proxyCache.set(cacheKey, data);
+      return data;
+    }
     try {
       const db = await openDB();
       const record = await dbGet(db, lang);

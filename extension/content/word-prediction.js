@@ -26,6 +26,8 @@
   let prefixIndex = new Map(); // 2-3 char prefix → [indices into wordList]
   let recentWords = [];    // Last 20 selected words per language
   let recentWordsSet = new Set(); // For O(1) lookup
+  let knownPresens = new Set();    // NB/NN: known presens verb forms for tense detection
+  let knownPreteritum = new Set(); // NB/NN: known preteritum verb forms for tense detection
 
   // ── Init ──
   init();
@@ -113,6 +115,7 @@
       'grammar_present': [`${langPrefix}presens`],
       'grammar_preteritum': [`${langPrefix}preteritum`],
       'grammar_perfektum': [`${langPrefix}perfektum`],
+      'grammar_imperativ': [`${langPrefix}imperativ`],
       'grammar_comparative': [`${langPrefix}komparativ`],
       'grammar_superlative': [`${langPrefix}superlativ`],
     };
@@ -184,6 +187,16 @@
     fr: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles']
   };
 
+  // NB/NN form-level feature gating — maps individual conjugation form keys
+  // to grammar features so each can be toggled independently
+  const NB_NN_FORM_FEATURES = {
+    presens:              'grammar_present',
+    preteritum:           'grammar_preteritum',
+    perfektum_partisipp:  'grammar_perfektum',
+    imperativ:            'grammar_imperativ',
+    // infinitiv: always shown (base form, no gating)
+  };
+
   // Tense keys to feature mapping (supports multiple languages)
   const TENSE_FEATURES = {
     presens: 'grammar_present',
@@ -195,41 +208,42 @@
     passe_compose: 'grammar_passe_compose'
   };
 
-  // Pronoun context mapping - maps written pronouns to conjugation keys
-  const PRONOUN_CONTEXT = {
-    // German
-    'ich': 'ich',
-    'du': 'du',
-    'er': 'er/sie/es',
-    'sie': 'er/sie/es', // Could be sie/Sie or er/sie/es - we'll boost both
-    'es': 'er/sie/es',
-    'wir': 'wir',
-    'ihr': 'ihr',
-    // Spanish
-    'yo': 'yo',
-    'tú': 'tú',
-    'tu': 'tú',
-    'él': 'él/ella/usted',
-    'ella': 'él/ella/usted',
-    'usted': 'él/ella/usted',
-    'nosotros': 'nosotros',
-    'nosotras': 'nosotros',
-    'vosotros': 'vosotros',
-    'vosotras': 'vosotros',
-    'ellos': 'ellos/ellas/ustedes',
-    'ellas': 'ellos/ellas/ustedes',
-    'ustedes': 'ellos/ellas/ustedes',
-    // French
-    'je': 'je',
-    'j\'': 'je',
-    'il': 'il/elle/on',
-    'elle': 'il/elle/on',
-    'on': 'il/elle/on',
-    'nous': 'nous',
-    'vous': 'vous',
-    'ils': 'ils/elles',
-    'elles': 'ils/elles'
+  // Pronoun context mapping — per-language to avoid key conflicts (e.g. 'du' in DE vs NB)
+  const PRONOUN_CONTEXT_BY_LANG = {
+    de: {
+      'ich': 'ich', 'du': 'du', 'er': 'er/sie/es',
+      'sie': 'er/sie/es', 'es': 'er/sie/es',
+      'wir': 'wir', 'ihr': 'ihr'
+    },
+    es: {
+      'yo': 'yo', 'tú': 'tú', 'tu': 'tú',
+      'él': 'él/ella/usted', 'ella': 'él/ella/usted', 'usted': 'él/ella/usted',
+      'nosotros': 'nosotros', 'nosotras': 'nosotros',
+      'vosotros': 'vosotros', 'vosotras': 'vosotros',
+      'ellos': 'ellos/ellas/ustedes', 'ellas': 'ellos/ellas/ustedes', 'ustedes': 'ellos/ellas/ustedes'
+    },
+    fr: {
+      'je': 'je', "j'": 'je',
+      'il': 'il/elle/on', 'elle': 'il/elle/on', 'on': 'il/elle/on',
+      'tu': 'tu', 'nous': 'nous', 'vous': 'vous',
+      'ils': 'ils/elles', 'elles': 'ils/elles'
+    },
+    nb: {
+      'jeg': '_nb_pronoun', 'du': '_nb_pronoun', 'han': '_nb_pronoun',
+      'hun': '_nb_pronoun', 'vi': '_nb_pronoun', 'dere': '_nb_pronoun',
+      'de': '_nb_pronoun', 'det': '_nb_pronoun', 'den': '_nb_pronoun', 'man': '_nb_pronoun'
+    },
+    nn: {
+      'eg': '_nb_pronoun', 'du': '_nb_pronoun', 'han': '_nb_pronoun',
+      'ho': '_nb_pronoun', 'vi': '_nb_pronoun', 'dykk': '_nb_pronoun',
+      'dei': '_nb_pronoun', 'det': '_nb_pronoun', 'den': '_nb_pronoun', 'ein': '_nb_pronoun'
+    }
   };
+
+  function getPronounContext(word) {
+    const langMap = PRONOUN_CONTEXT_BY_LANG[currentLang];
+    return (langMap && langMap[word]) || null;
+  }
 
   // Modal verbs - when present, main verb should be infinitive
   const MODAL_VERBS = new Set([
@@ -257,7 +271,19 @@
     // French - devoir (must)
     'dois', 'doit', 'devons', 'devez', 'doivent',
     // French - vouloir (want)
-    'veux', 'veut', 'voulons', 'voulez', 'veulent'
+    'veux', 'veut', 'voulons', 'voulez', 'veulent',
+    // Norwegian - kunne (can)
+    'kan', 'kunne', 'kunna',
+    // Norwegian - måtte (must)
+    'må', 'måtte',
+    // Norwegian - ville (want)
+    'vil', 'ville',
+    // Norwegian - skulle (shall)
+    'skal', 'skulle',
+    // Norwegian - burde (should)
+    'bør', 'burde',
+    // Norwegian - få (get to)
+    'får', 'fikk', 'fekk'
   ]);
 
   // ── Word list ──
@@ -288,6 +314,9 @@
 
       // Flatten bank-based structure into prediction entries
       wordList = [];
+      knownPresens.clear();
+      knownPreteritum.clear();
+      const isNorwegian = lang === 'nb' || lang === 'nn';
       const allowedPronouns = getAllowedPronouns();
 
       for (const bank of BANKS) {
@@ -350,8 +379,11 @@
           // Add conjugated verb forms
           if (bank === 'verbbank' && entry.conjugations) {
             for (const [tense, tenseData] of Object.entries(entry.conjugations)) {
-              const featureId = TENSE_FEATURES[tense];
-              if (featureId && !isFeatureEnabled(featureId)) continue;
+              // For DE/ES/FR: gate by tense feature
+              if (!isNorwegian) {
+                const featureId = TENSE_FEATURES[tense];
+                if (featureId && !isFeatureEnabled(featureId)) continue;
+              }
 
               if (tenseData.former) {
                 if (Array.isArray(tenseData.former)) {
@@ -379,14 +411,26 @@
                     // Only apply pronoun filtering for German
                     if (lang === 'de' && allowedPronouns && !allowedPronouns.has(key)) continue;
 
+                    // NB/NN: gate each form individually by its own grammar feature
+                    if (isNorwegian && NB_NN_FORM_FEATURES[key]) {
+                      if (!isFeatureEnabled(NB_NN_FORM_FEATURES[key])) continue;
+                    }
+
                     wordList.push({
                       word: form.toLowerCase(),
                       display: form,
                       translation: `${entry.word} (${key})`,
                       type: 'conjugation',
                       pronoun: lang === 'de' ? key : null,
+                      formKey: isNorwegian ? key : null,
                       baseWord: entry.word
                     });
+
+                    // NB/NN: track known presens/preteritum forms for tense detection
+                    if (isNorwegian) {
+                      if (key === 'presens') knownPresens.add(form.toLowerCase());
+                      if (key === 'preteritum') knownPreteritum.add(form.toLowerCase());
+                    }
                   }
                 }
               }
@@ -603,12 +647,33 @@
   function runPrediction(el) {
     if (lexiPaused) return;
     activeElement = el;
-    const { currentWord, previousWord, hasModalVerb } = getTextContext(el);
+    const { currentWord, previousWord, hasModalVerb, detectedTense } = getTextContext(el);
 
     if (currentWord && currentWord.length >= 2) {
       // Detect pronoun context for smart verb suggestions
-      const pronounContext = PRONOUN_CONTEXT[previousWord] || null;
-      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasModalVerb);
+      const pronounContext = getPronounContext(previousWord);
+      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasModalVerb, detectedTense);
+
+      // NB/NN: check for compound word matches (særskriving detection)
+      // If student typed "skole sekk", search for "skolesekk" as a compound
+      if ((currentLang === 'nb' || currentLang === 'nn') && previousWord && previousWord.length >= 2) {
+        const compound = (previousWord + currentWord).toLowerCase();
+        const compoundHits = findSuggestions(compound, 3, null, false, null);
+        const replaceLen = previousWord.length + 1 + currentWord.length; // prev + space + current
+        for (const hit of compoundHits) {
+          // Only include when the combined text is an exact prefix of a real word
+          if (hit.word.startsWith(compound) && hit.word.length >= compound.length) {
+            suggestions.unshift({
+              ...hit,
+              type: 'compound',
+              score: hit.score + 300,
+              compoundReplaceLen: replaceLen
+            });
+          }
+        }
+        suggestions.splice(5);
+      }
+
       if (suggestions.length > 0) {
         showDropdown(suggestions, el);
       } else {
@@ -639,7 +704,8 @@
       if (selectedIndex >= 0 && selectedIndex < items.length) {
         e.preventDefault();
         e.stopPropagation();
-        applySuggestion(items[selectedIndex].dataset.word);
+        const item = items[selectedIndex];
+        applySuggestion(item.dataset.word, parseInt(item.dataset.compoundLen) || 0);
       }
     } else if (e.key === 'Escape') {
       hideDropdown();
@@ -651,7 +717,7 @@
     const item = e.target.closest('.lh-pred-item');
     if (item) {
       e.preventDefault();
-      applySuggestion(item.dataset.word);
+      applySuggestion(item.dataset.word, parseInt(item.dataset.compoundLen) || 0);
     }
   }
 
@@ -718,7 +784,27 @@
     const wordsBeforeCursor = beforeCurrentWord.toLowerCase().split(/\s+/);
     const hasModalVerb = wordsBeforeCursor.some(w => MODAL_VERBS.has(w));
 
-    return { currentWord, previousWord, hasModalVerb };
+    // NB/NN: detect dominant tense in surrounding text
+    // Scan recent words to see if student is writing in presens or preteritum
+    let detectedTense = null;
+    if (currentLang === 'nb' || currentLang === 'nn') {
+      let presensCount = 0;
+      let preteritumCount = 0;
+      // Check up to 20 recent words before cursor for known verb forms
+      const recentTokens = wordsBeforeCursor.slice(-20);
+      for (const w of recentTokens) {
+        if (knownPresens.has(w)) presensCount++;
+        if (knownPreteritum.has(w)) preteritumCount++;
+      }
+      // Need at least 2 verb hits to be confident, and a clear majority
+      const total = presensCount + preteritumCount;
+      if (total >= 2) {
+        if (presensCount > preteritumCount) detectedTense = 'presens';
+        else if (preteritumCount > presensCount) detectedTense = 'preteritum';
+      }
+    }
+
+    return { currentWord, previousWord, hasModalVerb, detectedTense };
   }
 
   // ── Phonetic equivalence rules per language ──
@@ -770,6 +856,50 @@
       ['oi', 'wa'],
       ['ch', 'sh'],
       ['gn', 'ny'],
+    ],
+    nb: [
+      // Double vs single consonants (most common Norwegian spelling error)
+      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
+      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
+      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
+      // Sibilant confusions
+      ['skj', 'sj'], ['sk', 'sj'],
+      ['kj', 'tj'], ['kj', 'k'],
+      // Silent/weak consonants
+      ['hv', 'v'],       // hva/va, hvor/vor
+      ['gj', 'j'],       // gjøre/jøre
+      ['hj', 'j'],       // hjemme/jemme
+      ['lj', 'j'],       // ljug/jug
+      // Final devoicing / confusion
+      ['d', 't'], ['g', 'k'],
+      ['nd', 'nn'],       // band/bann
+      // Vowel confusions
+      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
+      ['ei', 'e'], ['ai', 'e'],
+      ['au', 'ø'],
+      ['y', 'i'],
+    ],
+    nn: [
+      // Double vs single consonants
+      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
+      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
+      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
+      // Sibilant confusions
+      ['skj', 'sj'], ['sk', 'sj'],
+      ['kj', 'tj'], ['kj', 'k'],
+      // Silent/weak consonants
+      ['hv', 'v'],
+      ['gj', 'j'],
+      ['hj', 'j'],
+      ['lj', 'j'],
+      // Final devoicing / confusion
+      ['d', 't'], ['g', 'k'],
+      ['nd', 'nn'],
+      // Vowel confusions
+      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
+      ['ei', 'e'], ['ai', 'e'],
+      ['au', 'ø'],
+      ['y', 'i'],
     ]
   };
 
@@ -799,7 +929,7 @@
   }
 
   // ── Fuzzy matching ──
-  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false) {
+  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null) {
     const q = input.toLowerCase();
     const qPhonetic = phoneticNormalize(q);
 
@@ -816,7 +946,7 @@
           const entry = wordList[idx];
           let score = matchScore(q, entry.word);
           if (score > 0) {
-            applyBoosts(entry, score, scored, pronounContext, hasModalVerb);
+            applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
           }
         }
         // Also check 3-char prefix for better precision
@@ -830,7 +960,7 @@
               const entry = wordList[idx];
               let score = matchScore(q, entry.word);
               if (score > 0) {
-                applyBoosts(entry, score, scored, pronounContext, hasModalVerb);
+                applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
               }
             }
           }
@@ -846,7 +976,7 @@
         const targetPhonetic = phoneticNormalize(entry.word);
         const score = phoneticMatchScore(qPhonetic, targetPhonetic);
         if (score > 0) {
-          applyBoosts(entry, score, scored, pronounContext, hasModalVerb);
+          applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
         }
       }
     }
@@ -869,11 +999,17 @@
     return results;
   }
 
-  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb) {
-    // Typo matches: only boost when the match is a prefix/close match (score >= 50),
-    // not a weak substring containment from the phonetic fallback
+  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query) {
+    // Typo matches: only show "mente du?" when the input is a plausible misspelling
+    // of the correct word (at least 60% of its length), not just a short prefix
     if (entry.type === 'typo' && score >= 50) {
-      score += 150;
+      if (query && query.length / entry.display.length >= 0.6) {
+        score += 150; // Genuine misspelling — boost and keep typo hint
+      } else {
+        // Input too short relative to the correct word — demote to regular suggestion
+        entry = { ...entry, type: 'base' };
+        score += 30;
+      }
     }
 
     // Boost recently used words
@@ -886,10 +1022,35 @@
       score += 250;
     }
 
+    // NB/NN: when a modal verb is in the sentence, also boost infinitiv conjugation forms
+    // (e.g., "kan spise" — boost the infinitiv entry from conjugations)
+    if (hasModalVerb && entry.type === 'conjugation' && entry.formKey === 'infinitiv') {
+      score += 250;
+    }
+
     // Boost conjugated forms that match the pronoun context
     if (!hasModalVerb && pronounContext && entry.type === 'conjugation') {
       if (entry.pronoun === pronounContext) {
         score += 200;
+      }
+    }
+
+    // NB/NN: pronoun context means "next word is a verb" — boost verb forms
+    // in the detected tense (default to presens if no tense detected)
+    if (!hasModalVerb && pronounContext === '_nb_pronoun') {
+      const targetTense = detectedTense || 'presens';
+      if (entry.type === 'base' && entry.bank === 'verbbank') {
+        score += 150;
+      }
+      if (entry.type === 'conjugation' && entry.formKey === targetTense) {
+        score += 200;
+      }
+    }
+
+    // NB/NN tense consistency: boost verb forms matching the detected tense
+    if (detectedTense && entry.type === 'conjugation' && entry.formKey) {
+      if (entry.formKey === detectedTense) {
+        score += 180;
       }
     }
 
@@ -969,9 +1130,11 @@
     dropdown.innerHTML = suggestions.map((s, i) => {
       const posLabel = s.bank ? bankToPosShort(s.bank) : '';
       const typoHint = s.type === 'typo' ? `<span class="lh-pred-typo">${escapeHtml(t('pred_typo_hint'))}</span>` : '';
+      const compoundHint = s.type === 'compound' ? `<span class="lh-pred-typo">${escapeHtml(t('pred_compound_hint'))}</span>` : '';
+      const compoundAttr = s.compoundReplaceLen ? ` data-compound-len="${s.compoundReplaceLen}"` : '';
       return `
-      <div class="lh-pred-item ${i === 0 ? 'selected' : ''}" data-word="${escapeAttr(s.display)}">
-        <span class="lh-pred-word">${escapeHtml(s.display)}${typoHint}</span>
+      <div class="lh-pred-item ${i === 0 ? 'selected' : ''}" data-word="${escapeAttr(s.display)}"${compoundAttr}>
+        <span class="lh-pred-word">${escapeHtml(s.display)}${typoHint}${compoundHint}</span>
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
@@ -1003,7 +1166,7 @@
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        applySuggestion(item.dataset.word);
+        applySuggestion(item.dataset.word, parseInt(item.dataset.compoundLen) || 0);
       });
     });
 
@@ -1144,21 +1307,33 @@
     }
   }
 
+  // ── Sentence-start capitalization ──
+  function shouldCapitalize(textBefore) {
+    const trimmed = textBefore.trim();
+    if (trimmed.length === 0) return true; // Start of document
+    return /[.!?]\s*$/.test(textBefore) || /\n\s*$/.test(textBefore);
+  }
+
+  function capitalizeFirst(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+  }
+
   // ── Apply suggestion ──
-  function applySuggestion(word) {
+  // compoundReplaceLen: if > 0, replace this many chars before cursor (prev word + space + current word)
+  function applySuggestion(word, compoundReplaceLen = 0) {
     if (!activeElement) return;
 
     if (activeElement.isContentEditable) {
-      applyToContentEditable(word);
+      applyToContentEditable(word, compoundReplaceLen);
     } else {
-      applyToInput(word);
+      applyToInput(word, compoundReplaceLen);
     }
 
     trackRecentWord(word);
     hideDropdown();
   }
 
-  function applyToInput(word) {
+  function applyToInput(word, compoundReplaceLen = 0) {
     const el = activeElement;
     const text = el.value || '';
     const cursorPos = el.selectionStart || 0;
@@ -1169,9 +1344,15 @@
     const match = before.match(/[\wáàâäãåæéèêëíìîïóòôöõøúùûüñçß]+$/i);
 
     if (match) {
-      const wordStart = cursorPos - match[0].length;
-      el.value = text.slice(0, wordStart) + word + after;
-      const newPos = wordStart + word.length;
+      // Compound: replace previous word + space + current word
+      const replaceStart = compoundReplaceLen > 0
+        ? cursorPos - compoundReplaceLen
+        : cursorPos - match[0].length;
+      if (shouldCapitalize(text.slice(0, replaceStart))) {
+        word = capitalizeFirst(word);
+      }
+      el.value = text.slice(0, replaceStart) + word + after;
+      const newPos = replaceStart + word.length;
       el.selectionStart = newPos;
       el.selectionEnd = newPos;
     } else {
@@ -1185,7 +1366,7 @@
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
-  function applyToContentEditable(word) {
+  function applyToContentEditable(word, compoundReplaceLen = 0) {
     const sel = window.getSelection();
     if (!sel.rangeCount) return;
     const range = sel.getRangeAt(0);
@@ -1215,7 +1396,14 @@
     const match = before.match(/[\wáàâäãåæéèêëíìîïóòôöõøúùûüñçß]+$/i);
 
     if (match) {
-      const wordStart = cursorPos - match[0].length;
+      // Compound: replace previous word + space + current word
+      const wordStart = compoundReplaceLen > 0
+        ? cursorPos - compoundReplaceLen
+        : cursorPos - match[0].length;
+
+      if (shouldCapitalize(text.slice(0, wordStart))) {
+        word = capitalizeFirst(word);
+      }
 
       // Select the partial word so it gets replaced
       const selectRange = document.createRange();

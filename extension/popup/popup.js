@@ -1196,23 +1196,23 @@ function renderResults(results, options = {}) {
       </div>
       <button class="explore-btn">${t('result_explore')}</button>
       <div class="result-expanded hidden">
+        ${renderVerbConjugations(entry)}
+        ${renderNounCases(entry)}
+        ${renderNounForms(entry)}
+        ${renderAdjectiveComparison(entry)}
         ${entry.synonyms && entry.synonyms.length ? `
           <div class="expanded-section">
             <h4>${t('result_synonyms')}</h4>
             <p>${entry.synonyms.map(s => escapeHtml(s)).join(', ')}</p>
           </div>
         ` : ''}
-        ${renderExamples(entry)}
         ${entry.grammar ? `
           <div class="expanded-section">
             <h4>${t('result_grammar')}</h4>
             <p>${escapeHtml(entry.grammar)}</p>
           </div>
         ` : ''}
-        ${renderVerbConjugations(entry)}
-        ${renderNounCases(entry)}
-        ${renderNounForms(entry)}
-        ${renderAdjectiveComparison(entry)}
+        ${renderExamples(entry)}
       </div>
     </div>
   `).join('');

@@ -349,6 +349,14 @@ After making changes to files under `extension/`:
 2. Rebuild the zip: `npm run package`
 3. Upload the zip as a GitHub Release asset
 
+## Papertek Vocabulary — Shared Data Source
+
+The vocabulary API (`papertek-vocabulary.vercel.app`) is a sibling project we control, located at `/Users/geirforbord/Papertek/papertek-vocabulary`. All dictionary data — words, conjugations, typos, grammar features — originates there.
+
+**Prefer fixing data issues at the API source** over adding client-side workarounds in Leksihjelp. For example, if a word has incorrect typo entries or wrong conjugations, fix it in `papertek-vocabulary` rather than filtering it out in extension code.
+
+**However**, `papertek-vocabulary` is also consumed by `papertek-webapps` and `papertek-nativeapps`. Changes to the API data or schema affect all three consumers, so consider cross-app impact before modifying the vocabulary API.
+
 ## Development Notes
 
 - Extension is designed for **offline use** — vocabulary is bundled, not fetched at runtime

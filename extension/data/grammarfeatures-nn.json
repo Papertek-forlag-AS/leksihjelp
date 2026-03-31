@@ -99,6 +99,19 @@
       "dataPath": "conjugations.presens.former.imperativ"
     },
     {
+      "id": "grammar_nn_passiv",
+      "name": "Passiv",
+      "nameEn": "Passive Voice",
+      "description": "Passiv form (bli + partisipp, -st-passiv)",
+      "descriptionEn": "Passive voice forms",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.passiv",
+      "future": true
+    },
+    {
       "id": "grammar_nn_verb_class",
       "name": "Verbklasse",
       "nameEn": "Verb Class",
@@ -144,7 +157,8 @@
       "appliesTo": [
         "adj"
       ],
-      "dataPath": "declension"
+      "dataPath": "declension",
+      "future": true
     }
   ],
   "categories": [
@@ -162,6 +176,72 @@
       "id": "adjectives",
       "name": "Adjektiv",
       "nameEn": "Adjectives"
+    }
+  ],
+  "presets": [
+    {
+      "id": "basic",
+      "name": "Lite",
+      "nameEn": "Basic",
+      "description": "Grunnleggende — presens, kjønn, fleirtal",
+      "features": [
+        "grammar_nn_presens",
+        "grammar_nn_genus",
+        "grammar_nn_fleirtal"
+      ]
+    },
+    {
+      "id": "intermediate",
+      "name": "Middels",
+      "nameEn": "Intermediate",
+      "description": "Preteritum, bestemt form, gradbøying",
+      "features": [
+        "grammar_nn_presens",
+        "grammar_nn_preteritum",
+        "grammar_nn_genus",
+        "grammar_nn_fleirtal",
+        "grammar_nn_bestemt_form",
+        "grammar_nn_komparativ",
+        "grammar_nn_superlativ"
+      ]
+    },
+    {
+      "id": "advanced",
+      "name": "Mye",
+      "nameEn": "Advanced",
+      "description": "Perfektum, bøyingstabell, imperativ",
+      "features": [
+        "grammar_nn_presens",
+        "grammar_nn_preteritum",
+        "grammar_nn_perfektum",
+        "grammar_nn_imperativ",
+        "grammar_nn_genus",
+        "grammar_nn_fleirtal",
+        "grammar_nn_bestemt_form",
+        "grammar_nn_noun_forms",
+        "grammar_nn_komparativ",
+        "grammar_nn_superlativ"
+      ]
+    },
+    {
+      "id": "all",
+      "name": "Alt",
+      "nameEn": "All",
+      "description": "All grammatikk — passiv, adjektivbøying",
+      "features": [
+        "grammar_nn_presens",
+        "grammar_nn_preteritum",
+        "grammar_nn_perfektum",
+        "grammar_nn_imperativ",
+        "grammar_nn_passiv",
+        "grammar_nn_genus",
+        "grammar_nn_fleirtal",
+        "grammar_nn_bestemt_form",
+        "grammar_nn_noun_forms",
+        "grammar_nn_komparativ",
+        "grammar_nn_superlativ",
+        "grammar_nn_adj_declension"
+      ]
     }
   ]
 }

@@ -162,6 +162,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     handleTtsFetch(msg.url, msg.headers, msg.body).then(sendResponse);
     return true; // async
   }
+
+  // Vocab data proxy — content scripts can't access extension-origin IndexedDB
+  if (msg.type === 'VOCAB_GET_CACHED') {
+    getVocabRecord(msg.language).then(record => {
+      sendResponse(record?.data || null);
+    }).catch(() => sendResponse(null));
+    return true; // async
+  }
+
+  if (msg.type === 'VOCAB_GET_GRAMMAR') {
+    getVocabRecord(msg.language).then(record => {
+      sendResponse(record?.grammarFeatures || null);
+    }).catch(() => sendResponse(null));
+    return true; // async
+  }
 });
 
 // ── Code verification (legacy) ──
@@ -183,6 +198,37 @@ async function verifyCode(code) {
     // Server unreachable — no offline fallback
     return { valid: false, offline: true };
   }
+}
+
+// ── Vocab data proxy (content scripts can't access extension-origin IndexedDB) ──
+const VOCAB_DB_NAME = 'leksihjelp-vocab';
+const VOCAB_DB_VERSION = 2;
+
+function openVocabDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(VOCAB_DB_NAME, VOCAB_DB_VERSION);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains('languages')) {
+        db.createObjectStore('languages', { keyPath: 'language' });
+      }
+      if (!db.objectStoreNames.contains('audio')) {
+        db.createObjectStore('audio');
+      }
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getVocabRecord(lang) {
+  const db = await openVocabDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('languages', 'readonly');
+    const req = tx.objectStore('languages').get(lang);
+    req.onsuccess = () => { db.close(); resolve(req.result || null); };
+    req.onerror = () => { db.close(); reject(req.error); };
+  });
 }
 
 // ── TTS fetch (routes through service worker to avoid content script CORS) ──

@@ -203,6 +203,7 @@ const _STRINGS = {
 
     // ── Word prediction ──
     pred_typo_hint: 'mente du?',
+    pred_compound_hint: 'sammensatt',
     pred_tab_hint: 'Tab for å velge',
     pred_switch_lang: 'Bytt språk',
     pred_pause: 'Pause ordforslag',
@@ -396,6 +397,7 @@ const _STRINGS = {
     widget_lookup_not_found: 'Fann ikkje ordet i ordboka',
 
     pred_typo_hint: 'meinte du?',
+    pred_compound_hint: 'samansett',
     pred_tab_hint: 'Tab for å velje',
     pred_switch_lang: 'Byt språk',
     pred_pause: 'Pause ordforslag',
@@ -587,6 +589,7 @@ const _STRINGS = {
     widget_lookup_not_found: 'Word not found in dictionary',
 
     pred_typo_hint: 'did you mean?',
+    pred_compound_hint: 'compound',
     pred_tab_hint: 'Tab to select',
     pred_switch_lang: 'Switch language',
     pred_pause: 'Pause predictions',
