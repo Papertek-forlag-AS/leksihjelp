@@ -60,12 +60,17 @@
     no: 'Norsk'
   };
 
+  // Map language codes to ElevenLabs voice keys
+  // NB/NN both use the 'no' Norwegian voices
+  const VOICE_LANG_MAP = { nb: 'no', nn: 'no' };
+
   // Browser TTS voice name patterns per language
   const BROWSER_VOICE_LANGS = {
     es: 'es',
     de: 'de',
     fr: 'fr',
     en: 'en',
+    nb: 'nb',
     nn: 'nb', // Nynorsk uses same voice as Bokmål
     no: 'nb'
   };
@@ -155,10 +160,7 @@
         <span class="lh-title">${t('widget_title')}</span>
         <button class="lh-close" title="${t('widget_close')}">&times;</button>
       </div>
-      <div class="lh-lang-toggle">
-        <button class="lh-lang-btn active" data-lang="target" title="${t('widget_read_target')}">${t('widget_target_lang')}</button>
-        <button class="lh-lang-btn" data-lang="no" title="${t('widget_read_norwegian')}">${t('widget_norwegian')}</button>
-      </div>
+      <div class="lh-lang-toggle"></div>
       <div class="lh-text-area-wrapper">
         <div class="lh-font-controls">
           <button class="lh-font-btn lh-font-mode" title="${t('widget_font_auto_tooltip')}">${t('widget_font_auto')}</button>
@@ -204,16 +206,7 @@
     });
     widget.querySelector('.lh-font-mode').addEventListener('click', toggleFontMode);
 
-    // Language toggle buttons
-    widget.querySelectorAll('.lh-lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        widget.querySelectorAll('.lh-lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        readingLang = btn.dataset.lang;
-        updateVoiceOptions();
-        updateLangToggleLabels();
-      });
-    });
+    // Language picker is populated dynamically in buildLangPicker()
 
     // Prevent widget clicks from deselecting text,
     // but allow interaction with form controls (slider, select)
@@ -315,11 +308,44 @@
 
   }
 
-  function updateLangToggleLabels() {
-    const targetBtn = widget.querySelector('.lh-lang-btn[data-lang="target"]');
-    if (targetBtn) {
-      targetBtn.textContent = langName(currentLang) || t('widget_target_lang');
+  const WIDGET_LANG_FLAGS = { de: '\uD83C\uDDE9\uD83C\uDDEA', es: '\uD83C\uDDEA\uD83C\uDDF8', fr: '\uD83C\uDDEB\uD83C\uDDF7', en: '\uD83C\uDDEC\uD83C\uDDE7', nb: '\uD83C\uDDF3\uD83C\uDDF4', nn: '\uD83C\uDDF3\uD83C\uDDF4' };
+  const WIDGET_LANG_LABELS = { de: 'DE', es: 'ES', fr: 'FR', en: 'EN', nb: 'NB', nn: 'NN' };
+  const BUNDLED_WIDGET_LANGS = ['nb', 'nn', 'en'];
+
+  async function buildLangPicker() {
+    const toggle = widget.querySelector('.lh-lang-toggle');
+    if (!toggle) return;
+
+    // Discover available languages
+    const langs = [...BUNDLED_WIDGET_LANGS];
+    if (window.__lexiVocabStore) {
+      try {
+        const cached = await window.__lexiVocabStore.listCachedLanguages();
+        for (const c of cached) {
+          if (!langs.includes(c.language)) langs.push(c.language);
+        }
+      } catch {}
     }
+
+    toggle.innerHTML = langs.map(lang =>
+      `<button class="lh-lang-btn ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">${WIDGET_LANG_FLAGS[lang] || ''} ${WIDGET_LANG_LABELS[lang] || lang.toUpperCase()}</button>`
+    ).join('');
+
+    toggle.querySelectorAll('.lh-lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        if (lang === currentLang) return;
+        currentLang = lang;
+        readingLang = 'target';
+        // Update active state
+        toggle.querySelectorAll('.lh-lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        // Persist and broadcast
+        chrome.storage.local.set({ language: lang });
+        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
+        updateVoiceOptions();
+      });
+    });
   }
 
   function attachListeners() {
@@ -356,7 +382,7 @@
     removeWordHighlight();
     updateVoiceOptions();
     updateModeBadge();
-    updateLangToggleLabels();
+    buildLangPicker();
 
     // Populate the text area with word spans
     populateTextArea(selectedText);
@@ -657,10 +683,12 @@
     select.innerHTML = '';
 
     // Determine which language to use for voices
-    const voiceLang = readingLang === 'no' ? 'no' : currentLang;
+    // Map nb/nn → no for ElevenLabs voice lookup
+    const rawLang = readingLang === 'no' ? 'no' : currentLang;
+    const voiceLang = VOICE_LANG_MAP[rawLang] || rawLang;
 
     if (isAuthenticated) {
-      const voices = ELEVENLABS_VOICES[voiceLang] || ELEVENLABS_VOICES.es;
+      const voices = ELEVENLABS_VOICES[voiceLang] || ELEVENLABS_VOICES.no;
       voices.forEach((v, i) => {
         const opt = document.createElement('option');
         opt.value = v.id;
@@ -672,7 +700,7 @@
       // Browser voices for the language
       const synth = window.speechSynthesis;
       const allVoices = synth.getVoices();
-      const langCode = BROWSER_VOICE_LANGS[voiceLang] || 'es';
+      const langCode = BROWSER_VOICE_LANGS[voiceLang] || BROWSER_VOICE_LANGS[rawLang] || 'nb';
       const matching = allVoices.filter(v => v.lang.startsWith(langCode));
 
       if (matching.length === 0) {

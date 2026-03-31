@@ -546,11 +546,52 @@ body {
 
 .results-placeholder {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 200px;
   color: var(--text-muted);
   text-align: center;
+  gap: 16px;
+}
+
+.skriv-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(17, 180, 154, 0.06);
+  border: 1px solid rgba(17, 180, 154, 0.15);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 12px;
+  transition: background 0.15s;
+}
+
+.skriv-link:hover {
+  background: rgba(17, 180, 154, 0.12);
+}
+
+.skriv-link-icon {
+  font-size: 16px;
+}
+
+.skriv-link span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.skriv-link-text {
+  font-weight: 500;
+  color: #11B49A;
+}
+
+.skriv-link-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
 }
 
 .fallback-hint {

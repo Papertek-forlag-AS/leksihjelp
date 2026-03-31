@@ -51,6 +51,8 @@ const _STRINGS = {
     search_no_results: 'Ingen treff',
     search_fallback_hint: 'Viste du resultater fra den andre retningen:',
     search_placeholder_text: 'Skriv et ord for å søke i ordboken',
+    skriv_link: 'Trenger du et sted å skrive?',
+    skriv_note: 'Lagres kun lokalt i nettleseren',
     search_dir_no_target: 'Norsk → Målspråk',
     search_dir_target_no: 'Målspråk → Norsk',
     search_monolingual: 'ordbok',
@@ -175,7 +177,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillinger',
-    nav_pause_title: 'Sett Leksihjelp på pause',
+    nav_pause_title: 'Skru av ordforslag og uttale midlertidig',
 
     // ── Widget (floating-widget.js) ──
     widget_title: 'Leksihjelp — Uttale',
@@ -256,6 +258,8 @@ const _STRINGS = {
     search_no_results: 'Ingen treff',
     search_fallback_hint: 'Viser resultat frå den andre retninga:',
     search_placeholder_text: 'Skriv eit ord for å søkje i ordboka',
+    skriv_link: 'Treng du ein stad å skrive?',
+    skriv_note: 'Vert berre lagra lokalt i nettlesaren',
     search_dir_no_target: 'Norsk → Målspråk',
     search_dir_target_no: 'Målspråk → Norsk',
     search_monolingual: 'ordbok',
@@ -371,7 +375,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillingar',
-    nav_pause_title: 'Set Leksihjelp på pause',
+    nav_pause_title: 'Skru av ordforslag og uttale mellombels',
 
     widget_title: 'Leksihjelp — Uttale',
     widget_close: 'Lukk',
@@ -448,6 +452,8 @@ const _STRINGS = {
     search_no_results: 'No results',
     search_fallback_hint: 'Showing results from the other direction:',
     search_placeholder_text: 'Type a word to search the dictionary',
+    skriv_link: 'Need a place to write?',
+    skriv_note: 'Only saved locally in your browser',
     search_dir_no_target: 'Norwegian → Target language',
     search_dir_target_no: 'Target language → Norwegian',
     search_monolingual: 'dictionary',
@@ -563,7 +569,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Settings',
-    nav_pause_title: 'Pause Leksihjelp',
+    nav_pause_title: 'Temporarily disable word suggestions and pronunciation',
 
     widget_title: 'Leksihjelp — Pronunciation',
     widget_close: 'Close',

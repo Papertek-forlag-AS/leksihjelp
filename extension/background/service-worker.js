@@ -177,6 +177,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }).catch(() => sendResponse(null));
     return true; // async
   }
+
+  if (msg.type === 'VOCAB_LIST_CACHED') {
+    listVocabLanguages().then(sendResponse).catch(() => sendResponse([]));
+    return true; // async
+  }
 });
 
 // ── Code verification (legacy) ──
@@ -227,6 +232,24 @@ async function getVocabRecord(lang) {
     const tx = db.transaction('languages', 'readonly');
     const req = tx.objectStore('languages').get(lang);
     req.onsuccess = () => { db.close(); resolve(req.result || null); };
+    req.onerror = () => { db.close(); reject(req.error); };
+  });
+}
+
+async function listVocabLanguages() {
+  const db = await openVocabDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('languages', 'readonly');
+    const req = tx.objectStore('languages').getAll();
+    req.onsuccess = () => {
+      db.close();
+      resolve((req.result || []).map(r => ({
+        language: r.language,
+        version: r.version,
+        totalWords: r.data?._metadata?.totalWords || 0,
+        cachedAt: r.cachedAt
+      })));
+    };
     req.onerror = () => { db.close(); reject(req.error); };
   });
 }

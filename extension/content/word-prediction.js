@@ -286,6 +286,10 @@
     'får', 'fikk', 'fekk'
   ]);
 
+  // Infinitive markers — only trigger when IMMEDIATELY preceding the current word
+  // (unlike modal verbs which are scanned across the whole sentence)
+  const INFINITIVE_MARKERS = new Set(['å', 'zu']);
+
   // ── Word list ──
   async function loadWordList(lang) {
     try {
@@ -652,7 +656,9 @@
     if (currentWord && currentWord.length >= 2) {
       // Detect pronoun context for smart verb suggestions
       const pronounContext = getPronounContext(previousWord);
-      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasModalVerb, detectedTense);
+      // Infinitive markers (å, zu) only count when immediately preceding
+      const hasInfinitiveMarker = hasModalVerb || INFINITIVE_MARKERS.has(previousWord);
+      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense);
 
       // NB/NN: check for compound word matches (særskriving detection)
       // If student typed "skole sekk", search for "skolesekk" as a compound

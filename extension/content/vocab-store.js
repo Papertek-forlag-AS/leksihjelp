@@ -166,6 +166,14 @@
    * List all cached languages with their versions.
    */
   async function listCachedLanguages() {
+    if (!_isExtensionOrigin) {
+      const cacheKey = 'list';
+      if (_proxyCache.has(cacheKey)) return _proxyCache.get(cacheKey);
+      const data = await _sendMessageAsync({ type: 'VOCAB_LIST_CACHED' });
+      const result = data || [];
+      if (result.length > 0) _proxyCache.set(cacheKey, result);
+      return result;
+    }
     try {
       const db = await openDB();
       const records = await dbGetAll(db);
