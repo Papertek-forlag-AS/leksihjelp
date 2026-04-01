@@ -85,6 +85,7 @@
   let widgetWordSpans = []; // DOM span references for each word in the widget text area
   let wordCharPositions = []; // [{word, charStart, charEnd}] for timing sync
   let wordTimingInterval = null; // For ElevenLabs word timing estimation
+  let browserTtsCharIndex = 0; // Last known charIndex for browser TTS restart
   let lexiPaused = false; // Global pause state
   let justDragged = false; // Prevents hideWidget after drag ends
 
@@ -191,6 +192,16 @@
     widget.querySelector('.lh-play-btn').addEventListener('click', handlePlay);
     widget.querySelector('#lh-speed').addEventListener('input', (e) => {
       widget.querySelector('.lh-speed-value').textContent = `${parseFloat(e.target.value).toFixed(1)}×`;
+      // Live speed update for browser TTS: restart from current position with new rate
+      if (currentUtterance) {
+        const newSpeed = parseFloat(e.target.value);
+        const remainingText = selectedText.substring(browserTtsCharIndex);
+        if (!remainingText.trim()) return;
+        const voiceURI = widget.querySelector('#lh-voice').value;
+        window.speechSynthesis.cancel();
+        currentUtterance = null;
+        playBrowserTTS(remainingText, voiceURI, newSpeed, widget.querySelector('.lh-play-btn'), browserTtsCharIndex);
+      }
     });
 
     // Font size controls
@@ -287,13 +298,13 @@
       const dy = e.clientY - resizeStartY;
 
       if (resizeType === 'right' || resizeType === 'corner') {
-        const newW = Math.max(280, Math.min(window.innerWidth * 0.9, resizeStartW + dx));
+        const newW = Math.max(320, Math.min(window.innerWidth * 0.9, resizeStartW + dx));
         widget.style.setProperty('width', newW + 'px', 'important');
         widget.style.setProperty('min-width', newW + 'px', 'important');
         widget.style.setProperty('max-width', newW + 'px', 'important');
       }
       if (resizeType === 'bottom' || resizeType === 'corner') {
-        const newH = Math.max(200, Math.min(window.innerHeight * 0.9, resizeStartH + dy));
+        const newH = Math.max(300, Math.min(window.innerHeight * 0.9, resizeStartH + dy));
         widget.style.setProperty('max-height', newH + 'px', 'important');
         widget.style.setProperty('height', newH + 'px', 'important');
       }
@@ -882,7 +893,7 @@
   }
 
   // ── Browser TTS ──
-  function playBrowserTTS(text, voiceURI, speed, playBtn) {
+  function playBrowserTTS(text, voiceURI, speed, playBtn, charOffset = 0) {
     const synth = window.speechSynthesis;
     synth.cancel();
 
@@ -899,11 +910,15 @@
 
     // Word-by-word highlighting using boundary event
     let browserTtsWordIndex = 0;
+    browserTtsCharIndex = charOffset;
     utterance.onboundary = (event) => {
       if (event.name === 'word') {
-        // Find word index by character position
+        // Track absolute character position for live speed restart
+        browserTtsCharIndex = charOffset + event.charIndex;
+        // Find word index by absolute character position
+        const absCharIndex = charOffset + event.charIndex;
         const wordIndex = wordCharPositions.findIndex(
-          w => event.charIndex >= w.charStart && event.charIndex < w.charEnd
+          w => absCharIndex >= w.charStart && absCharIndex < w.charEnd
         );
         if (wordIndex !== -1) {
           highlightWordInWidget(wordIndex);
@@ -918,8 +933,10 @@
 
     utterance.onstart = () => {
       currentUtterance = utterance;
-      browserTtsWordIndex = 0;
-      highlightWordInWidget(0); // Highlight first word
+      if (charOffset === 0) {
+        browserTtsWordIndex = 0;
+        highlightWordInWidget(0);
+      }
       playBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
     };
 
@@ -947,6 +964,7 @@
       window.speechSynthesis.cancel();
       currentUtterance = null;
     }
+    browserTtsCharIndex = 0;
     removeWordHighlight();
   }
 
