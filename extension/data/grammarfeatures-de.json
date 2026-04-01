@@ -39,6 +39,58 @@
       "dataPath": "conjugations.perfektum"
     },
     {
+      "id": "grammar_de_futurum",
+      "name": "Futurum",
+      "nameEn": "Future Tense",
+      "description": "Framtid med werden + infinitiv",
+      "descriptionEn": "Future tense with werden + infinitive",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.futurum",
+      "future": true
+    },
+    {
+      "id": "grammar_de_imperativ",
+      "name": "Imperativ",
+      "nameEn": "Imperative",
+      "description": "Bydeform (Komm!, Gehen Sie!)",
+      "descriptionEn": "Imperative/command forms",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.imperativ",
+      "future": true
+    },
+    {
+      "id": "grammar_de_konjunktiv",
+      "name": "Konjunktiv II",
+      "nameEn": "Subjunctive II",
+      "description": "Konjunktiv II for hypotetiske situasjonar (hätte, wäre, würde)",
+      "descriptionEn": "Subjunctive II for hypothetical situations",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.konjunktiv",
+      "future": true
+    },
+    {
+      "id": "grammar_de_passiv",
+      "name": "Passiv",
+      "nameEn": "Passive Voice",
+      "description": "Passiv med werden + partisipp",
+      "descriptionEn": "Passive voice with werden + past participle",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.passiv",
+      "future": true
+    },
+    {
       "id": "grammar_de_verb_class",
       "name": "Verbklasse",
       "nameEn": "Verb Class",
@@ -157,6 +209,19 @@
         "adj"
       ],
       "dataPath": "declension"
+    },
+    {
+      "id": "grammar_de_pronoun_cases",
+      "name": "Pronomen i kasus",
+      "nameEn": "Pronoun Cases",
+      "description": "Pronomen i nominativ, akkusativ og dativ (ich/mich/mir)",
+      "descriptionEn": "Pronouns in nominative, accusative, and dative cases",
+      "category": "pronouns",
+      "appliesTo": [
+        "pronoun"
+      ],
+      "dataPath": "cases",
+      "future": true
     }
   ],
   "categories": [
@@ -174,6 +239,86 @@
       "id": "adjectives",
       "name": "Adjektiv",
       "nameEn": "Adjectives"
+    },
+    {
+      "id": "pronouns",
+      "name": "Pronomen",
+      "nameEn": "Pronouns"
+    }
+  ],
+  "presets": [
+    {
+      "id": "basic",
+      "name": "Lite",
+      "nameEn": "Basic",
+      "description": "Grunnleggende — presens, artikler, flertall",
+      "features": [
+        "grammar_de_presens",
+        "grammar_de_genus",
+        "grammar_de_plural"
+      ]
+    },
+    {
+      "id": "intermediate",
+      "name": "Middels",
+      "nameEn": "Intermediate",
+      "description": "Flere tider, akkusativ, gradbøyning",
+      "features": [
+        "grammar_de_presens",
+        "grammar_de_preteritum",
+        "grammar_de_verb_class",
+        "grammar_de_genus",
+        "grammar_de_plural",
+        "grammar_de_akkusativ",
+        "grammar_de_komparativ",
+        "grammar_de_superlativ"
+      ]
+    },
+    {
+      "id": "advanced",
+      "name": "Mye",
+      "nameEn": "Advanced",
+      "description": "Perfektum, dativ, adjektivbøyning, imperativ",
+      "features": [
+        "grammar_de_presens",
+        "grammar_de_preteritum",
+        "grammar_de_perfektum",
+        "grammar_de_imperativ",
+        "grammar_de_verb_class",
+        "grammar_de_genus",
+        "grammar_de_plural",
+        "grammar_de_akkusativ",
+        "grammar_de_dativ",
+        "grammar_de_komparativ",
+        "grammar_de_superlativ",
+        "grammar_de_adj_declension"
+      ]
+    },
+    {
+      "id": "all",
+      "name": "Alt",
+      "nameEn": "All",
+      "description": "All grammatikk — genitiv, konjunktiv, passiv, pronomen",
+      "features": [
+        "grammar_de_presens",
+        "grammar_de_preteritum",
+        "grammar_de_perfektum",
+        "grammar_de_futurum",
+        "grammar_de_imperativ",
+        "grammar_de_konjunktiv",
+        "grammar_de_passiv",
+        "grammar_de_verb_class",
+        "grammar_de_genus",
+        "grammar_de_plural",
+        "grammar_de_cases",
+        "grammar_de_akkusativ",
+        "grammar_de_dativ",
+        "grammar_de_genitiv",
+        "grammar_de_komparativ",
+        "grammar_de_superlativ",
+        "grammar_de_adj_declension",
+        "grammar_de_pronoun_cases"
+      ]
     }
   ]
 }
