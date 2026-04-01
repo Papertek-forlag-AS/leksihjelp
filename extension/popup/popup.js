@@ -600,6 +600,20 @@ function buildInflectionIndex(words) {
         }
       }
     }
+
+    // Typos — index common misspellings (særskriving splits, missing diacritics, etc.)
+    if (entry.typos && Array.isArray(entry.typos)) {
+      for (const typo of entry.typos) {
+        addToIndex(typo.toLowerCase(), entry, 'typo', null);
+      }
+    }
+
+    // Accepted forms — alternative valid spellings
+    if (entry.acceptedForms && Array.isArray(entry.acceptedForms)) {
+      for (const form of entry.acceptedForms) {
+        addToIndex(form.toLowerCase(), entry, 'typo', null);
+      }
+    }
   }
 
   return index;
@@ -1064,7 +1078,9 @@ function performSearch(query) {
         if (directEntrySet.has(match.entry)) continue;
         const hint = match.matchType === 'conjugation'
           ? t('result_inflection_conjugation', { query, word: match.entry.word })
-          : t('result_inflection_plural', { query, word: match.entry.word });
+          : match.matchType === 'typo'
+            ? t('result_inflection_typo', { query, word: match.entry.word })
+            : t('result_inflection_plural', { query, word: match.entry.word });
         inflectionResults.push({ entry: match.entry, inflectionHint: hint });
       }
     }

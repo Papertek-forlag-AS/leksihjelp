@@ -67,6 +67,7 @@ const _STRINGS = {
     result_cases: 'Bøyning (kasus)',
     result_inflection_conjugation: '«{query}» → bøyning av «{word}»',
     result_inflection_plural: '«{query}» → flertall av «{word}»',
+    result_inflection_typo: '«{query}» → mente du «{word}»?',
 
     // ── Declension table headers ──
     decl_def_sg: 'Bestemt ent.',
@@ -273,6 +274,7 @@ const _STRINGS = {
     result_cases: 'Bøying (kasus)',
     result_inflection_conjugation: '«{query}» → bøying av «{word}»',
     result_inflection_plural: '«{query}» → fleirtal av «{word}»',
+    result_inflection_typo: '«{query}» → meinte du «{word}»?',
 
     decl_def_sg: 'Bestemt ent.',
     decl_indef_sg: 'Ubestemt ent.',
@@ -467,6 +469,7 @@ const _STRINGS = {
     result_cases: 'Declension (cases)',
     result_inflection_conjugation: '"{query}" → conjugation of "{word}"',
     result_inflection_plural: '"{query}" → plural of "{word}"',
+    result_inflection_typo: 'Did you mean "{word}"?',
 
     decl_def_sg: 'Definite sg.',
     decl_indef_sg: 'Indefinite sg.',
