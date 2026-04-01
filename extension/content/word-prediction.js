@@ -26,8 +26,9 @@
   let prefixIndex = new Map(); // 2-3 char prefix → [indices into wordList]
   let recentWords = [];    // Last 20 selected words per language
   let recentWordsSet = new Set(); // For O(1) lookup
-  let knownPresens = new Set();    // NB/NN: known presens verb forms for tense detection
-  let knownPreteritum = new Set(); // NB/NN: known preteritum verb forms for tense detection
+  let knownPresens = new Set();    // Known present-tense verb forms for tense detection
+  let knownPreteritum = new Set(); // Known past-tense verb forms for tense detection
+  let bigramData = null;   // Bigram frequency data: previousWord → { nextWord: weight }
 
   // ── Init ──
   init();
@@ -197,6 +198,15 @@
     // infinitiv: always shown (base form, no gating)
   };
 
+  // Tense normalization — maps language-specific tense keys to common group names
+  // Used for cross-language tense consistency detection
+  const TENSE_GROUP = {
+    presens: 'present', presente: 'present',
+    preteritum: 'past', preterito: 'past',
+    perfektum: 'perfect', perfecto: 'perfect', passe_compose: 'perfect',
+    perfektum_partisipp: 'perfect', // NB/NN form key
+  };
+
   // Tense keys to feature mapping (supports multiple languages)
   const TENSE_FEATURES = {
     presens: 'grammar_present',
@@ -290,6 +300,102 @@
   // (unlike modal verbs which are scanned across the whole sentence)
   const INFINITIVE_MARKERS = new Set(['å', 'zu']);
 
+  // ── POS expectation: determiners and prepositions ──
+  // After a determiner → expect noun/adjective (strong signal with gender hint)
+  // After a preposition → expect noun/adjective (moderate signal, no gender)
+  const DETERMINERS_BY_LANG = {
+    de: {
+      'der': 'm', 'die': 'f', 'das': 'n',
+      'ein': null, 'eine': 'f', 'einen': 'm', 'einem': null, 'einer': 'f',
+      'dem': null, 'den': 'm',
+      'kein': null, 'keine': 'f', 'keinen': 'm', 'keinem': null, 'keiner': 'f',
+      'mein': null, 'meine': 'f', 'meinen': 'm',
+      'dein': null, 'deine': 'f', 'deinen': 'm',
+      'sein': null, 'seine': 'f', 'seinen': 'm',
+      'ihre': 'f', 'ihren': 'm',
+      'unsere': 'f', 'unseren': 'm',
+      'dieser': 'm', 'diese': 'f', 'dieses': 'n', 'diesem': null, 'diesen': 'm',
+      'jeder': 'm', 'jede': 'f', 'jedes': 'n',
+      'welcher': 'm', 'welche': 'f', 'welches': 'n',
+    },
+    es: {
+      'el': 'm', 'la': 'f', 'los': 'm', 'las': 'f',
+      'un': 'm', 'una': 'f', 'unos': 'm', 'unas': 'f',
+      'nuestro': 'm', 'nuestra': 'f', 'nuestros': 'm', 'nuestras': 'f',
+      'este': 'm', 'esta': 'f', 'estos': 'm', 'estas': 'f',
+      'ese': 'm', 'esa': 'f', 'esos': 'm', 'esas': 'f',
+      'aquel': 'm', 'aquella': 'f',
+      'mi': null, 'tu': null, 'su': null,
+      'mis': null, 'tus': null, 'sus': null,
+    },
+    fr: {
+      'le': 'm', 'la': 'f', 'les': null,
+      'un': 'm', 'une': 'f', 'des': null,
+      'du': 'm',
+      'mon': null, 'ma': 'f', 'mes': null,
+      'ton': null, 'ta': 'f', 'tes': null,
+      'son': null, 'sa': 'f', 'ses': null,
+      'notre': null, 'votre': null, 'leur': null,
+      'ce': 'm', 'cet': 'm', 'cette': 'f', 'ces': null,
+      'quel': 'm', 'quelle': 'f', 'quels': 'm', 'quelles': 'f',
+    },
+    nb: {
+      // Only unambiguous determiners (den/det/de are also pronouns → handled there)
+      'en': 'm', 'ei': 'f', 'et': 'n',
+      'min': 'm', 'mi': 'f', 'mitt': 'n',
+      'din': 'm', 'di': 'f', 'ditt': 'n',
+      'si': 'f', 'sitt': 'n',
+      'vårt': 'n', 'denne': null, 'dette': 'n',
+      'noe': 'n', 'intet': 'n', 'hvert': 'n',
+      'noen': null, 'ingen': null, 'hver': null, 'alle': null,
+    },
+    nn: {
+      'ein': 'm', 'ei': 'f', 'eit': 'n',
+      'min': 'm', 'mi': 'f', 'mitt': 'n',
+      'din': 'm', 'di': 'f', 'ditt': 'n',
+      'si': 'f', 'sitt': 'n',
+      'vårt': 'n', 'denne': null, 'dette': 'n',
+      'noko': 'n', 'inkje': 'n', 'kvart': 'n',
+      'nokon': null, 'ingen': null, 'kvar': null, 'alle': null,
+    }
+  };
+
+  // German preposition → grammatical case mapping
+  // Used to boost the correct case form after a preposition
+  const PREPOSITION_CASE = {
+    // Accusative only (durch, für, gegen, ohne, um, bis)
+    'durch': 'akkusativ', 'für': 'akkusativ', 'gegen': 'akkusativ',
+    'ohne': 'akkusativ', 'um': 'akkusativ', 'bis': 'akkusativ',
+    // Dative only (aus, bei, mit, nach, seit, von, gegenüber)
+    'aus': 'dativ', 'bei': 'dativ', 'mit': 'dativ', 'nach': 'dativ',
+    'seit': 'dativ', 'von': 'dativ', 'gegenüber': 'dativ',
+    // Genitive (während, wegen, trotz, statt)
+    'während': 'genitiv', 'wegen': 'genitiv', 'trotz': 'genitiv', 'statt': 'genitiv',
+    // Two-way / Wechselpräpositionen (acc or dat depending on motion vs location)
+    'an': 'wechsel', 'auf': 'wechsel', 'hinter': 'wechsel', 'in': 'wechsel',
+    'neben': 'wechsel', 'über': 'wechsel', 'unter': 'wechsel', 'vor': 'wechsel',
+    'zwischen': 'wechsel',
+  };
+
+  // Prepositions — moderate noun/adj signal (no verb demote, since
+  // constructions like "ir a + infinitive" or "de + infinitive" exist)
+  const PREPOSITIONS_BY_LANG = {
+    de: new Set(['in', 'auf', 'mit', 'für', 'an', 'bei', 'nach', 'von', 'aus',
+      'über', 'unter', 'vor', 'hinter', 'zwischen', 'neben', 'gegen', 'ohne',
+      'um', 'durch', 'bis', 'seit', 'während', 'wegen', 'trotz', 'statt']),
+    es: new Set(['en', 'de', 'a', 'por', 'para', 'con', 'sin', 'sobre', 'entre',
+      'hacia', 'hasta', 'desde', 'durante', 'contra', 'tras']),
+    fr: new Set(['à', 'de', 'en', 'dans', 'sur', 'sous', 'avec', 'sans', 'pour',
+      'par', 'entre', 'vers', 'chez', 'contre', 'depuis', 'pendant',
+      'avant', 'après', 'devant', 'derrière', 'malgré']),
+    nb: new Set(['i', 'på', 'med', 'for', 'til', 'fra', 'av', 'om', 'hos', 'mot',
+      'over', 'under', 'ved', 'etter', 'mellom', 'gjennom', 'blant',
+      'langs', 'rundt', 'uten', 'innen', 'utenfor', 'innenfor']),
+    nn: new Set(['i', 'på', 'med', 'for', 'til', 'frå', 'av', 'om', 'hos', 'mot',
+      'over', 'under', 'ved', 'etter', 'mellom', 'gjennom', 'blant',
+      'langs', 'rundt', 'utan', 'innan', 'utanfor', 'innanfor']),
+  };
+
   // ── Word list ──
   async function loadWordList(lang) {
     try {
@@ -338,7 +444,8 @@
             display: entry.word,
             translation: translation,
             type: 'base',
-            bank: bank
+            bank: bank,
+            genus: bank === 'nounbank' ? (entry.genus || null) : null
           });
 
           // Add Norwegian translation for reverse prediction
@@ -393,19 +500,25 @@
                 if (Array.isArray(tenseData.former)) {
                   // Spanish/French: array of forms, map index to pronoun label
                   const pronounLabels = LANGUAGE_PRONOUNS[lang] || [];
+                  const arrTenseKey = TENSE_GROUP[tense] || null;
                   tenseData.former.forEach((form, index) => {
                     if (!form) return;
                     const pronoun = pronounLabels[index] || `${index}`;
                     // Filter by allowed pronouns (if set)
                     if (allowedPronouns && !allowedPronouns.has(pronoun)) return;
+                    const formLower = form.toLowerCase();
                     wordList.push({
-                      word: form.toLowerCase(),
+                      word: formLower,
                       display: form,
                       translation: `${entry.word} (${pronoun})`,
                       type: 'conjugation',
                       pronoun: pronoun,
-                      baseWord: entry.word
+                      baseWord: entry.word,
+                      tenseKey: arrTenseKey
                     });
+                    // Track for tense detection
+                    if (arrTenseKey === 'present') knownPresens.add(formLower);
+                    if (arrTenseKey === 'past') knownPreteritum.add(formLower);
                   });
                 } else if (typeof tenseData.former === 'object') {
                   // Object with keys: German uses pronouns (ich, du, ...),
@@ -420,20 +533,29 @@
                       if (!isFeatureEnabled(NB_NN_FORM_FEATURES[key])) continue;
                     }
 
+                    // NB/NN: tense is derived from form key (presens, preteritum, etc.)
+                    // DE: tense is the outer loop variable (presens, preteritum, perfektum)
+                    const objTenseKey = isNorwegian ? (TENSE_GROUP[key] || null) : (TENSE_GROUP[tense] || null);
+                    const formLower = form.toLowerCase();
+
                     wordList.push({
-                      word: form.toLowerCase(),
+                      word: formLower,
                       display: form,
                       translation: `${entry.word} (${key})`,
                       type: 'conjugation',
                       pronoun: lang === 'de' ? key : null,
                       formKey: isNorwegian ? key : null,
-                      baseWord: entry.word
+                      baseWord: entry.word,
+                      tenseKey: objTenseKey
                     });
 
-                    // NB/NN: track known presens/preteritum forms for tense detection
+                    // Track known present/past forms for tense detection (all languages)
                     if (isNorwegian) {
-                      if (key === 'presens') knownPresens.add(form.toLowerCase());
-                      if (key === 'preteritum') knownPreteritum.add(form.toLowerCase());
+                      if (key === 'presens') knownPresens.add(formLower);
+                      if (key === 'preteritum') knownPreteritum.add(formLower);
+                    } else {
+                      if (objTenseKey === 'present') knownPresens.add(formLower);
+                      if (objTenseKey === 'past') knownPreteritum.add(formLower);
                     }
                   }
                 }
@@ -480,7 +602,9 @@
                     display: form,
                     translation: `${entry.word} (${caseName} ${number})`,
                     type: 'case',
-                    baseWord: entry.word
+                    baseWord: entry.word,
+                    genus: entry.genus || null,
+                    caseName: caseName
                   });
                 }
               }
@@ -499,7 +623,8 @@
                   translation: `${entry.word} (${formType} ${number})`,
                   type: 'nounform',
                   bank: bank,
-                  baseWord: entry.word
+                  baseWord: entry.word,
+                  genus: entry.genus || null
                 });
               }
             }
@@ -512,7 +637,8 @@
               display: entry.plural,
               translation: `${entry.word} (flertall)`,
               type: 'plural',
-              baseWord: entry.word
+              baseWord: entry.word,
+              genus: entry.genus || null
             });
           }
 
@@ -552,8 +678,34 @@
         }
       }
       buildPrefixIndex();
+      await loadBigrams(lang);
     } catch (e) {
       console.error('Leksihjelp: Failed to load word list', e);
+    }
+  }
+
+  // ── Bigram frequency data ──
+  async function loadBigrams(lang) {
+    try {
+      const url = chrome.runtime.getURL(`data/bigrams-${lang}.json`);
+      const res = await fetch(url);
+      if (!res.ok) { bigramData = null; return; }
+      const raw = await res.json();
+      delete raw._metadata;
+      // Normalize: lowercase all keys and value keys for case-insensitive matching
+      // Merges duplicates (e.g. "Guten"+"guten") keeping the highest weight
+      bigramData = {};
+      for (const [key, pairs] of Object.entries(raw)) {
+        const lowerKey = key.toLowerCase();
+        const merged = bigramData[lowerKey] || {};
+        for (const [word, weight] of Object.entries(pairs)) {
+          const lowerWord = word.toLowerCase();
+          merged[lowerWord] = Math.max(merged[lowerWord] || 0, weight);
+        }
+        bigramData[lowerKey] = merged;
+      }
+    } catch (e) {
+      bigramData = null;
     }
   }
 
@@ -651,14 +803,14 @@
   function runPrediction(el) {
     if (lexiPaused) return;
     activeElement = el;
-    const { currentWord, previousWord, hasModalVerb, detectedTense } = getTextContext(el);
+    const { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords } = getTextContext(el);
 
     if (currentWord && currentWord.length >= 2) {
       // Detect pronoun context for smart verb suggestions
       const pronounContext = getPronounContext(previousWord);
       // Infinitive markers (å, zu) only count when immediately preceding
       const hasInfinitiveMarker = hasModalVerb || INFINITIVE_MARKERS.has(previousWord);
-      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense);
+      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
 
       // NB/NN: check for compound word matches (særskriving detection)
       // If student typed "skole sekk", search for "skolesekk" as a compound
@@ -740,7 +892,7 @@
 
     if (el.isContentEditable) {
       const sel = window.getSelection();
-      if (!sel.rangeCount) return { currentWord: '', previousWord: '', hasModalVerb: false };
+      if (!sel.rangeCount) return { currentWord: '', previousWord: '', hasModalVerb: false, detectedTense: null, expectedPOS: null, genderContext: null, posStrength: 0, caseContext: null, previousTwoWords: '' };
       const range = sel.getRangeAt(0);
       let node = range.startContainer;
       let offset = range.startOffset;
@@ -761,7 +913,7 @@
           }
         }
         if (!resolved) {
-          return { currentWord: '', previousWord: '', hasModalVerb: false };
+          return { currentWord: '', previousWord: '', hasModalVerb: false, detectedTense: null, expectedPOS: null, genderContext: null, posStrength: 0, caseContext: null, previousTwoWords: '' };
         }
       }
 
@@ -790,13 +942,12 @@
     const wordsBeforeCursor = beforeCurrentWord.toLowerCase().split(/\s+/);
     const hasModalVerb = wordsBeforeCursor.some(w => MODAL_VERBS.has(w));
 
-    // NB/NN: detect dominant tense in surrounding text
-    // Scan recent words to see if student is writing in presens or preteritum
+    // Detect dominant tense in surrounding text (all languages)
+    // Scans recent words for known present/past verb forms to detect tense consistency
     let detectedTense = null;
-    if (currentLang === 'nb' || currentLang === 'nn') {
+    {
       let presensCount = 0;
       let preteritumCount = 0;
-      // Check up to 20 recent words before cursor for known verb forms
       const recentTokens = wordsBeforeCursor.slice(-20);
       for (const w of recentTokens) {
         if (knownPresens.has(w)) presensCount++;
@@ -805,12 +956,60 @@
       // Need at least 2 verb hits to be confident, and a clear majority
       const total = presensCount + preteritumCount;
       if (total >= 2) {
-        if (presensCount > preteritumCount) detectedTense = 'presens';
-        else if (preteritumCount > presensCount) detectedTense = 'preteritum';
+        if (presensCount > preteritumCount) detectedTense = 'present';
+        else if (preteritumCount > presensCount) detectedTense = 'past';
       }
     }
 
-    return { currentWord, previousWord, hasModalVerb, detectedTense };
+    // German: detect grammatical case from governing preposition
+    // Checks previous word and 2 words back (for "mit dem H..." pattern)
+    let caseContext = null;
+    if (currentLang === 'de') {
+      if (previousWord) caseContext = PREPOSITION_CASE[previousWord] || null;
+      if (!caseContext && wordsBeforeCursor.length >= 2) {
+        const twoBack = wordsBeforeCursor[wordsBeforeCursor.length - 2];
+        if (twoBack) caseContext = PREPOSITION_CASE[twoBack] || null;
+      }
+    }
+
+    // Detect POS expectation and gender context from determiners/prepositions
+    let expectedPOS = null;  // 'noun_adj' when next word is likely a noun/adjective
+    let genderContext = null; // gender hint ('m', 'f', 'n') from determiner
+    let posStrength = 0;     // 2 = strong (determiner), 1 = moderate (preposition)
+
+    const detMap = DETERMINERS_BY_LANG[currentLang];
+    if (detMap) {
+      // Check immediate previous word for a determiner
+      if (previousWord && detMap[previousWord] !== undefined) {
+        expectedPOS = 'noun_adj';
+        genderContext = detMap[previousWord];
+        posStrength = 2;
+      } else if (wordsBeforeCursor.length >= 2) {
+        // 2-word lookback: handles "die große Sch..." (article + adjective + noun)
+        const twoBack = wordsBeforeCursor[wordsBeforeCursor.length - 2];
+        if (twoBack && detMap[twoBack] !== undefined) {
+          expectedPOS = 'noun_adj';
+          genderContext = detMap[twoBack];
+          posStrength = 2;
+        }
+      }
+    }
+
+    // Prepositions: moderate noun/adj signal (no verb demote)
+    if (!expectedPOS) {
+      const prepSet = PREPOSITIONS_BY_LANG[currentLang];
+      if (prepSet && previousWord && prepSet.has(previousWord)) {
+        expectedPOS = 'noun_adj';
+        posStrength = 1;
+      }
+    }
+
+    // Two-word lookback for multi-word bigram keys (e.g. "ha det" → "bra")
+    const previousTwoWords = wordsBeforeCursor.length >= 2
+      ? wordsBeforeCursor.slice(-2).join(' ')
+      : '';
+
+    return { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords };
   }
 
   // ── Phonetic equivalence rules per language ──
@@ -935,7 +1134,7 @@
   }
 
   // ── Fuzzy matching ──
-  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null) {
+  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null, expectedPOS = null, genderContext = null, posStrength = 0, caseContext = null, previousWord = '', previousTwoWords = '') {
     const q = input.toLowerCase();
     const qPhonetic = phoneticNormalize(q);
 
@@ -952,7 +1151,7 @@
           const entry = wordList[idx];
           let score = matchScore(q, entry.word);
           if (score > 0) {
-            applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
+            applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
           }
         }
         // Also check 3-char prefix for better precision
@@ -966,7 +1165,7 @@
               const entry = wordList[idx];
               let score = matchScore(q, entry.word);
               if (score > 0) {
-                applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
+                applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
               }
             }
           }
@@ -982,7 +1181,7 @@
         const targetPhonetic = phoneticNormalize(entry.word);
         const score = phoneticMatchScore(qPhonetic, targetPhonetic);
         if (score > 0) {
-          applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q);
+          applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
         }
       }
     }
@@ -1005,7 +1204,7 @@
     return results;
   }
 
-  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query) {
+  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords) {
     // Typo matches: only show "mente du?" when the input is a plausible misspelling
     // of the correct word (at least 60% of its length), not just a short prefix
     if (entry.type === 'typo' && score >= 50) {
@@ -1042,21 +1241,75 @@
     }
 
     // NB/NN: pronoun context means "next word is a verb" — boost verb forms
-    // in the detected tense (default to presens if no tense detected)
+    // in the detected tense (default to present if no tense detected)
     if (!hasModalVerb && pronounContext === '_nb_pronoun') {
-      const targetTense = detectedTense || 'presens';
+      const targetTense = detectedTense || 'present';
       if (entry.type === 'base' && entry.bank === 'verbbank') {
         score += 150;
       }
-      if (entry.type === 'conjugation' && entry.formKey === targetTense) {
+      if (entry.type === 'conjugation' && entry.tenseKey === targetTense) {
         score += 200;
       }
     }
 
-    // NB/NN tense consistency: boost verb forms matching the detected tense
-    if (detectedTense && entry.type === 'conjugation' && entry.formKey) {
-      if (entry.formKey === detectedTense) {
+    // Tense consistency: boost verb forms matching the detected tense (all languages)
+    // e.g. if student writes in past tense, boost preteritum/preterito forms
+    if (detectedTense && entry.type === 'conjugation' && entry.tenseKey) {
+      if (entry.tenseKey === detectedTense) {
         score += 180;
+      }
+    }
+
+    // POS expectation: after determiners/prepositions, boost nouns and adjectives
+    if (expectedPOS === 'noun_adj') {
+      const isNounOrAdj = entry.bank === 'nounbank' || entry.bank === 'adjectivebank' ||
+        entry.type === 'nounform' || entry.type === 'plural' || entry.type === 'case' ||
+        entry.type === 'comparative' || entry.type === 'superlative';
+      const isVerb = entry.bank === 'verbbank' || entry.type === 'conjugation';
+
+      if (isNounOrAdj) {
+        score += posStrength >= 2 ? 150 : 100; // Stronger after determiners than prepositions
+      } else if (isVerb && posStrength >= 2) {
+        score -= 100; // Only demote verbs after determiners (not prepositions)
+      }
+    }
+
+    // Gender agreement: after a gendered determiner, boost nouns with matching gender
+    // e.g. "die Sch..." boosts feminine nouns, "el per..." boosts masculine nouns
+    if (genderContext && entry.genus === genderContext) {
+      score += 120;
+    }
+
+    // German case from prepositions: boost noun case forms matching the expected case
+    // e.g. "mit H..." boosts dative forms, "für H..." boosts accusative forms
+    if (caseContext && entry.type === 'case' && entry.caseName) {
+      if (caseContext === 'wechsel') {
+        // Two-way prepositions: boost both accusative and dative (smaller boost)
+        if (entry.caseName === 'akkusativ' || entry.caseName === 'dativ') {
+          score += 80;
+        }
+      } else if (entry.caseName === caseContext) {
+        score += 150;
+      }
+    }
+
+    // Bigram frequency: boost words that commonly follow the previous word(s)
+    // Checks both single-word keys ("es" → "gibt") and two-word keys ("ha det" → "bra")
+    // All keys/values are lowercased at load time, matched against entry.word (also lowercase)
+    if (bigramData) {
+      let bigramWeight = 0;
+      // Check two-word key first (more specific = higher priority)
+      if (previousTwoWords) {
+        const pairs2 = bigramData[previousTwoWords];
+        if (pairs2) bigramWeight = pairs2[entry.word] || 0;
+      }
+      // Fall back to single-word key
+      if (!bigramWeight && previousWord) {
+        const pairs1 = bigramData[previousWord];
+        if (pairs1) bigramWeight = pairs1[entry.word] || 0;
+      }
+      if (bigramWeight > 0) {
+        score += bigramWeight * 40; // 40/80/120 based on weight 1/2/3
       }
     }
 
