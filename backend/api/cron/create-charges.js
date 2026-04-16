@@ -52,10 +52,13 @@ export default async function handler(req, res) {
         const nextCharge = new Date(agreement.nextChargeDate);
         if (nextCharge > now) continue;
       } else if (agreement.startDate) {
-        // If no next charge date but has start date, check if it's been at least a month
+        // If no next charge date but has start date, check if it's been at least a month.
+        // Comparing only year+month would charge a May-15 agreement on June 1
+        // (only 17 days later), so also require the day-of-month to have elapsed.
         const start = new Date(agreement.startDate);
-        const monthsSinceStart = (now.getFullYear() - start.getFullYear()) * 12 + (now.getMonth() - start.getMonth());
-        if (monthsSinceStart < 1) continue;
+        const monthDelta = (now.getUTCFullYear() - start.getUTCFullYear()) * 12 + (now.getUTCMonth() - start.getUTCMonth());
+        const dueThisMonth = now.getUTCDate() >= start.getUTCDate();
+        if (monthDelta < 1 || (monthDelta === 1 && !dueThisMonth)) continue;
       } else {
         continue; // No start date yet, skip
       }

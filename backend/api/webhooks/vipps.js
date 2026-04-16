@@ -20,6 +20,26 @@
 import crypto from 'crypto';
 import { getFirestoreDb } from '../_firebase.js';
 
+// Disable Vercel's default body parser so we receive the raw bytes required
+// for HMAC-SHA256 verification. Re-serializing parsed JSON breaks signatures.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+async function readRawBody(req) {
+  if (typeof req.body === 'string') return req.body;
+  if (req.rawBody) {
+    return typeof req.rawBody === 'string' ? req.rawBody : req.rawBody.toString('utf-8');
+  }
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString('utf-8');
+}
+
 // ── HMAC-SHA256 Webhook Verification ──
 
 /**
@@ -125,15 +145,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Get raw body for HMAC verification.
-  // Prefer the actual raw bytes; fall back to re-serialization only in dev.
+  // Read raw body bytes for HMAC verification (body parser disabled via config).
   let rawBody;
-  if (typeof req.body === 'string') {
-    rawBody = req.body;
-  } else if (req.rawBody) {
-    rawBody = typeof req.rawBody === 'string' ? req.rawBody : req.rawBody.toString('utf-8');
-  } else {
-    rawBody = JSON.stringify(req.body);
+  try {
+    rawBody = await readRawBody(req);
+  } catch (err) {
+    console.error('Failed to read webhook body:', err.message);
+    return res.status(400).json({ error: 'Invalid body' });
   }
 
   // Verify HMAC signature — required in production
@@ -155,7 +173,7 @@ export default async function handler(req, res) {
   res.status(200).json({ ok: true });
 
   try {
-    const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    const event = rawBody ? JSON.parse(rawBody) : null;
     if (!event || !event.eventType) {
       console.warn('Webhook received without eventType:', JSON.stringify(event));
       return;

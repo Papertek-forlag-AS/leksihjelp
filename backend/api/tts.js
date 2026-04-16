@@ -15,7 +15,7 @@
 import { setCorsHeaders, rateLimit, getClientIp } from './_utils.js';
 import { verifySessionToken } from './_jwt.js';
 import { getFirestoreDb } from './_firebase.js';
-import { recalculateQuota } from './_quota.js';
+import { recalculateQuota, DEFAULT_MAX_BALANCE } from './_quota.js';
 
 export default async function handler(req, res) {
   setCorsHeaders(res, req);
@@ -124,7 +124,8 @@ export default async function handler(req, res) {
       }
     }
 
-    // Check quota (read-only) — deduction happens after successful TTS call
+    // Atomically check + deduct quota in a single transaction.
+    // If the ElevenLabs call later fails, we refund in the catch block.
     try {
       const quotaResult = await db.runTransaction(async (transaction) => {
         const freshDoc = await transaction.get(userRef);
@@ -132,19 +133,21 @@ export default async function handler(req, res) {
 
         // Recalculate quota (handles rollover + lazy migration)
         const quotaUpdate = recalculateQuota(freshData);
+        const updateFields = quotaUpdate?.needsUpdate ? { ...quotaUpdate.updateFields } : {};
         if (quotaUpdate?.needsUpdate) {
-          transaction.update(userRef, quotaUpdate.updateFields);
           freshData.quotaBalance = quotaUpdate.quotaBalance;
         }
 
         const quotaBalance = typeof freshData.quotaBalance === 'number' ? freshData.quotaBalance : 0;
-        const quotaMaxBalance = freshData.quotaMaxBalance || 20_000;
+        const quotaMaxBalance = freshData.quotaMaxBalance || DEFAULT_MAX_BALANCE;
 
-        // Check quota — is there enough balance for this request?
         if (quotaBalance < text.length) {
+          if (Object.keys(updateFields).length > 0) transaction.update(userRef, updateFields);
           return { exceeded: true, quotaBalance, quotaMaxBalance };
         }
 
+        updateFields.quotaBalance = quotaBalance - text.length;
+        transaction.update(userRef, updateFields);
         return { exceeded: false };
       });
 
@@ -202,24 +205,13 @@ export default async function handler(req, res) {
     if (!elevenLabsRes.ok) {
       const errText = await elevenLabsRes.text();
       console.error('ElevenLabs error:', elevenLabsRes.status, errText);
+      await refundQuota(authMethod, userSub, text.length);
       return res.status(502).json({
         error: 'Uttale-tjenesten er midlertidig utilgjengelig'
       });
     }
 
     const data = await elevenLabsRes.json();
-
-    // Deduct quota only after successful TTS call (token auth only)
-    if (authMethod === 'token' && userSub) {
-      const db = await getFirestoreDb();
-      const userRef = db.collection('users').doc(userSub);
-      await db.runTransaction(async (transaction) => {
-        const freshDoc = await transaction.get(userRef);
-        const freshData = freshDoc.data();
-        const balance = typeof freshData.quotaBalance === 'number' ? freshData.quotaBalance : 0;
-        transaction.update(userRef, { quotaBalance: Math.max(0, balance - text.length) });
-      });
-    }
 
     // Derive word-level timing from character-level alignment
     const wordTimings = deriveWordTimings(data.alignment);
@@ -232,7 +224,25 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('TTS proxy error:', err);
+    await refundQuota(authMethod, userSub, text.length);
     return res.status(500).json({ error: 'Intern serverfeil' });
+  }
+}
+
+async function refundQuota(authMethod, userSub, chars) {
+  if (authMethod !== 'token' || !userSub || !chars) return;
+  try {
+    const db = await getFirestoreDb();
+    const userRef = db.collection('users').doc(userSub);
+    await db.runTransaction(async (transaction) => {
+      const freshDoc = await transaction.get(userRef);
+      const freshData = freshDoc.data() || {};
+      const balance = typeof freshData.quotaBalance === 'number' ? freshData.quotaBalance : 0;
+      const maxBalance = freshData.quotaMaxBalance || DEFAULT_MAX_BALANCE;
+      transaction.update(userRef, { quotaBalance: Math.min(balance + chars, maxBalance) });
+    });
+  } catch (err) {
+    console.error('Quota refund failed:', err.message);
   }
 }
 
