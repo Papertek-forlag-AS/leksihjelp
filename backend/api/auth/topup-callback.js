@@ -19,9 +19,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { reference, userId } = req.query || {};
+  const { reference } = req.query || {};
 
-  if (!reference || !userId) {
+  if (!reference) {
     return redirect(res, `${SITE_URL}/?topup_error=missing_params`);
   }
 
@@ -36,9 +36,11 @@ export default async function handler(req, res) {
 
     const topupData = topupDoc.data();
 
-    // Verify userId matches the stored record to prevent crediting wrong user
-    if (topupData.userId && topupData.userId !== userId) {
-      console.error(`topup-callback userId mismatch: query=${userId}, stored=${topupData.userId}`);
+    // The stored topup record is the source of truth for which user to credit.
+    // Never trust the userId from the query string for authorization.
+    const userId = topupData.userId;
+    if (!userId) {
+      console.error(`topup-callback stored record missing userId: ${reference}`);
       return redirect(res, `${SITE_URL}/?topup_error=invalid_user`);
     }
 

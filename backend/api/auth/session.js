@@ -11,7 +11,7 @@
 import { setCorsHeaders, rateLimit, getClientIp } from '../_utils.js';
 import { verifySessionToken } from '../_jwt.js';
 import { getFirestoreDb } from '../_firebase.js';
-import { recalculateQuota } from '../_quota.js';
+import { recalculateQuota, DEFAULT_MAX_BALANCE } from '../_quota.js';
 
 export default async function handler(req, res) {
   setCorsHeaders(res, req);
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
     }
 
     const quotaBalance = quotaUpdate ? quotaUpdate.quotaBalance : (userData.quotaBalance ?? 0);
-    const quotaMaxBalance = quotaUpdate ? quotaUpdate.quotaMaxBalance : (userData.quotaMaxBalance || 20_000);
+    const quotaMaxBalance = quotaUpdate ? quotaUpdate.quotaMaxBalance : (userData.quotaMaxBalance || DEFAULT_MAX_BALANCE);
 
     return res.status(200).json({
       user: {

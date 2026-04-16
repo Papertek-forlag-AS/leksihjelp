@@ -14,8 +14,8 @@
 
 // ── Defaults ──
 
-const DEFAULT_MONTHLY_ALLOWANCE = 50_000;
-const DEFAULT_MAX_BALANCE = 500_000; // ~10 months accumulation
+export const DEFAULT_MONTHLY_ALLOWANCE = 50_000;
+export const DEFAULT_MAX_BALANCE = 500_000; // ~10 months accumulation
 
 // ── Helpers ──
 
@@ -23,7 +23,7 @@ const DEFAULT_MAX_BALANCE = 500_000; // ~10 months accumulation
  * Get the first day of the month for a given date (midnight UTC).
  */
 export function firstOfMonth(date) {
-  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), 1));
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
 }
 
 /**

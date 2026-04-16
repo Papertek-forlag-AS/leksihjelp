@@ -14,7 +14,7 @@ import { setCorsHeaders, rateLimit, getClientIp } from '../_utils.js';
 import { exchangeCodeForTokens, getVippsUserInfo } from '../_vipps.js';
 import { createSessionToken } from '../_jwt.js';
 import { getFirestoreDb } from '../_firebase.js';
-import { getInitialQuotaFields } from '../_quota.js';
+import { getInitialQuotaFields, DEFAULT_MAX_BALANCE } from '../_quota.js';
 
 const SITE_URL = process.env.SITE_URL || 'https://leksihjelp.no';
 
@@ -104,8 +104,8 @@ export default async function handler(req, res) {
         name: userData.name,
         email: userData.email,
         subscriptionStatus: userData.subscriptionStatus || 'none',
-        quotaBalance: userData.quotaBalance ?? 10_000,
-        quotaMaxBalance: userData.quotaMaxBalance || 20_000,
+        quotaBalance: userData.quotaBalance ?? 0,
+        quotaMaxBalance: userData.quotaMaxBalance || DEFAULT_MAX_BALANCE,
       },
     });
   } catch (err) {
