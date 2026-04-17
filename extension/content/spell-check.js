@@ -409,31 +409,55 @@
     document.addEventListener('click', onDocClick, true);
   }
 
+  // Walk up to find the element that actually declared contenteditable, not a
+  // nested text node or span that merely inherits it. Rich editors (TipTap,
+  // Lexical, ProseMirror) fire focus/input on the root div — but third-party
+  // code sometimes bubbles events from deeper nodes, and reading text from a
+  // child would miss the rest of the document.
+  function resolveEditable(target) {
+    if (!target || target.nodeType !== 1) return null;
+    if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+      return PREDICTION.isTextInput(target) ? target : null;
+    }
+    let cur = target;
+    while (cur && cur.nodeType === 1) {
+      const attr = cur.getAttribute && cur.getAttribute('contenteditable');
+      if (attr === 'true' || attr === '') return cur;
+      cur = cur.parentElement;
+    }
+    return target.isContentEditable ? target : null;
+  }
+
   function onFocus(e) {
     if (!enabled || paused) return;
-    if (!PREDICTION.isTextInput(e.target)) return;
-    if (activeEl !== e.target) {
+    const el = resolveEditable(e.target);
+    if (!el) return;
+    if (activeEl !== el) {
       // Reset dismissals when moving to a new input — they're session-scoped
       // to the currently focused element.
       dismissed.clear();
     }
-    activeEl = e.target;
+    activeEl = el;
     schedule();
   }
 
   function onInput(e) {
     if (!enabled || paused) return;
-    if (!PREDICTION.isTextInput(e.target)) return;
-    activeEl = e.target;
+    const el = resolveEditable(e.target);
+    if (!el) return;
+    activeEl = el;
     schedule();
   }
 
   function onBlur() {
     // Keep overlay briefly so users can click markers after the input
-    // blurs; hide once focus has settled elsewhere.
+    // blurs; hide once focus has truly left the editable and our overlay.
     setTimeout(() => {
       const ae = document.activeElement;
-      if (ae !== activeEl && overlay && !overlay.contains(ae)) {
+      if (!activeEl) return;
+      const focusStillInside = activeEl === ae || activeEl.contains(ae);
+      const focusInOverlay = overlay && overlay.contains(ae);
+      if (!focusStillInside && !focusInOverlay) {
         hideOverlay();
       }
     }, 250);
@@ -701,7 +725,12 @@
     while ((n = walker.nextNode())) {
       const len = n.textContent.length;
       const nextOff = offset + len;
-      if (startNode === null && nextOff >= start) {
+      // Use strict > for start: when the start offset lands exactly on a text-node
+      // boundary (e.g., between two paragraphs), the character at `start` belongs
+      // to the NEXT node, not this one. Using >= here would anchor the range to
+      // the very end of the previous node and the Range would span whitespace
+      // instead of the target word.
+      if (startNode === null && nextOff > start) {
         startNode = n;
         startOff = start - offset;
       }

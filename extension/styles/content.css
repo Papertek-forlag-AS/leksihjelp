@@ -764,12 +764,13 @@
 
 #lexi-spell-overlay .lh-spell-dot {
   position: fixed;
-  height: 2px;
+  height: 3px;
   border-radius: 2px;
   pointer-events: auto;
   cursor: pointer;
   transition: height 0.1s, opacity 0.1s;
-  opacity: 0.85;
+  opacity: 0.9;
+  z-index: 2147483645;
 }
 
 #lexi-spell-overlay .lh-spell-dot::after {
