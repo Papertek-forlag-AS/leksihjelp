@@ -121,6 +121,9 @@
       const w = entry.word;
       if (!w) continue;
       validWords.add(w);
+      // Verb infinitives are stored as "å sykle" / "å være" — also accept the
+      // bare infinitive so unprefixed usage doesn't get flagged as unknown.
+      if (w.startsWith('å ')) validWords.add(w.slice(2));
 
       if ((entry.bank === 'nounbank' || entry.type === 'nounform' || entry.type === 'plural') && entry.genus) {
         // Only set genus if not already present, so the base form wins
@@ -250,7 +253,7 @@
         });
       }
 
-      // 4) Known typo.
+      // 4) Known typo (curated in vocab data).
       if (typoFix.has(t.word) && !validWords.has(t.word)) {
         const correct = typoFix.get(t.word);
         findings.push({
@@ -261,10 +264,117 @@
           fix: matchCase(t.display, correct),
           message: `Skrivefeil: "${t.display}" → "${correct}"`,
         });
+        continue;
+      }
+
+      // 5) Fuzzy typo — unknown word with a close neighbor in the vocabulary.
+      //    Skips proper nouns (capitalized outside sentence-start) and words
+      //    already handled by the curated typo branch above.
+      if (
+        t.word.length >= 4 &&
+        !validWords.has(t.word) &&
+        !isLikelyProperNoun(t, i, toks, text)
+      ) {
+        const fuzzy = findFuzzyNeighbor(t.word);
+        if (fuzzy) {
+          findings.push({
+            type: 'typo',
+            start: t.start,
+            end: t.end,
+            original: t.display,
+            fix: matchCase(t.display, fuzzy),
+            message: `Skrivefeil: "${t.display}" → "${fuzzy}"`,
+          });
+        }
       }
     }
 
     return dedupeOverlapping(findings);
+  }
+
+  // Detect proper-noun-like tokens: capitalized first letter AND not at the
+  // start of a sentence. Sentence starts are either position 0 in the text or
+  // immediately preceded by a sentence-ending punctuation.
+  function isLikelyProperNoun(tok, idx, toks, text) {
+    const first = tok.display[0];
+    if (first !== first.toUpperCase() || first === first.toLowerCase()) return false;
+    if (idx === 0) return false;
+    // Look at chars between previous token and this one
+    const prevTok = toks[idx - 1];
+    const between = text.slice(prevTok.end, tok.start);
+    if (/[.!?]/.test(between)) return false;
+    return true;
+  }
+
+  // Bounded Damerau-Levenshtein. Returns edit distance between a and b, or
+  // k + 1 if known to exceed k (early abort). Treats a single transposition
+  // of adjacent characters as one edit, so "nrosk"/"norsk" is distance 1 —
+  // the most common class of typing error for learners.
+  function editDistance(a, b, k) {
+    const la = a.length;
+    const lb = b.length;
+    if (Math.abs(la - lb) > k) return k + 1;
+    // Full matrix — word lengths are small, so memory isn't a concern and
+    // we need three rows of history for the transposition case.
+    const dp = [];
+    for (let i = 0; i <= la; i++) {
+      dp.push(new Array(lb + 1).fill(0));
+      dp[i][0] = i;
+    }
+    for (let j = 0; j <= lb; j++) dp[0][j] = j;
+    for (let i = 1; i <= la; i++) {
+      let rowMin = dp[i][0];
+      for (let j = 1; j <= lb; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let v = Math.min(
+          dp[i - 1][j] + 1,       // delete
+          dp[i][j - 1] + 1,       // insert
+          dp[i - 1][j - 1] + cost // substitute
+        );
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+          v = Math.min(v, dp[i - 2][j - 2] + 1); // transpose
+        }
+        dp[i][j] = v;
+        if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > k) return k + 1;
+    }
+    return dp[la][lb];
+  }
+
+  function findFuzzyNeighbor(word) {
+    const len = word.length;
+    // Tighter threshold for short words — 1 edit out of 4 chars is already
+    // a lot of signal to drop, but 1 edit out of 8+ is common.
+    const k = len <= 6 ? 1 : 2;
+    let best = null;
+    let bestScore = -Infinity; // higher is better
+    const first = word[0];
+    for (const cand of validWords) {
+      const cl = cand.length;
+      if (Math.abs(cl - len) > k) continue;
+      if (cand[0] !== first) continue; // Very common typos keep the first char
+      if (cand === word) continue;
+      const d = editDistance(word, cand, k);
+      if (d > k) continue;
+      // Tiebreak by shared prefix length — with "komer", "kommer" (shares
+      // "kom") beats "koner" (shares "ko"). Subtract d so lower distance
+      // still wins across the board.
+      const shared = sharedPrefixLen(word, cand);
+      const score = shared - d * 10;
+      if (score > bestScore) {
+        bestScore = score;
+        best = cand;
+      }
+    }
+    return best;
+  }
+
+  function sharedPrefixLen(a, b) {
+    const n = Math.min(a.length, b.length);
+    let i = 0;
+    while (i < n && a[i] === b[i]) i++;
+    return i;
   }
 
   // When two findings cover overlapping spans (e.g., særskriving + typo on

@@ -760,8 +760,10 @@
 
     // Pass the language code so the backend can enforce the correct language.
     // This prevents ElevenLabs from misidentifying Norwegian as Danish.
-    const voiceLang = readingLang === 'no' ? 'no' : currentLang;
-    const langCode = voiceLang || null;
+    // Map nb/nn → 'no' because eleven_flash_v2_5 doesn't recognize the
+    // bokmål/nynorsk codes — only the generic 'no'.
+    const rawLang = readingLang === 'no' ? 'no' : currentLang;
+    const langCode = VOICE_LANG_MAP[rawLang] || rawLang || null;
 
     if (isAuthenticated) {
       await playElevenLabs(selectedText, voiceId, speed, langCode, playBtn);
