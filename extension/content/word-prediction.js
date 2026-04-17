@@ -360,6 +360,46 @@
     }
   };
 
+  // NB/NN number + definiteness hints from determiners, demonstratives, quantifiers.
+  // Parallel to DETERMINERS_BY_LANG (which carries gender) — this one drives
+  // noun/adjective form agreement for Norwegian.
+  const NB_NN_AGREEMENT_CONTEXT = {
+    nb: {
+      'en': { number: 'entall', definiteness: 'ubestemt' },
+      'ei': { number: 'entall', definiteness: 'ubestemt' },
+      'et': { number: 'entall', definiteness: 'ubestemt' },
+      'den': { number: 'entall', definiteness: 'bestemt' },
+      'det': { number: 'entall', definiteness: 'bestemt' },
+      'de': { number: 'flertall', definiteness: 'bestemt' },
+      'denne': { number: 'entall', definiteness: 'bestemt' },
+      'dette': { number: 'entall', definiteness: 'bestemt' },
+      'disse': { number: 'flertall', definiteness: 'bestemt' },
+      'mange': { number: 'flertall' },
+      'flere': { number: 'flertall' },
+      'noen': { number: 'flertall' },
+      'få': { number: 'flertall' },
+      'alle': { number: 'flertall' },
+      'begge': { number: 'flertall' },
+    },
+    nn: {
+      'ein': { number: 'entall', definiteness: 'ubestemt' },
+      'ei': { number: 'entall', definiteness: 'ubestemt' },
+      'eit': { number: 'entall', definiteness: 'ubestemt' },
+      'den': { number: 'entall', definiteness: 'bestemt' },
+      'det': { number: 'entall', definiteness: 'bestemt' },
+      'dei': { number: 'flertall', definiteness: 'bestemt' },
+      'denne': { number: 'entall', definiteness: 'bestemt' },
+      'dette': { number: 'entall', definiteness: 'bestemt' },
+      'desse': { number: 'flertall', definiteness: 'bestemt' },
+      'mange': { number: 'flertall' },
+      'fleire': { number: 'flertall' },
+      'nokon': { number: 'flertall' },
+      'få': { number: 'flertall' },
+      'alle': { number: 'flertall' },
+      'begge': { number: 'flertall' },
+    },
+  };
+
   // German preposition → grammatical case mapping
   // Used to boost the correct case form after a preposition
   const PREPOSITION_CASE = {
@@ -624,7 +664,9 @@
                   type: 'nounform',
                   bank: bank,
                   baseWord: entry.word,
-                  genus: entry.genus || null
+                  genus: entry.genus || null,
+                  number: number,
+                  definiteness: formType,
                 });
               }
             }
@@ -673,6 +715,39 @@
                 type: 'superlative',
                 baseWord: entry.word
               });
+            }
+
+            // NB/NN: emit declined adjective forms (maskulin/feminin/noytrum/flertall/bestemt)
+            // so gender+number+definiteness agreement can surface the right form.
+            if (isNorwegian && entry.declension?.positiv) {
+              const ADJ_FORM_META = {
+                maskulin: { genus: 'm', number: 'entall', definiteness: 'ubestemt' },
+                feminin: { genus: 'f', number: 'entall', definiteness: 'ubestemt' },
+                noytrum: { genus: 'n', number: 'entall', definiteness: 'ubestemt' },
+                flertall: { genus: null, number: 'flertall', definiteness: null },
+                bestemt: { genus: null, number: 'entall', definiteness: 'bestemt' },
+              };
+              const baseLower = (entry.word || '').toLowerCase();
+              for (const [formKey, form] of Object.entries(entry.declension.positiv)) {
+                if (!form || typeof form !== 'string') continue;
+                const meta = ADJ_FORM_META[formKey];
+                if (!meta) continue;
+                const lower = form.toLowerCase();
+                if (lower === baseLower) continue;
+                // Intentionally emit duplicates by word (e.g. flertall & bestemt
+                // both "store") — display-level dedup downstream keeps the
+                // highest-scoring match for the current agreement context.
+                wordList.push({
+                  word: lower,
+                  display: form,
+                  translation: `${entry.word} (${formKey})`,
+                  type: 'adjform',
+                  baseWord: entry.word,
+                  genus: meta.genus,
+                  number: meta.number,
+                  definiteness: meta.definiteness,
+                });
+              }
             }
           }
         }
@@ -803,14 +878,14 @@
   function runPrediction(el) {
     if (lexiPaused) return;
     activeElement = el;
-    const { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords } = getTextContext(el);
+    const { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords, numberContext, definitenessContext } = getTextContext(el);
 
     if (currentWord && currentWord.length >= 2) {
       // Detect pronoun context for smart verb suggestions
       const pronounContext = getPronounContext(previousWord);
       // Infinitive markers (å, zu) only count when immediately preceding
       const hasInfinitiveMarker = hasModalVerb || INFINITIVE_MARKERS.has(previousWord);
-      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
+      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
 
       // NB/NN: check for compound word matches (særskriving detection)
       // If student typed "skole sekk", search for "skolesekk" as a compound
@@ -1004,12 +1079,28 @@
       }
     }
 
+    // NB/NN number + definiteness agreement signal
+    let numberContext = null;
+    let definitenessContext = null;
+    if (currentLang === 'nb' || currentLang === 'nn') {
+      const agreeMap = NB_NN_AGREEMENT_CONTEXT[currentLang];
+      let agree = previousWord && agreeMap[previousWord];
+      if (!agree && wordsBeforeCursor.length >= 2) {
+        const twoBack = wordsBeforeCursor[wordsBeforeCursor.length - 2];
+        agree = twoBack && agreeMap[twoBack];
+      }
+      if (agree) {
+        numberContext = agree.number || null;
+        definitenessContext = agree.definiteness || null;
+      }
+    }
+
     // Two-word lookback for multi-word bigram keys (e.g. "ha det" → "bra")
     const previousTwoWords = wordsBeforeCursor.length >= 2
       ? wordsBeforeCursor.slice(-2).join(' ')
       : '';
 
-    return { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords };
+    return { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords, numberContext, definitenessContext };
   }
 
   // ── Phonetic equivalence rules per language ──
@@ -1134,7 +1225,7 @@
   }
 
   // ── Fuzzy matching ──
-  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null, expectedPOS = null, genderContext = null, posStrength = 0, caseContext = null, previousWord = '', previousTwoWords = '') {
+  function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null, expectedPOS = null, genderContext = null, posStrength = 0, caseContext = null, previousWord = '', previousTwoWords = '', numberContext = null, definitenessContext = null) {
     const q = input.toLowerCase();
     const qPhonetic = phoneticNormalize(q);
 
@@ -1151,7 +1242,7 @@
           const entry = wordList[idx];
           let score = matchScore(q, entry.word);
           if (score > 0) {
-            applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
+            applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
           }
         }
         // Also check 3-char prefix for better precision
@@ -1165,7 +1256,7 @@
               const entry = wordList[idx];
               let score = matchScore(q, entry.word);
               if (score > 0) {
-                applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
+                applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
               }
             }
           }
@@ -1181,7 +1272,7 @@
         const targetPhonetic = phoneticNormalize(entry.word);
         const score = phoneticMatchScore(qPhonetic, targetPhonetic);
         if (score > 0) {
-          applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords);
+          applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
         }
       }
     }
@@ -1204,7 +1295,7 @@
     return results;
   }
 
-  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords) {
+  function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext = null, definitenessContext = null) {
     // Typo matches: only show "mente du?" when the input is a plausible misspelling
     // of the correct word (at least 60% of its length), not just a short prefix
     if (entry.type === 'typo' && score >= 50) {
@@ -1264,7 +1355,7 @@
     if (expectedPOS === 'noun_adj') {
       const isNounOrAdj = entry.bank === 'nounbank' || entry.bank === 'adjectivebank' ||
         entry.type === 'nounform' || entry.type === 'plural' || entry.type === 'case' ||
-        entry.type === 'comparative' || entry.type === 'superlative';
+        entry.type === 'comparative' || entry.type === 'superlative' || entry.type === 'adjform';
       const isVerb = entry.bank === 'verbbank' || entry.type === 'conjugation';
 
       if (isNounOrAdj) {
@@ -1278,6 +1369,27 @@
     // e.g. "die Sch..." boosts feminine nouns, "el per..." boosts masculine nouns
     if (genderContext && entry.genus === genderContext) {
       score += 120;
+    }
+
+    // NB/NN number + definiteness agreement for noun forms and adjective forms.
+    // "en stor..." (entall/ubestemt) → boost stor (m); "et stor..." → boost stort (n).
+    // "mange stor..." (flertall) → boost store. "den store bil..." (bestemt) → boost bilen.
+    if ((numberContext || definitenessContext) && (entry.type === 'nounform' || entry.type === 'adjform')) {
+      const numMatch = numberContext && entry.number === numberContext;
+      const defMatch = definitenessContext && entry.definiteness === definitenessContext;
+      // Flertall adjforms carry no definiteness — accept them whenever number matches.
+      const adjFlertall = entry.type === 'adjform' && entry.number === 'flertall' && entry.definiteness == null;
+      if (numMatch && (defMatch || !definitenessContext || adjFlertall)) {
+        score += 130;
+      } else if (numMatch || defMatch) {
+        score += 60;
+      } else {
+        // Explicit mismatch on both dimensions — demote so wrong-agreement forms
+        // don't outrank the base entry.
+        const numConflict = numberContext && entry.number && entry.number !== numberContext;
+        const defConflict = definitenessContext && entry.definiteness && entry.definiteness !== definitenessContext;
+        if (numConflict || defConflict) score -= 80;
+      }
     }
 
     // German case from prepositions: boost noun case forms matching the expected case
@@ -1711,4 +1823,23 @@
   function escapeAttr(str) {
     return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
+
+  // Narrow interface consumed by spell-check.js — avoids duplicate vocab loading.
+  // Kept minimal so spell-check can later be extracted with its own data source.
+  self.__lexiPrediction = {
+    getWordList: () => wordList,
+    getLanguage: () => currentLang,
+    isReady: () => wordList.length > 0,
+    isPaused: () => lexiPaused,
+    isTextInput,
+    onReady(cb) {
+      if (wordList.length > 0) { cb(); return; }
+      const start = Date.now();
+      const tick = () => {
+        if (wordList.length > 0) cb();
+        else if (Date.now() - start < 15000) setTimeout(tick, 100);
+      };
+      tick();
+    },
+  };
 })();
