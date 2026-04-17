@@ -68,6 +68,18 @@
   // ── Init ──
   init();
 
+  // Temporary diagnostic logger — helps pinpoint why markers aren't
+  // rendering on third-party editors. Enable in devtools with
+  // `window.__lexiSpellDebug = true` or it runs anyway with reduced volume.
+  function dbg(...args) {
+    if (typeof window !== 'undefined' && window.__lexiSpellDebug) {
+      console.log('[lexi-spell]', ...args);
+    }
+  }
+  function warn(...args) {
+    console.log('[lexi-spell]', ...args);
+  }
+
   async function init() {
     const stored = await storageGet(['language', 'predictionEnabled', 'spellCheckEnabled', 'lexiPaused']);
     lang = stored.language || 'en';
@@ -77,13 +89,25 @@
     // Explicit spellCheckEnabled=false disables even if prediction is on.
     enabled = predictionEnabled && stored.spellCheckEnabled !== false;
 
+    warn('init', { lang, enabled, paused, predictionEnabled, spellCheckEnabled: stored.spellCheckEnabled });
+
     PREDICTION.onReady(() => {
       rebuildIndexes();
+      warn('vocab ready', { validWords: validWords.size, typos: typoFix.size, nouns: nounGenus.size });
     });
 
     attachListeners();
 
     chrome.runtime.onMessage.addListener(handleRuntimeMessage);
+
+    // Expose state for ad-hoc inspection from devtools.
+    if (typeof window !== 'undefined') {
+      window.__lexiSpell = {
+        state: () => ({ lang, enabled, paused, activeEl, findings: lastFindings, markers: markers.length }),
+        recheck: () => runCheck(),
+        validWordsSize: () => validWords.size,
+      };
+    }
   }
 
   function handleRuntimeMessage(msg) {
@@ -429,15 +453,16 @@
   }
 
   function onFocus(e) {
-    if (!enabled || paused) return;
+    if (!enabled || paused) { dbg('skip focus — disabled/paused', { enabled, paused }); return; }
     const el = resolveEditable(e.target);
-    if (!el) return;
+    if (!el) { dbg('skip focus — no editable', e.target?.tagName); return; }
     if (activeEl !== el) {
       // Reset dismissals when moving to a new input — they're session-scoped
       // to the currently focused element.
       dismissed.clear();
     }
     activeEl = el;
+    warn('focus → active', { tag: el.tagName, cls: el.className, ce: el.isContentEditable });
     schedule();
   }
 
@@ -479,12 +504,13 @@
   }
 
   function runCheck() {
-    if (!activeEl || !enabled || paused) { hideOverlay(); return; }
+    if (!activeEl || !enabled || paused) { dbg('runCheck skip', { activeEl: !!activeEl, enabled, paused }); hideOverlay(); return; }
     const { text, cursor } = readInput(activeEl);
+    dbg('runCheck', { textLen: text?.length, lang, vocabReady: validWords.size });
     if (!text || text.length < 3) { hideOverlay(); return; }
     let findings = check(text, cursor);
-    // Filter dismissed (original+fix keyed, session-scoped per input).
     findings = findings.filter(f => !dismissed.has(dismissKey(f)));
+    warn('findings', findings.length, findings.slice(0, 5).map(f => `${f.type}:${f.original}→${f.fix}`));
     if (findings.length === 0) { hideOverlay(); return; }
     lastFindings = findings;
     renderMarkers(findings);
@@ -521,9 +547,11 @@
     clearMarkers();
     ensureOverlay();
 
+    let rendered = 0, skipped = 0;
     findings.forEach((finding, idx) => {
       const rect = positionForRange(activeEl, finding.start, finding.end);
-      if (!rect || !isInsideElement(activeEl, rect)) return;
+      if (!rect) { skipped++; dbg('skip marker — no rect', finding); return; }
+      if (!isInsideElement(activeEl, rect)) { skipped++; dbg('skip marker — outside el', finding, rect); return; }
       const dot = document.createElement('div');
       dot.className = `lh-spell-dot lh-spell-${finding.type}`;
       dot.dataset.idx = String(idx);
@@ -537,7 +565,9 @@
       overlay.appendChild(dot);
       markers.push({ el: dot, finding, rect });
       positionDot(dot, rect);
+      rendered++;
     });
+    warn('markers rendered', { rendered, skipped, total: findings.length });
   }
 
   function positionDot(dot, rect) {
