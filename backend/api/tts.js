@@ -167,7 +167,9 @@ export default async function handler(req, res) {
 
   // ── Call ElevenLabs ──
   const voice = voiceId || 'ThT5KcBeYPX3keUQqHPh'; // default voice
-  const rate = Math.max(0.5, Math.min(1.5, parseFloat(speed) || 1.0));
+  // ElevenLabs voice_settings.speed only accepts 0.7–1.2. Clamp so
+  // out-of-range client values don't 422 the call.
+  const rate = Math.max(0.7, Math.min(1.2, parseFloat(speed) || 1.0));
 
   // Pass language code directly to ElevenLabs.
   // eleven_flash_v2_5 uses short codes (no, es, de, fr).

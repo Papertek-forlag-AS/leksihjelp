@@ -177,7 +177,7 @@
         <div class="lh-slider-group">
           <div class="lh-slider-row">
             <span class="lh-slider-label">${t('widget_speed')}</span>
-            <input type="range" class="lh-slider" id="lh-speed" min="0.5" max="1.5" step="0.1" value="1.0">
+            <input type="range" class="lh-slider" id="lh-speed" min="0.7" max="1.2" step="0.1" value="1.0">
             <span class="lh-speed-value">1.0×</span>
           </div>
         </div>

@@ -147,9 +147,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   currentLang = (await chromeStorageGet('language')) || null;
 
-  // Step 2: If no learning language selected yet, show the language picker
-  if (!currentLang) {
+  // Step 2: Show the learning-language picker on first popup open.
+  // Gated on a dedicated flag rather than the presence of `language` —
+  // the floating widget silently writes `language` when the user picks
+  // a TTS language, which would otherwise swallow the picker entirely.
+  const onboardingComplete = await chromeStorageGet('onboardingComplete');
+  if (!onboardingComplete) {
     await initFirstRunPicker();
+    await chromeStorageSet({ onboardingComplete: true });
   }
 
   // If still no language after picker (skipped), default to English
