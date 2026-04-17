@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Leksihjelp",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Ordbok, uttale og ordforslag for norske elever som lærer spansk, fransk eller tysk.",
   "permissions": [
     "contextMenus",
