@@ -168,6 +168,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGrammarSettings();
   initNav();
   initPinButton();
+  initSkrivButton();
   initPauseButton();
   initDarkMode();
   initAuth();
@@ -1864,33 +1865,48 @@ function initNav() {
 }
 
 // ── Pin (Fest) Button ──────────────────────────────────────
+// Chrome extension popups close as soon as focus leaves, so the only way to
+// keep Leksihjelp persistently visible is to open it in a detached popup
+// window. The ?pinned=1 param lets that window hide its own Fest button.
 async function initPinButton() {
   const pinBtn = document.getElementById('pin-btn');
-  const pinOverlay = document.getElementById('pin-overlay');
-  const pinDismissBtn = document.getElementById('pin-dismiss-btn');
+  if (!pinBtn) return;
 
-  // Check if user already dismissed the pin guide
-  const dismissed = await chromeStorageGet('pinDismissed');
-  if (dismissed) {
+  const params = new URLSearchParams(location.search);
+  if (params.get('pinned') === '1') {
+    // Already running in the detached window — hide Fest, it'd just stack.
     pinBtn.classList.add('hidden');
     return;
   }
 
-  pinBtn.addEventListener('click', () => {
-    pinOverlay.classList.remove('hidden');
-  });
-
-  pinDismissBtn.addEventListener('click', async () => {
-    pinOverlay.classList.add('hidden');
-    pinBtn.classList.add('hidden');
-    await chromeStorageSet({ pinDismissed: true });
-  });
-
-  // Also close overlay by clicking outside the content
-  pinOverlay.addEventListener('click', (e) => {
-    if (e.target === pinOverlay) {
-      pinOverlay.classList.add('hidden');
+  pinBtn.addEventListener('click', async () => {
+    try {
+      await chrome.windows.create({
+        url: chrome.runtime.getURL('popup/popup.html?pinned=1'),
+        type: 'popup',
+        width: 420,
+        height: 680,
+      });
+    } catch (err) {
+      console.error('Failed to open pinned window:', err);
+      return;
     }
+    // The toolbar popup closes itself as focus moves to the new window,
+    // but call window.close() explicitly so it feels instant.
+    window.close();
+  });
+}
+
+// ── Skriv button (pencil) ──────────────────────────────────
+// Opens the Papertek writing tool in a new tab. Always visible in the
+// header so students can reach it regardless of dictionary state.
+function initSkrivButton() {
+  const btn = document.getElementById('skriv-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    chrome.tabs
+      ? chrome.tabs.create({ url: 'https://skriv.papertek.app' })
+      : window.open('https://skriv.papertek.app', '_blank');
   });
 }
 

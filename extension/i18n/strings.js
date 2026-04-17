@@ -18,7 +18,8 @@ const _STRINGS = {
   nb: {
     // ── Header ──
     pin_label: 'Fest',
-    pin_title: 'Fest Leksihjelp til verktøylinjen',
+    pin_title: 'Hold Leksihjelp åpen i eget vindu',
+    skriv_btn_title: 'Åpne skriveokt',
     settings_title: 'Innstillinger',
 
     // ── Pin overlay ──
@@ -230,7 +231,8 @@ const _STRINGS = {
   // ──────────────────────────────────────────────────────────
   nn: {
     pin_label: 'Fest',
-    pin_title: 'Fest Leksihjelp til verktøylinjen',
+    pin_title: 'Hald Leksihjelp ope i eige vindauge',
+    skriv_btn_title: 'Opne skriveøkt',
     settings_title: 'Innstillingar',
 
     pin_overlay_title: 'Fest Leksihjelp til verktøylinjen',
@@ -425,7 +427,8 @@ const _STRINGS = {
   // ──────────────────────────────────────────────────────────
   en: {
     pin_label: 'Pin',
-    pin_title: 'Pin Leksihjelp to the toolbar',
+    pin_title: 'Keep Leksihjelp open in a separate window',
+    skriv_btn_title: 'Open writing space',
     settings_title: 'Settings',
 
     pin_overlay_title: 'Pin Leksihjelp to the toolbar',

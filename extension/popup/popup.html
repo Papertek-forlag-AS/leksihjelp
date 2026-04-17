@@ -15,7 +15,13 @@
         <h1>Leksihjelp</h1>
       </div>
       <div class="header-actions">
-        <button id="pin-btn" class="icon-btn pin-btn" data-i18n-title="pin_title" title="Fest Leksihjelp til verktøylinjen">
+        <button id="skriv-btn" class="icon-btn" data-i18n-title="skriv_btn_title" data-i18n-aria-label="skriv_btn_title" title="Åpne skriveokt" aria-label="Åpne skriveokt">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+        <button id="pin-btn" class="icon-btn pin-btn" data-i18n-title="pin_title" title="Hold Leksihjelp åpen i eget vindu">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2L12 6M15.5 7.5L19 4M8.5 7.5L5 4M7 8C7 8 4 12 4 14C4 16 6 17 8 17.5L8 22L10 22L10 17.5C10 17.5 12 18 14 17.5L14 22L16 22L16 17.5C18 17 20 16 20 14C20 12 17 8 17 8L7 8Z"/>
           </svg>
@@ -28,28 +34,6 @@
         </button>
       </div>
     </header>
-
-    <!-- Pin instructions overlay -->
-    <div id="pin-overlay" class="pin-overlay hidden">
-      <div class="pin-overlay-content glass">
-        <h3 data-i18n="pin_overlay_title">Fest Leksihjelp til verktøylinjen</h3>
-        <div class="pin-steps">
-          <div class="pin-step">
-            <span class="pin-step-num">1</span>
-            <span data-i18n="pin_step_1">Klikk på puslespill-ikonet <strong>&#129513;</strong> i verktøylinjen</span>
-          </div>
-          <div class="pin-step">
-            <span class="pin-step-num">2</span>
-            <span data-i18n="pin_step_2">Finn <strong>Leksihjelp</strong> i listen over utvidelser</span>
-          </div>
-          <div class="pin-step">
-            <span class="pin-step-num">3</span>
-            <span data-i18n="pin_step_3">Klikk p&aring; pin-ikonet <strong>&#128204;</strong> ved siden av Leksihjelp</span>
-          </div>
-        </div>
-        <button id="pin-dismiss-btn" class="btn-primary pin-dismiss-btn" data-i18n="pin_dismiss">Skj&oslash;nte!</button>
-      </div>
-    </div>
 
     <!-- First-run UI language picker -->
     <div id="ui-language-picker" class="language-picker hidden">

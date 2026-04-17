@@ -1,6 +1,6 @@
 {
   "name": "leksihjelp",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Chrome extension for Norwegian students learning foreign languages",
   "scripts": {
     "sync-vocab": "node scripts/sync-vocab.js",
