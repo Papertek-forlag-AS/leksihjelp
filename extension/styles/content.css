@@ -716,101 +716,163 @@
     color: #94a3b8;
   }
 
-  #lexi-spell-bar {
-    background: rgba(30, 32, 53, 0.92);
-    border-color: rgba(255, 255, 255, 0.08);
+  #lexi-spell-overlay .lh-spell-popover {
+    background: rgba(30, 32, 53, 0.96);
+    border-color: rgba(255, 255, 255, 0.1);
     color: #e2e8f0;
   }
 
-  #lexi-spell-bar .lh-spell-header {
+  #lexi-spell-overlay .lh-spell-note {
     color: #94a3b8;
   }
 
-  #lexi-spell-bar .lh-spell-item {
-    border-top-color: rgba(255, 255, 255, 0.06);
+  #lexi-spell-overlay .lh-spell-orig {
+    color: #f87171;
   }
 
-  #lexi-spell-bar .lh-spell-fix {
-    background: rgba(17, 180, 154, 0.2);
-    color: #11B49A;
+  #lexi-spell-overlay .lh-spell-btn {
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
   }
 
-  #lexi-spell-bar .lh-spell-fix:hover {
-    background: rgba(17, 180, 154, 0.3);
+  #lexi-spell-overlay .lh-spell-accept {
+    background: rgba(17, 180, 154, 0.25);
+    color: #5eead4;
+  }
+
+  #lexi-spell-overlay .lh-spell-accept:hover {
+    background: rgba(17, 180, 154, 0.4);
+  }
+
+  #lexi-spell-overlay .lh-spell-decline:hover {
+    background: rgba(255, 255, 255, 0.12);
   }
 }
 
-#lexi-spell-bar {
+/* ── Spell-check overlay (per-word markers + popover) ── */
+
+#lexi-spell-overlay {
   position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
   z-index: 2147483645;
-  display: none;
-  min-width: 280px;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.94);
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#lexi-spell-overlay .lh-spell-dot {
+  position: fixed;
+  height: 2px;
+  border-radius: 2px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: height 0.1s, opacity 0.1s;
+  opacity: 0.85;
+}
+
+#lexi-spell-overlay .lh-spell-dot::after {
+  /* Invisible hit target that extends above the thin line so the word
+     itself is clickable. */
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+#lexi-spell-overlay .lh-spell-dot:hover {
+  height: 3px;
+  opacity: 1;
+}
+
+#lexi-spell-overlay .lh-spell-typo { background: #ef4444; }
+#lexi-spell-overlay .lh-spell-gender { background: #f59e0b; }
+#lexi-spell-overlay .lh-spell-modal_form { background: #f59e0b; }
+#lexi-spell-overlay .lh-spell-sarskriving { background: #8b5cf6; }
+
+#lexi-spell-overlay .lh-spell-popover {
+  position: fixed;
+  pointer-events: auto;
+  min-width: 200px;
+  max-width: 280px;
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 6px 8px;
-  font-size: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  font-size: 13px;
   color: #1e293b;
+  animation: lexi-fadein 0.12s ease-out;
 }
 
-#lexi-spell-bar.visible {
-  display: block;
-  animation: lexi-fadein 0.15s ease-out;
+#lexi-spell-overlay .lh-spell-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
-#lexi-spell-bar .lh-spell-header {
-  font-size: 10px;
+#lexi-spell-overlay .lh-spell-orig {
+  color: #dc2626;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+#lexi-spell-overlay .lh-spell-arrow {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+#lexi-spell-overlay .lh-spell-fix-text {
+  color: #0d8a75;
   font-weight: 600;
+}
+
+#lexi-spell-overlay .lh-spell-note {
+  font-size: 10px;
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  padding: 2px 4px 4px;
+  margin-bottom: 8px;
 }
 
-#lexi-spell-bar .lh-spell-item {
+#lexi-spell-overlay .lh-spell-actions {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 6px 4px;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  gap: 6px;
 }
 
-#lexi-spell-bar .lh-spell-item:first-of-type {
-  border-top: none;
-}
-
-#lexi-spell-bar .lh-spell-msg {
+#lexi-spell-overlay .lh-spell-btn {
   flex: 1;
-  line-height: 1.35;
-}
-
-#lexi-spell-bar .lh-spell-fix {
-  flex-shrink: 0;
-  background: rgba(17, 180, 154, 0.12);
-  color: #0d8a75;
   border: none;
-  padding: 4px 10px;
+  padding: 5px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.1s;
   font-family: inherit;
+  transition: background 0.1s;
 }
 
-#lexi-spell-bar .lh-spell-fix:hover {
-  background: rgba(17, 180, 154, 0.22);
+#lexi-spell-overlay .lh-spell-accept {
+  background: rgba(17, 180, 154, 0.15);
+  color: #0d8a75;
 }
 
-#lexi-spell-bar .lh-spell-more {
-  padding: 4px 4px 2px;
-  font-size: 10px;
-  color: #94a3b8;
-  font-style: italic;
+#lexi-spell-overlay .lh-spell-accept:hover {
+  background: rgba(17, 180, 154, 0.3);
+}
+
+#lexi-spell-overlay .lh-spell-decline {
+  background: rgba(0, 0, 0, 0.05);
+  color: #64748b;
+}
+
+#lexi-spell-overlay .lh-spell-decline:hover {
+  background: rgba(0, 0, 0, 0.08);
 }

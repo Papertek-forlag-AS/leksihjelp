@@ -2,7 +2,8 @@
  * Leksihjelp — Spell / Grammar Check (content script)
  *
  * Scans Norwegian (NB/NN) text in the active input for learner errors that
- * browsers miss. Surfaces findings in a compact floating bar.
+ * browsers miss. Each error gets a small dot anchored under the word;
+ * clicking opens a popover with accept/dismiss actions.
  *
  * Kept as a standalone module: it consumes vocab through __lexiPrediction
  * so it can later be decoupled from word-prediction and shipped independently
@@ -35,8 +36,7 @@
   const typoFix = new Map();           // 'komer' → 'kommer'
   const compoundNouns = new Set();     // noun-bank entries, used for særskriving
 
-  // UI
-  let bar = null;
+  // UI state lives in the "Overlay + markers + popover" section below.
 
   // ── Config ──
   const ARTICLE_GENUS = {
@@ -89,17 +89,17 @@
   function handleRuntimeMessage(msg) {
     if (msg.type === 'LANGUAGE_CHANGED') {
       lang = msg.language;
-      hideBar();
+      hideOverlay();
       PREDICTION.onReady(rebuildIndexes);
     } else if (msg.type === 'PREDICTION_TOGGLED') {
       // Prediction off → spell-check off (honor the umbrella toggle).
-      if (!msg.enabled) { enabled = false; hideBar(); }
+      if (!msg.enabled) { enabled = false; hideOverlay(); }
     } else if (msg.type === 'SPELL_CHECK_TOGGLED') {
       enabled = !!msg.enabled;
-      if (!enabled) hideBar();
+      if (!enabled) hideOverlay();
     } else if (msg.type === 'LEXI_PAUSED') {
       paused = !!msg.paused;
-      if (paused) hideBar();
+      if (paused) hideOverlay();
     }
   }
 
@@ -404,13 +404,19 @@
     document.addEventListener('keyup', onInput, true);
     document.addEventListener('focusin', onFocus, true);
     document.addEventListener('blur', onBlur, true);
-    window.addEventListener('scroll', positionBar, true);
-    window.addEventListener('resize', positionBar);
+    window.addEventListener('scroll', schedulePositionRefresh, true);
+    window.addEventListener('resize', schedulePositionRefresh);
+    document.addEventListener('click', onDocClick, true);
   }
 
   function onFocus(e) {
     if (!enabled || paused) return;
     if (!PREDICTION.isTextInput(e.target)) return;
+    if (activeEl !== e.target) {
+      // Reset dismissals when moving to a new input — they're session-scoped
+      // to the currently focused element.
+      dismissed.clear();
+    }
     activeEl = e.target;
     schedule();
   }
@@ -423,12 +429,21 @@
   }
 
   function onBlur() {
-    // Keep bar briefly so users can click fixes; hide after a short grace.
+    // Keep overlay briefly so users can click markers after the input
+    // blurs; hide once focus has settled elsewhere.
     setTimeout(() => {
-      if (document.activeElement !== activeEl && bar && !bar.contains(document.activeElement)) {
-        hideBar();
+      const ae = document.activeElement;
+      if (ae !== activeEl && overlay && !overlay.contains(ae)) {
+        hideOverlay();
       }
-    }, 200);
+    }, 250);
+  }
+
+  function onDocClick(e) {
+    if (!popover) return;
+    if (popover.contains(e.target)) return;
+    for (const m of markers) if (m.el.contains(e.target)) return;
+    hidePopover();
   }
 
   function schedule() {
@@ -440,100 +455,327 @@
   }
 
   function runCheck() {
-    if (!activeEl || !enabled || paused) { hideBar(); return; }
+    if (!activeEl || !enabled || paused) { hideOverlay(); return; }
     const { text, cursor } = readInput(activeEl);
-    if (!text || text.length < 3) { hideBar(); return; }
-    const findings = check(text, cursor);
-    if (findings.length === 0) { hideBar(); return; }
-    renderBar(findings);
+    if (!text || text.length < 3) { hideOverlay(); return; }
+    let findings = check(text, cursor);
+    // Filter dismissed (original+fix keyed, session-scoped per input).
+    findings = findings.filter(f => !dismissed.has(dismissKey(f)));
+    if (findings.length === 0) { hideOverlay(); return; }
+    lastFindings = findings;
+    renderMarkers(findings);
+  }
+
+  function dismissKey(f) {
+    return `${f.original}|${f.fix}`;
   }
 
   function readInput(el) {
-    if (el.isContentEditable) {
-      // contenteditable — just read the textContent. Applying fixes in
-      // contenteditable is non-trivial (v1 renders read-only suggestions).
-      return { text: el.textContent || '', cursor: null };
-    }
+    if (el.isContentEditable) return { text: el.textContent || '', cursor: null };
     return { text: el.value || '', cursor: el.selectionEnd };
   }
 
-  // ── UI ──
+  // ── Overlay + markers + popover ──
 
-  function ensureBar() {
-    if (bar) return bar;
-    bar = document.createElement('div');
-    bar.id = 'lexi-spell-bar';
-    bar.addEventListener('mousedown', e => e.preventDefault()); // prevent blur
-    document.body.appendChild(bar);
-    return bar;
+  let overlay = null;
+  const markers = []; // [{ el, finding, rect }]
+  let popover = null;
+  let activePopoverIdx = -1;
+  let lastFindings = [];
+  const dismissed = new Set();
+  let posRefreshRaf = null;
+
+  function ensureOverlay() {
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'lexi-spell-overlay';
+    document.body.appendChild(overlay);
+    return overlay;
   }
 
-  function renderBar(findings) {
-    const el = ensureBar();
-    const top = findings.slice(0, 3);
-    const isEditable = activeEl && activeEl.isContentEditable;
+  function renderMarkers(findings) {
+    clearMarkers();
+    ensureOverlay();
 
-    const items = top.map((f, idx) => `
-      <div class="lh-spell-item" data-idx="${idx}">
-        <span class="lh-spell-msg">${escapeHtml(f.message)}</span>
-        ${isEditable ? '' : `<button class="lh-spell-fix" data-idx="${idx}">Fiks</button>`}
-      </div>
-    `).join('');
-
-    const more = findings.length > top.length ? `<div class="lh-spell-more">+${findings.length - top.length} til</div>` : '';
-
-    el.innerHTML = `
-      <div class="lh-spell-header">Skrivehjelp (${findings.length})</div>
-      ${items}
-      ${more}
-    `;
-
-    el.querySelectorAll('.lh-spell-fix').forEach(btn => {
-      btn.addEventListener('click', ev => {
-        ev.preventDefault();
-        const idx = Number(btn.dataset.idx);
-        applyFix(findings[idx]);
+    findings.forEach((finding, idx) => {
+      const rect = positionForRange(activeEl, finding.start, finding.end);
+      if (!rect || !isInsideElement(activeEl, rect)) return;
+      const dot = document.createElement('div');
+      dot.className = `lh-spell-dot lh-spell-${finding.type}`;
+      dot.dataset.idx = String(idx);
+      dot.title = finding.message;
+      dot.addEventListener('mousedown', e => e.preventDefault()); // prevent blur
+      dot.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        showPopover(idx, finding);
       });
+      overlay.appendChild(dot);
+      markers.push({ el: dot, finding, rect });
+      positionDot(dot, rect);
     });
-
-    el.classList.add('visible');
-    positionBar();
   }
 
-  function positionBar() {
-    if (!bar || !activeEl) return;
-    const r = activeEl.getBoundingClientRect();
-    // Place just below the input, within viewport.
-    const top = Math.min(window.innerHeight - 40, r.bottom + 4 + window.scrollY - window.scrollY);
-    bar.style.top = `${r.bottom + window.scrollY + 4}px`;
-    bar.style.left = `${r.left + window.scrollX}px`;
-    bar.style.maxWidth = `${Math.max(280, r.width)}px`;
+  function positionDot(dot, rect) {
+    // Thin underline-style bar, full width of the error span, just below it.
+    dot.style.top = `${rect.top + rect.height}px`;
+    dot.style.left = `${rect.left}px`;
+    dot.style.width = `${Math.max(rect.width, 12)}px`;
   }
 
-  function hideBar() {
-    if (bar) bar.classList.remove('visible');
+  // Keep markers aligned with their words when the input scrolls or the
+  // viewport resizes. Skip the work if the text itself has changed —
+  // schedule() will rerun check().
+  function schedulePositionRefresh() {
+    if (posRefreshRaf) return;
+    posRefreshRaf = requestAnimationFrame(() => {
+      posRefreshRaf = null;
+      if (!activeEl || markers.length === 0) return;
+      for (const m of markers) {
+        const rect = positionForRange(activeEl, m.finding.start, m.finding.end);
+        if (!rect || !isInsideElement(activeEl, rect)) {
+          m.el.style.display = 'none';
+          continue;
+        }
+        m.el.style.display = '';
+        positionDot(m.el, rect);
+        m.rect = rect;
+      }
+      if (popover && activePopoverIdx >= 0 && markers[activePopoverIdx]) {
+        positionPopover(markers[activePopoverIdx].rect);
+      }
+    });
   }
+
+  function isInsideElement(el, rect) {
+    const er = el.getBoundingClientRect();
+    // Keep a few-pixel tolerance so a word at the very top/bottom line still
+    // shows its marker.
+    return rect.bottom >= er.top - 2 && rect.top <= er.bottom + 2 &&
+           rect.right >= er.left - 2 && rect.left <= er.right + 2;
+  }
+
+  function clearMarkers() {
+    for (const m of markers) m.el.remove();
+    markers.length = 0;
+    hidePopover();
+  }
+
+  function hideOverlay() {
+    clearMarkers();
+    if (overlay) overlay.remove();
+    overlay = null;
+  }
+
+  function showPopover(idx, finding) {
+    hidePopover();
+    activePopoverIdx = idx;
+    popover = document.createElement('div');
+    popover.className = `lh-spell-popover lh-spell-popover-${finding.type}`;
+    popover.addEventListener('mousedown', e => e.preventDefault());
+    popover.innerHTML = `
+      <div class="lh-spell-head">
+        <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
+        <span class="lh-spell-arrow">→</span>
+        <span class="lh-spell-fix-text">${escapeHtml(finding.fix)}</span>
+      </div>
+      <div class="lh-spell-note">${escapeHtml(typeLabel(finding.type))}</div>
+      <div class="lh-spell-actions">
+        <button type="button" class="lh-spell-btn lh-spell-accept">✓ Fiks</button>
+        <button type="button" class="lh-spell-btn lh-spell-decline">✕ Avvis</button>
+      </div>
+    `;
+    popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
+    popover.querySelector('.lh-spell-decline').addEventListener('click', () => {
+      dismissed.add(dismissKey(finding));
+      hidePopover();
+      runCheck();
+    });
+    overlay.appendChild(popover);
+    positionPopover(markers[idx]?.rect);
+  }
+
+  function typeLabel(t) {
+    switch (t) {
+      case 'typo': return 'Skrivefeil';
+      case 'gender': return 'Kjønn';
+      case 'modal_form': return 'Verbform etter hjelpeverb';
+      case 'sarskriving': return 'Særskriving';
+      default: return '';
+    }
+  }
+
+  function positionPopover(rect) {
+    if (!popover || !rect) return;
+    // Size must be known — force layout.
+    const pw = popover.offsetWidth || 240;
+    const ph = popover.offsetHeight || 80;
+    const margin = 6;
+    let top = rect.top - ph - margin;
+    if (top < margin) top = rect.bottom + margin + 4; // drop below word if no room above
+    let left = rect.left;
+    if (left + pw > window.innerWidth - margin) left = window.innerWidth - pw - margin;
+    if (left < margin) left = margin;
+    popover.style.top = `${top}px`;
+    popover.style.left = `${left}px`;
+  }
+
+  function hidePopover() {
+    if (popover) popover.remove();
+    popover = null;
+    activePopoverIdx = -1;
+  }
+
+  // ── Apply fix ──
 
   function applyFix(finding) {
     if (!activeEl || !finding) return;
-    if (activeEl.isContentEditable) return; // v1: read-only for contenteditable
+    if (activeEl.isContentEditable) {
+      applyFixCE(finding);
+    } else {
+      applyFixTextarea(finding);
+    }
+    hidePopover();
+    // Re-check so markers refresh with updated offsets.
+    schedule();
+  }
 
+  function applyFixTextarea(finding) {
     const value = activeEl.value || '';
     const before = value.slice(0, finding.start);
     const after = value.slice(finding.end);
-    const next = before + finding.fix + after;
-    activeEl.value = next;
-    const newCursor = before.length + finding.fix.length;
-    try { activeEl.setSelectionRange(newCursor, newCursor); } catch (_) { /* noop */ }
+    activeEl.value = before + finding.fix + after;
+    const cursor = before.length + finding.fix.length;
+    try { activeEl.setSelectionRange(cursor, cursor); } catch (_) { /* noop */ }
     activeEl.dispatchEvent(new Event('input', { bubbles: true }));
+  }
 
-    // Re-check immediately — fixing one error may reveal a cascading one.
-    schedule();
+  function applyFixCE(finding) {
+    // Route through the editor's input pipeline so frameworks (TipTap,
+    // Lexical, etc.) don't overwrite the DOM mutation on their next render.
+    const range = rangeForOffsets(activeEl, finding.start, finding.end);
+    if (!range) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    // beforeinput first for modern editors; execCommand fallback for older ones
+    let ok = false;
+    try {
+      const ev = new InputEvent('beforeinput', {
+        bubbles: true, cancelable: true,
+        inputType: 'insertReplacementText',
+        data: finding.fix,
+      });
+      const dispatched = activeEl.dispatchEvent(ev);
+      if (dispatched && !ev.defaultPrevented) {
+        ok = document.execCommand && document.execCommand('insertText', false, finding.fix);
+      } else {
+        // Editor handled it — we're done
+        ok = true;
+      }
+    } catch (_) { ok = false; }
+    if (!ok) {
+      // Last-ditch: replace the text node content directly. Works in plain
+      // contenteditable but may be reverted by some frameworks.
+      try {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(finding.fix));
+      } catch (_) { /* noop */ }
+    }
+    sel.removeAllRanges();
+  }
+
+  // ── Range / position helpers ──
+
+  function positionForRange(el, start, end) {
+    if (el.isContentEditable) return rectFromCE(el, start, end);
+    if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') return rectFromTextarea(el, start, end);
+    return null;
+  }
+
+  function rangeForOffsets(el, start, end) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let offset = 0;
+    let startNode = null, startOff = 0, endNode = null, endOff = 0;
+    let n;
+    while ((n = walker.nextNode())) {
+      const len = n.textContent.length;
+      const nextOff = offset + len;
+      if (startNode === null && nextOff >= start) {
+        startNode = n;
+        startOff = start - offset;
+      }
+      if (endNode === null && nextOff >= end) {
+        endNode = n;
+        endOff = end - offset;
+        break;
+      }
+      offset = nextOff;
+    }
+    if (!startNode || !endNode) return null;
+    try {
+      const r = document.createRange();
+      r.setStart(startNode, Math.max(0, Math.min(startOff, startNode.textContent.length)));
+      r.setEnd(endNode, Math.max(0, Math.min(endOff, endNode.textContent.length)));
+      return r;
+    } catch (_) { return null; }
+  }
+
+  function rectFromCE(el, start, end) {
+    const r = rangeForOffsets(el, start, end);
+    if (!r) return null;
+    const rect = r.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) return null;
+    return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+  }
+
+  // Mirror-div technique for textarea. Build a hidden clone of the textarea
+  // with the same layout, insert a marker span at the target offsets, read
+  // its rect. Adjust for the textarea's scroll position.
+  function rectFromTextarea(el, start, end) {
+    const cs = window.getComputedStyle(el);
+    const eRect = el.getBoundingClientRect();
+    const mirror = document.createElement('div');
+    const copyProps = [
+      'boxSizing', 'fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
+      'letterSpacing', 'textTransform', 'wordSpacing', 'lineHeight',
+      'tabSize', 'overflowWrap', 'wordBreak',
+      'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+      'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+      'borderTopStyle', 'borderRightStyle', 'borderBottomStyle', 'borderLeftStyle',
+    ];
+    for (const p of copyProps) mirror.style[p] = cs[p];
+    mirror.style.position = 'fixed';
+    mirror.style.visibility = 'hidden';
+    mirror.style.whiteSpace = 'pre-wrap';
+    mirror.style.top = `${eRect.top}px`;
+    mirror.style.left = `${eRect.left}px`;
+    mirror.style.width = `${el.clientWidth + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)}px`;
+    mirror.style.height = 'auto';
+
+    const value = el.value || '';
+    const before = document.createTextNode(value.slice(0, start));
+    const marker = document.createElement('span');
+    marker.textContent = value.slice(start, end) || '\u200b';
+    const after = document.createTextNode(value.slice(end));
+    mirror.appendChild(before);
+    mirror.appendChild(marker);
+    mirror.appendChild(after);
+    document.body.appendChild(mirror);
+    const mRect = marker.getBoundingClientRect();
+    mirror.remove();
+
+    return {
+      top: mRect.top - el.scrollTop,
+      left: mRect.left - el.scrollLeft,
+      width: mRect.width,
+      height: mRect.height,
+    };
   }
 
   function escapeHtml(s) {
     const d = document.createElement('span');
-    d.textContent = s;
+    d.textContent = String(s ?? '');
     return d.innerHTML;
   }
 })();
