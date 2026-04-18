@@ -47,7 +47,12 @@ Plans:
   2. Running `npm run sync-vocab` pulls a visibly larger typo bank from `papertek-vocabulary` into `extension/data/*.json`, and the regression fixture shows higher recall on NB typo test cases without new false positives on NN
   3. `extension/data/bigrams-nb.json` and `extension/data/bigrams-nn.json` contain materially more high-frequency pairs than before (verifiable in a diff), still in the existing `{prev: {next: weight}}` schema
   4. Total packaged extension zip size from `npm run package` stays within the 10 MB ceiling, verified in the release checklist
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+- [ ] 02-01-PLAN.md — DATA-01: build-frequencies.js streaming NB N-gram 2021 → extension/data/freq-{nb,nn}.json sidecars (Wave 1, autonomous)
+- [ ] 02-02-PLAN.md — DATA-03: build-bigrams.js regrowing extension/data/bigrams-{nb,nn}.json via max-merge with hand-authored idioms (Wave 1, autonomous)
+- [ ] 02-03-PLAN.md — DATA-02: typo-bank expansion in papertek-vocabulary + Phase-1 data-defect fixes + sync (Wave 1, human-verify checkpoint for cross-app push)
+- [ ] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous)
 
 ### Phase 3: Rule Architecture & Ranking Quality
 **Goal**: Spell-check rules are refactored into `extension/content/spell-rules/` as a plugin registry, and the frequency signal plus tiebreaking improvements land for both spell-check fuzzy matching and word-prediction across all six languages — turning the Zipf data into visible ranking wins.
@@ -96,7 +101,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
-| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/TBD | Not started | - |
+| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/4 | Planned | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
