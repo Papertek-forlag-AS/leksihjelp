@@ -88,35 +88,40 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 
 ## Traceability
 
-Filled by roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| DATA-01 | — | Pending |
-| DATA-02 | — | Pending |
-| DATA-03 | — | Pending |
-| SC-01 | — | Pending |
-| SC-02 | — | Pending |
-| SC-03 | — | Pending |
-| SC-04 | — | Pending |
-| SC-05 | — | Pending |
-| SC-06 | — | Pending |
-| WP-01 | — | Pending |
-| WP-02 | — | Pending |
-| WP-03 | — | Pending |
-| WP-04 | — | Pending |
-| UX-01 | — | Pending |
-| UX-02 | — | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 3 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| DATA-01 | Phase 2 | Pending |
+| DATA-02 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Pending |
+| SC-01 | Phase 3 | Pending |
+| SC-02 | Phase 4 | Pending |
+| SC-03 | Phase 4 | Pending |
+| SC-04 | Phase 4 | Pending |
+| SC-05 | Phase 4 | Pending |
+| SC-06 | Phase 3 | Pending |
+| WP-01 | Phase 3 | Pending |
+| WP-02 | Phase 3 | Pending |
+| WP-03 | Phase 3 | Pending |
+| WP-04 | Phase 3 | Pending |
+| UX-01 | Phase 5 | Pending |
+| UX-02 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 19 total
-- Mapped to phases: 0 (roadmap pending)
-- Unmapped: 19 ⚠️ (expected pre-roadmap)
+- Mapped to phases: 19 ✓
+- Unmapped: 0
+
+**Phase Distribution:**
+- Phase 1 (Foundation): 3 requirements — INFRA-01, INFRA-02, INFRA-04
+- Phase 2 (Data Layer): 3 requirements — DATA-01, DATA-02, DATA-03
+- Phase 3 (Rule Architecture & Ranking): 7 requirements — INFRA-03, SC-01, SC-06, WP-01, WP-02, WP-03, WP-04
+- Phase 4 (False-Positive Reduction): 4 requirements — SC-02, SC-03, SC-04, SC-05
+- Phase 5 (Student Experience Polish): 2 requirements — UX-01, UX-02
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after initial definition*
+*Last updated: 2026-04-17 after roadmap creation (traceability filled)*
