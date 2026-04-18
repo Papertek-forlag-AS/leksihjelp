@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-18T13:11:53.301Z"
+last_updated: "2026-04-18T13:29:34.382Z"
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -23,34 +23,35 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 1 of 5 (Foundation — Vocab Seam + Regression Fixture)
-Plan: 1 of 3 complete in current phase
+Plan: 2 of 3 complete in current phase
 Status: In progress
-Last activity: 2026-04-18 — Plan 01-01 complete (vocab-seam core + browser wrapper)
+Last activity: 2026-04-18 — Plan 01-02 complete (consumer cutover: spell-check-core extracted, __lexiPrediction deleted, __lexiVocab wired to both consumers)
 
-Progress: [███░░░░░░░] 33%
+Progress: [██████░░░░] 66%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 4m 24s
-- Total execution time: 4m 24s
+- Total plans completed: 2
+- Average duration: 9m 5s
+- Total execution time: 18m 11s
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 01 | 1 | 4m 24s | 4m 24s |
+| Phase 01 | 2 | 18m 11s | 9m 5s |
 
 **Recent Trend:**
-- Last 5 plans: 4m 24s
-- Trend: —
+- Last 5 plans: 4m 24s, 13m 47s
+- Trend: growing (complexity-driven — Plan 02 was a 5-file cutover vs Plan 01's 2-file greenfield)
 
 *Updated after each plan completion*
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 01 P01 | 4m 24s | 2 tasks | 2 files |
+| Phase 01 P02 | 13m 47s | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Recent decisions affecting current work:
 - [Phase 01]: vocab-seam surface: getBigrams() returns null (not empty object) when file missing — matches existing consumer null-handling
 - [Phase 01]: vocab-seam default grammar predicate when enabledGrammarFeatures storage key missing: () => true (emit superset; consumers filter further)
 - [Phase 01]: typoBank is a Map reference-alias of typoFix (same Map, zero memory cost)
+- [Phase 01]: Finding contract locked — core emits `rule_id` (not `type`); DOM adapter shims `f.type = f.rule_id` post-call so legacy UI code works unchanged (consumed by Plan 03 fixture harness)
+- [Phase 01]: Grammar-feature filtering is seam-level only — word-prediction consumes pre-filtered wordList as-is, single source of truth
+- [Phase 01]: Consumer-local derived state (prefixIndex, tense sets) rebuilt via VOCAB.onReady(cb) re-registration on LANGUAGE_CHANGED / GRAMMAR_FEATURES_CHANGED — avoids stale captures without changing the seam API
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18 — Executed Plan 01-01 (vocab-seam core + browser wrapper)
-Stopped at: Completed 01-01-PLAN.md. Next: Plan 01-02 (consumer wiring + manifest cutover)
-Resume file: .planning/phases/01-foundation-vocab-seam-regression-fixture/01-02-PLAN.md
+Last session: 2026-04-18 — Executed Plan 01-02 (consumer cutover + manifest reorder + version bump 2.3.0)
+Stopped at: Completed 01-02-PLAN.md. Next: Plan 01-03 (Node fixture harness — runs spell-check-core.check against fixture files)
+Resume file: .planning/phases/01-foundation-vocab-seam-regression-fixture/01-03-PLAN.md

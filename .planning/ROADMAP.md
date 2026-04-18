@@ -34,8 +34,8 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
   4. Grepping spell-check source confirms zero imports from `word-prediction.js` internals and zero references to premium/subscription state — the module is extractable to `skriv.papertek.app` in principle
 **Plans:** 3 plans
 Plans:
-- [ ] 01-01-PLAN.md — Build vocab-seam-core.js (pure index builder) + vocab-seam.js (browser IIFE owning vocab loading)
-- [ ] 01-02-PLAN.md — Extract spell-check-core.js, refactor consumers to read __lexiVocab, delete __lexiPrediction, reorder manifest
+- [x] 01-01-PLAN.md — Build vocab-seam-core.js (pure index builder) + vocab-seam.js (browser IIFE owning vocab loading)
+- [x] 01-02-PLAN.md — Extract spell-check-core.js, refactor consumers to read __lexiVocab, delete __lexiPrediction, reorder manifest
 - [ ] 01-03-PLAN.md — Author scripts/check-fixtures.js + 10 seed JSONL fixture files + README + CLAUDE.md release-workflow update (checkpoint)
 
 ### Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)
@@ -95,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation (Vocab Seam + Regression Fixture) | 1/3 | In Progress | - |
+| 1. Foundation (Vocab Seam + Regression Fixture) | 2/3 | In Progress | - |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/TBD | Not started | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
