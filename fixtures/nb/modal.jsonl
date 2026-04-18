@@ -1,0 +1,20 @@
+// NB modal-verb ground truth. After kan/vil/skal/må/bør/kunne/ville/skulle,
+// the verb should be in infinitive form. Span convention: end EXCLUSIVE.
+
+// ── Positive cases — must flag ──
+{"id":"nb-modal-001","text":"Jeg kan spiser middag","expected":[{"rule_id":"modal_form","start":8,"end":14,"suggestion":"spise"}],"must_not_flag":[]}
+{"id":"nb-modal-002","text":"Han vil kjøper bilen","expected":[{"rule_id":"modal_form","start":8,"end":14,"suggestion":"kjøpe"}],"must_not_flag":[]}
+{"id":"nb-modal-003","text":"Du skal leser boka","expected":[{"rule_id":"modal_form","start":8,"end":13,"suggestion":"lese"}],"must_not_flag":[]}
+{"id":"nb-modal-004","text":"Hun bør kommer snart","expected":[{"rule_id":"modal_form","start":8,"end":14,"suggestion":"komme"}],"must_not_flag":[]}
+{"id":"nb-modal-005","text":"Han må arbeider hardt","expected":[{"rule_id":"modal_form","start":7,"end":15,"suggestion":"arbeide"}],"must_not_flag":[]}
+{"id":"nb-modal-006","text":"Jeg kan løper raskt","expected":[{"rule_id":"modal_form","start":8,"end":13,"suggestion":"løpe"}],"must_not_flag":[]}
+{"id":"nb-modal-007","text":"Vi vil danser mer","expected":[{"rule_id":"modal_form","start":7,"end":13,"suggestion":"danse"}],"must_not_flag":[]}
+{"id":"nb-modal-008","text":"Han skal svømmer i dag","expected":[{"rule_id":"modal_form","start":9,"end":16,"suggestion":"svømme"}],"must_not_flag":[]}
+{"id":"nb-modal-009","text":"Jeg må skriver boka","expected":[{"rule_id":"modal_form","start":7,"end":14,"suggestion":"skrive"}],"must_not_flag":[]}
+{"id":"nb-modal-010","text":"Han kunne lager mat","expected":[{"rule_id":"modal_form","start":10,"end":15,"suggestion":"lage"}],"must_not_flag":[]}
+{"id":"nb-modal-011","text":"Hun ville kjøper bilen","expected":[{"rule_id":"modal_form","start":10,"end":16,"suggestion":"kjøpe"}],"must_not_flag":[]}
+
+// ── Acceptance cases — modal + infinitive, must NOT flag ──
+{"id":"nb-modal-accept-001","text":"Jeg kan spise middag","expected":[],"must_not_flag":[]}
+{"id":"nb-modal-accept-002","text":"Han må lese boka","expected":[],"must_not_flag":[]}
+{"id":"nb-modal-accept-003","text":"Hun vil kjøpe bilen","expected":[],"must_not_flag":[]}

@@ -1,0 +1,24 @@
+// NN gender-article ground truth. Nynorsk uses ein (m), ei (f), eit (n).
+// Unlike NB, NN has no feminine-to-common tolerance — "ein bok" is always
+// wrong (should be "ei bok"). Span convention: end EXCLUSIVE.
+
+// ── Positive cases — must flag ──
+{"id":"nn-gender-001","text":"ein hus","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"eit"}],"must_not_flag":[]}
+{"id":"nn-gender-002","text":"Eg har ein hus","expected":[{"rule_id":"gender","start":7,"end":10,"suggestion":"eit"}],"must_not_flag":[]}
+{"id":"nn-gender-003","text":"Ho har eit mann","expected":[{"rule_id":"gender","start":7,"end":10,"suggestion":"ein"}],"must_not_flag":[]}
+{"id":"nn-gender-004","text":"Vi har ei bord","expected":[{"rule_id":"gender","start":7,"end":9,"suggestion":"eit"}],"must_not_flag":[]}
+{"id":"nn-gender-005","text":"Han har ein bok","expected":[{"rule_id":"gender","start":8,"end":11,"suggestion":"ei"}],"must_not_flag":[]}
+{"id":"nn-gender-006","text":"Det er ein jente","expected":[{"rule_id":"gender","start":7,"end":10,"suggestion":"ei"}],"must_not_flag":[]}
+{"id":"nn-gender-007","text":"Det er eit skule","expected":[{"rule_id":"gender","start":7,"end":10,"suggestion":"ein"}],"must_not_flag":[]}
+{"id":"nn-gender-008","text":"Han har eit bok","expected":[{"rule_id":"gender","start":8,"end":11,"suggestion":"ei"}],"must_not_flag":[]}
+{"id":"nn-gender-009","text":"Det er ei barn","expected":[{"rule_id":"gender","start":7,"end":9,"suggestion":"eit"}],"must_not_flag":[]}
+{"id":"nn-gender-010","text":"Det er ein eple","expected":[{"rule_id":"gender","start":7,"end":10,"suggestion":"eit"}],"must_not_flag":[]}
+{"id":"nn-gender-011","text":"ei mann","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"ein"}],"must_not_flag":[]}
+{"id":"nn-gender-012","text":"eit gut","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"ein"}],"must_not_flag":[]}
+
+// ── Acceptance cases — must NOT flag ──
+{"id":"nn-gender-accept-001","text":"eit hus","expected":[],"must_not_flag":[]}
+{"id":"nn-gender-accept-002","text":"ein mann","expected":[],"must_not_flag":[]}
+{"id":"nn-gender-accept-003","text":"ei bok","expected":[],"must_not_flag":[]}
+{"id":"nn-gender-accept-004","text":"Eg har eit hus","expected":[],"must_not_flag":[]}
+{"id":"nn-gender-accept-005","text":"Ho har ein mann","expected":[],"must_not_flag":[]}

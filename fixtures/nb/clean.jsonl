@@ -1,0 +1,12 @@
+// NB clean corpus — grammatically correct Bokmål sentences that should NOT
+// produce any finding. Any flag = hard failure (exit code 1). This is the
+// backstop against over-triggering rules.
+
+{"id":"nb-clean-001","text":"Jeg liker å lese bøker.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-002","text":"Statsministeren holdt en tale.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-003","text":"Han kan spise middag nå.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-004","text":"Vi går på skolen i dag.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-005","text":"Hun skriver en bok.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-006","text":"Jeg har en bok og en penn.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-007","text":"Mannen kjører bilen.","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-008","text":"Katten sover på stolen.","expected":[],"must_not_flag":[]}

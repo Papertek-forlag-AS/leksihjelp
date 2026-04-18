@@ -1,0 +1,27 @@
+// NB gender-article ground truth cases.
+// Rule id: "gender". Span convention: start inclusive, end EXCLUSIVE.
+// Each case asserts what the tool SHOULD return (ground truth), never
+// snapshots current output. See fixtures/README.md for the schema.
+
+// ── Positive cases — article must flag ──
+{"id":"nb-gender-001","text":"en hus","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-002","text":"Jeg har en hus","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-003","text":"Jeg ser et mann","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"en"}],"must_not_flag":[]}
+{"id":"nb-gender-004","text":"Hun har ei bord","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"en"}],"must_not_flag":[]}
+{"id":"nb-gender-005","text":"Det er en barn","expected":[{"rule_id":"gender","start":7,"end":9,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-006","text":"et gutt","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"en"}],"must_not_flag":[]}
+{"id":"nb-gender-007","text":"en eple","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-008","text":"Jeg ser ei hus","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-009","text":"Jeg har et bil","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"en"}],"must_not_flag":[]}
+// Two-back pattern: adjective sits between article and noun.
+{"id":"nb-gender-2back-001","text":"Jeg har en stor hus","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"et"}],"must_not_flag":[]}
+{"id":"nb-gender-2back-002","text":"Det er en fin hus","expected":[{"rule_id":"gender","start":7,"end":9,"suggestion":"et"}],"must_not_flag":[]}
+
+// ── Acceptance cases — must NOT flag ──
+{"id":"nb-gender-accept-001","text":"et hus","expected":[],"must_not_flag":[]}
+{"id":"nb-gender-accept-002","text":"en mann","expected":[],"must_not_flag":[]}
+// Bokmål tolerance: feminine nouns accept common-gender "en".
+{"id":"nb-gender-accept-bok-en","text":"en bok","expected":[],"must_not_flag":[]}
+{"id":"nb-gender-accept-bok-ei","text":"ei bok","expected":[],"must_not_flag":[]}
+{"id":"nb-gender-accept-003","text":"et barn","expected":[],"must_not_flag":[]}
+{"id":"nb-gender-accept-004","text":"Jeg har en bok og en penn","expected":[],"must_not_flag":[]}

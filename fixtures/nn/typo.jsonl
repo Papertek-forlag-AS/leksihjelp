@@ -1,0 +1,15 @@
+// NN typo ground truth. Rule id: "typo". Expected `suggestion` is the
+// intended correct Nynorsk word — never a snapshot of current fuzzy output.
+// Span convention: end EXCLUSIVE.
+
+// ── Positive cases — must flag with the correct suggestion ──
+{"id":"nn-typo-lkar-001","text":"Han lkar boka","expected":[{"rule_id":"typo","start":4,"end":8,"suggestion":"likar"}],"must_not_flag":[]}
+{"id":"nn-typo-skirv-001","text":"Ho skirv brev","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"skriv"}],"must_not_flag":[]}
+{"id":"nn-typo-nrosk-001","text":"Eg lærer nrosk","expected":[{"rule_id":"typo","start":9,"end":14,"suggestion":"norsk"}],"must_not_flag":[]}
+{"id":"nn-typo-berte-001","text":"Det er berte","expected":[{"rule_id":"typo","start":7,"end":12,"suggestion":"betre"}],"must_not_flag":[]}
+{"id":"nn-typo-prver-001","text":"Vi prver noko","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"prøver"}],"must_not_flag":[]}
+{"id":"nn-typo-arbied-001","text":"Han arbied mykje","expected":[{"rule_id":"typo","start":4,"end":10,"suggestion":"arbeid"}],"must_not_flag":[]}
+{"id":"nn-typo-hadd-001","text":"Ho hadd ikkje tid","expected":[{"rule_id":"typo","start":3,"end":7,"suggestion":"hadde"}],"must_not_flag":[]}
+{"id":"nn-typo-tysnk-001","text":"Eg er veldig tysnk","expected":[{"rule_id":"typo","start":13,"end":18,"suggestion":"tysk"}],"must_not_flag":[]}
+{"id":"nn-typo-mnen-001","text":"Det er mnen som","expected":[{"rule_id":"typo","start":7,"end":11,"suggestion":"menn"}],"must_not_flag":[]}
+{"id":"nn-typo-skirver-001","text":"Han skirver mykje","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"skriver"}],"must_not_flag":[]}

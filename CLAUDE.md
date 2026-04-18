@@ -342,12 +342,15 @@ const tenseConfig = [
 
 After making changes to files under `extension/`:
 
-1. Update the version in all three places:
+1. Run the regression fixture suite:
+   - `npm run check-fixtures` — must exit 0. Per-rule P/R/F1 is informational in Phase 1; hard mismatches (missing-expected or unexpected findings) block the release.
+   - If anything fails, fix the rule (or the fixture, if the expected answer was wrong) and re-run until exit is 0.
+2. Update the version in all three places:
    - `extension/manifest.json` (the Chrome extension version)
    - `package.json` (the project version)
    - `backend/public/index.html` (the landing page display version)
-2. Rebuild the zip: `npm run package`
-3. Upload the zip as a GitHub Release asset
+3. Rebuild the zip: `npm run package`
+4. Upload the zip as a GitHub Release asset
 
 ## Papertek Vocabulary — Shared Data Source
 

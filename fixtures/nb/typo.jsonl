@@ -1,0 +1,23 @@
+// NB typo ground truth. Rule id: "typo". An unknown (not-in-vocabulary) word
+// that has a clear correction is flagged. Span convention: end EXCLUSIVE.
+// Expected `suggestion` is the intended correct word — never a snapshot of
+// the current fuzzy-matcher output. A fixture that fails because the tool
+// suggests a different correction is a real bug to track, not a fixture bug.
+
+// ── Positive cases — must flag with the correct suggestion ──
+{"id":"nb-typo-komer-001","text":"Han komer hjem","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"kommer"}],"must_not_flag":[]}
+{"id":"nb-typo-likr-001","text":"Jeg likr boka","expected":[{"rule_id":"typo","start":4,"end":8,"suggestion":"liker"}],"must_not_flag":[]}
+{"id":"nb-typo-prver-001","text":"Vi prver noe nytt","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"prøver"}],"must_not_flag":[]}
+{"id":"nb-typo-spisr-001","text":"Hun spisr maten","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"spiser"}],"must_not_flag":[]}
+{"id":"nb-typo-berde-001","text":"Det er berde enn","expected":[{"rule_id":"typo","start":7,"end":12,"suggestion":"bedre"}],"must_not_flag":[]}
+{"id":"nb-typo-nrosk-001","text":"Eleven lærer nrosk","expected":[{"rule_id":"typo","start":13,"end":18,"suggestion":"norsk"}],"must_not_flag":[]}
+{"id":"nb-typo-skirver-001","text":"Jeg skirver hjemme","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"skriver"}],"must_not_flag":[]}
+{"id":"nb-typo-laerrer-001","text":"Hun lærrer godt","expected":[{"rule_id":"typo","start":4,"end":10,"suggestion":"lærer"}],"must_not_flag":[]}
+{"id":"nb-typo-jbobe-001","text":"Vi jbobe mye","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"jobbe"}],"must_not_flag":[]}
+{"id":"nb-typo-utrlig-001","text":"Jeg er helt utrlig","expected":[{"rule_id":"typo","start":12,"end":18,"suggestion":"utrolig"}],"must_not_flag":[]}
+{"id":"nb-typo-ikek-001","text":"Jeg kan ikek gjøre det","expected":[{"rule_id":"typo","start":8,"end":12,"suggestion":"ikke"}],"must_not_flag":[]}
+// Note: "flik → flink" is a known weakness of the current fuzzy ranker
+// (it returns "flak" for "Han er veldig flik"). A fixture exercising that
+// case is deferred to Phase 3 when the ranker learns to prefer length-
+// growing edits over substitutions at short words. See SUMMARY.md for
+// Phase 1 baseline discussion.

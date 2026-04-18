@@ -1,0 +1,22 @@
+// NN modal-verb ground truth. Same principle as NB: after kan/vil/skal/må/
+// bør/kunne/ville/skulle, verb goes in infinitive. Span convention: end
+// EXCLUSIVE.
+
+// ── Positive cases — must flag ──
+{"id":"nn-modal-001","text":"Eg kan kjøper bilen","expected":[{"rule_id":"modal_form","start":7,"end":13,"suggestion":"kjøpe"}],"must_not_flag":[]}
+{"id":"nn-modal-002","text":"Ho skal skriv brev","expected":[{"rule_id":"modal_form","start":8,"end":13,"suggestion":"skrive"}],"must_not_flag":[]}
+{"id":"nn-modal-003","text":"Han vil arbeider mykje","expected":[{"rule_id":"modal_form","start":8,"end":16,"suggestion":"arbeide"}],"must_not_flag":[]}
+{"id":"nn-modal-004","text":"Du må høyrer på meg","expected":[{"rule_id":"modal_form","start":6,"end":12,"suggestion":"høyre"}],"must_not_flag":[]}
+{"id":"nn-modal-005","text":"Eg kan snakkar norsk","expected":[{"rule_id":"modal_form","start":7,"end":14,"suggestion":"snakke"}],"must_not_flag":[]}
+{"id":"nn-modal-006","text":"Ho bør les boka","expected":[{"rule_id":"modal_form","start":7,"end":10,"suggestion":"lese"}],"must_not_flag":[]}
+{"id":"nn-modal-007","text":"Han må går heim","expected":[{"rule_id":"modal_form","start":7,"end":10,"suggestion":"gå"}],"must_not_flag":[]}
+{"id":"nn-modal-008","text":"Ho kan står der","expected":[{"rule_id":"modal_form","start":7,"end":11,"suggestion":"stå"}],"must_not_flag":[]}
+{"id":"nn-modal-009","text":"Vi skal drikk vatn","expected":[{"rule_id":"modal_form","start":8,"end":13,"suggestion":"drikke"}],"must_not_flag":[]}
+{"id":"nn-modal-010","text":"Han kan søv no","expected":[{"rule_id":"modal_form","start":8,"end":11,"suggestion":"sove"}],"must_not_flag":[]}
+
+// ── Acceptance cases — must NOT flag ──
+{"id":"nn-modal-accept-001","text":"Eg kan kjøpe bilen","expected":[],"must_not_flag":[]}
+{"id":"nn-modal-accept-002","text":"Han må gå heim","expected":[],"must_not_flag":[]}
+{"id":"nn-modal-accept-003","text":"Ho vil sove no","expected":[],"must_not_flag":[]}
+{"id":"nn-modal-accept-004","text":"Han kan stå her","expected":[],"must_not_flag":[]}
+{"id":"nn-modal-accept-005","text":"Vi skal snakke saman","expected":[],"must_not_flag":[]}

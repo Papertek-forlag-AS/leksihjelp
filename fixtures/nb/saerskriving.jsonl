@@ -1,0 +1,23 @@
+// NB særskriving (space-splitting) ground truth. Two noun-bank words adjacent
+// that the dictionary knows as a single compound = flag. Span covers the whole
+// two-word phrase; end is EXCLUSIVE.
+
+// ── Positive cases — must flag ──
+{"id":"nb-saer-001","text":"Jeg har en skole sekk","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"skolesekk"}],"must_not_flag":[]}
+{"id":"nb-saer-002","text":"Jeg har en sommer ferie","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"sommerferie"}],"must_not_flag":[]}
+{"id":"nb-saer-003","text":"Jeg har en vinter jakke","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"vinterjakke"}],"must_not_flag":[]}
+{"id":"nb-saer-004","text":"Jeg har en matte bok","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"mattebok"}],"must_not_flag":[]}
+{"id":"nb-saer-005","text":"Jeg har en fot ball","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"fotball"}],"must_not_flag":[]}
+{"id":"nb-saer-006","text":"Jeg har en hånd kle","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"håndkle"}],"must_not_flag":[]}
+{"id":"nb-saer-007","text":"Jeg har en bok hylle","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"bokhylle"}],"must_not_flag":[]}
+{"id":"nb-saer-008","text":"Jeg har en kjøkken bord","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"kjøkkenbord"}],"must_not_flag":[]}
+{"id":"nb-saer-009","text":"Jeg har en appelsin juice","expected":[{"rule_id":"sarskriving","start":11,"end":25,"suggestion":"appelsinjuice"}],"must_not_flag":[]}
+{"id":"nb-saer-010","text":"Jeg har en sol briller","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"solbriller"}],"must_not_flag":[]}
+{"id":"nb-saer-011","text":"Hun har en biologi bok","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"biologibok"}],"must_not_flag":[]}
+
+// ── Acceptance cases — non-compound noun pairs, must NOT flag ──
+{"id":"nb-saer-accept-001","text":"Han leser en god bok","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-002","text":"Hun gikk på en lang tur","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-003","text":"Det er en fin dag","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-004","text":"Jeg har en god venn","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-005","text":"De har ei stor bok","expected":[],"must_not_flag":[]}
