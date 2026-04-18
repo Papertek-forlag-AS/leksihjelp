@@ -20,5 +20,8 @@ serviceAccount*.json
 corpus/*
 !corpus/.gitignore
 
+# Package-time staging dir (used by scripts/package-extension.js)
+.package-staging/
+
 # Claude Code settings
 .claude/

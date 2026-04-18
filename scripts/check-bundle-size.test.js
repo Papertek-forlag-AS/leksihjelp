@@ -39,7 +39,7 @@ function test(name, fn) {
 }
 
 function run(cmd, opts) {
-  return execSync(cmd, Object.assign({ cwd: ROOT, encoding: 'utf8' }, opts || {}));
+  return execSync(cmd, Object.assign({ cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }, opts || {}));
 }
 
 console.log('check-bundle-size.test.js — Plan 02-04 Task 1 behavior tests\n');
@@ -110,7 +110,7 @@ test('Test 3 (behavior): check-bundle-size runs end-to-end and reports honestly'
   //   - stdout includes PASS or FAIL
   //   - stdout includes a byte count
   //   - exit code is consistent with the reported bytes vs cap
-  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const combined = (result.stdout || '') + (result.stderr || '');
   if (result.status !== 0 && result.status !== 1) {
     throw new Error('check-bundle-size exited with unexpected code ' + result.status + '. Output:\n' + combined);
@@ -123,7 +123,7 @@ test('Test 3 (behavior): check-bundle-size runs end-to-end and reports honestly'
 
 test('Test 4/5 (behavior): exit code matches reported bytes vs 10 MiB cap', () => {
   const size = fs.statSync(ZIP_PATH).size;
-  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (size <= CEILING_BYTES && result.status !== 0) {
     throw new Error('zip is under cap (' + size + ' bytes) but exit was ' + result.status);
   }
@@ -133,7 +133,7 @@ test('Test 4/5 (behavior): exit code matches reported bytes vs 10 MiB cap', () =
 });
 
 test('Test 5 (behavior): per-directory breakdown is printed', () => {
-  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8' });
+  const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   const combined = (result.stdout || '') + (result.stderr || '');
   // Must contain a breakdown line — we expect directory names like data/, audio/, content/, etc.
   const sawBreakdown = /^\s*[A-Za-z][A-Za-z0-9_\-]*\/[^\S\r\n]+[\d,]+/m.test(combined);

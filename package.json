@@ -14,7 +14,8 @@
     "check-fixtures:nn": "node scripts/check-fixtures.js nn",
     "build-frequencies": "node scripts/build-frequencies.js",
     "build-bigrams": "node scripts/build-bigrams.js",
-    "package": "cd extension && zip -r ../backend/public/lexi-extension.zip . -x '*.DS_Store' -x '*.map' && echo 'Created backend/public/lexi-extension.zip'"
+    "package": "node scripts/package-extension.js",
+    "check-bundle-size": "node scripts/check-bundle-size.js"
   },
   "repository": {
     "type": "git",
