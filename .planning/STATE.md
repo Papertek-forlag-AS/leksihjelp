@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-04-18T18:11:34.671Z"
+status: unknown
+last_updated: "2026-04-18T18:34:04.140Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 6
 ---
 
 # Project State
@@ -22,30 +22,30 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 1 of 4 plans done
-Plan: 2 of 4 in Phase 2 (next up: 02-02 bigrams)
-Status: Plan 02-01 complete — NB N-gram 2021 → Zipf sidecar JSON shipping DATA-01
-Last activity: 2026-04-18 — Plan 02-01 complete (build-frequencies.js + freq-nb.json 13,132 entries / 61 KB gz + freq-nn.json 11,013 entries / 52 KB gz)
+Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 2 of 4 plans done
+Plan: 3 of 4 in Phase 2 (next up: 02-03 DATA-02 typo-bank + NN infinitive normalisation)
+Status: Plan 02-02 complete — NB N-gram 2021 → bigram sidecar JSON shipping DATA-03
+Last activity: 2026-04-18 — Plan 02-02 complete (build-bigrams.js + bigrams-nb.json 2019 head-words / 32 KB gz + bigrams-nn.json 2022 head-words / 31 KB gz, 314 hand-authored pairs preserved with zero downgrades)
 
-Progress: [██▌░░░░░░░] 25%  (Phase 2, 1/4 plans)
+Progress: [█████░░░░░] 50%  (Phase 2, 2/4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 11m 24s
-- Total execution time: 45m 44s
+- Total plans completed: 5
+- Average duration: 15m 56s
+- Total execution time: 1h 19m 44s
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 3 | 33m 36s | 11m 12s |
-| Phase 02 | 1 | 12m 08s | 12m 08s |
+| Phase 02 | 2 | 46m 08s | 23m 04s |
 
 **Recent Trend:**
-- Last 5 plans: 4m 24s, 13m 47s, 15m 25s, 12m 08s
-- Trend: stable at ~12–15 min per plan. Plan 02-01 (data-layer build script with 1 GB corpus download) on-pace at 12m despite deviations fixing CSV delimiter + Zipf floor estimates.
+- Last 5 plans: 4m 24s, 13m 47s, 15m 25s, 12m 08s, 34m 00s
+- Trend: Plan 02-02 doubled the moving average because the bigram corpus is ~7× larger than the unigram corpus (7.15 GB vs 1.04 GB gzipped) plus 5 resume-attempts across mid-stream connection drops. Parse+derive phase itself was only ~5 min for each language; the rest was download.
 
 *Updated after each plan completion*
 
@@ -55,6 +55,7 @@ Progress: [██▌░░░░░░░] 25%  (Phase 2, 1/4 plans)
 | Phase 01 P02 | 13m 47s | 2 tasks | 6 files |
 | Phase 01-foundation-vocab-seam-regression-fixture P03 | 15m 25s | 3 tasks | 14 files |
 | Phase 02-data-layer-frequency-bigrams-typo-bank P01 | 12m 8s | 2 tasks | 6 files |
+| Phase 02-data-layer-frequency-bigrams-typo-bank P02 | 34 min | 1 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,13 @@ Recent decisions affecting current work:
 - [Phase 02-01]: Zipf floor of 3.0 (plan estimate) filters too aggressively for actual NB N-gram 2021 ↔ validWords overlap (~6K entries). Ship with Zipf floor 0.0 as the default — budget enforcer raises floor only if output exceeds 200 KB gzipped. Actual overlap is 13,132 NB / 11,013 NN entries at 61 KB / 52 KB gzipped (69% / 74% headroom).
 - [Phase 02-01]: MIN_ENTRIES fail-loud floors are reality-based corruption guards, not ship-quality gates. ~4K of shipped validWords are multi-word phrases (cannot match unigram corpus); another ~2K are deliberate typos. Natural overlap is ~50% of validWords size. Set floors at 5K / 2K to catch true corruption (empty download, wrong lang) without false-alarming on real distribution.
 - [Phase 02-01]: `corpus/` gitignore double-safety pattern — root `.gitignore` uses `corpus/*` + `!corpus/.gitignore` (negation so inner ignore tracks itself); inner `corpus/.gitignore` uses `*` + `!.gitignore` (self-exception). Together they guarantee the 1 GB corpus file stays out of git even if the inner file is ever deleted.
+- [Phase 02-02]: NB N-gram 2021 digibok-BIGRAM CSV has DIFFERENT schema from the unigram file — columns are `first,second,lang,freq,json` with word cells DOUBLE-QUOTED (`"Råholt"`) and symbol cells bare (`!`, `$`, `-`). Parser must (a) indexOf-locate first 4 commas to avoid blowing up on the quoted-json fifth column, and (b) strip surrounding `"` from word cells with `unquote()` helper. Missing either step silently yields zero rows kept.
+- [Phase 02-02]: 7 GB+ HTTP downloads from nb.no require Range-based resume — the server drops the connection mid-stream roughly every 1 GB. `ensureCorpus()` now does HEAD first to learn Content-Length, then a retry loop with `Range: bytes=N-` requests, a no-progress streak counter (10 consecutive retries that don't advance the on-disk byte count → abort), and 1-30s exponential backoff between attempts. Completed 7.15 GB download in 5 attempts with no user intervention.
+- [Phase 02-02]: Bigram weight buckets use concentration ratio `pairFreq / firstTotal` (how much of `first`'s continuations this `next` takes), NOT true Pointwise Mutual Information. Thresholds 0.05 / 0.015 / else → {3, 2, 1}. Simpler to compute in one stream pass, reproducible, and Phase 3 WP-02 ranker is free to retune without a schema change.
+- [Phase 02-02]: Pitfall-7 max-merge guarantee — `/tmp/02-02-snapshot/bigrams-{nb,nn}.pre.json` baseline captured BEFORE the script runs; the plan's verify block iterates every (prev, next) triple independently of any internal script assertion. Defence in depth: 314 hand-authored pairs verified preserved across NB+NN with zero downgrades. Script's own `assertPreserved()` is the first gate, external full-sweep verify is the second.
+- [Phase 02-02]: `assertPreserved()` 10× growth floor only fires when `preHeads ≤ 100` (hand-authored scale) — re-runs of an already-enriched file would otherwise fail non-idempotently. Pitfall-7 sweep runs unconditionally and is the real correctness check.
+- [Phase 02-02]: Downloaders NOT factored into a shared helper between `build-frequencies.js` (Plan 02-01) and `build-bigrams.js` (Plan 02-02). Research Open Question 4 closed in favour of cheap duplication — the error-retry surfaces differ enough that a shared helper would force both scripts into a lowest-common-denominator interface. Re-evaluate when a third corpus downloader lands.
+- [Phase 02-02 coordination note]: Plans 02-01 and 02-02 ran in parallel in wave 1 with no declared dependencies; both edited `package.json`. The 02-01 commit landed both npm scripts (`build-frequencies` AND `build-bigrams`) because 02-01 committed slightly later while 02-02's edits were still unstaged. No harm done, but future multi-plan waves should be aware that shared-config edits need coordination or one plan will "absorb" the other's changes.
 
 ### Pending Todos
 
@@ -98,6 +106,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-18 — Executed Plan 02-01 (build-frequencies.js + NB/NN Zipf sidecar JSON). DATA-01 requirement shipped.
-Stopped at: Completed 02-01-PLAN.md. Phase 2 Plan 02-01 (DATA-01 frequency tables) is complete; next up is Plan 02-02 (DATA-03 bigrams — note: scripts/build-bigrams.js file already appeared during this session, likely pre-scaffolded).
-Resume file: Suggest `/gsd:execute-plan 02-02` (NB/NN bigram expansion via max-merge with hand-authored idioms).
+Last session: 2026-04-18 — Executed Plan 02-02 (build-bigrams.js + NB/NN bigram sidecar JSON). DATA-03 requirement shipped.
+Stopped at: Completed 02-02-PLAN.md. Phase 2 Plan 02-02 (DATA-03 bigram expansion via max-merge) is complete; next up is Plan 02-03 (DATA-02 typo-bank deduplication + NN infinitive normalisation — cross-repo, requires coordination with papertek-vocabulary).
+Resume file: Suggest `/gsd:execute-plan 02-03` (typo-bank + NN infinitive — note the rollback protocol and cross-app blast-radius blockers above).

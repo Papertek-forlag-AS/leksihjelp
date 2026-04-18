@@ -20,7 +20,7 @@ text input on the web.
 
 - [x] **DATA-01**: Build-time script ingests the NB N-gram 2021 corpus (Språkbanken, CC-0) and emits sidecar `extension/data/freq-{lang}.json` with Zipf-scored unigram frequencies for NB and NN, under 200 KB gzipped each
 - [ ] **DATA-02**: Typo-bank expansion in `papertek-vocabulary` — coordinated cross-app review, additive schema only, synced into the extension via existing `npm run sync-vocab`
-- [ ] **DATA-03**: Extend bundled bigram data for NB and NN with high-frequency pairs derived from NB N-gram 2021; same schema as the existing `bigrams-{lang}.json` files; respect the bundle-size budget (~10 MB ceiling)
+- [x] **DATA-03**: Extend bundled bigram data for NB and NN with high-frequency pairs derived from NB N-gram 2021; same schema as the existing `bigrams-{lang}.json` files; respect the bundle-size budget (~10 MB ceiling)
 
 ### Spell-Check Quality (NB/NN)
 
@@ -96,7 +96,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | INFRA-04 | Phase 1 | Complete |
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
+| DATA-03 | Phase 2 | Complete |
 | SC-01 | Phase 3 | Pending |
 | SC-02 | Phase 4 | Pending |
 | SC-03 | Phase 4 | Pending |
