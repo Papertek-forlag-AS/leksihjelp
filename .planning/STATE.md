@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-18T19:30:54.341Z"
+last_updated: "2026-04-18T19:42:39.312Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 7
   completed_plans: 7
 ---
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 3 of 4 plans done
-Plan: 4 of 4 in Phase 2 (next up: 02-04 release gate — bundle size + minification)
-Status: Plan 02-03 complete — Norwegian typo bank +62.7% (NB +35.5%, NN +104.5%) + three Phase-1 data defects fixed at source + vocab-seam type="typo" validWords-pollution bug auto-fixed
-Last activity: 2026-04-18 — Plan 02-03 complete (DATA-02). Sibling repo commits 0533e28d + c6965c00 pushed to main; Leksihjelp feat commit 2b73566 landed. Fixture suite 132/132 pass with explicit per-class F1=1.000 assertions.
+Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 4 of 4 plans done (phase COMPLETE with SC-4 as a documented Blocker → Phase 2.1 queued)
+Plan: 4 of 4 in Phase 2 — DONE (02-04 release gate shipped; zip 10.11 MiB > cap 10.00 MiB → Outcome B, Phase 2.1 queued for product decision)
+Status: Plan 02-04 complete — check-bundle-size gate + JSON minification pipeline SHIPPED as permanent release infrastructure. Minification saved 13.25 MiB of whitespace pre-zip but the packaged zip is 10,599,772 bytes (10.11 MiB), 114 KB over the 10 MiB cap. Gate correctly exits 1 against the current over-cap zip; that's the intended fail-loud signal. SC-4 is a documented Blocker pending Phase 2.1.
+Last activity: 2026-04-18 — Plan 02-04 complete. Commits f2bf1f2 (test RED), 522f159 (feat GREEN outcome B), 34f7f52 (docs CLAUDE.md release workflow). Fixture suite still 132/132 pass (this plan added only release tooling, no runtime changes).
 
-Progress: [███████░░░] 75%  (Phase 2, 3/4 plans)
+Progress: [██████████] 100%  (Phase 2, 4/4 plans — SC-4 deferred to Phase 2.1)
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [███████░░░] 75%  (Phase 2, 3/4 plans)
 | Phase 02-data-layer-frequency-bigrams-typo-bank P01 | 12m 8s | 2 tasks | 6 files |
 | Phase 02-data-layer-frequency-bigrams-typo-bank P02 | 34 min | 1 tasks | 3 files |
 | Phase 02 P03 | 1h 20m | 3 tasks | 14 files |
+| Phase 02-data-layer-frequency-bigrams-typo-bank P04 | 5 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,11 @@ Recent decisions affecting current work:
 - [Phase 02-03]: SC-2 recall-delta seeded via 6 NB typo fixture cases chosen as position-0/1 transpositions (different first char from fix word) — guaranteed to bypass fuzzy matcher's `first-char-must-match` rule, so ONLY the curated-typo branch can resolve them. Pre-sync FAIL, post-sync PASS — operational signal rather than hand-waved F1=1.000.
 - [Phase 02-03]: NN `finst_verb.typos` had `fint` and `fints` registered as typos, but both are valid neuter forms of the common adjective `fin`. The same-lang dedupe script didn't catch them because NN lexicon LACKS `fin_adj` entirely — cross-lang / missing-entry collision, not same-lang overlap. Removed `fint`/`fints` from typos; fixture `nn-clean-003` text swapped from `fint` to `stort` to avoid the underlying data gap. Gap tracked as a new STATE.md blocker.
 - [Phase 02-03]: Vercel API redeploy lag is real — first `npm run sync-vocab` after sibling-repo push pulled pre-commit data. Waiting ~60s and re-syncing fixes it. Documented in Task 3 Rollback Protocol for future cross-repo plan executors.
+- [Phase 02-04]: Outcome B accepted over silent-bypass — the 114 KB overage after minification could be hidden by bumping `CEILING_BYTES` in the script, but that violates the plan's explicit fail-loud policy AND the publicly-stated 10 MB promise on the landing page. Gate ships and correctly reports FAIL; Phase 2.1 does the product work.
+- [Phase 02-04]: Staging-dir pattern (`.package-staging/` gitignored copy of `extension/`) chosen over in-tree minify-then-revert — lower risk of transient source-tree damage if the process is killed mid-run, zero risk of a minified JSON being committed by accident.
+- [Phase 02-04]: JSON minification alone saves 13.25 MiB of whitespace pre-zip but only 114 KB short of closing the cap — the structural size driver is `data/` (20.84 MiB uncompressed) + `audio/` (7.67 MiB uncompressed), so Phase 2.1 remediation must target one of those directories (audio stripping is cheapest by impact/effort ratio).
+- [Phase 02-04]: `unzip -l` date format is platform-dependent — macOS emits `MM-DD-YYYY`, Linux distributions often emit `YYYY-MM-DD`. Release-tooling regex must accept both (`\d{2,4}[-/]\d{2}[-/]\d{2,4}`) to work on dev + CI. Generic principle: cross-platform tool parsers should anchor on structure (column widths, separators) rather than specific numeric layouts.
+- [Phase 02-04]: Release-gate pattern locked in — scripts named `scripts/check-*.js` run with zero args, produce a diagnostic + PASS/FAIL line, exit 0/1 against a hard numeric threshold, and register in CLAUDE.md's Release Workflow as must-exit-0 steps. Both `check-fixtures` and `check-bundle-size` follow this pattern; future release gates (e.g. a bundle-reproducibility check) should adopt it.
 
 ### Pending Todos
 
@@ -115,6 +121,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-18 — Executed Plan 02-03 (DATA-02). Option B selected at checkpoint; rule library expanded +62.7% combined typo growth; seam bug auto-fixed; 132/132 fixture suite PASS with explicit per-class F1=1.000 assertions.
-Stopped at: Completed 02-03-PLAN.md. Phase 2 Plan 02-03 (DATA-02) is complete; next up is Plan 02-04 (release gate — bundle size, minification, version bump). Remember the bundle-size 10 MiB ceiling contingency (see Blockers/Concerns) — with typo bank +62.7% and bigrams/freq sidecars from 02-01/02-02, the packaged zip may be harder to fit under 10 MiB. Plan 02-04's minification strategy matters more now than before 02-03.
-Resume file: Suggest `/gsd:execute-plan 02-04` (release gate — bundle-size check is the main concern; two deferred items from 02-03 tracked in STATE.md Blockers as not-in-scope).
+Last session: 2026-04-18 — Executed Plan 02-04 (release gate). TDD: RED (f2bf1f2) + GREEN (522f159) + docs (34f7f52). Shipped `scripts/check-bundle-size.js` (10 MiB gate) + `scripts/package-extension.js` (minifying staging-dir helper) + CLAUDE.md Release Workflow step 2. **Outcome B triggered** — post-minification zip is 10,599,772 bytes (10.11 MiB), 114 KB over the 10 MiB cap. Gate correctly exits 1; SC-4 is a documented Blocker pending Phase 2.1.
+Stopped at: Completed 02-04-PLAN.md. **Phase 2 is complete** (4/4 plans, all SUMMARY files on disk) WITH SC-4 as a documented Blocker — the release-gate ships as permanent infrastructure, but no GitHub Release can cut while the gate reports FAIL. Phase 2.1 is queued for the bundle-size product decision (audio stripping / `en.json` audit / vocab trimming / ceiling bump with user sign-off). Fixture suite still green (132/132 pass).
+Resume file: Suggest `/gsd:add-phase 2.1` for the bundle-size product decision OR `/gsd:verify-work 02` to confirm Phase 2 close. If Phase 2.1 is deferred and Phase 3 starts instead, the release gate will continue to block releases until the zip is back under cap — Phase 3 can proceed in parallel since it adds runtime code, not data.
