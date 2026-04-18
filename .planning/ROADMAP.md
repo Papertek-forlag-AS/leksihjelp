@@ -51,7 +51,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — DATA-01: build-frequencies.js streaming NB N-gram 2021 → extension/data/freq-{nb,nn}.json sidecars (Wave 1, autonomous) ✓ Complete 2026-04-18
 - [x] 02-02-PLAN.md — DATA-03: build-bigrams.js regrowing extension/data/bigrams-{nb,nn}.json via max-merge with hand-authored idioms (Wave 1, autonomous) ✓ Complete 2026-04-18
-- [ ] 02-03-PLAN.md — DATA-02: typo-bank expansion in papertek-vocabulary + Phase-1 data-defect fixes + sync (Wave 1, human-verify checkpoint for cross-app push)
+- [x] 02-03-PLAN.md — DATA-02: typo-bank expansion in papertek-vocabulary + Phase-1 data-defect fixes + sync (Wave 1, human-verify checkpoint for cross-app push) ✓ Complete 2026-04-18
 - [ ] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous)
 
 ### Phase 3: Rule Architecture & Ranking Quality
