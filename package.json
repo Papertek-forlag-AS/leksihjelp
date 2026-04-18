@@ -12,6 +12,8 @@
     "check-fixtures": "node scripts/check-fixtures.js",
     "check-fixtures:nb": "node scripts/check-fixtures.js nb",
     "check-fixtures:nn": "node scripts/check-fixtures.js nn",
+    "build-frequencies": "node scripts/build-frequencies.js",
+    "build-bigrams": "node scripts/build-bigrams.js",
     "package": "cd extension && zip -r ../backend/public/lexi-extension.zip . -x '*.DS_Store' -x '*.map' && echo 'Created backend/public/lexi-extension.zip'"
   },
   "repository": {

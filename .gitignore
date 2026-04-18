@@ -16,5 +16,9 @@ serviceAccount*.json
 # Extension zip — distribute via GitHub Releases
 *.zip
 
+# NB N-gram corpus cache (1 GB+) — never commit; build script re-downloads on demand
+corpus/*
+!corpus/.gitignore
+
 # Claude Code settings
 .claude/
