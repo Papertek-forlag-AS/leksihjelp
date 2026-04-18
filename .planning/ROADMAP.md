@@ -15,7 +15,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted
+- [x] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted ✓ Complete 2026-04-18
 - [ ] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary`
 - [ ] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
@@ -36,7 +36,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 Plans:
 - [x] 01-01-PLAN.md — Build vocab-seam-core.js (pure index builder) + vocab-seam.js (browser IIFE owning vocab loading)
 - [x] 01-02-PLAN.md — Extract spell-check-core.js, refactor consumers to read __lexiVocab, delete __lexiPrediction, reorder manifest
-- [ ] 01-03-PLAN.md — Author scripts/check-fixtures.js + 10 seed JSONL fixture files + README + CLAUDE.md release-workflow update (checkpoint)
+- [x] 01-03-PLAN.md — Author scripts/check-fixtures.js + 10 seed JSONL fixture files + README + CLAUDE.md release-workflow update (checkpoint)
 
 ### Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)
 **Goal**: The data foundations that pay twice — frequency tables and expanded bigrams for NB/NN plus additional typo-bank coverage in `papertek-vocabulary` — are bundled and synced, keeping the extension under the 10 MB budget.
@@ -95,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation (Vocab Seam + Regression Fixture) | 2/3 | In Progress | - |
+| 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/TBD | Not started | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |

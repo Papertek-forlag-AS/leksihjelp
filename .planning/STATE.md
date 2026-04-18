@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-04-18T13:29:34.382Z"
+status: phase-1-complete
+last_updated: "2026-04-18T14:05:00.000Z"
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -22,29 +22,29 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation — Vocab Seam + Regression Fixture)
-Plan: 2 of 3 complete in current phase
-Status: In progress
-Last activity: 2026-04-18 — Plan 01-02 complete (consumer cutover: spell-check-core extracted, __lexiPrediction deleted, __lexiVocab wired to both consumers)
+Phase: 1 of 5 complete (Foundation — Vocab Seam + Regression Fixture) — all 3 plans done
+Plan: 3 of 3 complete in Phase 1
+Status: Phase 1 complete; ready for Phase 2 (Data Layer) planning
+Last activity: 2026-04-18 — Plan 01-03 complete (fixture harness + 132 ground-truth JSONL cases + CLAUDE.md release gate)
 
-Progress: [██████░░░░] 66%
+Progress: [██████████] 100%  (Phase 1, 3/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 9m 5s
-- Total execution time: 18m 11s
+- Total plans completed: 3
+- Average duration: 11m 12s
+- Total execution time: 33m 36s
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| Phase 01 | 2 | 18m 11s | 9m 5s |
+| Phase 01 | 3 | 33m 36s | 11m 12s |
 
 **Recent Trend:**
-- Last 5 plans: 4m 24s, 13m 47s
-- Trend: growing (complexity-driven — Plan 02 was a 5-file cutover vs Plan 01's 2-file greenfield)
+- Last 5 plans: 4m 24s, 13m 47s, 15m 25s
+- Trend: stable at ~13–15 min per plan (complexity-driven — P01 greenfield 2-file, P02 5-file cutover, P03 harness + 132 fixture cases)
 
 *Updated after each plan completion*
 
@@ -52,6 +52,7 @@ Progress: [██████░░░░] 66%
 |------|----------|-------|-------|
 | Phase 01 P01 | 4m 24s | 2 tasks | 2 files |
 | Phase 01 P02 | 13m 47s | 2 tasks | 6 files |
+| Phase 01-foundation-vocab-seam-regression-fixture P03 | 15m 25s | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -71,10 +72,15 @@ Recent decisions affecting current work:
 - [Phase 01]: Finding contract locked — core emits `rule_id` (not `type`); DOM adapter shims `f.type = f.rule_id` post-call so legacy UI code works unchanged (consumed by Plan 03 fixture harness)
 - [Phase 01]: Grammar-feature filtering is seam-level only — word-prediction consumes pre-filtered wordList as-is, single source of truth
 - [Phase 01]: Consumer-local derived state (prefixIndex, tense sets) rebuilt via VOCAB.onReady(cb) re-registration on LANGUAGE_CHANGED / GRAMMAR_FEATURES_CHANGED — avoids stale captures without changing the seam API
+- [Phase 01]: Fixture cases are hand-authored ground truth, not snapshots of current tool output (pitfall #4) — a case that fails today because of an imperfect rule stays in the fixture; fixing the rule is what flips the exit code back to 0
+- [Phase 01]: Fixture exit-code semantics — non-zero on ANY hard mismatch (missing expected OR unexpected flag); P/R/F1 printed but not thresholded in Phase 1 (thresholds deferred to Phase 4 SC-05 per CONTEXT)
+- [Phase 01]: Span convention in fixtures is end-EXCLUSIVE (end = start + word.length) and fixture filenames are ASCII-only (`saerskriving.jsonl`, not `særskriving.jsonl`)
+- [Phase 01]: Live Chrome smoke test for Phase 1 deferred by user on 2026-04-18 ("I can't test now, but we shouldn't let that block progress — continue and we make the tests later") — to be picked up at release time or during `/gsd:verify-work`
+- [Phase 01]: Three pre-existing data-source issues surfaced during fixture authoring (NN verb-infinitive pollution `lese → lese høyt`; NB noun `brev` tagged `m` instead of `n`; typos-in-validWords bypassing curated branch) — NOT rule bugs, data quality issues in `papertek-vocabulary`; natural fit for Phase 2 DATA-02
 
 ### Pending Todos
 
-None yet.
+- Live Chrome smoke test for Phase 1 (deferred 2026-04-18): load `extension/` unpacked, type `en hus` in a textarea, confirm red dot + `et hus` popover, DevTools console clean. Pick up at release time or during `/gsd:verify-work`.
 
 ### Blockers/Concerns
 
@@ -84,6 +90,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18 — Executed Plan 01-02 (consumer cutover + manifest reorder + version bump 2.3.0)
-Stopped at: Completed 01-02-PLAN.md. Next: Plan 01-03 (Node fixture harness — runs spell-check-core.check against fixture files)
-Resume file: .planning/phases/01-foundation-vocab-seam-regression-fixture/01-03-PLAN.md
+Last session: 2026-04-18 — Executed Plan 01-03 (fixture harness + 132 ground-truth JSONL cases + CLAUDE.md release gate). Phase 1 complete.
+Stopped at: Completed 01-03-PLAN.md. Phase 1 (Foundation — Vocab Seam + Regression Fixture) is complete; ready for Phase 2 (Data Layer) planning.
+Resume file: None — suggest `/gsd:plan-phase 2` (or `/gsd:verify-work 1` first to confirm phase health, and to pick up the deferred Chrome smoke test).
