@@ -32,7 +32,11 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
   2. A developer can run `node scripts/check-fixtures.js nb` and see pass/fail output plus precision/recall per error class for at least 4 rule classes (gender, modal-verb, særskriving, typo)
   3. Adding a known-failing test case to `fixtures/nb/*.jsonl` causes the script to exit non-zero; fixing the rule causes it to exit zero — verified by the developer in one commit cycle
   4. Grepping spell-check source confirms zero imports from `word-prediction.js` internals and zero references to premium/subscription state — the module is extractable to `skriv.papertek.app` in principle
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Build vocab-seam-core.js (pure index builder) + vocab-seam.js (browser IIFE owning vocab loading)
+- [ ] 01-02-PLAN.md — Extract spell-check-core.js, refactor consumers to read __lexiVocab, delete __lexiPrediction, reorder manifest
+- [ ] 01-03-PLAN.md — Author scripts/check-fixtures.js + 10 seed JSONL fixture files + README + CLAUDE.md release-workflow update (checkpoint)
 
 ### Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)
 **Goal**: The data foundations that pay twice — frequency tables and expanded bigrams for NB/NN plus additional typo-bank coverage in `papertek-vocabulary` — are bundled and synced, keeping the extension under the 10 MB budget.
@@ -91,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation (Vocab Seam + Regression Fixture) | 0/TBD | Not started | - |
+| 1. Foundation (Vocab Seam + Regression Fixture) | 0/3 | Not started | - |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/TBD | Not started | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
