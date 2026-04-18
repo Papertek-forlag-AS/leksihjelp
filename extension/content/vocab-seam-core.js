@@ -425,10 +425,22 @@
     for (const entry of wordList) {
       const w = entry.word;
       if (!w) continue;
-      validWords.add(w);
+      // Typo-type entries must NOT be added to validWords — they are
+      // misspellings, not valid forms. The curated-typo branch in
+      // spell-check-core.js skips any token that's in validWords, so
+      // adding typos here silently disables the curated-fix path (and
+      // the fuzzy path too, since it also respects validWords). This
+      // bug was masked in Phase 1 because the baseline NB typo fixtures
+      // happened to use typos that weren't in the bank at all. Phase 2
+      // DATA-02's typo-bank expansion surfaced it — the seeded cases
+      // couldn't hit the curated branch because their own typos had
+      // been shadowed into validWords. Fixed here as a Rule-1 auto-fix.
+      if (entry.type !== 'typo') {
+        validWords.add(w);
+      }
       // Verb infinitives are stored as "å sykle" / "å være" — also accept the
       // bare infinitive so unprefixed usage doesn't get flagged as unknown.
-      if (w.startsWith('å ')) validWords.add(w.slice(2));
+      if (entry.type !== 'typo' && w.startsWith('å ')) validWords.add(w.slice(2));
 
       if ((entry.bank === 'nounbank' || entry.type === 'nounform' || entry.type === 'plural') && entry.genus) {
         // Only set genus if not already present, so the base form wins

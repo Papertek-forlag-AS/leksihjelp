@@ -16,6 +16,21 @@
 {"id":"nb-typo-jbobe-001","text":"Vi jbobe mye","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"jobbe"}],"must_not_flag":[]}
 {"id":"nb-typo-utrlig-001","text":"Jeg er helt utrlig","expected":[{"rule_id":"typo","start":12,"end":18,"suggestion":"utrolig"}],"must_not_flag":[]}
 {"id":"nb-typo-ikek-001","text":"Jeg kan ikek gjøre det","expected":[{"rule_id":"typo","start":8,"end":12,"suggestion":"ikke"}],"must_not_flag":[]}
+
+// ── SC-2 recall-delta seed cases (Phase 2 Plan 02-03) ──
+// These 6 cases target typos ABSENT from the Phase-1 typo bank AND outside
+// fuzzy-matcher reach (position-0/1 transpositions don't share a first-char
+// with the fix word, so findFuzzyNeighbor() never considers them). They
+// FAIL pre-sync (zero findings — missing expected) and PASS post-sync after
+// the sibling-repo rule-library expansion lands the new firstPairTranspose
+// pattern. The recall delta is exactly these 6 cases going from red → green.
+{"id":"nb-typo-paotek-001","text":"Gå til paotek for medisin.","expected":[{"rule_id":"typo","start":7,"end":13,"suggestion":"apotek"}],"must_not_flag":[]}
+{"id":"nb-typo-abnan-001","text":"En abnan er gul og søt.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"banan"}],"must_not_flag":[]}
+{"id":"nb-typo-ibbliotek-001","text":"Jeg går til ibbliotek.","expected":[{"rule_id":"typo","start":12,"end":21,"suggestion":"bibliotek"}],"must_not_flag":[]}
+{"id":"nb-typo-ardio-001","text":"Hun har en ardio.","expected":[{"rule_id":"typo","start":11,"end":16,"suggestion":"radio"}],"must_not_flag":[]}
+{"id":"nb-typo-afmilie-001","text":"Min afmilie er stor.","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"familie"}],"must_not_flag":[]}
+{"id":"nb-typo-niteresse-001","text":"Hun har stor niteresse for musikk.","expected":[{"rule_id":"typo","start":13,"end":22,"suggestion":"interesse"}],"must_not_flag":[]}
+
 // Note: "flik → flink" is a known weakness of the current fuzzy ranker
 // (it returns "flak" for "Han er veldig flik"). A fixture exercising that
 // case is deferred to Phase 3 when the ranker learns to prefer length-

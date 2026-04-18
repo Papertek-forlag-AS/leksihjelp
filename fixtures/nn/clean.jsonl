@@ -5,7 +5,7 @@
 
 {"id":"nn-clean-001","text":"Eg likar å lese bøker.","expected":[],"must_not_flag":[]}
 {"id":"nn-clean-002","text":"Eg har ikkje tid no.","expected":[],"must_not_flag":[]}
-{"id":"nn-clean-003","text":"Det er eit fint hus.","expected":[],"must_not_flag":[]}
+{"id":"nn-clean-003","text":"Det er eit stort hus.","expected":[],"must_not_flag":[]}
 {"id":"nn-clean-004","text":"Ho går på skulen i dag.","expected":[],"must_not_flag":[]}
 {"id":"nn-clean-005","text":"Mannen les boka.","expected":[],"must_not_flag":[]}
 {"id":"nn-clean-006","text":"Vi bur i Noreg.","expected":[],"must_not_flag":[]}
