@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-04-18T16:18:28.051Z"
+status: in_progress
+last_updated: "2026-04-18T18:11:34.671Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 7
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,33 +18,34 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 1 — Foundation (Vocab Seam + Regression Fixture)
+**Current focus:** Phase 2 — Data Layer (Frequency + Bigrams + Typo Bank)
 
 ## Current Position
 
-Phase: 1 of 5 complete (Foundation — Vocab Seam + Regression Fixture) — all 3 plans done
-Plan: 3 of 3 complete in Phase 1
-Status: Phase 1 complete; ready for Phase 2 (Data Layer) planning
-Last activity: 2026-04-18 — Plan 01-03 complete (fixture harness + 132 ground-truth JSONL cases + CLAUDE.md release gate)
+Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 1 of 4 plans done
+Plan: 2 of 4 in Phase 2 (next up: 02-02 bigrams)
+Status: Plan 02-01 complete — NB N-gram 2021 → Zipf sidecar JSON shipping DATA-01
+Last activity: 2026-04-18 — Plan 02-01 complete (build-frequencies.js + freq-nb.json 13,132 entries / 61 KB gz + freq-nn.json 11,013 entries / 52 KB gz)
 
-Progress: [██████████] 100%  (Phase 1, 3/3 plans)
+Progress: [██▌░░░░░░░] 25%  (Phase 2, 1/4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 11m 12s
-- Total execution time: 33m 36s
+- Total plans completed: 4
+- Average duration: 11m 24s
+- Total execution time: 45m 44s
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | Phase 01 | 3 | 33m 36s | 11m 12s |
+| Phase 02 | 1 | 12m 08s | 12m 08s |
 
 **Recent Trend:**
-- Last 5 plans: 4m 24s, 13m 47s, 15m 25s
-- Trend: stable at ~13–15 min per plan (complexity-driven — P01 greenfield 2-file, P02 5-file cutover, P03 harness + 132 fixture cases)
+- Last 5 plans: 4m 24s, 13m 47s, 15m 25s, 12m 08s
+- Trend: stable at ~12–15 min per plan. Plan 02-01 (data-layer build script with 1 GB corpus download) on-pace at 12m despite deviations fixing CSV delimiter + Zipf floor estimates.
 
 *Updated after each plan completion*
 
@@ -53,6 +54,7 @@ Progress: [██████████] 100%  (Phase 1, 3/3 plans)
 | Phase 01 P01 | 4m 24s | 2 tasks | 2 files |
 | Phase 01 P02 | 13m 47s | 2 tasks | 6 files |
 | Phase 01-foundation-vocab-seam-regression-fixture P03 | 15m 25s | 3 tasks | 14 files |
+| Phase 02-data-layer-frequency-bigrams-typo-bank P01 | 12m 8s | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -77,6 +79,10 @@ Recent decisions affecting current work:
 - [Phase 01]: Span convention in fixtures is end-EXCLUSIVE (end = start + word.length) and fixture filenames are ASCII-only (`saerskriving.jsonl`, not `særskriving.jsonl`)
 - [Phase 01]: Live Chrome smoke test for Phase 1 deferred by user on 2026-04-18 ("I can't test now, but we shouldn't let that block progress — continue and we make the tests later") — to be picked up at release time or during `/gsd:verify-work`
 - [Phase 01]: Three pre-existing data-source issues surfaced during fixture authoring (NN verb-infinitive pollution `lese → lese høyt`; NB noun `brev` tagged `m` instead of `n`; typos-in-validWords bypassing curated branch) — NOT rule bugs, data quality issues in `papertek-vocabulary`; natural fit for Phase 2 DATA-02
+- [Phase 02-01]: NB N-gram 2021 digibok unigram CSV is **comma-separated** with schema `first,lang,freq,json` (not tab as the plan assumed). Rows where the first cell is CSV-quoted (starts with `"`) are always punctuation-only — fast-reject them. The 4th column is a quoted per-year JSON blob, parsed on first 3 comma positions only.
+- [Phase 02-01]: Zipf floor of 3.0 (plan estimate) filters too aggressively for actual NB N-gram 2021 ↔ validWords overlap (~6K entries). Ship with Zipf floor 0.0 as the default — budget enforcer raises floor only if output exceeds 200 KB gzipped. Actual overlap is 13,132 NB / 11,013 NN entries at 61 KB / 52 KB gzipped (69% / 74% headroom).
+- [Phase 02-01]: MIN_ENTRIES fail-loud floors are reality-based corruption guards, not ship-quality gates. ~4K of shipped validWords are multi-word phrases (cannot match unigram corpus); another ~2K are deliberate typos. Natural overlap is ~50% of validWords size. Set floors at 5K / 2K to catch true corruption (empty download, wrong lang) without false-alarming on real distribution.
+- [Phase 02-01]: `corpus/` gitignore double-safety pattern — root `.gitignore` uses `corpus/*` + `!corpus/.gitignore` (negation so inner ignore tracks itself); inner `corpus/.gitignore` uses `*` + `!.gitignore` (self-exception). Together they guarantee the 1 GB corpus file stays out of git even if the inner file is ever deleted.
 
 ### Pending Todos
 
@@ -92,6 +98,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-18 — Executed Plan 01-03 (fixture harness + 132 ground-truth JSONL cases + CLAUDE.md release gate). Phase 1 complete.
-Stopped at: Completed 01-03-PLAN.md. Phase 1 (Foundation — Vocab Seam + Regression Fixture) is complete; ready for Phase 2 (Data Layer) planning.
-Resume file: None — suggest `/gsd:plan-phase 2` (or `/gsd:verify-work 1` first to confirm phase health, and to pick up the deferred Chrome smoke test).
+Last session: 2026-04-18 — Executed Plan 02-01 (build-frequencies.js + NB/NN Zipf sidecar JSON). DATA-01 requirement shipped.
+Stopped at: Completed 02-01-PLAN.md. Phase 2 Plan 02-01 (DATA-01 frequency tables) is complete; next up is Plan 02-02 (DATA-03 bigrams — note: scripts/build-bigrams.js file already appeared during this session, likely pre-scaffolded).
+Resume file: Suggest `/gsd:execute-plan 02-02` (NB/NN bigram expansion via max-merge with hand-authored idioms).
