@@ -2,10 +2,13 @@
  * Leksihjelp — Word Prediction (content script)
  *
  * Provides autocomplete suggestions as user types in any text input.
- * Uses fuzzy matching against a bundled word list.
+ * Uses fuzzy matching against the shared vocab seam.
  * Works with <input>, <textarea>, and contenteditable elements.
  * Includes conjugated verb forms and declined noun forms.
- * Respects grammar feature settings from the extension popup.
+ *
+ * Vocabulary is loaded by vocab-seam.js and consumed here via __lexiVocab.
+ * Grammar-feature gating is seam-owned: the seam emits the filtered wordList
+ * and this file consumes it as-is (no local isFeatureEnabled duplicate).
  */
 
 (function () {
@@ -13,59 +16,66 @@
 
   const { t, initI18n, setUiLanguage, getUiLanguage } = self.__lexiI18n;
 
-  let wordList = [];       // Array of { word, display, translation, type, baseWord, pronoun }
+  // Vocab seam binding. Must load before this script (see manifest.json
+  // content_scripts order).
+  const VOCAB = self.__lexiVocab;
+  if (!VOCAB) {
+    console.error('[lexi-prediction] __lexiVocab not loaded — check manifest content_scripts order');
+    return;
+  }
+
   let dropdown = null;
   let activeElement = null;
   let selectedIndex = -1;
   let enabled = true;
   let currentLang = 'en';
-  let enabledFeatures = new Set(); // Grammar features enabled by user
-  let grammarFeatures = null; // Grammar features metadata
   let lexiPaused = false; // Global pause state
   let predictionTimer = null; // debounce timer for prediction
-  let prefixIndex = new Map(); // 2-3 char prefix → [indices into wordList]
+  let prefixIndex = new Map(); // 2-3 char prefix → [indices into VOCAB.getWordList()]
   let recentWords = [];    // Last 20 selected words per language
   let recentWordsSet = new Set(); // For O(1) lookup
-  let knownPresens = new Set();    // Known present-tense verb forms for tense detection
-  let knownPreteritum = new Set(); // Known past-tense verb forms for tense detection
-  let bigramData = null;   // Bigram frequency data: previousWord → { nextWord: weight }
+  let knownPresens = new Set();    // Known present-tense verb forms for tense detection (rebuilt from VOCAB)
+  let knownPreteritum = new Set(); // Known past-tense verb forms for tense detection (rebuilt from VOCAB)
 
   // ── Init ──
   init();
 
   async function init() {
     await initI18n();
-    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'enabledGrammarFeatures', 'lexiPaused']);
+    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'lexiPaused']);
     currentLang = stored.language || 'en';
     enabled = stored.predictionEnabled !== false;
     lexiPaused = stored.lexiPaused || false;
 
-    // Load grammar features settings
-    if (stored.enabledGrammarFeatures && stored.enabledGrammarFeatures[currentLang]) {
-      enabledFeatures = new Set(stored.enabledGrammarFeatures[currentLang]);
-    }
-
     await loadRecentWords(currentLang);
-    await loadGrammarFeatures(currentLang);
-    await loadWordList(currentLang);
     createDropdown();
     attachGlobalListeners();
     if (lexiPaused) updatePauseBadge();
 
+    // Rebuild local derived state (prefix index + tense sets) once the seam
+    // has vocab loaded. Seam's onReady queue handles late subscribers.
+    VOCAB.onReady(refreshFromVocab);
+
     chrome.runtime.onMessage.addListener(async (msg) => {
       if (msg.type === 'LANGUAGE_CHANGED') {
+        // Vocab-seam (registered earlier in manifest order) kicks off its own
+        // reload on this message. We update currentLang + recent words, then
+        // queue a refresh for when the seam signals ready again. Seam sets
+        // ready=false synchronously before awaiting the reload, so our
+        // onReady call queues deterministically.
         currentLang = msg.language;
         await loadRecentWords(msg.language);
-        await loadGrammarFeatures(msg.language);
-        await loadWordList(msg.language);
+        VOCAB.onReady(refreshFromVocab);
       }
       if (msg.type === 'PREDICTION_TOGGLED') {
         enabled = msg.enabled;
         if (!enabled) hideDropdown();
       }
       if (msg.type === 'GRAMMAR_FEATURES_CHANGED') {
-        enabledFeatures = new Set(msg.features || []);
-        await loadWordList(currentLang); // Rebuild word list with new filters
+        // Vocab-seam rebuilds its indexes on this message (grammar toggles
+        // change which forms make it into the wordList). We refresh our
+        // prefix index + tense sets when the seam signals ready.
+        VOCAB.onReady(refreshFromVocab);
       }
       if (msg.type === 'LEXI_PAUSED') {
         lexiPaused = msg.paused;
@@ -78,82 +88,12 @@
     });
   }
 
-  async function loadGrammarFeatures(lang) {
-    try {
-      // Try vocab store first
-      if (window.__lexiVocabStore) {
-        const cached = await window.__lexiVocabStore.getCachedGrammarFeatures(lang);
-        if (cached) {
-          grammarFeatures = cached;
-          if (enabledFeatures.size === 0 && grammarFeatures?.features) {
-            enabledFeatures = new Set(grammarFeatures.features.map(f => f.id));
-          }
-          return;
-        }
-      }
-
-      // Fall back to bundled file
-      const url = chrome.runtime.getURL(`data/grammarfeatures-${lang}.json`);
-      const res = await fetch(url);
-      grammarFeatures = await res.json();
-
-      if (enabledFeatures.size === 0 && grammarFeatures?.features) {
-        enabledFeatures = new Set(grammarFeatures.features.map(f => f.id));
-      }
-    } catch (e) {
-      grammarFeatures = null;
-    }
-  }
-
-  function isFeatureEnabled(featureId) {
-    if (enabledFeatures.size === 0) return true;
-    if (enabledFeatures.has(featureId)) return true;
-    // Check language-specific variants
-    const langPrefix = `grammar_${currentLang}_`;
-    const genericToLangMap = {
-      'grammar_articles': [`${langPrefix}genus`],
-      'grammar_plural': [`${langPrefix}flertall`, `${langPrefix}fleirtal`],
-      'grammar_present': [`${langPrefix}presens`],
-      'grammar_preteritum': [`${langPrefix}preteritum`],
-      'grammar_perfektum': [`${langPrefix}perfektum`],
-      'grammar_imperativ': [`${langPrefix}imperativ`],
-      'grammar_comparative': [`${langPrefix}komparativ`],
-      'grammar_superlative': [`${langPrefix}superlativ`],
-    };
-    const langIds = genericToLangMap[featureId];
-    if (langIds) return langIds.some(id => enabledFeatures.has(id));
-    return false;
-  }
-
-  function getAllowedPronouns() {
-    const langPronouns = {
-      de: [
-        { id: 'grammar_pronouns_all', pronouns: ['ich', 'du', 'er/sie/es', 'wir', 'ihr', 'sie/Sie'] },
-        { id: 'grammar_pronouns_singular_wir', pronouns: ['ich', 'du', 'er/sie/es', 'wir'] },
-        { id: 'grammar_pronouns_ich_du', pronouns: ['ich', 'du'] }
-      ],
-      es: [
-        { id: 'grammar_es_pronouns_all', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'] },
-        { id: 'grammar_es_pronouns_singular_nosotros', pronouns: ['yo', 'tú', 'él/ella/usted', 'nosotros'] },
-        { id: 'grammar_es_pronouns_yo_tu', pronouns: ['yo', 'tú'] }
-      ],
-      fr: [
-        { id: 'grammar_fr_pronouns_all', pronouns: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles'] },
-        { id: 'grammar_fr_pronouns_singular_nous', pronouns: ['je', 'tu', 'il/elle/on', 'nous'] },
-        { id: 'grammar_fr_pronouns_je_tu', pronouns: ['je', 'tu'] }
-      ]
-    };
-
-    const features = langPronouns[currentLang];
-    if (features) {
-      for (const pf of features) {
-        if (enabledFeatures.has(pf.id)) {
-          return new Set(pf.pronouns);
-        }
-      }
-      return new Set(features[0].pronouns);
-    }
-    return null; // No filtering for NB/NN/EN
+  // Rebuild prefixIndex + knownPresens/knownPreteritum from the seam's current
+  // wordList. Cheap — linear in wordList size. Called on init-ready and after
+  // LANGUAGE_CHANGED / GRAMMAR_FEATURES_CHANGED.
+  function refreshFromVocab() {
+    buildPrefixIndex();
+    buildTenseSets();
   }
 
   function chromeStorageGet(keys) {
@@ -161,12 +101,6 @@
       chrome.storage.local.get(keys, resolve);
     });
   }
-
-  // Bank names for iteration
-  const BANKS = [
-    'verbbank', 'nounbank', 'adjectivebank', 'articlesbank',
-    'generalbank', 'numbersbank', 'phrasesbank', 'pronounsbank'
-  ];
 
   // Language labels for dropdown footer
   const LANG_LABELS = {
@@ -180,43 +114,6 @@
       phrasesbank: 'pos_phrase_short', pronounsbank: 'pos_pronoun_short' };
     return t(keys[bank] || 'pos_general_short');
   }
-
-  // Pronoun labels per language — maps array index to pronoun string
-  // Used to label Spanish/French conjugations where former is an array
-  const LANGUAGE_PRONOUNS = {
-    es: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'],
-    fr: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles']
-  };
-
-  // NB/NN form-level feature gating — maps individual conjugation form keys
-  // to grammar features so each can be toggled independently
-  const NB_NN_FORM_FEATURES = {
-    presens:              'grammar_present',
-    preteritum:           'grammar_preteritum',
-    perfektum_partisipp:  'grammar_perfektum',
-    imperativ:            'grammar_imperativ',
-    // infinitiv: always shown (base form, no gating)
-  };
-
-  // Tense normalization — maps language-specific tense keys to common group names
-  // Used for cross-language tense consistency detection
-  const TENSE_GROUP = {
-    presens: 'present', presente: 'present',
-    preteritum: 'past', preterito: 'past',
-    perfektum: 'perfect', perfecto: 'perfect', passe_compose: 'perfect',
-    perfektum_partisipp: 'perfect', // NB/NN form key
-  };
-
-  // Tense keys to feature mapping (supports multiple languages)
-  const TENSE_FEATURES = {
-    presens: 'grammar_present',
-    presente: 'grammar_present',
-    preteritum: 'grammar_preteritum',
-    preterito: 'grammar_preterito',
-    perfektum: 'grammar_perfektum',
-    perfecto: 'grammar_perfecto',
-    passe_compose: 'grammar_passe_compose'
-  };
 
   // Pronoun context mapping — per-language to avoid key conflicts (e.g. 'du' in DE vs NB)
   const PRONOUN_CONTEXT_BY_LANG = {
@@ -436,363 +333,40 @@
       'langs', 'rundt', 'utan', 'innan', 'utanfor', 'innanfor']),
   };
 
-  // ── Word list ──
-  async function loadWordList(lang) {
-    try {
-      let data = null;
-
-      // Try vocab store first
-      if (window.__lexiVocabStore) {
-        data = await window.__lexiVocabStore.getCachedLanguage(lang);
-      }
-
-      // Fall back to bundled file (only NB/NN/EN are bundled; DE/ES/FR are download-only)
-      if (!data) {
-        const bundledLangs = ['nb', 'nn', 'en'];
-        if (bundledLangs.includes(lang)) {
-          const url = chrome.runtime.getURL(`data/${lang}.json`);
-          const res = await fetch(url);
-          data = await res.json();
-        }
-      }
-
-      if (!data) {
-        wordList = [];
-        prefixIndex.clear();
-        return;
-      }
-
-      // Flatten bank-based structure into prediction entries
-      wordList = [];
-      knownPresens.clear();
-      knownPreteritum.clear();
-      const isNorwegian = lang === 'nb' || lang === 'nn';
-      const allowedPronouns = getAllowedPronouns();
-
-      for (const bank of BANKS) {
-        const bankData = data[bank];
-        if (!bankData || typeof bankData !== 'object') continue;
-
-        for (const entry of Object.values(bankData)) {
-          if (!entry.word) continue;
-
-          const translation = entry.translation || entry.translations?.nb || '';
-
-          // Add base word
-          wordList.push({
-            word: entry.word.toLowerCase(),
-            display: entry.word,
-            translation: translation,
-            type: 'base',
-            bank: bank,
-            genus: bank === 'nounbank' ? (entry.genus || null) : null
-          });
-
-          // Add Norwegian translation for reverse prediction
-          if (translation) {
-            wordList.push({
-              word: translation.toLowerCase(),
-              display: translation,
-              translation: entry.word,
-              type: 'translation'
-            });
-          }
-
-          // Add known typos — when student types a common misspelling,
-          // suggest the correct word with high priority
-          if (entry.typos && Array.isArray(entry.typos)) {
-            for (const typo of entry.typos) {
-              wordList.push({
-                word: typo.toLowerCase(),
-                display: entry.word,  // Show the correct word
-                translation: translation,
-                type: 'typo',
-                bank: bank,
-                baseWord: entry.word
-              });
-            }
-          }
-
-          // Add accepted forms — alternative valid spellings
-          if (entry.acceptedForms && Array.isArray(entry.acceptedForms)) {
-            for (const form of entry.acceptedForms) {
-              wordList.push({
-                word: form.toLowerCase(),
-                display: form,
-                translation: `${entry.word} (${translation || ''})`,
-                type: 'accepted',
-                bank: bank,
-                baseWord: entry.word
-              });
-            }
-          }
-
-          // Add conjugated verb forms
-          if (bank === 'verbbank' && entry.conjugations) {
-            for (const [tense, tenseData] of Object.entries(entry.conjugations)) {
-              // For DE/ES/FR: gate by tense feature
-              if (!isNorwegian) {
-                const featureId = TENSE_FEATURES[tense];
-                if (featureId && !isFeatureEnabled(featureId)) continue;
-              }
-
-              if (tenseData.former) {
-                if (Array.isArray(tenseData.former)) {
-                  // Spanish/French: array of forms, map index to pronoun label
-                  const pronounLabels = LANGUAGE_PRONOUNS[lang] || [];
-                  const arrTenseKey = TENSE_GROUP[tense] || null;
-                  tenseData.former.forEach((form, index) => {
-                    if (!form) return;
-                    const pronoun = pronounLabels[index] || `${index}`;
-                    // Filter by allowed pronouns (if set)
-                    if (allowedPronouns && !allowedPronouns.has(pronoun)) return;
-                    const formLower = form.toLowerCase();
-                    wordList.push({
-                      word: formLower,
-                      display: form,
-                      translation: `${entry.word} (${pronoun})`,
-                      type: 'conjugation',
-                      pronoun: pronoun,
-                      baseWord: entry.word,
-                      tenseKey: arrTenseKey
-                    });
-                    // Track for tense detection
-                    if (arrTenseKey === 'present') knownPresens.add(formLower);
-                    if (arrTenseKey === 'past') knownPreteritum.add(formLower);
-                  });
-                } else if (typeof tenseData.former === 'object') {
-                  // Object with keys: German uses pronouns (ich, du, ...),
-                  // NB/NN uses form labels (infinitiv, presens, ...),
-                  // EN uses English pronouns (I, you, he/she, ...)
-                  for (const [key, form] of Object.entries(tenseData.former)) {
-                    // Only apply pronoun filtering for German
-                    if (lang === 'de' && allowedPronouns && !allowedPronouns.has(key)) continue;
-
-                    // NB/NN: gate each form individually by its own grammar feature
-                    if (isNorwegian && NB_NN_FORM_FEATURES[key]) {
-                      if (!isFeatureEnabled(NB_NN_FORM_FEATURES[key])) continue;
-                    }
-
-                    // NB/NN: tense is derived from form key (presens, preteritum, etc.)
-                    // DE: tense is the outer loop variable (presens, preteritum, perfektum)
-                    const objTenseKey = isNorwegian ? (TENSE_GROUP[key] || null) : (TENSE_GROUP[tense] || null);
-                    const formLower = form.toLowerCase();
-
-                    wordList.push({
-                      word: formLower,
-                      display: form,
-                      translation: `${entry.word} (${key})`,
-                      type: 'conjugation',
-                      pronoun: lang === 'de' ? key : null,
-                      formKey: isNorwegian ? key : null,
-                      baseWord: entry.word,
-                      tenseKey: objTenseKey
-                    });
-
-                    // Track known present/past forms for tense detection (all languages)
-                    if (isNorwegian) {
-                      if (key === 'presens') knownPresens.add(formLower);
-                      if (key === 'preteritum') knownPreteritum.add(formLower);
-                    } else {
-                      if (objTenseKey === 'present') knownPresens.add(formLower);
-                      if (objTenseKey === 'past') knownPreteritum.add(formLower);
-                    }
-                  }
-                }
-              }
-
-              // EN perfect tense: participle/present_participle (no former)
-              if (tenseData.participle) {
-                wordList.push({
-                  word: tenseData.participle.toLowerCase(),
-                  display: tenseData.participle,
-                  translation: `${entry.word} (past participle)`,
-                  type: 'conjugation',
-                  baseWord: entry.word
-                });
-              }
-              if (tenseData.present_participle) {
-                wordList.push({
-                  word: tenseData.present_participle.toLowerCase(),
-                  display: tenseData.present_participle,
-                  translation: `${entry.word} (-ing)`,
-                  type: 'conjugation',
-                  baseWord: entry.word
-                });
-              }
-            }
-          }
-
-          // Add noun case forms (v2.0 format)
-          if (bank === 'nounbank' && entry.cases) {
-            for (const [caseName, caseData] of Object.entries(entry.cases)) {
-              // Feature gating per case
-              if (caseName === 'akkusativ' && !isFeatureEnabled('grammar_accusative_nouns')) continue;
-              if (caseName === 'dativ' && !isFeatureEnabled('grammar_dative')) continue;
-              if (caseName === 'genitiv' && !isFeatureEnabled('grammar_genitiv')) continue;
-
-              if (!caseData.forms) continue;
-
-              for (const [number, numberForms] of Object.entries(caseData.forms)) {
-                if (!numberForms) continue; // plurale tantum: singular is null
-                for (const [article, form] of Object.entries(numberForms)) {
-                  if (!form) continue;
-                  wordList.push({
-                    word: form.toLowerCase(),
-                    display: form,
-                    translation: `${entry.word} (${caseName} ${number})`,
-                    type: 'case',
-                    baseWord: entry.word,
-                    genus: entry.genus || null,
-                    caseName: caseName
-                  });
-                }
-              }
-            }
-          }
-
-          // Add NB/NN noun forms (ubestemt/bestemt × entall/flertall)
-          if (bank === 'nounbank' && entry.forms) {
-            for (const [formType, forms] of Object.entries(entry.forms)) {
-              if (!forms || typeof forms !== 'object') continue;
-              for (const [number, form] of Object.entries(forms)) {
-                if (!form || form.toLowerCase() === (entry.word || '').toLowerCase()) continue;
-                wordList.push({
-                  word: form.toLowerCase(),
-                  display: form,
-                  translation: `${entry.word} (${formType} ${number})`,
-                  type: 'nounform',
-                  bank: bank,
-                  baseWord: entry.word,
-                  genus: entry.genus || null,
-                  number: number,
-                  definiteness: formType,
-                });
-              }
-            }
-          }
-
-          // Add plural forms
-          if (bank === 'nounbank' && entry.plural && isFeatureEnabled('grammar_plural')) {
-            wordList.push({
-              word: entry.plural.toLowerCase(),
-              display: entry.plural,
-              translation: `${entry.word} (flertall)`,
-              type: 'plural',
-              baseWord: entry.word,
-              genus: entry.genus || null
-            });
-          }
-
-          // Add adjective comparison forms
-          // German: entry.komparativ (string), Spanish/French: entry.comparison.komparativ.form (nested)
-          if (bank === 'adjectivebank') {
-            const komparativ = entry.komparativ
-              || entry.comparison?.komparativ?.form || entry.comparison?.komparativ
-              || entry.comparison?.comparativo?.form
-              || entry.comparison?.comparatif?.form
-              || entry.comparison?.comparative;
-            const superlativ = entry.superlativ
-              || entry.comparison?.superlativ?.form || entry.comparison?.superlativ
-              || entry.comparison?.superlativo?.form
-              || entry.comparison?.superlatif?.form
-              || entry.comparison?.superlative;
-
-            if (komparativ && isFeatureEnabled('grammar_comparative')) {
-              wordList.push({
-                word: komparativ.toLowerCase(),
-                display: komparativ,
-                translation: `${entry.word} (komparativ)`,
-                type: 'comparative',
-                baseWord: entry.word
-              });
-            }
-            if (superlativ && isFeatureEnabled('grammar_superlative')) {
-              wordList.push({
-                word: superlativ.toLowerCase(),
-                display: superlativ,
-                translation: `${entry.word} (superlativ)`,
-                type: 'superlative',
-                baseWord: entry.word
-              });
-            }
-
-            // NB/NN: emit declined adjective forms (maskulin/feminin/noytrum/flertall/bestemt)
-            // so gender+number+definiteness agreement can surface the right form.
-            if (isNorwegian && entry.declension?.positiv) {
-              const ADJ_FORM_META = {
-                maskulin: { genus: 'm', number: 'entall', definiteness: 'ubestemt' },
-                feminin: { genus: 'f', number: 'entall', definiteness: 'ubestemt' },
-                noytrum: { genus: 'n', number: 'entall', definiteness: 'ubestemt' },
-                flertall: { genus: null, number: 'flertall', definiteness: null },
-                bestemt: { genus: null, number: 'entall', definiteness: 'bestemt' },
-              };
-              const baseLower = (entry.word || '').toLowerCase();
-              for (const [formKey, form] of Object.entries(entry.declension.positiv)) {
-                if (!form || typeof form !== 'string') continue;
-                const meta = ADJ_FORM_META[formKey];
-                if (!meta) continue;
-                const lower = form.toLowerCase();
-                if (lower === baseLower) continue;
-                // Intentionally emit duplicates by word (e.g. flertall & bestemt
-                // both "store") — display-level dedup downstream keeps the
-                // highest-scoring match for the current agreement context.
-                wordList.push({
-                  word: lower,
-                  display: form,
-                  translation: `${entry.word} (${formKey})`,
-                  type: 'adjform',
-                  baseWord: entry.word,
-                  genus: meta.genus,
-                  number: meta.number,
-                  definiteness: meta.definiteness,
-                });
-              }
-            }
-          }
-        }
-      }
-      buildPrefixIndex();
-      await loadBigrams(lang);
-    } catch (e) {
-      console.error('Leksihjelp: Failed to load word list', e);
-    }
-  }
-
-  // ── Bigram frequency data ──
-  async function loadBigrams(lang) {
-    try {
-      const url = chrome.runtime.getURL(`data/bigrams-${lang}.json`);
-      const res = await fetch(url);
-      if (!res.ok) { bigramData = null; return; }
-      const raw = await res.json();
-      delete raw._metadata;
-      // Normalize: lowercase all keys and value keys for case-insensitive matching
-      // Merges duplicates (e.g. "Guten"+"guten") keeping the highest weight
-      bigramData = {};
-      for (const [key, pairs] of Object.entries(raw)) {
-        const lowerKey = key.toLowerCase();
-        const merged = bigramData[lowerKey] || {};
-        for (const [word, weight] of Object.entries(pairs)) {
-          const lowerWord = word.toLowerCase();
-          merged[lowerWord] = Math.max(merged[lowerWord] || 0, weight);
-        }
-        bigramData[lowerKey] = merged;
-      }
-    } catch (e) {
-      bigramData = null;
-    }
-  }
-
   // ── Prefix index for fast candidate lookup ──
+  // Rebuilt from VOCAB.getWordList() whenever the seam signals ready.
   function buildPrefixIndex() {
     prefixIndex.clear();
+    const wordList = VOCAB.getWordList();
     for (let i = 0; i < wordList.length; i++) {
       const w = wordList[i].word;
       for (let len = 2; len <= Math.min(3, w.length); len++) {
         const prefix = w.slice(0, len);
         if (!prefixIndex.has(prefix)) prefixIndex.set(prefix, []);
         prefixIndex.get(prefix).push(i);
+      }
+    }
+  }
+
+  // ── Tense-detection sets ──
+  // Reconstructs presens/preteritum verb-form sets from the seam's wordList.
+  // Mirrors the old loadWordList tense tracking (word-prediction.js:559–599
+  // pre-refactor). NB/NN uses entry.formKey ('presens'/'preteritum'); other
+  // languages use entry.tenseKey ('present'/'past') — both precomputed by
+  // vocab-seam-core.js.
+  function buildTenseSets() {
+    knownPresens.clear();
+    knownPreteritum.clear();
+    const wordList = VOCAB.getWordList();
+    const isNorwegian = currentLang === 'nb' || currentLang === 'nn';
+    for (const entry of wordList) {
+      if (entry.type !== 'conjugation') continue;
+      if (isNorwegian) {
+        if (entry.formKey === 'presens') knownPresens.add(entry.word);
+        else if (entry.formKey === 'preteritum') knownPreteritum.add(entry.word);
+      } else {
+        if (entry.tenseKey === 'present') knownPresens.add(entry.word);
+        else if (entry.tenseKey === 'past') knownPreteritum.add(entry.word);
       }
     }
   }
@@ -845,7 +419,7 @@
   function handleInput(e) {
     if (!enabled || lexiPaused) return;
     const el = e.target;
-    if (!isTextInput(el)) return;
+    if (!VOCAB.isTextInput(el)) return;
     schedulePrediction(el);
   }
 
@@ -861,7 +435,7 @@
          'F1', 'F2', 'F3', 'F4', 'F5', 'F6',
          'F7', 'F8', 'F9', 'F10', 'F11', 'F12'].includes(e.key)) return;
     const el = e.target;
-    if (!isTextInput(el)) return;
+    if (!VOCAB.isTextInput(el)) return;
     schedulePrediction(el);
   }
 
@@ -1229,6 +803,13 @@
     const q = input.toLowerCase();
     const qPhonetic = phoneticNormalize(q);
 
+    // Read wordList fresh from the seam each call. Prefix-index entries hold
+    // indices into whatever wordList was live when buildPrefixIndex ran — and
+    // refreshFromVocab ensures the two stay in sync across LANGUAGE_CHANGED
+    // and GRAMMAR_FEATURES_CHANGED (pitfall: a stale capture here would break
+    // every suggestion after a language switch).
+    const wordList = VOCAB.getWordList();
+
     // Fast path: use prefix index to narrow candidates
     const scored = [];
     const scoredIndices = new Set();
@@ -1408,6 +989,8 @@
     // Bigram frequency: boost words that commonly follow the previous word(s)
     // Checks both single-word keys ("es" → "gibt") and two-word keys ("ha det" → "bra")
     // All keys/values are lowercased at load time, matched against entry.word (also lowercase)
+    // VOCAB.getBigrams() returns null when no bigrams file ships for the language.
+    const bigramData = VOCAB.getBigrams();
     if (bigramData) {
       let bigramWeight = 0;
       // Check two-word key first (more specific = higher priority)
@@ -1802,17 +1385,9 @@
   }
 
   // ── Helpers ──
-  function isTextInput(el) {
-    if (!el) return false;
-    if (el.isContentEditable) return true;
-    const tag = el.tagName;
-    if (tag === 'TEXTAREA') return true;
-    if (tag === 'INPUT') {
-      const type = (el.type || 'text').toLowerCase();
-      return ['text', 'search', 'url', 'email'].includes(type);
-    }
-    return false;
-  }
+  // isTextInput is now sourced from VOCAB.isTextInput (ported to vocab-seam.js
+  // at Plan 01). spell-check.js consumes vocab directly from __lexiVocab; no
+  // prediction-side export remains.
 
   function escapeHtml(str) {
     const d = document.createElement('span');
@@ -1823,23 +1398,4 @@
   function escapeAttr(str) {
     return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
-
-  // Narrow interface consumed by spell-check.js — avoids duplicate vocab loading.
-  // Kept minimal so spell-check can later be extracted with its own data source.
-  self.__lexiPrediction = {
-    getWordList: () => wordList,
-    getLanguage: () => currentLang,
-    isReady: () => wordList.length > 0,
-    isPaused: () => lexiPaused,
-    isTextInput,
-    onReady(cb) {
-      if (wordList.length > 0) { cb(); return; }
-      const start = Date.now();
-      const tick = () => {
-        if (wordList.length > 0) cb();
-        else if (Date.now() - start < 15000) setTimeout(tick, 100);
-      };
-      tick();
-    },
-  };
 })();

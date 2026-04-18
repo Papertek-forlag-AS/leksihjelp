@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Leksihjelp",
-  "version": "2.2.6",
+  "version": "2.3.0",
   "description": "Ordbok, uttale og ordforslag for norske elever som lærer spansk, fransk eller tysk.",
   "permissions": [
     "contextMenus",
@@ -21,8 +21,11 @@
       "js": [
         "i18n/strings.js",
         "content/vocab-store.js",
+        "content/vocab-seam-core.js",
+        "content/vocab-seam.js",
         "content/floating-widget.js",
         "content/word-prediction.js",
+        "content/spell-check-core.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",
