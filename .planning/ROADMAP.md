@@ -95,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation (Vocab Seam + Regression Fixture) | 0/3 | Not started | - |
+| 1. Foundation (Vocab Seam + Regression Fixture) | 1/3 | In Progress | - |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 0/TBD | Not started | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
