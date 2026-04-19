@@ -82,7 +82,7 @@ Plans:
 - [ ] 03-01-PLAN.md — Foundation: wire freq-{lang}.json through seam + core + fixture runner (Wave 1, autonomous) — lights up VOCAB.getFrequency for NB/NN
 - [ ] 03-02-PLAN.md — INFRA-03: extract spell-check rules to extension/content/spell-rules/*.js plugin registry; slim core to a runner; update manifest + fixture-runner require sweep (Wave 2, autonomous)
 - [ ] 03-03-PLAN.md — SC-01: add Zipf tiebreaker to fuzzy scoreCandidate in nb-typo-fuzzy.js + author new fixture case targeting Zipf (not adjacent-transposition) (Wave 3, autonomous)
-- [ ] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 2, human-verify checkpoint for 3-language top-3 inspection)
+- [ ] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 3, depends on 03-01 + 03-02 to avoid vocab-seam-core.js conflict with Plan 02; human-verify checkpoint for 3-language top-3 inspection)
 - [ ] 03-05-PLAN.md — WP-02 (EN bigrams hand-authored) + SC-06 release gate (check-network-silence.js + self-test + CLAUDE.md Release Workflow step) (Wave 1, autonomous)
 
 ### Phase 4: False-Positive Reduction on NB/NN
