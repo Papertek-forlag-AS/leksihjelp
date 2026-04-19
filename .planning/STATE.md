@@ -110,6 +110,10 @@ Recent decisions affecting current work:
 - [Phase 02-05]: BLOCKED-by-design outcome pattern — a plan whose primary deliverable is authoritative audit evidence can terminate at a blocking checkpoint without being a "plan failure." The plan produced what it was supposed to produce (evidence + decision gate); the gate's `blocked` resolution halts the plan cleanly and hands the product decision back to the user. Count it as completed-end-to-end on its own terms; track SC-4 separately as the unmet roadmap criterion.
 - [Phase 02-05]: Audit scope-distinction discipline locked in — future audits of `extension/data/{lang}.json` must explicitly triage every `'{lang}'` hit into {data-vocab, i18n-ui, html-lang, comment/doc, preposition/article-word-collision} classifications before assigning runtime-reference status. E.g., `'en'` in extension code overwhelmingly hits the Norwegian article word `en`, Spanish/French preposition `en`, or UI i18n `data-ui-lang` attributes — not the vocab language code. Without this triage, an audit can't distinguish false positives from real runtime refs.
 
+### Roadmap Evolution
+
+- Phase 02.1 inserted after Phase 2: Close SC-4 bundle-size cap (URGENT)
+
 ### Pending Todos
 
 - Live Chrome smoke test for Phase 1 (deferred 2026-04-18): load `extension/` unpacked, type `en hus` in a textarea, confirm red dot + `et hus` popover, DevTools console clean. Pick up at release time or during `/gsd:verify-work`.
