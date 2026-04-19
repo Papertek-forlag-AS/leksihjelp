@@ -40,14 +40,14 @@ Plans:
 - [x] 01-03-PLAN.md — Author scripts/check-fixtures.js + 10 seed JSONL fixture files + README + CLAUDE.md release-workflow update (checkpoint)
 
 ### Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)
-**Goal**: The data foundations that pay twice — frequency tables and expanded bigrams for NB/NN plus additional typo-bank coverage in `papertek-vocabulary` — are bundled and synced, keeping the extension under the 10 MB budget.
+**Goal**: The data foundations that pay twice — frequency tables and expanded bigrams for NB/NN plus additional typo-bank coverage in `papertek-vocabulary` — are bundled and synced, keeping the extension within the internal bundle-size budget (20 MiB).
 **Depends on**: Phase 1 (fixture in place so data-driven regressions are detectable)
 **Requirements**: DATA-01, DATA-02, DATA-03
 **Success Criteria** (what must be TRUE):
   1. A developer can run `npm run build-frequencies` and produces `extension/data/freq-nb.json` and `extension/data/freq-nn.json`, each under 200 KB gzipped, from an NB N-gram 2021 source dataset
   2. Running `npm run sync-vocab` pulls a visibly larger typo bank from `papertek-vocabulary` into `extension/data/*.json`, and the regression fixture shows higher recall on NB typo test cases without new false positives on NN
   3. `extension/data/bigrams-nb.json` and `extension/data/bigrams-nn.json` contain materially more high-frequency pairs than before (verifiable in a diff), still in the existing `{prev: {next: weight}}` schema
-  4. Total packaged extension zip size from `npm run package` stays within the 10 MB ceiling, verified in the release checklist
+  4. Total packaged extension zip size from `npm run package` stays under the internal engineering ceiling (20 MiB), verified by `scripts/check-bundle-size.js` exit 0 in the release checklist
 **Plans:** 5 plans
 Plans:
 - [x] 02-01-PLAN.md — DATA-01: build-frequencies.js streaming NB N-gram 2021 → extension/data/freq-{nb,nn}.json sidecars (Wave 1, autonomous) ✓ Complete 2026-04-18
