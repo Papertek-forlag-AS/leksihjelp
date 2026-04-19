@@ -16,7 +16,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted ✓ Complete 2026-04-18
-- [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size deferred to Phase 2.1 per outcome B)
+- [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size gap closure added 2026-04-19 as 02-05-PLAN.md, remediation locked: audit+remove extension/data/en.json)
 - [ ] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
@@ -47,12 +47,13 @@ Plans:
   2. Running `npm run sync-vocab` pulls a visibly larger typo bank from `papertek-vocabulary` into `extension/data/*.json`, and the regression fixture shows higher recall on NB typo test cases without new false positives on NN
   3. `extension/data/bigrams-nb.json` and `extension/data/bigrams-nn.json` contain materially more high-frequency pairs than before (verifiable in a diff), still in the existing `{prev: {next: weight}}` schema
   4. Total packaged extension zip size from `npm run package` stays within the 10 MB ceiling, verified in the release checklist
-**Plans:** 4 plans
+**Plans:** 5 plans
 Plans:
 - [x] 02-01-PLAN.md — DATA-01: build-frequencies.js streaming NB N-gram 2021 → extension/data/freq-{nb,nn}.json sidecars (Wave 1, autonomous) ✓ Complete 2026-04-18
 - [x] 02-02-PLAN.md — DATA-03: build-bigrams.js regrowing extension/data/bigrams-{nb,nn}.json via max-merge with hand-authored idioms (Wave 1, autonomous) ✓ Complete 2026-04-18
 - [x] 02-03-PLAN.md — DATA-02: typo-bank expansion in papertek-vocabulary + Phase-1 data-defect fixes + sync (Wave 1, human-verify checkpoint for cross-app push) ✓ Complete 2026-04-18
-- [ ] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous)
+- [x] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous) ✓ Complete 2026-04-18 (Outcome B — gate ships, zip 10.11 MiB > cap)
+- [ ] 02-05-PLAN.md — SC-4 gap closure: audit + remove extension/data/en.json + re-verify check-bundle-size exits 0 (Wave 3, checkpoint:decision at audit verdict)
 
 ### Phase 3: Rule Architecture & Ranking Quality
 **Goal**: Spell-check rules are refactored into `extension/content/spell-rules/` as a plugin registry, and the frequency signal plus tiebreaking improvements land for both spell-check fuzzy matching and word-prediction across all six languages — turning the Zipf data into visible ranking wins.
@@ -101,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
-| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 4/4 | Complete (SC-4 deferred to Phase 2.1) | 2026-04-18 |
+| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 4/5 | In progress (02-05 gap closure for SC-4 pending) | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
