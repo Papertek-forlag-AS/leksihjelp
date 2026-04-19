@@ -469,7 +469,7 @@
 
   // ── Public API ──
 
-  function buildIndexes({ raw, bigrams, lang, isFeatureEnabled } = {}) {
+  function buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled } = {}) {
     // Default predicate: emit all forms (Node / test use — "superset" policy
     // per CONTEXT: consumers filter further at the seam level).
     const iff = typeof isFeatureEnabled === 'function' ? isFeatureEnabled : () => true;
@@ -479,6 +479,17 @@
       buildLookupIndexes(wordList, lang);
     const normBigrams = bigrams ? normalizeBigrams(bigrams) : null;
 
+    // Hydrate Zipf frequency map from the sidecar shipped by Phase 2 DATA-01.
+    // Freq is null for languages without a freq-{lang}.json sidecar (de/es/fr/en) —
+    // consumers get an empty Map and VOCAB.getFrequency returns null for every word,
+    // matching today's behaviour for those languages.
+    const freqMap = new Map();
+    if (freq && typeof freq === 'object') {
+      for (const [k, v] of Object.entries(freq)) {
+        if (typeof v === 'number') freqMap.set(k.toLowerCase(), v);
+      }
+    }
+
     return {
       wordList,
       nounGenus,
@@ -487,9 +498,8 @@
       typoFix,
       compoundNouns,
       bigrams: normBigrams,
-      // Phase 1: freq table is always empty. DATA-01 in Phase 2 populates it
-      // from the frequency layer; the getter signature does not change.
-      freq: new Map(),
+      // Phase 3-01: hydrated from freq-{lang}.json sidecar (NB/NN today; empty Map for other languages).
+      freq: freqMap,
       // typoBank is an alias (same Map reference) of typoFix — the data-
       // oriented name used by consumers doing lookup/autocorrect work.
       typoBank: typoFix,
