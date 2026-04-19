@@ -110,6 +110,17 @@
     }
   }
 
+  async function loadRawFrequency(lang) {
+    try {
+      const url = chrome.runtime.getURL(`data/freq-${lang}.json`);
+      const res = await fetch(url);
+      if (!res.ok) return null; // No sidecar for this language — OK
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function loadForLanguage(lang) {
     ready = false;
 
@@ -131,10 +142,13 @@
       return;
     }
 
-    const bigrams = await loadRawBigrams(lang);
+    const [bigrams, freq] = await Promise.all([
+      loadRawBigrams(lang),
+      loadRawFrequency(lang),
+    ]);
     const isFeatureEnabled = buildFeaturePredicate(lang);
 
-    state = core.buildIndexes({ raw, bigrams, lang, isFeatureEnabled });
+    state = core.buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled });
     ready = true;
 
     // Drain ready callbacks. splice(0) so late subscribers arriving during
