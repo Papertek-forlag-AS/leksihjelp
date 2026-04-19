@@ -123,6 +123,20 @@
 
         const translation = entry.translation || entry.translations?.nb || '';
 
+        // Pitfall 7 (Phase 3-04): raw `entry.frequency` scales differ wildly
+        // per language (DE 0–48k+, similar shape elsewhere). Normalize once
+        // at seam-build time to a Zipf-alike float so the word-prediction
+        // ranker can feed all 6 languages into one signal without per-language
+        // scale math. For NB/NN we PREFER VOCAB.getFrequency (Zipf sidecar
+        // populated from freq-{nb,nn}.json), but `entry.zipf` here is the
+        // fallback + the only source for de/es/fr/en. Computed once per
+        // source entry; attached to every emitted wordList push so consumers
+        // never need to know the bank-row shape.
+        const rawFrequency = entry.frequency;
+        const zipf = (typeof rawFrequency === 'number' && rawFrequency > 0)
+          ? Math.log10(rawFrequency + 1)
+          : 0;
+
         // Add base word
         wordList.push({
           word: entry.word.toLowerCase(),
@@ -130,7 +144,8 @@
           translation: translation,
           type: 'base',
           bank: bank,
-          genus: bank === 'nounbank' ? (entry.genus || null) : null
+          genus: bank === 'nounbank' ? (entry.genus || null) : null,
+          zipf: zipf
         });
 
         // Add Norwegian translation for reverse prediction
@@ -139,7 +154,8 @@
             word: translation.toLowerCase(),
             display: translation,
             translation: entry.word,
-            type: 'translation'
+            type: 'translation',
+            zipf: zipf
           });
         }
 
@@ -153,7 +169,8 @@
               translation: translation,
               type: 'typo',
               bank: bank,
-              baseWord: entry.word
+              baseWord: entry.word,
+              zipf: zipf
             });
           }
         }
@@ -167,7 +184,8 @@
               translation: `${entry.word} (${translation || ''})`,
               type: 'accepted',
               bank: bank,
-              baseWord: entry.word
+              baseWord: entry.word,
+              zipf: zipf
             });
           }
         }
@@ -199,7 +217,8 @@
                     type: 'conjugation',
                     pronoun: pronoun,
                     baseWord: entry.word,
-                    tenseKey: arrTenseKey
+                    tenseKey: arrTenseKey,
+                    zipf: zipf
                   });
                 });
               } else if (typeof tenseData.former === 'object') {
@@ -228,7 +247,8 @@
                     pronoun: lang === 'de' ? key : null,
                     formKey: isNorwegian ? key : null,
                     baseWord: entry.word,
-                    tenseKey: objTenseKey
+                    tenseKey: objTenseKey,
+                    zipf: zipf
                   });
                 }
               }
@@ -241,7 +261,8 @@
                 display: tenseData.participle,
                 translation: `${entry.word} (past participle)`,
                 type: 'conjugation',
-                baseWord: entry.word
+                baseWord: entry.word,
+                zipf: zipf
               });
             }
             if (tenseData.present_participle) {
@@ -250,7 +271,8 @@
                 display: tenseData.present_participle,
                 translation: `${entry.word} (-ing)`,
                 type: 'conjugation',
-                baseWord: entry.word
+                baseWord: entry.word,
+                zipf: zipf
               });
             }
           }
@@ -277,7 +299,8 @@
                   type: 'case',
                   baseWord: entry.word,
                   genus: entry.genus || null,
-                  caseName: caseName
+                  caseName: caseName,
+                  zipf: zipf
                 });
               }
             }
@@ -300,6 +323,7 @@
                 genus: entry.genus || null,
                 number: number,
                 definiteness: formType,
+                zipf: zipf
               });
             }
           }
@@ -313,7 +337,8 @@
             translation: `${entry.word} (flertall)`,
             type: 'plural',
             baseWord: entry.word,
-            genus: entry.genus || null
+            genus: entry.genus || null,
+            zipf: zipf
           });
         }
 
@@ -337,7 +362,8 @@
               display: komparativ,
               translation: `${entry.word} (komparativ)`,
               type: 'comparative',
-              baseWord: entry.word
+              baseWord: entry.word,
+              zipf: zipf
             });
           }
           if (superlativ && isFeatureEnabled('grammar_superlative')) {
@@ -346,7 +372,8 @@
               display: superlativ,
               translation: `${entry.word} (superlativ)`,
               type: 'superlative',
-              baseWord: entry.word
+              baseWord: entry.word,
+              zipf: zipf
             });
           }
 
@@ -379,6 +406,7 @@
                 genus: meta.genus,
                 number: meta.number,
                 definiteness: meta.definiteness,
+                zipf: zipf
               });
             }
           }
