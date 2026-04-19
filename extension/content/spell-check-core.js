@@ -1,21 +1,24 @@
 /**
- * Leksihjelp — Spell / Grammar Check Core (pure rule evaluation)
+ * Leksihjelp — Spell / Grammar Check Core (rule registry runner)
  *
  * Pure, side-effect-free rule evaluator used by both:
  *   - extension/content/spell-check.js (browser DOM adapter)
  *   - scripts/check-fixtures.js        (Node fixture harness, Plan 03)
  *
- * Dual-export footer: writes `self.__lexiSpellCore` in the browser and
- * `module.exports` in Node — same API, same code path.
+ * INFRA-03: this file is now ONLY the runner + shared helpers. Each rule
+ * (gender, modal_form, sarskriving, typo curated, typo fuzzy) lives in its
+ * own file under extension/content/spell-rules/ and registers itself onto
+ * `self.__lexiSpellRules` at IIFE load time. Adding a new rule = create one
+ * file + add one manifest line; zero edits to this file.
  *
- * Contents — moved verbatim from extension/content/spell-check.js
- * (pre-Plan-02: lines 42–66 constants, 177–192 tokenization,
- * 196–317 check() body, 322–467 helpers).
+ * Dual-export footer: writes `self.__lexiSpellCore` in the browser and
+ * `module.exports` in Node — same API, same code path. Also initializes
+ * `self.__lexiSpellRules = []` so rule files loaded BEFORE core (or
+ * out-of-order) still find a registry to push onto.
  *
  * This file MUST NOT reference DOM globals (the "document" object), the
- * chrome extension runtime, timers, or any other browser-only API. It
- * takes vocabulary indexes as arguments and returns an array of Finding
- * objects.
+ * chrome extension runtime, timers, or any other browser-only API. It takes
+ * vocabulary indexes as arguments and returns an array of Finding objects.
  *
  * Span convention: start is inclusive, end is exclusive (Python-style).
  * end = start + word.length. Plan 03 fixtures reference this comment.
@@ -28,35 +31,7 @@
 (function () {
   'use strict';
 
-  // ── Config (copied verbatim from spell-check.js:42–66) ──
-
-  const ARTICLE_GENUS = {
-    nb: { 'en': 'm', 'ei': 'f', 'et': 'n' },
-    nn: { 'ein': 'm', 'ei': 'f', 'eit': 'n' },
-  };
-  const GENUS_ARTICLE = {
-    nb: { 'm': 'en', 'f': 'ei', 'n': 'et' },
-    nn: { 'm': 'ein', 'f': 'ei', 'n': 'eit' },
-  };
-  const MODAL_VERBS = new Set([
-    'kan', 'kunne', 'kunna',
-    'må', 'måtte',
-    'vil', 'ville',
-    'skal', 'skulle',
-    'bør', 'burde',
-    'får', 'fikk', 'fekk',
-  ]);
-  // Words that should never trigger særskriving even when the concatenation happens
-  // to exist as a compound. Tuned conservatively to avoid false positives.
-  const SARSKRIVING_BLOCKLIST = new Set([
-    'i', 'på', 'av', 'til', 'med', 'for', 'om', 'er', 'og', 'å', 'at',
-    'som', 'en', 'ei', 'et', 'ein', 'eit', 'det', 'den', 'de', 'dei',
-    'du', 'jeg', 'eg', 'han', 'hun', 'ho', 'vi', 'dere', 'dykk', 'meg',
-    'deg', 'oss', 'dem', 'seg', 'min', 'din', 'sin', 'vår', 'ikke',
-    'ikkje', 'nei', 'ja',
-  ]);
-
-  // ── Tokenization (copied verbatim from spell-check.js:177–192) ──
+  // ── Tokenization ──
 
   const WORD_RE = /[\p{L}]+/gu;
 
@@ -75,141 +50,46 @@
     return out;
   }
 
-  // ── Rule evaluation (copied verbatim from spell-check.js:196–317) ──
+  // ── Generic rule runner ──
   //
-  // Rule evaluation order inside check() is LOAD-BEARING — dedupeOverlapping
-  // keeps the earlier-listed finding when two rules conflict. Do not reorder
-  // for style. The fixture suite in Plan 03 tests this precedence.
+  // Iterates self.__lexiSpellRules filtered by language and sorted by
+  // priority. Rule bodies live in extension/content/spell-rules/. Lower
+  // priority runs first; dedupeOverlapping keeps the earliest-listed finding
+  // on overlap (load-bearing — see spell-rules/README.md).
   function check(text, vocab, opts = {}) {
     const { cursorPos = null, lang = 'nb' } = opts;
+    if (!text || text.length < 3) return [];
+    if (lang !== 'nb' && lang !== 'nn') return [];
+
+    const tokens = tokenize(text);
+    if (tokens.length < 2) return [];
+
     const vocabRef = vocab || {};
-    const nounGenus      = vocabRef.nounGenus      || new Map();
-    const verbInfinitive = vocabRef.verbInfinitive || new Map();
-    const validWords     = vocabRef.validWords     || new Set();
-    const typoFix        = vocabRef.typoFix        || new Map();
-    const compoundNouns  = vocabRef.compoundNouns  || new Set();
+    const ctx = { text, tokens, vocab: vocabRef, cursorPos, lang };
+
+    const host = typeof self !== 'undefined' ? self : globalThis;
+    const allRules = host.__lexiSpellRules || [];
+    const rules = allRules
+      .filter(r => Array.isArray(r.languages) && r.languages.includes(lang))
+      .slice()
+      .sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
     const findings = [];
-    if (!text || text.length < 3) return findings;
-    if (lang !== 'nb' && lang !== 'nn') return findings;
-
-    const toks = tokenize(text);
-    if (toks.length < 2) return findings;
-    const articles = ARTICLE_GENUS[lang];
-    const genusArticle = GENUS_ARTICLE[lang];
-
-    for (let i = 0; i < toks.length; i++) {
-      const t = toks[i];
-      const prev = toks[i - 1];
-      const prevPrev = toks[i - 2];
-
-      // Skip the token currently being typed — the cursor is inside or right
-      // after it, so it's likely incomplete. Flagging incomplete words would
-      // be jarring while the user is mid-thought.
-      if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
-
-      // 1) Gender article mismatch. Check both immediately previous word and
-      //    2-back (to catch "en stor hus" where an adjective sits between).
-      let articleTok = null;
-      if (prev && articles[prev.word]) articleTok = prev;
-      else if (prevPrev && articles[prevPrev.word]) articleTok = prevPrev;
-
-      if (articleTok && nounGenus.has(t.word)) {
-        const expected = articles[articleTok.word];
-        const actual = nounGenus.get(t.word);
-        // In Bokmål, feminine nouns accept the common-gender article "en" too:
-        // "en bok" and "ei bok" are both correct. Only flag when the article
-        // and noun genus are strictly incompatible.
-        const acceptable = (
-          actual === expected ||
-          (lang === 'nb' && actual === 'f' && articleTok.word === 'en')
-        );
-        if (actual && !acceptable) {
-          const correctArticle = genusArticle[actual];
-          if (correctArticle) {
-            findings.push({
-              rule_id: 'gender',
-              start: articleTok.start,
-              end: articleTok.end,
-              original: articleTok.display,
-              fix: matchCase(articleTok.display, correctArticle),
-              message: `Kjønn: "${articleTok.display} ${t.display}" skulle vært "${correctArticle} ${t.display}"`,
-            });
-          }
-        }
-      }
-
-      // 2) Wrong verb form after modal.
-      if (prev && MODAL_VERBS.has(prev.word) && verbInfinitive.has(t.word)) {
-        const inf = verbInfinitive.get(t.word);
-        if (inf && inf !== t.word) {
-          findings.push({
-            rule_id: 'modal_form',
-            start: t.start,
-            end: t.end,
-            original: t.display,
-            fix: matchCase(t.display, inf),
-            message: `Etter "${prev.display}" skal verbet stå i infinitiv: "${inf}"`,
-          });
-        }
-      }
-
-      // 3) Særskriving: prev + t forms a compound noun in the dictionary.
-      if (
-        prev &&
-        prev.word.length >= 2 && t.word.length >= 2 &&
-        !SARSKRIVING_BLOCKLIST.has(prev.word) &&
-        !SARSKRIVING_BLOCKLIST.has(t.word) &&
-        compoundNouns.has(prev.word + t.word)
-      ) {
-        findings.push({
-          rule_id: 'sarskriving',
-          start: prev.start,
-          end: t.end,
-          original: `${prev.display} ${t.display}`,
-          fix: prev.display + t.display.toLowerCase(),
-          message: `Særskriving: "${prev.display} ${t.display}" skrives som ett ord`,
-        });
-      }
-
-      // 4) Known typo (curated in vocab data).
-      if (typoFix.has(t.word) && !validWords.has(t.word)) {
-        const correct = typoFix.get(t.word);
-        findings.push({
-          rule_id: 'typo',
-          start: t.start,
-          end: t.end,
-          original: t.display,
-          fix: matchCase(t.display, correct),
-          message: `Skrivefeil: "${t.display}" → "${correct}"`,
-        });
-        continue;
-      }
-
-      // 5) Fuzzy typo — unknown word with a close neighbor in the vocabulary.
-      //    Skips proper nouns (capitalized outside sentence-start) and words
-      //    already handled by the curated typo branch above.
-      if (
-        t.word.length >= 4 &&
-        !validWords.has(t.word) &&
-        !isLikelyProperNoun(t, i, toks, text)
-      ) {
-        const fuzzy = findFuzzyNeighbor(t.word, validWords);
-        if (fuzzy) {
-          findings.push({
-            rule_id: 'typo',
-            start: t.start,
-            end: t.end,
-            original: t.display,
-            fix: matchCase(t.display, fuzzy),
-            message: `Skrivefeil: "${t.display}" → "${fuzzy}"`,
-          });
+    for (const rule of rules) {
+      try {
+        const out = rule.check(ctx);
+        if (Array.isArray(out) && out.length) findings.push(...out);
+      } catch (e) {
+        if (!rule._warned) {
+          console.warn('[lexi-spell] rule', rule.id, 'threw', e);
+          rule._warned = true;
         }
       }
     }
-
     return dedupeOverlapping(findings);
   }
+
+  // ── Shared helpers (used by rule files via self.__lexiSpellCore) ──
 
   // Detect proper-noun-like tokens: capitalized first letter AND not at the
   // start of a sentence. Sentence starts are either position 0 in the text or
@@ -346,9 +226,10 @@
   }
 
   // When two findings cover overlapping spans (e.g., særskriving + typo on
-  // the same word), keep the earlier-listed one — order in the checker loop
-  // mirrors pedagogical priority. This ordering is exercised by the fixture
-  // suite in Plan 03; do not reorder the rules in check() above.
+  // the same word), keep the earlier-listed one — order in the rules array
+  // (sorted by priority) mirrors pedagogical priority. This ordering is
+  // exercised by the fixture suite in Plan 03; do not reorder rule
+  // priorities in spell-rules/* without re-running the fixtures.
   function dedupeOverlapping(findings) {
     const kept = [];
     for (const f of findings) {
@@ -369,15 +250,24 @@
   // ── Dual-export footer ──
   // Writes `self.__lexiSpellCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path. `self` is defined
-  // both in content scripts and in Node 18+.
+  // both in content scripts and in Node 18+. ALSO initializes the rule
+  // registry array so rule files loading either before or after core still
+  // find it (belt-and-braces against manifest-order drift).
   const api = {
     check,
-    // Helpers exposed for potential direct testing / future rule-plugin extraction.
     tokenize,
     editDistance,
     matchCase,
     dedupeOverlapping,
+    sharedPrefixLen,
+    sharedSuffixLen,
+    isAdjacentTransposition,
+    isLikelyProperNoun,
+    scoreCandidate,
+    findFuzzyNeighbor,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  if (typeof self !== 'undefined') self.__lexiSpellCore = api;
+  const host = typeof self !== 'undefined' ? self : globalThis;
+  host.__lexiSpellCore = api;
+  host.__lexiSpellRules = host.__lexiSpellRules || [];
 })();
