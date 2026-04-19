@@ -88,7 +88,20 @@ function loadVocab(lang) {
   if (fs.existsSync(bigramFile)) {
     bigrams = JSON.parse(fs.readFileSync(bigramFile, 'utf8'));
   }
-  return vocabCore.buildIndexes({ raw, bigrams, lang, isFeatureEnabled: () => true });
+  let freq = null;
+  const freqFile = path.join(DATA_DIR, 'freq-' + lang + '.json');
+  if (fs.existsSync(freqFile)) {
+    freq = JSON.parse(fs.readFileSync(freqFile, 'utf8'));
+  }
+  const vocab = vocabCore.buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled: () => true });
+
+  // Pitfall 2 (RESEARCH.md): fail loud if a language we expect to have Zipf
+  // data somehow lost it. NB/NN shipped freq sidecars in Phase 2; if they
+  // vanish, fuzzy-ranking regressions would be silent.
+  if ((lang === 'nb' || lang === 'nn') && (!(vocab.freq instanceof Map) || vocab.freq.size === 0)) {
+    throw new Error(`[check-fixtures] Expected populated freq Map for ${lang}, got empty. Check extension/data/freq-${lang}.json.`);
+  }
+  return vocab;
 }
 
 // ── Matcher ──
