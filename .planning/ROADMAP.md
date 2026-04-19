@@ -65,7 +65,7 @@ Plans:
 
 Plans:
 - [x] 02.1-01-PLAN.md — Bump CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, update script header comment + failure-mode prose + test name (Wave 1, autonomous) ✓ Complete 2026-04-19 (gate exits 0; 10.11 MiB zip under 20 MiB cap; 9.89 MiB headroom)
-- [ ] 02.1-02-PLAN.md — Live-docs sweep: CLAUDE.md, PROJECT.md, ROADMAP.md SC-4 + Phase 2 goal, REQUIREMENTS.md DATA-03, .planning/research/{FEATURES,ARCHITECTURE,STACK,PITFALLS}.md, STATE.md live SC-4 blocker resolution (Wave 1, autonomous)
+- [x] 02.1-02-PLAN.md — Live-docs sweep: CLAUDE.md, PROJECT.md, ROADMAP.md SC-4 + Phase 2 goal, REQUIREMENTS.md DATA-03, .planning/research/{FEATURES,ARCHITECTURE,STACK,PITFALLS}.md, STATE.md live SC-4 blocker resolution (Wave 1, autonomous) ✓ Complete 2026-04-19
 
 ### Phase 3: Rule Architecture & Ranking Quality
 **Goal**: Spell-check rules are refactored into `extension/content/spell-rules/` as a plugin registry, and the frequency signal plus tiebreaking improvements land for both spell-check fuzzy matching and word-prediction across all six languages — turning the Zipf data into visible ranking wins.
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
-| 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete   | 2026-04-19 |
+| 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
