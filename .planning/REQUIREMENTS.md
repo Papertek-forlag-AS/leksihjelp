@@ -13,7 +13,7 @@ text input on the web.
 
 - [x] **INFRA-01**: Shared `window.__lexiVocab` module exposes wordList, frequency tables, bigrams, and lookup helpers, replacing the narrow `__lexiPrediction` seam so spell-check no longer depends on word-prediction's load order
 - [x] **INFRA-02**: Node-script regression fixture harness under `scripts/` runs a JSONL corpus of NB/NN sentences, asserts expected flagged spans + suggested fixes, and reports precision/recall per error class
-- [ ] **INFRA-03**: Rule-plugin architecture under `extension/content/spell-rules/` — each error class is a self-contained file tagged with supported languages, registered via a global array; adding a new class does not require edits to `spell-check.js`
+- [x] **INFRA-03**: Rule-plugin architecture under `extension/content/spell-rules/` — each error class is a self-contained file tagged with supported languages, registered via a global array; adding a new class does not require edits to `spell-check.js`
 - [x] **INFRA-04**: Spell-check remains structurally separable — no imports from word-prediction internals, no premium/policy coupling; the module could later be extracted to `skriv.papertek.app` without touching prediction code
 
 ### Data (vocabulary + frequency tables)
@@ -92,7 +92,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 |-------------|-------|--------|
 | INFRA-01 | Phase 1 | Complete |
 | INFRA-02 | Phase 1 | Complete |
-| INFRA-03 | Phase 3 | Pending |
+| INFRA-03 | Phase 3 | Complete |
 | INFRA-04 | Phase 1 | Complete |
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Complete |
