@@ -42,6 +42,23 @@ const path = require('path');
 const vocabCore = require(path.join(__dirname, '..', 'extension', 'content', 'vocab-seam-core.js'));
 const spellCore = require(path.join(__dirname, '..', 'extension', 'content', 'spell-check-core.js'));
 
+// INFRA-03 rule registry: load rule files AFTER spell-check-core.js so that
+// self.__lexiSpellRules and self.__lexiSpellCore are initialized before any
+// rule IIFE runs. Deterministic alphabetical order — matches manifest ordering.
+const SPELL_RULES_DIR = path.join(__dirname, '..', 'extension', 'content', 'spell-rules');
+if (fs.existsSync(SPELL_RULES_DIR)) {
+  const ruleFiles = fs.readdirSync(SPELL_RULES_DIR)
+    .filter(f => f.endsWith('.js'))
+    .sort();
+  for (const f of ruleFiles) {
+    require(path.join(SPELL_RULES_DIR, f));
+  }
+  const registry = (typeof self !== 'undefined' ? self : globalThis).__lexiSpellRules || [];
+  if (registry.length === 0) {
+    throw new Error('[check-fixtures] INFRA-03 rule registry is empty — check rule file dual-load guards.');
+  }
+}
+
 const DATA_DIR    = path.join(__dirname, '..', 'extension', 'data');
 const FIXTURE_DIR = path.join(__dirname, '..', 'fixtures');
 
