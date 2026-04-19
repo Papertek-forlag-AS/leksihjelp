@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-19T08:11:05.566Z"
+last_updated: "2026-04-19T09:31:06.302Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 15
+  completed_plans: 13
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 02.1 of 5 — Close SC-4 bundle-size cap (INSERTED) — 2 of 2 plans COMPLETE ✓ 2026-04-19. SC-4 RESOLVED (ceiling raised 10 → 20 MiB; current 10.11 MiB zip passes with ~9.89 MiB headroom). DATA-03 reworded against new ceiling.
-Plan: 2 of 2 in Phase 02.1 — 02.1-02-PLAN.md COMPLETE 2026-04-19 (live-docs sweep: 9 files rewritten from "publicly-stated promise / 10 MiB ceiling" framing to "20 MiB internal engineering ceiling"; STATE.md live SC-4 blocker replaced with RESOLVED marker; historical archive + historical decision-log rows byte-identical to pre-edit)
-Status: Phase 02.1 landed as an atomic 2-plan wave. Plan 02.1-01 shipped the machine-readable edits (CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, header comment + failure-mode console.log + test name refreshed); commits bf0cf01, 4e3210b. Plan 02.1-02 shipped the human-readable edits (CLAUDE.md Release Workflow step 2, PROJECT.md Out-of-Scope + Constraints, ROADMAP.md Phase 2 Goal + SC-4, REQUIREMENTS.md DATA-03, all four .planning/research/*.md files, STATE.md live SC-4 blocker resolution); commits 7244e3a, 0a3b29f, 3477ef0. No extension source changes, no data-file changes, no audio refactor. Bundle-size gate now exits 0 at current zip (10.11 MiB). Release Workflow unblocked; GitHub Releases can ship again.
-Last activity: 2026-04-19 — Phase 02.1 completed. Plan 02.1-02 commits: 7244e3a (live ceiling prose rewrites, 6 files), 0a3b29f (ROADMAP Phase 2 Goal + SC-4 + REQUIREMENTS DATA-03), 3477ef0 (STATE.md live SC-4 blocker → RESOLVED marker). Sibling Plan 02.1-01 commits: bf0cf01 (script constant + header), 4e3210b (test constant + name). Plan metadata commit follows this entry. Historical archive .planning/phases/02-data-layer-frequency-bigrams-typo-bank/ untouched (git diff --stat empty). STATE.md historical decision-log rows (lines 100-112) byte-identical to pre-edit.
+Phase: 03 of 5 — Rule Architecture & Ranking Quality — 1 of 5 plans COMPLETE ✓ 2026-04-19. Phase 03 in flight; Plan 03-01 wired the freq sidecar through the seam (additive only).
+Plan: 1 of 5 in Phase 03 — 03-01-PLAN.md COMPLETE 2026-04-19 (freq sidecar wiring: VOCAB.getFrequency('bedre') NB → 5.58 / 'og' NN → 7.59; state.freq Map populated 13,132 NB / 11,013 NN entries; getFrequency('hallo') EN → null preserved; check-fixtures 138/138 still pass; fail-loud guard added against silent freq-data loss for NB/NN)
+Status: Plan 03-01 shipped end-to-end as 3 atomic feat commits — Task 1 (146c7a0): buildIndexes accepts and hydrates freq Map with lowercase keys; Task 2 (8311501): vocab-seam.js fetches freq-{lang}.json in parallel with bigrams via Promise.all; Task 3 (95bc910): check-fixtures.js loads freq sidecar AND throws fail-loud if NB/NN freq Map is empty post-build. Zero schema changes, zero new npm deps, zero scoring changes — pure data wiring. SC-01 (Plan 03-02 fuzzy Zipf tiebreaker) and WP-01 (Plan 03-04 word-prediction frequency signal) are now unblocked. Plan 03-05 (bigrams-en.json) commit a03dbd0 appeared on main during this plan's execution from a parallel wave-1 executor — unrelated to my files; no conflict.
+Last activity: 2026-04-19 — Plan 03-01 completed. Task commits: 146c7a0 (feat: buildIndexes freq hydration), 8311501 (feat: parallel freq+bigrams fetch in seam), 95bc910 (feat: fixture-runner freq injection + fail-loud guard). Plan metadata commit follows this entry. Files touched: extension/content/vocab-seam-core.js, extension/content/vocab-seam.js, scripts/check-fixtures.js — exactly the 3 files in plan frontmatter `files_modified`. No deviations, no auto-fixes, no checkpoints.
 
-Progress: [██████████] 100%  (Phase 02.1, 2/2 plans complete — SC-4 RESOLVED, ready for Phase 3)
+Progress: [██░░░░░░░░] 20%  (Phase 03, 1/5 plans complete — freq wiring landed; SC-01 + WP-01 unblocked)
 
 ## Performance Metrics
 
@@ -61,6 +61,8 @@ Progress: [██████████] 100%  (Phase 02.1, 2/2 plans complete
 | Phase 02-data-layer-frequency-bigrams-typo-bank P05 | 21 min | 1 task ran + 1 halted at checkpoint (Task 3 intentionally not executed) | 1 audit artifact created, 0 shipped files touched |
 | Phase 02.1 P01 | 2 min | 2 tasks | 2 files |
 | Phase 02.1 P02 | 2 min | 3 tasks | 9 files |
+| Phase 03-rule-architecture-ranking-quality P01 | 3 min | 3 tasks | 3 files |
+| Phase 03-rule-architecture-ranking-quality P05 | 4 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -116,6 +118,8 @@ Recent decisions affecting current work:
 - [Phase 02.1]: [Phase 02.1-02]: Live-docs sweep completed — 9 files rewritten to describe the 20 MiB internal engineering ceiling; no "publicly-stated promise" framing remains in CLAUDE.md, PROJECT.md, ROADMAP.md, REQUIREMENTS.md, or any .planning/research/*.md. STATE.md live SC-4 blocker REPLACED with "RESOLVED 2026-04-19 by Phase 02.1" marker; historical decision-log rows (## Accumulated Context > Decisions, lines ~100-112) byte-identical to pre-edit; historical archive .planning/phases/02-data-layer-frequency-bigrams-typo-bank/ untouched (git diff --stat empty). Atomic 2-plan wave: 02.1-01 owned the machine-readable constant (CEILING_BYTES in scripts/check-bundle-size.js + test), 02.1-02 owned the human-readable prose in 9 live docs.
 - [Phase 02.1]: [Phase 02.1-02]: Scope-exclusion discipline locked in — when correcting framing across many files, the plan frontmatter's scope_exclusions section MUST list files/directories that remain faithful to history (historical archive, historical decision rows). Applied here: STATE.md lines ~100-112 are byte-identical pre- and post-edit even though they contain the old "publicly-stated 10 MB promise" phrase (they document what was thought during Plan 02-04, not current state). Without this discipline, a live-docs sweep retrofits history. Pattern reusable: future framing corrections should split decision-log entries (historical, append-only) from Blockers/Concerns entries (live, replaceable).
 - [Phase 02.1]: [Phase 02.1-02]: ROADMAP.md meta-description quoting pattern — the Phase 02.1 entry in ROADMAP.md (lines 20 + 61) necessarily quotes the obsolete "publicly-stated promise" phrase to describe what the phase fixed. This is meta-commentary on the phase's own deliverable, not live ceiling framing. Kept intact; verification grep treats these hits as allowed. General rule: when a phase's job is to remove a phrase, the phase's own ROADMAP narrative remains the one place where the phrase legitimately appears as a description of past state.
+- [Phase 03]: [Phase 03-01]: Freq sidecar wired through vocab seam end-to-end via additive Promise.all parallel fetch (bigrams + freq) — VOCAB.getFrequency('bedre') NB returns 5.58 (was null); 'og' NN returns 7.59; 'hallo' EN returns null (no sidecar). State.freq Map populated 13,132 NB / 11,013 NN entries. Zero schema changes, zero new npm deps, no public API change (getFrequency null-return contract preserved). 138/138 fixtures still pass. SC-01 (fuzzy Zipf tiebreaker) and WP-01 (word-prediction frequency signal) now unblocked for Plans 03-02 and 03-04.
+- [Phase 03]: [Phase 03-01]: Fail-loud guard in scripts/check-fixtures.js throws Error if NB or NN freq Map is empty post-buildIndexes — defends against silent freq-data loss for languages we contractually shipped a sidecar for in Phase 2 (Pitfall 2 from 03-RESEARCH.md). Seam itself stays silent on missing sidecar (correct production behavior for de/es/fr/en); the runner is the right place to assert the NB/NN contract.
 
 ### Roadmap Evolution
 
@@ -137,6 +141,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-04-19 — Phase 02.1 (Close SC-4 bundle-size cap) landed as a 2-plan wave. Plan 02.1-01 raised CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, refreshed the script header + failure-mode console prose + test name (commits bf0cf01, 4e3210b). Plan 02.1-02 swept the live docs: CLAUDE.md Release Workflow step 2, PROJECT.md Out-of-Scope + Constraints, ROADMAP.md Phase 2 Goal + SC-4, REQUIREMENTS.md DATA-03, all four .planning/research/*.md files, and STATE.md live SC-4 blocker (commits 7244e3a, 0a3b29f, 3477ef0). Historical archive .planning/phases/02-data-layer-frequency-bigrams-typo-bank/ and STATE.md historical decision rows (lines 100-112) remain byte-identical to pre-edit. SC-4 is now RESOLVED: current zip (10.11 MiB) passes the 20 MiB gate with ~9.89 MiB headroom; Release Workflow is unblocked.
-Stopped at: **Phase 02.1 COMPLETE. Both plans shipped end-to-end; all verification greps returned allowed-only hits; SC-4 closed.** SUMMARYs at `.planning/phases/02.1-close-sc-4-bundle-size-cap/02.1-01-SUMMARY.md` and `.planning/phases/02.1-close-sc-4-bundle-size-cap/02.1-02-SUMMARY.md`. `scripts/check-bundle-size` now exits 0; the Release Workflow can ship a GitHub Release again.
-Resume for Phase 3: Rule Architecture & Ranking Quality is the next milestone phase. Runs `/gsd:discuss-phase 3` or `/gsd:plan-phase 3` to begin. Deferred items unchanged (NN phrase-infinitive triage, missing fin_adj entry, DATA-02 cross-app rollback protocol) — still tracked in Blockers/Concerns; not blockers for Phase 3 planning.
+Last session: 2026-04-19 — Phase 03 (Rule Architecture & Ranking Quality) Plan 03-01 wired the Phase 2 freq sidecars (freq-nb.json + freq-nn.json) through the vocab seam end-to-end. Three atomic feat commits: 146c7a0 (buildIndexes accepts freq param, hydrates Map with lowercase keys), 8311501 (vocab-seam.js loadRawFrequency + Promise.all parallel fetch with bigrams + pass freq through to core.buildIndexes), 95bc910 (check-fixtures.js loadVocab reads freq-{lang}.json sidecar + fail-loud Error if NB/NN freq Map empty). Smoke verified: NB getFrequency('bedre')=5.58, NN getFrequency('og')=7.59, EN getFrequency('hallo')=null (no sidecar), state.freq.size NB=13132 / NN=11013. 138/138 fixtures still pass; zero scoring change (Plan 03-02 introduces the Zipf tiebreaker). No deviations, no auto-fixes, no checkpoints. Plan 03-05 commit a03dbd0 (bigrams-en.json) appeared on main from a parallel wave-1 executor — unrelated to Plan 03-01's files.
+Stopped at: **Phase 03 Plan 1 of 5 COMPLETE.** SUMMARY at `.planning/phases/03-rule-architecture-ranking-quality/03-01-SUMMARY.md`. SC-01 (fuzzy Zipf tiebreaker) and WP-01 (word-prediction frequency signal) are both unblocked for downstream plans (03-02 + 03-04).
+Resume for Plan 03-02: SC-01 fuzzy Zipf tiebreaker — `VOCAB.getFrequency(candidate)` now returns real Zipf scores for NB/NN, ready for the ranker to consume. Run `/gsd:execute-phase 03` to continue. Deferred items unchanged (NN phrase-infinitive triage, missing fin_adj entry, DATA-02 cross-app rollback protocol) — not blockers for Plan 03-02.
