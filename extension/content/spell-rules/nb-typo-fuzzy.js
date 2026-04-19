@@ -3,20 +3,99 @@
  *
  * Final-resort branch: for tokens that aren't in validWords and aren't likely
  * proper nouns, search validWords for a Damerau-Levenshtein neighbor within
- * the bounded edit distance and pick the highest-scoring candidate (see
- * spell-check-core.js scoreCandidate for the heuristic).
+ * the bounded edit distance and pick the highest-scoring candidate.
  *
  * Rule ID: 'typo' — preserved verbatim from pre-INFRA-03 inline rule.
  *
- * Plan 03 (SC-01) extends THIS file with a Zipf frequency tiebreaker. This
- * plan ships byte-equivalent behavior to today's fuzzy rule.
+ * Phase 3-03 (SC-01): scoring is now LOCAL to this file (rather than imported
+ * from __lexiSpellCore). The local `scoreCandidate` adds a bounded Zipf term
+ * sourced from `vocab.freq` (the freq-{lang}.json sidecar shipped in Phase
+ * 2 DATA-01). When two candidates are otherwise tied, the higher-frequency
+ * NB/NN word wins. Local ownership keeps future ranker tuning a one-file
+ * change — INFRA-03's "no core edits for scoring changes" contract.
  */
 (function () {
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
   const core = host.__lexiSpellCore || {};
-  const { findFuzzyNeighbor, isLikelyProperNoun, matchCase } = core;
+  const {
+    editDistance,
+    sharedPrefixLen,
+    sharedSuffixLen,
+    isAdjacentTransposition,
+    isLikelyProperNoun,
+    matchCase,
+  } = core;
+
+  // Scoring heuristic — higher is better. Mirrors the formula in core for
+  // pref/suff/distance/length/transposition (lifted verbatim from the
+  // pre-Phase-3 inline rule), then adds a bounded Zipf tiebreaker.
+  //
+  // Pitfall 4 (RESEARCH.md:420-432) guardrail: the Zipf multiplier MUST be
+  // bounded so a d=2 common-word never beats a d=1 rare-word AND so a
+  // small Zipf gap can't override a small distance/length difference. With
+  // max observed Zipf ≈ 7 and multiplier 10, max boost is 70 points; the
+  // distance penalty is 100 per edit. So:
+  //   d=1 Zipf-0  → -100
+  //   d=2 Zipf-7  → -200 + 70 = -130
+  // d=1 still wins comfortably (gap of 30 points).
+  //
+  // Multiplier tuning (Phase 3-03): chose ZIPF_MULT = 10 over the 15 the
+  // plan first proposed. With 15, the existing fixture nb-typo-likr-001
+  // regressed: 'likr' has neighbors 'liker' (today -45, Zipf 4.99) and
+  // 'like' (today -55, Zipf 5.76); the 0.77 Zipf gap × 15 = +11.55 points
+  // overshoots the 10-point distance/length gap and flips the winner to
+  // 'like'. With multiplier 10, the boost is +7.7 — too small to override
+  // the length-penalty signal, so 'liker' stays the winner. The two new
+  // SC-01 cases (hagde, hatde) still flip correctly because their Zipf
+  // gaps (3.39, 3.09) × 10 produce 33.9 / 30.9 points — comfortably above
+  // the 5-point today-score gap.
+  const ZIPF_MULT = 10;
+
+  function scoreCandidate(query, cand, d, vocab) {
+    const pref = sharedPrefixLen(query, cand);
+    const suff = sharedSuffixLen(query, cand);
+    let s = pref * 15 + suff * 10 - d * 100;
+    if (cand.length < query.length) s -= 50;
+    if (isAdjacentTransposition(query, cand)) s += 40;
+
+    // Zipf tiebreaker — vocab.freq is hydrated from freq-{lang}.json by
+    // vocab-seam-core.buildIndexes (Phase 3-01). Empty Map for languages
+    // without a sidecar (de/es/fr/en) — fine, fuzzy is NB/NN-only anyway.
+    if (vocab && vocab.freq) {
+      const z = vocab.freq.get(cand);
+      if (typeof z === 'number') s += z * ZIPF_MULT;
+    }
+    return s;
+  }
+
+  // Local fuzzy neighbor lookup — owns its own scoring surface so future
+  // ranker tuning stays in this one file.
+  function findFuzzyNeighbor(word, vocab) {
+    const validWords = vocab.validWords || new Set();
+    const len = word.length;
+    // Tighter threshold for short words — 1 edit out of 4 chars is already
+    // a lot of signal to drop, but 1 edit out of 8+ is common.
+    const k = len <= 6 ? 1 : 2;
+    let best = null;
+    let bestScore = -Infinity; // higher is better
+    const first = word[0];
+    for (const cand of validWords) {
+      const cl = cand.length;
+      if (Math.abs(cl - len) > k) continue;
+      if (cand[0] !== first) continue; // Very common typos keep the first char
+      if (cand === word) continue;
+      const d = editDistance(word, cand, k);
+      if (d > k) continue;
+      const score = scoreCandidate(word, cand, d, vocab);
+      if (score > bestScore) {
+        bestScore = score;
+        best = cand;
+      }
+    }
+    return best;
+  }
 
   const rule = {
     id: 'typo',
@@ -35,7 +114,7 @@
           !validWords.has(t.word) &&
           !isLikelyProperNoun(t, i, tokens, text)
         ) {
-          const fuzzy = findFuzzyNeighbor(t.word, validWords);
+          const fuzzy = findFuzzyNeighbor(t.word, vocab);
           if (fuzzy) {
             out.push({
               rule_id: 'typo',

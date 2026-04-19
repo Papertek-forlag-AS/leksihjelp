@@ -36,3 +36,16 @@
 // case is deferred to Phase 3 when the ranker learns to prefer length-
 // growing edits over substitutions at short words. See SUMMARY.md for
 // Phase 1 baseline discussion.
+
+// ── SC-01 Zipf-tiebreaker cases (Phase 3-03) ──
+// Both candidates per case are at edit-distance 1 from the typo, neither
+// is an adjacent transposition, and neither has a length-growth penalty —
+// only the new Zipf term in scoreCandidate decides. Without the Zipf
+// boost, today's matcher picks the lower-Zipf candidate (verified via
+// scripts/find-zipf-tiebreak-candidate.js); with the boost the
+// higher-frequency A1 word wins.
+//
+// hagde: today picks 'hagle' (Zipf 3.32), should be 'hadde' (Zipf 6.71).
+// hatde: today picks 'hatte' (Zipf 3.62), should be 'hadde' (Zipf 6.71).
+{"id":"nb-typo-zipf-001","text":"Vi hagde fest i går.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
+{"id":"nb-typo-zipf-002","text":"De hatde ferie da.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
