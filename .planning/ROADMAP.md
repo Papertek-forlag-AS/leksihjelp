@@ -17,6 +17,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 
 - [x] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted ✓ Complete 2026-04-18
 - [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size gap closure added 2026-04-19 as 02-05-PLAN.md, remediation locked: audit+remove extension/data/en.json)
+- [ ] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03
 - [ ] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
@@ -55,6 +56,17 @@ Plans:
 - [x] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous) ✓ Complete 2026-04-18 (Outcome B — gate ships, zip 10.11 MiB > cap)
 - [x] 02-05-PLAN.md — SC-4 gap closure attempt: en.json audit ✓ Halted-by-design 2026-04-19 (verdict BLOCKED — en.json has 4 runtime paths + sync-vocab regeneration; plan produced authoritative audit evidence; SC-4 still OPEN — follow-up plan required for English-removal refactor / different remediation / ceiling bump)
 
+### Phase 02.1: Close SC-4 bundle-size cap (INSERTED)
+
+**Goal:** Close Phase 2 SC-4 by raising the bundle-size release gate's ceiling from 10 MiB to 20 MiB, preserving the gate as a regression-detection guard, and rewriting all live docs to drop the false "publicly-stated promise" framing in favour of an honest "internal engineering ceiling" description. The current zip (10.11 MiB) passes the new cap with ~9.89 MiB headroom; no extension source changes, no data-file changes, no audio refactor.
+**Depends on:** Phase 2
+**Requirements**: SC-4 (Phase 2 success criterion #4 — reworded), DATA-03 (REQUIREMENTS.md — reworded)
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02.1-01-PLAN.md — Bump CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, update script header comment + failure-mode prose + test name (Wave 1, autonomous)
+- [ ] 02.1-02-PLAN.md — Live-docs sweep: CLAUDE.md, PROJECT.md, ROADMAP.md SC-4 + Phase 2 goal, REQUIREMENTS.md DATA-03, .planning/research/{FEATURES,ARCHITECTURE,STACK,PITFALLS}.md, STATE.md live SC-4 blocker resolution (Wave 1, autonomous)
+
 ### Phase 3: Rule Architecture & Ranking Quality
 **Goal**: Spell-check rules are refactored into `extension/content/spell-rules/` as a plugin registry, and the frequency signal plus tiebreaking improvements land for both spell-check fuzzy matching and word-prediction across all six languages — turning the Zipf data into visible ranking wins.
 **Depends on**: Phase 1 (vocab seam + fixture), Phase 2 (frequency data available)
@@ -92,17 +104,19 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 
 **Parallelization notes:**
 - Phase 2's DATA-02 (papertek-vocabulary typo-bank work) has cross-app lead time and can start as soon as Phase 1's fixture lands, in parallel with DATA-01 and DATA-03.
+- Phase 02.1's two plans (script + test edits vs live-docs sweep) have zero file overlap and run in parallel as Wave 1.
 - Phase 3's WP-01..WP-04 (word-prediction ranking, all 6 languages) and SC-01 (Zipf tiebreaker, NB/NN) can execute as parallel plans once INFRA-03 lands.
 - Phase 4's SC-02, SC-03, SC-04 are independent rule files under the Phase 3 plugin architecture and can execute as parallel plans.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
-| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits follow-up plan) | - |
+| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
+| 02.1 Close SC-4 bundle-size cap (INSERTED) | 0/2 | Planned 2026-04-19 | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
