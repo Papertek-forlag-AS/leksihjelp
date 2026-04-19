@@ -29,12 +29,12 @@ text input on the web.
 - [ ] **SC-03**: NB↔NN dialect tolerance — a word valid in the other variant (e.g., `ikkje` typed inside an NB document) is not flagged as a typo; tolerant matching uses cross-variant lookup
 - [ ] **SC-04**: Code-switching tolerance — when a contiguous span of tokens matches a non-Norwegian language pattern (German/English/Spanish/French), the span is excluded from flagging via density heuristic, preventing false-positive storms inside mixed-language documents
 - [ ] **SC-05**: Production-quality særskriving detection — the `sarskriving` rule passes the regression fixture's target precision/recall thresholds (thresholds set during INFRA-02)
-- [ ] **SC-06**: Spell-check honors existing PROJECT.md constraints — stays free, offline, NB/NN only in v1 of this milestone, no new external API dependencies
+- [x] **SC-06**: Spell-check honors existing PROJECT.md constraints — stays free, offline, NB/NN only in v1 of this milestone, no new external API dependencies
 
 ### Word-Prediction Quality (all 6 languages)
 
 - [x] **WP-01**: Ranking integrates Zipf-style unigram frequency alongside existing POS, gender, case, tense, and bigram signals (uses the same `freq-{lang}.json` sidecars from DATA-01, extended to DE/ES/FR/EN where CC-0 data exists)
-- [ ] **WP-02**: Expanded bigram coverage (from DATA-03 for NB/NN; researcher decides source for DE/ES/FR/EN in the planning phase)
+- [x] **WP-02**: Expanded bigram coverage (from DATA-03 for NB/NN; researcher decides source for DE/ES/FR/EN in the planning phase)
 - [ ] **WP-03**: Improved tiebreaking — when multiple candidates share the same edit distance or score, the ranker prefers same-length matches, shared-suffix matches, and higher-frequency words over arbitrary iteration order
 - [ ] **WP-04**: Stricter filtering — irrelevant suggestions (wrong POS for the context, very low frequency, unrelated proper nouns) are demoted so the top-3 suggestions feel useful in at least 80 % of sampled scenarios (measurement method set during planning)
 
@@ -102,9 +102,9 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | SC-03 | Phase 4 | Pending |
 | SC-04 | Phase 4 | Pending |
 | SC-05 | Phase 4 | Pending |
-| SC-06 | Phase 3 | Pending |
+| SC-06 | Phase 3 | Complete |
 | WP-01 | Phase 3 | Complete |
-| WP-02 | Phase 3 | Pending |
+| WP-02 | Phase 3 | Complete |
 | WP-03 | Phase 3 | Pending |
 | WP-04 | Phase 3 | Pending |
 | UX-01 | Phase 5 | Pending |
