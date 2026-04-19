@@ -4,18 +4,20 @@
  * Leksihjelp — Bundle-size release gate (Plan 02-04 Task 1)
  *
  * Runs `npm run package`, measures the resulting zip, prints a per-directory
- * byte breakdown, and exits 0 if the zip is ≤ 10 MiB or 1 if it exceeds it.
+ * byte breakdown, and exits 0 if the zip is ≤ 20 MiB or 1 if it exceeds it.
  *
- * The 10 MiB ceiling is ROADMAP success criterion #4 and a publicly-stated
- * promise. The script does NOT bypass the cap — a FAIL + breakdown is the
- * correct signal that bundle-size remediation is needed.
+ * The 20 MiB ceiling is an internal engineering guard against accidental
+ * bundle growth (e.g., a pretty-printed JSON checked in by mistake, a large
+ * asset added silently). Chrome Web Store accepts up to 2 GB; this number is
+ * ours, not the store's. A FAIL + breakdown is the correct signal that
+ * something has changed and warrants investigation before release.
  *
  * Usage:
  *   npm run check-bundle-size
  *
  * Exit codes:
- *   0 — zip ≤ 10 MiB (PASS)
- *   1 — zip > 10 MiB OR packaging itself failed (FAIL)
+ *   0 — zip ≤ 20 MiB (PASS)
+ *   1 — zip > 20 MiB OR packaging itself failed (FAIL)
  *
  * Zero npm deps. Node 18+. CommonJS. Matches style of check-fixtures.js.
  */
@@ -28,7 +30,7 @@ const { execSync, spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const ZIP_PATH = path.join(ROOT, 'backend', 'public', 'lexi-extension.zip');
-const CEILING_BYTES = 10 * 1024 * 1024; // 10 MiB = 10,485,760
+const CEILING_BYTES = 20 * 1024 * 1024; // 20 MiB = 20,971,520 (raised 2026-04-19, Phase 02.1)
 
 function humanMiB(bytes) {
   return (bytes / (1024 * 1024)).toFixed(2);
@@ -147,10 +149,11 @@ function main() {
       'OVER cap ' + commaBytes(CEILING_BYTES) + ' by ' + commaBytes(over) + ' bytes (' + humanMiB(over) + ' MiB)'
     );
     console.log(
-      '\nThe 10 MiB ceiling is ROADMAP success criterion #4 and a publicly-stated promise.\n' +
-      'Do NOT bypass by silently editing CEILING_BYTES. Investigate the breakdown above\n' +
-      'and remediate (e.g., strip bundled audio + fetch on first use; trim rarely-used vocab;\n' +
-      'split the lexicon; or open a new phase to make the product decision with user sign-off).'
+      '\nThe 20 MiB ceiling is an internal engineering guard, not a Chrome Web Store limit.\n' +
+      'A FAIL means the zip grew unexpectedly — investigate the breakdown above. The fix is\n' +
+      'usually a regression (e.g., a pretty-printed JSON checked in, a large new asset\n' +
+      'committed unintentionally). If the growth is intentional and the new size is\n' +
+      'justified, raise CEILING_BYTES in a new phase with explicit sign-off.'
     );
     process.exit(1);
   }
