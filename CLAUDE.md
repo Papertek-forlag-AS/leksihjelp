@@ -345,15 +345,18 @@ After making changes to files under `extension/`:
 1. Run the regression fixture suite:
    - `npm run check-fixtures` — must exit 0. Per-rule P/R/F1 is informational in Phase 1; hard mismatches (missing-expected or unexpected findings) block the release.
    - If anything fails, fix the rule (or the fixture, if the expected answer was wrong) and re-run until exit is 0.
-2. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
+2. Verify the offline surface stays network-silent (SC-06):
+   - `npm run check-network-silence` — must exit 0. Scans `extension/content/spell-check*.js`, `extension/content/spell-rules/**`, and `extension/content/word-prediction.js` for `fetch(`, `XMLHttpRequest`, `sendBeacon`, and `http(s)://` URL literals. Whitelists `chrome.runtime.getURL` and `chrome-extension://` (local-resource access is fine). Exits 1 on any forbidden hit with file:line output.
+   - Philosophically: this gate enforces the "free + offline forever" promise on the extension side. A PR that adds `fetch(...)` to a spell rule for "just one loan-word list" breaks the gate and gets the attention it needs.
+3. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
    - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
-3. Update the version in all three places:
+4. Update the version in all three places:
    - `extension/manifest.json` (the Chrome extension version)
    - `package.json` (the project version)
    - `backend/public/index.html` (the landing page display version)
-4. Rebuild the zip: `npm run package`
-5. Upload the zip as a GitHub Release asset
+5. Rebuild the zip: `npm run package`
+6. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 

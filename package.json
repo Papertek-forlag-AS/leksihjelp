@@ -15,7 +15,9 @@
     "build-frequencies": "node scripts/build-frequencies.js",
     "build-bigrams": "node scripts/build-bigrams.js",
     "package": "node scripts/package-extension.js",
-    "check-bundle-size": "node scripts/check-bundle-size.js"
+    "check-bundle-size": "node scripts/check-bundle-size.js",
+    "check-network-silence": "node scripts/check-network-silence.js",
+    "check-network-silence:test": "node scripts/check-network-silence.test.js"
   },
   "repository": {
     "type": "git",
