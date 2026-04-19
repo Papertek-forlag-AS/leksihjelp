@@ -37,6 +37,53 @@
   let knownPresens = new Set();    // Known present-tense verb forms for tense detection (rebuilt from VOCAB)
   let knownPreteritum = new Set(); // Known past-tense verb forms for tense detection (rebuilt from VOCAB)
 
+  // ── Frequency helpers (Phase 3-04: WP-01 + WP-03 + WP-04) ──
+  //
+  // getEffectiveFreq: Zipf sidecar (NB/NN via VOCAB.getFrequency, populated
+  // from freq-{lang}.json) takes priority; seam-normalized entry.zipf
+  // (computed in vocab-seam-core.js buildWordList) is the fallback + sole
+  // source for DE/ES/FR/EN. Returns 0 when neither is available — guards
+  // Pitfall 7 (no raw entry.frequency reads anywhere in the ranker).
+  function getEffectiveFreq(entry) {
+    const z = VOCAB.getFrequency(entry.word);
+    if (typeof z === 'number') return z;
+    if (typeof entry.zipf === 'number') return entry.zipf;
+    return 0;
+  }
+
+  // sharedSuffixLen: tiebreaker helper. Counts trailing characters that match
+  // between query and candidate. Mirrors the spell-check core helper but is
+  // declared locally — word-prediction is disallowed from importing the
+  // spell-check surface (INFRA-04 structural separability).
+  function sharedSuffixLen(a, b) {
+    if (!a || !b) return 0;
+    const la = a.length, lb = b.length;
+    const n = Math.min(la, lb);
+    let i = 0;
+    while (i < n && a[la - 1 - i] === b[lb - 1 - i]) i++;
+    return i;
+  }
+
+  // freqSignal (WP-01): linear in Zipf; multiplier 20 means top-Zipf (~7) adds
+  // ~140, bottom-Zipf (0) adds 0. Bigram signal caps at +120; the two top out
+  // comparable so neither dominates the ranker.
+  function freqSignal(entry) {
+    const z = getEffectiveFreq(entry);
+    return z * 20;
+  }
+
+  // lowFreqDemotion (WP-04): demote rare/obscure forms so the top-3 isn't
+  // dominated by random high-score-but-low-frequency artefacts. Floor Zipf
+  // 1.5 (≈ occurs ~30/million) is generous so learner-core vocab never
+  // triggers it. Entries with no frequency data at all (Zipf 0) are LEFT
+  // ALONE — demoting them would punish words that simply don't appear in
+  // the sidecar (very common for proper nouns, niche learner-core entries).
+  function lowFreqDemotion(entry) {
+    const z = getEffectiveFreq(entry);
+    if (z > 0 && z < 1.5) return -80;
+    return 0;
+  }
+
   // ── Init ──
   init();
 
@@ -858,8 +905,24 @@
       }
     }
 
-    // Sort by score descending
-    scored.sort((a, b) => b.score - a.score);
+    // Sort by score descending, with deterministic tiebreakers (WP-03):
+    //   1. higher score wins
+    //   2. higher effective frequency wins (Zipf sidecar > entry.zipf > 0)
+    //   3. closer-to-query-length wins (favours exact-length matches)
+    //   4. longer shared suffix wins (favours conjugations of the same stem)
+    //   5. alphabetical — last resort, gives dev-readable, reproducible output
+    scored.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const fa = getEffectiveFreq(a), fb = getEffectiveFreq(b);
+      if (fa !== fb) return fb - fa;
+      const la = Math.abs(a.word.length - q.length);
+      const lb = Math.abs(b.word.length - q.length);
+      if (la !== lb) return la - lb;
+      const sa = sharedSuffixLen(q, a.word);
+      const sb = sharedSuffixLen(q, b.word);
+      if (sa !== sb) return sb - sa;
+      return a.word.localeCompare(b.word);
+    });
 
     // Deduplicate by display word
     const seen = new Set();
@@ -877,138 +940,136 @@
   }
 
   function applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, query, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext = null, definitenessContext = null) {
-    // Typo matches: only show "mente du?" when the input is a plausible misspelling
-    // of the correct word (at least 60% of its length), not just a short prefix
+    // Phase 3-04 refactor: signal-table-style accumulation. Each numbered
+    // block contributes a score delta; unlike the pre-refactor version we
+    // never mutate `entry` directly — `workingEntry` carries the (possibly
+    // re-typed) variant through the chain so the final push is unambiguous.
+    // CALLER sites (lines ~826/840/856) are unchanged.
+
+    let workingEntry = entry;
+
+    // 1. Typo matches — type may flip to 'base' if input is too short relative
+    //    to the correct word (kept first because it can re-type workingEntry).
     if (entry.type === 'typo' && score >= 50) {
       if (query && query.length / entry.display.length >= 0.6) {
         score += 150; // Genuine misspelling — boost and keep typo hint
       } else {
         // Input too short relative to the correct word — demote to regular suggestion
-        entry = { ...entry, type: 'base' };
+        workingEntry = { ...entry, type: 'base' };
         score += 30;
       }
     }
 
-    // Boost recently used words
-    if (recentWordsSet.has(entry.word)) {
+    // 2. Recency
+    if (recentWordsSet.has(workingEntry.word)) {
       score += 50;
     }
 
-    // When a modal verb is in the sentence, boost infinitive (base) verb forms
-    if (hasModalVerb && entry.type === 'base' && entry.bank === 'verbbank') {
+    // 3. Modal verb + infinitive boost (DE/NB/NN/etc — guarded by entry shape)
+    if (hasModalVerb && workingEntry.type === 'base' && workingEntry.bank === 'verbbank') {
+      score += 250;
+    }
+    if (hasModalVerb && workingEntry.type === 'conjugation' && workingEntry.formKey === 'infinitiv') {
       score += 250;
     }
 
-    // NB/NN: when a modal verb is in the sentence, also boost infinitiv conjugation forms
-    // (e.g., "kan spise" — boost the infinitiv entry from conjugations)
-    if (hasModalVerb && entry.type === 'conjugation' && entry.formKey === 'infinitiv') {
-      score += 250;
-    }
-
-    // Boost conjugated forms that match the pronoun context
-    if (!hasModalVerb && pronounContext && entry.type === 'conjugation') {
-      if (entry.pronoun === pronounContext) {
+    // 4. Pronoun + tense (per-language signals; field-presence guards are
+    //    sufficient — non-NB/NN entries don't carry _nb_pronoun, etc.)
+    if (!hasModalVerb && pronounContext && workingEntry.type === 'conjugation') {
+      if (workingEntry.pronoun === pronounContext) {
         score += 200;
       }
     }
-
-    // NB/NN: pronoun context means "next word is a verb" — boost verb forms
-    // in the detected tense (default to present if no tense detected)
     if (!hasModalVerb && pronounContext === '_nb_pronoun') {
       const targetTense = detectedTense || 'present';
-      if (entry.type === 'base' && entry.bank === 'verbbank') {
+      if (workingEntry.type === 'base' && workingEntry.bank === 'verbbank') {
         score += 150;
       }
-      if (entry.type === 'conjugation' && entry.tenseKey === targetTense) {
+      if (workingEntry.type === 'conjugation' && workingEntry.tenseKey === targetTense) {
         score += 200;
       }
     }
-
-    // Tense consistency: boost verb forms matching the detected tense (all languages)
-    // e.g. if student writes in past tense, boost preteritum/preterito forms
-    if (detectedTense && entry.type === 'conjugation' && entry.tenseKey) {
-      if (entry.tenseKey === detectedTense) {
+    if (detectedTense && workingEntry.type === 'conjugation' && workingEntry.tenseKey) {
+      if (workingEntry.tenseKey === detectedTense) {
         score += 180;
       }
     }
 
-    // POS expectation: after determiners/prepositions, boost nouns and adjectives
+    // 5. POS expectation: after determiners/prepositions, boost nouns/adjectives
     if (expectedPOS === 'noun_adj') {
-      const isNounOrAdj = entry.bank === 'nounbank' || entry.bank === 'adjectivebank' ||
-        entry.type === 'nounform' || entry.type === 'plural' || entry.type === 'case' ||
-        entry.type === 'comparative' || entry.type === 'superlative' || entry.type === 'adjform';
-      const isVerb = entry.bank === 'verbbank' || entry.type === 'conjugation';
+      const isNounOrAdj = workingEntry.bank === 'nounbank' || workingEntry.bank === 'adjectivebank' ||
+        workingEntry.type === 'nounform' || workingEntry.type === 'plural' || workingEntry.type === 'case' ||
+        workingEntry.type === 'comparative' || workingEntry.type === 'superlative' || workingEntry.type === 'adjform';
+      const isVerb = workingEntry.bank === 'verbbank' || workingEntry.type === 'conjugation';
 
       if (isNounOrAdj) {
-        score += posStrength >= 2 ? 150 : 100; // Stronger after determiners than prepositions
+        score += posStrength >= 2 ? 150 : 100;
       } else if (isVerb && posStrength >= 2) {
-        score -= 100; // Only demote verbs after determiners (not prepositions)
+        score -= 100;
       }
     }
 
-    // Gender agreement: after a gendered determiner, boost nouns with matching gender
-    // e.g. "die Sch..." boosts feminine nouns, "el per..." boosts masculine nouns
-    if (genderContext && entry.genus === genderContext) {
+    // 6. Gender agreement (DE/ES/FR/NB/NN — non-NB/NN/non-DE entries lack
+    //    `genus` so this naturally no-ops for languages without gender hints)
+    if (genderContext && workingEntry.genus === genderContext) {
       score += 120;
     }
 
-    // NB/NN number + definiteness agreement for noun forms and adjective forms.
-    // "en stor..." (entall/ubestemt) → boost stor (m); "et stor..." → boost stort (n).
-    // "mange stor..." (flertall) → boost store. "den store bil..." (bestemt) → boost bilen.
-    if ((numberContext || definitenessContext) && (entry.type === 'nounform' || entry.type === 'adjform')) {
-      const numMatch = numberContext && entry.number === numberContext;
-      const defMatch = definitenessContext && entry.definiteness === definitenessContext;
-      // Flertall adjforms carry no definiteness — accept them whenever number matches.
-      const adjFlertall = entry.type === 'adjform' && entry.number === 'flertall' && entry.definiteness == null;
+    // 7. NB/NN number + definiteness agreement (self-guards via field presence:
+    //    only nounform/adjform entries carry both `number` and `definiteness`)
+    if ((numberContext || definitenessContext) && (workingEntry.type === 'nounform' || workingEntry.type === 'adjform')) {
+      const numMatch = numberContext && workingEntry.number === numberContext;
+      const defMatch = definitenessContext && workingEntry.definiteness === definitenessContext;
+      const adjFlertall = workingEntry.type === 'adjform' && workingEntry.number === 'flertall' && workingEntry.definiteness == null;
       if (numMatch && (defMatch || !definitenessContext || adjFlertall)) {
         score += 130;
       } else if (numMatch || defMatch) {
         score += 60;
       } else {
-        // Explicit mismatch on both dimensions — demote so wrong-agreement forms
-        // don't outrank the base entry.
-        const numConflict = numberContext && entry.number && entry.number !== numberContext;
-        const defConflict = definitenessContext && entry.definiteness && entry.definiteness !== definitenessContext;
+        const numConflict = numberContext && workingEntry.number && workingEntry.number !== numberContext;
+        const defConflict = definitenessContext && workingEntry.definiteness && workingEntry.definiteness !== definitenessContext;
         if (numConflict || defConflict) score -= 80;
       }
     }
 
-    // German case from prepositions: boost noun case forms matching the expected case
-    // e.g. "mit H..." boosts dative forms, "für H..." boosts accusative forms
-    if (caseContext && entry.type === 'case' && entry.caseName) {
+    // 8. DE case from prepositions (self-guards via workingEntry.caseName presence)
+    if (caseContext && workingEntry.type === 'case' && workingEntry.caseName) {
       if (caseContext === 'wechsel') {
-        // Two-way prepositions: boost both accusative and dative (smaller boost)
-        if (entry.caseName === 'akkusativ' || entry.caseName === 'dativ') {
+        if (workingEntry.caseName === 'akkusativ' || workingEntry.caseName === 'dativ') {
           score += 80;
         }
-      } else if (entry.caseName === caseContext) {
+      } else if (workingEntry.caseName === caseContext) {
         score += 150;
       }
     }
 
-    // Bigram frequency: boost words that commonly follow the previous word(s)
-    // Checks both single-word keys ("es" → "gibt") and two-word keys ("ha det" → "bra")
-    // All keys/values are lowercased at load time, matched against entry.word (also lowercase)
-    // VOCAB.getBigrams() returns null when no bigrams file ships for the language.
+    // 9. Bigram frequency: 40/80/120 based on weight 1/2/3
     const bigramData = VOCAB.getBigrams();
     if (bigramData) {
       let bigramWeight = 0;
-      // Check two-word key first (more specific = higher priority)
       if (previousTwoWords) {
         const pairs2 = bigramData[previousTwoWords];
-        if (pairs2) bigramWeight = pairs2[entry.word] || 0;
+        if (pairs2) bigramWeight = pairs2[workingEntry.word] || 0;
       }
-      // Fall back to single-word key
       if (!bigramWeight && previousWord) {
         const pairs1 = bigramData[previousWord];
-        if (pairs1) bigramWeight = pairs1[entry.word] || 0;
+        if (pairs1) bigramWeight = pairs1[workingEntry.word] || 0;
       }
       if (bigramWeight > 0) {
-        score += bigramWeight * 40; // 40/80/120 based on weight 1/2/3
+        score += bigramWeight * 40;
       }
     }
 
-    scored.push({ ...entry, score });
+    // 10. Frequency signal (WP-01): Zipf sidecar for NB/NN; seam-normalized
+    //     entry.zipf for DE/ES/FR/EN. Top-Zipf (~7) adds ~140 — comparable
+    //     to bigram cap (+120) so neither signal dominates.
+    score += freqSignal(workingEntry);
+
+    // 11. Low-frequency demotion (WP-04): -80 for entries below Zipf 1.5
+    //     (≈ occurs <30/million). Zipf-0 entries are left alone — see helper.
+    score += lowFreqDemotion(workingEntry);
+
+    scored.push({ ...workingEntry, score });
   }
 
   function matchScore(query, target) {
