@@ -53,7 +53,7 @@ Plans:
 - [x] 02-02-PLAN.md — DATA-03: build-bigrams.js regrowing extension/data/bigrams-{nb,nn}.json via max-merge with hand-authored idioms (Wave 1, autonomous) ✓ Complete 2026-04-18
 - [x] 02-03-PLAN.md — DATA-02: typo-bank expansion in papertek-vocabulary + Phase-1 data-defect fixes + sync (Wave 1, human-verify checkpoint for cross-app push) ✓ Complete 2026-04-18
 - [x] 02-04-PLAN.md — Bundle-size gate: check-bundle-size.js + JSON minification in npm run package + CLAUDE.md Release Workflow step (Wave 2, autonomous) ✓ Complete 2026-04-18 (Outcome B — gate ships, zip 10.11 MiB > cap)
-- [ ] 02-05-PLAN.md — SC-4 gap closure: audit + remove extension/data/en.json + re-verify check-bundle-size exits 0 (Wave 3, checkpoint:decision at audit verdict)
+- [x] 02-05-PLAN.md — SC-4 gap closure attempt: en.json audit ✓ Halted-by-design 2026-04-19 (verdict BLOCKED — en.json has 4 runtime paths + sync-vocab regeneration; plan produced authoritative audit evidence; SC-4 still OPEN — follow-up plan required for English-removal refactor / different remediation / ceiling bump)
 
 ### Phase 3: Rule Architecture & Ranking Quality
 **Goal**: Spell-check rules are refactored into `extension/content/spell-rules/` as a plugin registry, and the frequency signal plus tiebreaking improvements land for both spell-check fuzzy matching and word-prediction across all six languages — turning the Zipf data into visible ranking wins.
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
-| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 4/5 | In progress (02-05 gap closure for SC-4 pending) | - |
+| 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits follow-up plan) | - |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
