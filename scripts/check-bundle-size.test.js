@@ -24,7 +24,7 @@ const ZIP_PATH = path.join(ROOT, 'backend', 'public', 'lexi-extension.zip');
 const SOURCE_NB_JSON = path.join(ROOT, 'extension', 'data', 'nb.json');
 const PACKAGE_HELPER = path.join(ROOT, 'scripts', 'package-extension.js');
 const GATE_SCRIPT = path.join(ROOT, 'scripts', 'check-bundle-size.js');
-const CEILING_BYTES = 10 * 1024 * 1024;
+const CEILING_BYTES = 20 * 1024 * 1024;
 
 let failures = 0;
 function test(name, fn) {
@@ -121,7 +121,7 @@ test('Test 3 (behavior): check-bundle-size runs end-to-end and reports honestly'
   if (!sawBytes) throw new Error('check-bundle-size output missing byte count. Got:\n' + combined);
 });
 
-test('Test 4/5 (behavior): exit code matches reported bytes vs 10 MiB cap', () => {
+test('Test 4/5 (behavior): exit code matches reported bytes vs 20 MiB cap', () => {
   const size = fs.statSync(ZIP_PATH).size;
   const result = spawnSync('node', [GATE_SCRIPT], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (size <= CEILING_BYTES && result.status !== 0) {
