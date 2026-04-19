@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-19T06:05:00.000Z"
+last_updated: "2026-04-19T08:05:08.973Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 2 of 5 — Data Layer (Frequency + Bigrams + Typo Bank) — 5 of 5 plans ran (phase ships with SC-4 as a documented Blocker; 02-05 gap-closure attempt halted-by-design 2026-04-19 with verdict BLOCKED; SC-4 still OPEN, follow-up plan required)
-Plan: 5 of 5 in Phase 2 — 02-05 HALTED-BY-DESIGN (audit produced authoritative evidence that en.json is a first-class bundled vocabulary language; deletion path rejected per 02-CONTEXT.md hard requirement; Task 3 intentionally NOT executed; SC-4 still OPEN)
-Status: Plan 02-05 halted cleanly at the Task 2 audit-verdict checkpoint (`blocked` option selected). Deliverable shipped: `.planning/phases/02-data-layer-frequency-bigrams-typo-bank/02-05-AUDIT.md` documenting 4 independent runtime failure paths for en.json deletion (popup.js:161/343/487 first-run fallback + language-delete fallback + settings-UI picker; vocab-seam.js:41/151, word-prediction.js:46/1166, floating-widget.js:107/324 content-script init defaults) + sync-vocab.js:414 regeneration path. Bundle-size state unchanged: zip 10,599,772 bytes (10.11 MiB), 114 KB over cap; check-bundle-size gate correctly exits 1. Fixture state unchanged: 138/138 pass (no source changes made, no regression possible). SC-4 remains OPEN — requires new plan for one of: full English-removal refactor / different remediation target (audio stripping, conjugation trimming) / ceiling bump with landing-page update.
-Last activity: 2026-04-19 — Plan 02-05 halted-by-design. Commits 2feffb1 (plan), 2cb785a (Task 1 audit), ca8926e (Task 2 checkpoint pause), c8681bc (SUMMARY BLOCKED-by-design), and the STATE+ROADMAP metadata commit that follows this entry. No shipped extension files changed. No fixture/bundle-size regressions possible.
+Phase: 02.1 of 5 — Close SC-4 bundle-size cap (INSERTED) — 2 of 2 plans COMPLETE ✓ 2026-04-19. SC-4 RESOLVED (ceiling raised 10 → 20 MiB; current 10.11 MiB zip passes with ~9.89 MiB headroom). DATA-03 reworded against new ceiling.
+Plan: 2 of 2 in Phase 02.1 — 02.1-02-PLAN.md COMPLETE 2026-04-19 (live-docs sweep: 9 files rewritten from "publicly-stated promise / 10 MiB ceiling" framing to "20 MiB internal engineering ceiling"; STATE.md live SC-4 blocker replaced with RESOLVED marker; historical archive + historical decision-log rows byte-identical to pre-edit)
+Status: Phase 02.1 landed as an atomic 2-plan wave. Plan 02.1-01 shipped the machine-readable edits (CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, header comment + failure-mode console.log + test name refreshed); commits bf0cf01, 4e3210b. Plan 02.1-02 shipped the human-readable edits (CLAUDE.md Release Workflow step 2, PROJECT.md Out-of-Scope + Constraints, ROADMAP.md Phase 2 Goal + SC-4, REQUIREMENTS.md DATA-03, all four .planning/research/*.md files, STATE.md live SC-4 blocker resolution); commits 7244e3a, 0a3b29f, 3477ef0. No extension source changes, no data-file changes, no audio refactor. Bundle-size gate now exits 0 at current zip (10.11 MiB). Release Workflow unblocked; GitHub Releases can ship again.
+Last activity: 2026-04-19 — Phase 02.1 completed. Plan 02.1-02 commits: 7244e3a (live ceiling prose rewrites, 6 files), 0a3b29f (ROADMAP Phase 2 Goal + SC-4 + REQUIREMENTS DATA-03), 3477ef0 (STATE.md live SC-4 blocker → RESOLVED marker). Sibling Plan 02.1-01 commits: bf0cf01 (script constant + header), 4e3210b (test constant + name). Plan metadata commit follows this entry. Historical archive .planning/phases/02-data-layer-frequency-bigrams-typo-bank/ untouched (git diff --stat empty). STATE.md historical decision-log rows (lines 100-112) byte-identical to pre-edit.
 
-Progress: [██████████] 100%  (Phase 2, 5/5 plans ran — SC-4 still OPEN, follow-up plan required)
+Progress: [██████████] 100%  (Phase 02.1, 2/2 plans complete — SC-4 RESOLVED, ready for Phase 3)
 
 ## Performance Metrics
 
@@ -59,6 +59,8 @@ Progress: [██████████] 100%  (Phase 2, 5/5 plans ran — SC-
 | Phase 02 P03 | 1h 20m | 3 tasks | 14 files |
 | Phase 02-data-layer-frequency-bigrams-typo-bank P04 | 5 min | 2 tasks | 7 files |
 | Phase 02-data-layer-frequency-bigrams-typo-bank P05 | 21 min | 1 task ran + 1 halted at checkpoint (Task 3 intentionally not executed) | 1 audit artifact created, 0 shipped files touched |
+| Phase 02.1 P01 | 2 min | 2 tasks | 2 files |
+| Phase 02.1 P02 | 2 min | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -109,6 +111,8 @@ Recent decisions affecting current work:
 - [Phase 02-05]: linkedTo.en entries in extension/data/{de,es,fr}.json (10,020 total) are DORMANT DATA — the runtime consumes linkedTo.nb and linkedTo.nn only; no code path dereferences linkedTo.en. These entries impose no runtime dependency on en.json existing and can remain untouched in any follow-up English-removal refactor. Preserving this finding so the follow-up plan doesn't re-audit.
 - [Phase 02-05]: BLOCKED-by-design outcome pattern — a plan whose primary deliverable is authoritative audit evidence can terminate at a blocking checkpoint without being a "plan failure." The plan produced what it was supposed to produce (evidence + decision gate); the gate's `blocked` resolution halts the plan cleanly and hands the product decision back to the user. Count it as completed-end-to-end on its own terms; track SC-4 separately as the unmet roadmap criterion.
 - [Phase 02-05]: Audit scope-distinction discipline locked in — future audits of `extension/data/{lang}.json` must explicitly triage every `'{lang}'` hit into {data-vocab, i18n-ui, html-lang, comment/doc, preposition/article-word-collision} classifications before assigning runtime-reference status. E.g., `'en'` in extension code overwhelmingly hits the Norwegian article word `en`, Spanish/French preposition `en`, or UI i18n `data-ui-lang` attributes — not the vocab language code. Without this triage, an audit can't distinguish false positives from real runtime refs.
+- [Phase 02.1]: [Phase 02.1-01]: SC-4 closed by ceiling bump — CEILING_BYTES raised 10 * 1024 * 1024 → 20 * 1024 * 1024 in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js (same value declared independently in each file, both lockstep to 20,971,520 bytes = 20 MiB). Current post-minification zip 10,599,772 bytes (10.11 MiB) passes with 9.89 MiB headroom. Gate ships exit 0. Chrome Web Store ceiling is 2 GB — the 20 MiB number is an internal engineering guard against accidental bundle growth (pretty-printed JSON checked in by mistake, large asset added silently), not a publicly-stated promise. — Product decision locked in 02.1-CONTEXT.md: raise the cap rather than pursue English-removal / audio-strip / conjugation-trim remediations. Evidence from 02-05-AUDIT.md (four runtime paths for en.json) + the offline-first-play pledge for audio/de informed the choice. 20 MiB (not 12 MiB) picked for headroom across Phase 3-5 without thrashing the decision mid-milestone.
+- [Phase 02.1]: [Phase 02.1-01]: Release-gate constant + test-mirror lockstep pattern — when a release gate uses a hard numeric threshold, both the gate and its behavior-test mirror must share the same value, AND the test's human-readable name must describe the same number the assertion uses. Drifting either silently invalidates the test's intent. Applied in this plan: CEILING_BYTES bumped in BOTH scripts/check-bundle-size.js (line 33) and scripts/check-bundle-size.test.js (line 27); Test 4/5 name updated 'vs 10 MiB cap' → 'vs 20 MiB cap' so behavioral contract matches gate reality. — RESEARCH.md Pitfall 2: if the test file's CEILING_BYTES drifts from the script's, the test still passes against the current 10.11 MiB zip (under both caps) so the test appears green but its intent is silently broken. Codifying the lockstep rule + the test-name contract prevents this failure mode for any future release gate.
 
 ### Roadmap Evolution
 

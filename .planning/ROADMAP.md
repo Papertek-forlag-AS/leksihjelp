@@ -17,7 +17,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 
 - [x] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted ✓ Complete 2026-04-18
 - [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size gap closure added 2026-04-19 as 02-05-PLAN.md, remediation locked: audit+remove extension/data/en.json)
-- [ ] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03
+- [x] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03 (completed 2026-04-19)
 - [ ] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
@@ -61,10 +61,10 @@ Plans:
 **Goal:** Close Phase 2 SC-4 by raising the bundle-size release gate's ceiling from 10 MiB to 20 MiB, preserving the gate as a regression-detection guard, and rewriting all live docs to drop the false "publicly-stated promise" framing in favour of an honest "internal engineering ceiling" description. The current zip (10.11 MiB) passes the new cap with ~9.89 MiB headroom; no extension source changes, no data-file changes, no audio refactor.
 **Depends on:** Phase 2
 **Requirements**: SC-4 (Phase 2 success criterion #4 — reworded), DATA-03 (REQUIREMENTS.md — reworded)
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 02.1-01-PLAN.md — Bump CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, update script header comment + failure-mode prose + test name (Wave 1, autonomous)
+- [x] 02.1-01-PLAN.md — Bump CEILING_BYTES 10 MiB → 20 MiB in scripts/check-bundle-size.js + scripts/check-bundle-size.test.js, update script header comment + failure-mode prose + test name (Wave 1, autonomous) ✓ Complete 2026-04-19 (gate exits 0; 10.11 MiB zip under 20 MiB cap; 9.89 MiB headroom)
 - [ ] 02.1-02-PLAN.md — Live-docs sweep: CLAUDE.md, PROJECT.md, ROADMAP.md SC-4 + Phase 2 goal, REQUIREMENTS.md DATA-03, .planning/research/{FEATURES,ARCHITECTURE,STACK,PITFALLS}.md, STATE.md live SC-4 blocker resolution (Wave 1, autonomous)
 
 ### Phase 3: Rule Architecture & Ranking Quality
@@ -116,7 +116,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
-| 02.1 Close SC-4 bundle-size cap (INSERTED) | 0/2 | Planned 2026-04-19 | - |
+| 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete   | 2026-04-19 |
 | 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
