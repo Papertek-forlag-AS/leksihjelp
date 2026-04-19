@@ -77,7 +77,13 @@ Plans:
   3. In word-prediction across DE/ES/FR/NB/NN/EN, the top-3 suggestions for a shared-prefix query (e.g., typing "ber" in NB) are visibly ranked by frequency and bigram context rather than by arbitrary insertion order — verified by manual inspection in at least 3 of the 6 languages
   4. DevTools Network tab shows zero outbound requests from spell-check or word-prediction code paths during a 30-second typing session (SC-06 constraint: no new external dependencies, stays free and offline)
   5. Sampled top-3 word-prediction suggestions feel useful to a developer reviewer in at least 80% of test scenarios (measurement method: review at least 20 sampled contexts per language against a simple yes/no "would a learner find this useful?" judgment)
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 03-01-PLAN.md — Foundation: wire freq-{lang}.json through seam + core + fixture runner (Wave 1, autonomous) — lights up VOCAB.getFrequency for NB/NN
+- [ ] 03-02-PLAN.md — INFRA-03: extract spell-check rules to extension/content/spell-rules/*.js plugin registry; slim core to a runner; update manifest + fixture-runner require sweep (Wave 2, autonomous)
+- [ ] 03-03-PLAN.md — SC-01: add Zipf tiebreaker to fuzzy scoreCandidate in nb-typo-fuzzy.js + author new fixture case targeting Zipf (not adjacent-transposition) (Wave 3, autonomous)
+- [ ] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 2, human-verify checkpoint for 3-language top-3 inspection)
+- [ ] 03-05-PLAN.md — WP-02 (EN bigrams hand-authored) + SC-06 release gate (check-network-silence.js + self-test + CLAUDE.md Release Workflow step) (Wave 1, autonomous)
 
 ### Phase 4: False-Positive Reduction on NB/NN
 **Goal**: Proper-noun guard, dialect tolerance, code-switching detection, and particularly særskriving all pass the regression fixture's precision/recall thresholds — so the tool stays quiet on correct Norwegian text, tolerates mixed-language documents, and only fires særskriving when it's genuinely wrong.
@@ -117,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
-| 3. Rule Architecture & Ranking Quality | 0/TBD | Not started | - |
+| 3. Rule Architecture & Ranking Quality | 0/5 | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 
