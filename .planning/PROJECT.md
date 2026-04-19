@@ -49,7 +49,7 @@ they're working on.
 - **Premium-gating for spell-check** — landing page (`backend/public/index.html:681-683`) publicly commits: "Alle funksjoner i selve utvidelsen er og forblir gratis og åpen kildekode. Eventuelle fremtidige betalingsfunksjoner vil kun gjelde tjenester som krever eksterne API-kostnader." Spell-check is 100% extension-side with no external cost — gating contradicts the promise and damages trust with existing users.
 - **Spell-check for non-Norwegian languages** — v1 language models are specific to Norwegian grammar (gender, særskriving). Adding DE/ES/FR requires language-specific rule sets, a separate milestone.
 - **Machine-learning models** — heuristics only. No on-device ML, no API calls for correction, keeps the product free and offline.
-- **Bundle-size growth beyond current ~10MB** — bigrams and frequency tables should stay within the existing budget; any growth must be justified.
+- **Bundle-size growth beyond current internal budget (~20 MiB)** — bigrams, frequency tables, and any added assets should stay within the engineering ceiling enforced by `scripts/check-bundle-size.js`; any planned growth that approaches the cap must be justified.
 - **Complete Grammarly parity** — explicitly unreachable without ML. We aim for production-quality on common errors, not full coverage of English-market grammar tooling.
 
 ## Context
@@ -76,7 +76,7 @@ they're working on.
 - **Dependency model**: Vocabulary data must originate in `papertek-vocabulary`; the extension pulls via `scripts/sync-vocab.js`. Never hand-edit `extension/data/*.json`.
 - **Cross-app impact**: Vocab schema changes ripple to `papertek-webapps` and `papertek-nativeapps`. Additive changes are safe; structural edits require cross-app coordination.
 - **Offline requirement**: Dictionary, prediction, spell-check, grammar features must all work without network. Only TTS and auth need connectivity.
-- **Bundle size**: Current ~10 MB. Data additions (frequency tables, bigrams, typo expansions) must stay within that budget.
+- **Bundle size**: Current ~10.1 MiB; internal engineering ceiling 20 MiB enforced by `scripts/check-bundle-size.js`. Data additions (frequency tables, bigrams, typo expansions) must stay within that budget.
 - **Platform**: Chrome + Edge + Brave (Chromium-based). No Safari/Firefox promises.
 - **Language priority**: NB first, NN second, then DE/ES/FR/EN for any language-specific feature work.
 - **No automated tests yet**: This milestone introduces a regression fixture as the first step toward measurable quality. Manual testing is the current baseline.

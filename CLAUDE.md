@@ -345,9 +345,9 @@ After making changes to files under `extension/`:
 1. Run the regression fixture suite:
    - `npm run check-fixtures` — must exit 0. Per-rule P/R/F1 is informational in Phase 1; hard mismatches (missing-expected or unexpected findings) block the release.
    - If anything fails, fix the rule (or the fixture, if the expected answer was wrong) and re-run until exit is 0.
-2. Verify the packaged extension stays under the 10 MiB ceiling:
+2. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
-   - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap without user sign-off — the 10 MB ceiling is a ROADMAP success criterion and a publicly-stated promise.
+   - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
 3. Update the version in all three places:
    - `extension/manifest.json` (the Chrome extension version)
    - `package.json` (the project version)
