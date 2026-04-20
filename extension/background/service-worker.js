@@ -1,4 +1,4 @@
-importScripts('../i18n/strings.js');
+importScripts('/i18n/strings.js');
 
 /**
  * Leksihjelp — Background Service Worker
