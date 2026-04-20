@@ -106,7 +106,11 @@ Plans:
   2. Typing `ikkje` in an NB document does not produce a spell-check flag, and typing `ikke` in an NN document does not produce a spell-check flag — verified via fixture cases in both directions
   3. A paragraph of English or German quoted inside an NB document produces no forest of flags — at most 1 flag per paragraph, not per word — verified via fixture case with ≥3 contiguous non-Norwegian tokens
   4. The særskriving rule's precision and recall, measured against the regression fixture, meet thresholds set during Phase 1 — verified by the fixture script output in the release notes
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 04-01-PLAN.md — SC-03 rail: wire vocab.sisterValidWords through seam + adapter + install SC-03 adapter-contract regression guard in check-fixtures (Wave 1, autonomous)
+- [ ] 04-02-PLAN.md — SC-02 + SC-04 rules: author nb-codeswitch.js (priority 1, density window) + nb-propernoun-guard.js (priority 5, name/loan layers), init ctx.suppressed in core, opt typo-curated / typo-fuzzy / sarskriving into suppression, register in manifest (Wave 2, autonomous)
+- [ ] 04-03-PLAN.md — SC-02/03/04/05 fixture expansion + SC-05 threshold gate: codeswitch.jsonl (new) + expanded clean/typo/saerskriving + THRESHOLDS table in check-fixtures (Wave 3, human-verify checkpoint for threshold-value lock)
 
 ### Phase 5: Student Experience Polish
 **Goal**: The spell-check popover explains errors in student-friendly Norwegian instead of bare class labels, and both spell-check popovers and word-prediction dropdowns cap visible suggestions at top-3 with a "vis flere" reveal — reducing cognitive load for dyslexic learners.
