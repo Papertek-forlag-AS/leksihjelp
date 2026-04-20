@@ -109,7 +109,7 @@ Plans:
 **Plans:** 3 plans
 Plans:
 - [x] 04-01-PLAN.md — SC-03 rail: wire vocab.sisterValidWords through seam + adapter + install SC-03 adapter-contract regression guard in check-fixtures (Wave 1, autonomous) ✓ 2026-04-20
-- [ ] 04-02-PLAN.md — SC-02 + SC-04 rules: author nb-codeswitch.js (priority 1, density window) + nb-propernoun-guard.js (priority 5, name/loan layers), init ctx.suppressed in core, opt typo-curated / typo-fuzzy / sarskriving into suppression, register in manifest (Wave 2, autonomous)
+- [x] 04-02-PLAN.md — SC-02 + SC-04 rules: author nb-codeswitch.js (priority 1, density window) + nb-propernoun-guard.js (priority 5, name/loan layers), init ctx.suppressed in core, opt typo-curated / typo-fuzzy / sarskriving into suppression, register in manifest (Wave 2, autonomous) ✓ 2026-04-20
 - [ ] 04-03-PLAN.md — SC-02/03/04/05 fixture expansion + SC-05 threshold gate: codeswitch.jsonl (new) + expanded clean/typo/saerskriving + THRESHOLDS table in check-fixtures (Wave 3, human-verify checkpoint for threshold-value lock)
 
 ### Phase 5: Student Experience Polish
@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
 | 3. Rule Architecture & Ranking Quality | 5/5 | Complete (SC-01 re-opened by 2026-04-20 audit — bridged in 03.1) | 2026-04-20 |
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
-| 4. False-Positive Reduction on NB/NN | 1/3 | In Progress | - |
+| 4. False-Positive Reduction on NB/NN | 2/3 | In Progress | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 
 ---

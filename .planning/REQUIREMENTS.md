@@ -25,9 +25,9 @@ text input on the web.
 ### Spell-Check Quality (NB/NN)
 
 - [x] **SC-01**: Fuzzy-match scoring ranks candidates using frequency (Zipf) as a tiebreaker after shared-prefix/suffix, so `berde` suggests `bedre` over `berre` in NB *(Phase 3 landed Zipf math + fixture coverage; v1.0 audit 2026-04-20 found `vocab.freq` is omitted from the runCheck vocab object so the tiebreaker is dead in browser runtime — re-assigned to Phase 03.1 for closure)*
-- [ ] **SC-02**: Expanded proper-noun and loan-word guard reduces false positives — capitalized words outside sentence-start, known loan-word list, common proper-noun patterns do not get flagged
+- [x] **SC-02**: Expanded proper-noun and loan-word guard reduces false positives — capitalized words outside sentence-start, known loan-word list, common proper-noun patterns do not get flagged
 - [ ] **SC-03**: NB↔NN dialect tolerance — a word valid in the other variant (e.g., `ikkje` typed inside an NB document) is not flagged as a typo; tolerant matching uses cross-variant lookup *(Phase 04-01 landed the seam rail — vocab.sisterValidWords Set populated for NB↔NN; Plans 04-02 + 04-03 will consume it in the gender and fuzzy-typo rules to complete the rule-behavior layer)*
-- [ ] **SC-04**: Code-switching tolerance — when a contiguous span of tokens matches a non-Norwegian language pattern (German/English/Spanish/French), the span is excluded from flagging via density heuristic, preventing false-positive storms inside mixed-language documents
+- [x] **SC-04**: Code-switching tolerance — when a contiguous span of tokens matches a non-Norwegian language pattern (German/English/Spanish/French), the span is excluded from flagging via density heuristic, preventing false-positive storms inside mixed-language documents
 - [ ] **SC-05**: Production-quality særskriving detection — the `sarskriving` rule passes the regression fixture's target precision/recall thresholds (thresholds set during INFRA-02)
 - [x] **SC-06**: Spell-check honors existing PROJECT.md constraints — stays free, offline, NB/NN only in v1 of this milestone, no new external API dependencies
 
@@ -98,9 +98,9 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |
 | SC-01 | Phase 03.1 | Complete |
-| SC-02 | Phase 4 | Pending |
+| SC-02 | Phase 4 | Complete |
 | SC-03 | Phase 4 | In Progress (04-01 rail shipped; 04-02 + 04-03 consume) |
-| SC-04 | Phase 4 | Pending |
+| SC-04 | Phase 4 | Complete |
 | SC-05 | Phase 4 | Pending |
 | SC-06 | Phase 3 | Complete |
 | WP-01 | Phase 3 | Complete |
