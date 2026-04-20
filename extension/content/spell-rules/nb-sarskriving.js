@@ -16,12 +16,26 @@
   // Words that should never trigger særskriving even when the concatenation
   // happens to exist as a compound. Tuned conservatively to avoid false
   // positives.
+  //
+  // Two classes of entries:
+  //   1. Function words (prepositions, articles, pronouns, conjunctions) —
+  //      grammar should never glue these to the next noun.
+  //   2. Common adjectives whose concatenation with a following noun ALSO
+  //      happens to exist in compoundNouns (e.g., `stor` + `by` = `storby`
+  //      which IS a real Norwegian compound, but "Hun bor i en stor by"
+  //      means "She lives in a big city" — adjective phrase, not compound).
+  //      Surfaced by Plan 04-03 fixture expansion as a real false-positive
+  //      class on adjective+noun acceptance cases.
   const SARSKRIVING_BLOCKLIST = new Set([
+    // Function words
     'i', 'på', 'av', 'til', 'med', 'for', 'om', 'er', 'og', 'å', 'at',
     'som', 'en', 'ei', 'et', 'ein', 'eit', 'det', 'den', 'de', 'dei',
     'du', 'jeg', 'eg', 'han', 'hun', 'ho', 'vi', 'dere', 'dykk', 'meg',
     'deg', 'oss', 'dem', 'seg', 'min', 'din', 'sin', 'vår', 'ikke',
     'ikkje', 'nei', 'ja',
+    // Adjectives that can collide with compoundNouns as the left half
+    // (added in Plan 04-03 to clear adjective+noun acceptance cases).
+    'stor',
   ]);
 
   const rule = {
