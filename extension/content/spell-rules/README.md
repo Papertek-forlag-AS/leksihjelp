@@ -59,3 +59,42 @@ them inside rules:
 The fuzzy rule (`nb-typo-fuzzy.js`) is the host for Plan 03's Zipf tiebreaker
 (SC-01). Phase 4 will add SC-02/03/04 as new rule files here without touching
 core.
+
+## Suppression convention — `ctx.suppressed` (Phase 4)
+
+Pre-pass rules (priority 1-9) populate `ctx.suppressed: Set<tokenIndex>`.
+Finding-emitting rules (priority >= 10) honor the set by checking it inside
+their per-token loop:
+
+```javascript
+if (ctx.suppressed && ctx.suppressed.has(i)) continue;
+```
+
+**Who populates:**
+- `nb-codeswitch.js` (priority 1) — adds every token index inside a dense
+  unknown-to-NB-AND-NN window.
+- `nb-propernoun-guard.js` (priority 5) — adds name spans, all-caps tokens,
+  hyphenated compounds, and curated loan words.
+
+**Who honors:**
+- `nb-typo-curated.js` (priority 40), `nb-typo-fuzzy.js` (priority 50),
+  `nb-sarskriving.js` (priority 30). Each has a single opt-in line near
+  the top of its per-token loop.
+
+**Who does NOT honor (intentional):**
+- `nb-gender.js` (priority 10), `nb-modal-verb.js` (priority 20). These
+  fire on real-grammar patterns (article-mismatch, modal+finite-verb);
+  they should still fire inside code-switched spans or near proper nouns
+  if the grammar pattern matches Norwegian structure.
+
+**Rule:** `ctx.suppressed` is STRICTLY ADDITIVE. Rules may `.add(i)` but
+MUST NOT `.delete(i)`. A rule that wants a token-specific exemption from
+another rule's suppression should check the token against its OWN predicate
+at decision time instead of modifying the shared set.
+
+**Priority range reservation:**
+- 1-9: pre-pass concerns that mutate `ctx.suppressed` (and emit no findings).
+- 10+: rules that emit findings.
+
+The runner in `spell-check-core.js` initializes `ctx.suppressed = new Set()`
+before any rule runs, so every rule can trust `ctx.suppressed instanceof Set`.

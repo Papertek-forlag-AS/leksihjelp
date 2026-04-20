@@ -65,7 +65,14 @@
     if (tokens.length < 2) return [];
 
     const vocabRef = vocab || {};
-    const ctx = { text, tokens, vocab: vocabRef, cursorPos, lang };
+    // Phase 4: `suppressed` is the shared "do not flag this token index" Set.
+    // Pre-pass rules (priority 1-9) populate it; typo/sarskriving rules
+    // (priority >= 10) honor it by `if (ctx.suppressed.has(i)) continue` in
+    // their per-token loop. gender/modal rules do NOT opt in — they fire on
+    // real-grammar patterns (article-mismatch, modal+finite-verb) regardless
+    // of whether the span is a name or code-switched quote. See
+    // spell-rules/README.md for the convention.
+    const ctx = { text, tokens, vocab: vocabRef, cursorPos, lang, suppressed: new Set() };
 
     const host = typeof self !== 'undefined' ? self : globalThis;
     const allRules = host.__lexiSpellRules || [];
