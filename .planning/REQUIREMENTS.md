@@ -24,7 +24,7 @@ text input on the web.
 
 ### Spell-Check Quality (NB/NN)
 
-- [ ] **SC-01**: Fuzzy-match scoring ranks candidates using frequency (Zipf) as a tiebreaker after shared-prefix/suffix, so `berde` suggests `bedre` over `berre` in NB *(Phase 3 landed Zipf math + fixture coverage; v1.0 audit 2026-04-20 found `vocab.freq` is omitted from the runCheck vocab object so the tiebreaker is dead in browser runtime — re-assigned to Phase 03.1 for closure)*
+- [x] **SC-01**: Fuzzy-match scoring ranks candidates using frequency (Zipf) as a tiebreaker after shared-prefix/suffix, so `berde` suggests `bedre` over `berre` in NB *(Phase 3 landed Zipf math + fixture coverage; v1.0 audit 2026-04-20 found `vocab.freq` is omitted from the runCheck vocab object so the tiebreaker is dead in browser runtime — re-assigned to Phase 03.1 for closure)*
 - [ ] **SC-02**: Expanded proper-noun and loan-word guard reduces false positives — capitalized words outside sentence-start, known loan-word list, common proper-noun patterns do not get flagged
 - [ ] **SC-03**: NB↔NN dialect tolerance — a word valid in the other variant (e.g., `ikkje` typed inside an NB document) is not flagged as a typo; tolerant matching uses cross-variant lookup
 - [ ] **SC-04**: Code-switching tolerance — when a contiguous span of tokens matches a non-Norwegian language pattern (German/English/Spanish/French), the span is excluded from flagging via density heuristic, preventing false-positive storms inside mixed-language documents
