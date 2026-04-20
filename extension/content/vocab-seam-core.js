@@ -497,7 +497,7 @@
 
   // ── Public API ──
 
-  function buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled } = {}) {
+  function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
     // Default predicate: emit all forms (Node / test use — "superset" policy
     // per CONTEXT: consumers filter further at the seam level).
     const iff = typeof isFeatureEnabled === 'function' ? isFeatureEnabled : () => true;
@@ -518,6 +518,22 @@
       }
     }
 
+    // Phase 4 / SC-03: cross-dialect tolerance. For NB sessions, also derive
+    // the NN validWords Set (lowercased, type!=='typo' filtered per Pitfall 1
+    // in 04-RESEARCH.md — we must NOT inherit the sister dialect's typo
+    // entries, or a word that's WRONG in both dialects would be silently
+    // accepted because the other side has it in its typo bank). For de/es/fr/en,
+    // sisterRaw is null and the Set stays empty.
+    const sisterValidWords = new Set();
+    if (sisterRaw && (lang === 'nb' || lang === 'nn')) {
+      const sisterLang = lang === 'nb' ? 'nn' : 'nb';
+      const sisterList = buildWordList(sisterRaw, sisterLang, () => true);
+      for (const entry of sisterList) {
+        if (entry.type === 'typo') continue;
+        if (entry.word) sisterValidWords.add(entry.word.toLowerCase());
+      }
+    }
+
     return {
       wordList,
       nounGenus,
@@ -528,6 +544,9 @@
       bigrams: normBigrams,
       // Phase 3-01: hydrated from freq-{lang}.json sidecar (NB/NN today; empty Map for other languages).
       freq: freqMap,
+      // Phase 4 / SC-03: cross-dialect validWords Set (NB session → NN lemmas; NN session → NB lemmas).
+      // Empty Set for de/es/fr/en. Typo-type entries intentionally excluded (Pitfall 1).
+      sisterValidWords,
       // typoBank is an alias (same Map reference) of typoFix — the data-
       // oriented name used by consumers doing lookup/autocorrect work.
       typoBank: typoFix,

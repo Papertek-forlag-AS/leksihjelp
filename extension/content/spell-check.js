@@ -205,12 +205,13 @@
     if (lang !== 'nb' && lang !== 'nn') { hideOverlay(); return; }
 
     const vocab = {
-      nounGenus:      VOCAB.getNounGenus(),
-      verbInfinitive: VOCAB.getVerbInfinitive(),
-      validWords:     VOCAB.getValidWords(),
-      typoFix:        VOCAB.getTypoFix(),
-      compoundNouns:  VOCAB.getCompoundNouns(),
-      freq:           VOCAB.getFreq(),  // Phase 03.1 / SC-01: Zipf tiebreaker Map (nb/nn populated, empty for others)
+      nounGenus:        VOCAB.getNounGenus(),
+      verbInfinitive:   VOCAB.getVerbInfinitive(),
+      validWords:       VOCAB.getValidWords(),
+      typoFix:          VOCAB.getTypoFix(),
+      compoundNouns:    VOCAB.getCompoundNouns(),
+      freq:             VOCAB.getFreq(),  // Phase 03.1 / SC-01: Zipf tiebreaker Map (nb/nn populated, empty for others)
+      sisterValidWords: VOCAB.getSisterValidWords(),  // Phase 4 / SC-03: cross-dialect tolerance
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

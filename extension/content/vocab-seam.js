@@ -121,6 +121,25 @@
     }
   }
 
+  // Phase 4 / SC-03: load the OTHER Norwegian variant's raw vocab so
+  // buildIndexes can derive a sisterValidWords Set. Only nb↔nn; all other
+  // langs get null (and buildIndexes returns an empty Set). Uses the same
+  // chrome.runtime.getURL + fetch pattern as loadRawVocab — no new network
+  // path. SC-06 network-silence gate continues to pass because
+  // chrome.runtime.getURL is explicitly whitelisted.
+  async function loadRawSister(lang) {
+    const sister = lang === 'nb' ? 'nn' : lang === 'nn' ? 'nb' : null;
+    if (!sister) return null;
+    try {
+      const url = chrome.runtime.getURL(`data/${sister}.json`);
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function loadForLanguage(lang) {
     ready = false;
 
@@ -142,13 +161,14 @@
       return;
     }
 
-    const [bigrams, freq] = await Promise.all([
+    const [bigrams, freq, sisterRaw] = await Promise.all([
       loadRawBigrams(lang),
       loadRawFrequency(lang),
+      loadRawSister(lang),   // Phase 4 / SC-03
     ]);
     const isFeatureEnabled = buildFeaturePredicate(lang);
 
-    state = core.buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled });
+    state = core.buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled });
     ready = true;
 
     // Drain ready callbacks. splice(0) so late subscribers arriving during
@@ -244,6 +264,12 @@
     // of the other pre-built indexes above, so the rule's null-guard on vocab.freq
     // stays truthful and the inner `typeof z === 'number'` catches undefined lookups.
     getFreq: () => (state && state.freq instanceof Map) ? state.freq : new Map(),
+    // Phase 4 / SC-03: cross-dialect validWords Set (lowercased). Populated
+    // for nb (contains ~11k NN lemmas) and nn (contains ~13k NB lemmas);
+    // empty Set for de/es/fr/en sessions. Empty-Set default mirrors the
+    // getValidWords / getNounGenus / getVerbInfinitive / getCompoundNouns
+    // pattern — consumers skip null-guards with `.has()` returning false.
+    getSisterValidWords: () => (state && state.sisterValidWords instanceof Set) ? state.sisterValidWords : new Set(),
   };
 
   // Kick off loading. Content scripts run at document_idle which is late
