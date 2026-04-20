@@ -19,6 +19,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size gap closure added 2026-04-19 as 02-05-PLAN.md, remediation locked: audit+remove extension/data/en.json)
 - [x] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03 (completed 2026-04-19)
 - [x] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages ✓ Complete 2026-04-20
+- [ ] **Phase 03.1: Close SC-01 browser wiring (INSERTED)** - Bridge `vocab.freq` from `__lexiVocab` seam through `spell-check.js:runCheck()` so the Zipf tiebreaker is live in the Chrome extension, not just in the fixture runner
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
 
@@ -85,9 +86,17 @@ Plans:
 - [x] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 3, depends on 03-01 + 03-02 to avoid vocab-seam-core.js conflict with Plan 02; human-verify checkpoint for 3-language top-3 inspection) ✓ Complete 2026-04-20
 - [x] 03-05-PLAN.md — WP-02 (EN bigrams hand-authored) + SC-06 release gate (check-network-silence.js + self-test + CLAUDE.md Release Workflow step) (Wave 1, autonomous) ✓ Complete 2026-04-19
 
+### Phase 03.1: Close SC-01 browser wiring (INSERTED)
+
+**Goal:** Restore SC-01 from "partial" (Zipf tiebreaker live in fixture runner only) to "satisfied end-to-end" by bridging `vocab.freq` from the `__lexiVocab` seam through `spell-check.js:runCheck()` into `nb-typo-fuzzy.js:scoreCandidate()`. Audit-identified integration defect: `spell-check.js:207-213` assembles a 5-field vocab object that omits `freq`; `nb-typo-fuzzy.js:66` reads `vocab.freq.get(cand)` behind a null guard that silently no-ops in the browser. Fixture runner masked the defect because it passes the full `buildIndexes()` output (which includes `freq`). Closes integration gap, requirement gap (SC-01), and flow gap "Type a typo → Zipf-correct top candidate."
+**Depends on:** Phase 3
+**Requirements**: SC-01 (REQUIREMENTS.md — re-opened pending closure)
+**Gap Closure:** Closes integration gap from v1.0 audit (spell-check.js:runCheck → nb-typo-fuzzy.js:scoreCandidate), the SC-01 partial requirement, and the "Type a typo → Zipf-correct top candidate" flow gap. Must land before Phase 4 so new Phase 4 rules can assume `vocab.freq` is reliably present in browser runtime.
+**Plans:** TBD
+
 ### Phase 4: False-Positive Reduction on NB/NN
 **Goal**: Proper-noun guard, dialect tolerance, code-switching detection, and particularly særskriving all pass the regression fixture's precision/recall thresholds — so the tool stays quiet on correct Norwegian text, tolerates mixed-language documents, and only fires særskriving when it's genuinely wrong.
-**Depends on**: Phase 1 (fixture), Phase 3 (rule architecture + frequency signals)
+**Depends on**: Phase 1 (fixture), Phase 3 (rule architecture + frequency signals), Phase 03.1 (vocab.freq browser wiring closed so new rules can rely on Zipf signal in the same code path)
 **Requirements**: SC-02, SC-03, SC-04, SC-05
 **Success Criteria** (what must be TRUE):
   1. A sample Norwegian news article (at least 500 words) pasted into a `<textarea>` produces no false positives on proper nouns, loan words, or capitalized names — verified by manual inspection
@@ -110,7 +119,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5
 
 **Parallelization notes:**
 - Phase 2's DATA-02 (papertek-vocabulary typo-bank work) has cross-app lead time and can start as soon as Phase 1's fixture lands, in parallel with DATA-01 and DATA-03.
@@ -123,7 +132,8 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
-| 3. Rule Architecture & Ranking Quality | 5/5 | Complete    | 2026-04-20 |
+| 3. Rule Architecture & Ranking Quality | 5/5 | Complete (SC-01 re-opened by 2026-04-20 audit — bridged in 03.1) | 2026-04-20 |
+| 03.1 Close SC-01 browser wiring (INSERTED) | 0/TBD | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 

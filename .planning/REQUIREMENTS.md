@@ -24,7 +24,7 @@ text input on the web.
 
 ### Spell-Check Quality (NB/NN)
 
-- [x] **SC-01**: Fuzzy-match scoring ranks candidates using frequency (Zipf) as a tiebreaker after shared-prefix/suffix, so `berde` suggests `bedre` over `berre` in NB
+- [ ] **SC-01**: Fuzzy-match scoring ranks candidates using frequency (Zipf) as a tiebreaker after shared-prefix/suffix, so `berde` suggests `bedre` over `berre` in NB *(Phase 3 landed Zipf math + fixture coverage; v1.0 audit 2026-04-20 found `vocab.freq` is omitted from the runCheck vocab object so the tiebreaker is dead in browser runtime — re-assigned to Phase 03.1 for closure)*
 - [ ] **SC-02**: Expanded proper-noun and loan-word guard reduces false positives — capitalized words outside sentence-start, known loan-word list, common proper-noun patterns do not get flagged
 - [ ] **SC-03**: NB↔NN dialect tolerance — a word valid in the other variant (e.g., `ikkje` typed inside an NB document) is not flagged as a typo; tolerant matching uses cross-variant lookup
 - [ ] **SC-04**: Code-switching tolerance — when a contiguous span of tokens matches a non-Norwegian language pattern (German/English/Spanish/French), the span is excluded from flagging via density heuristic, preventing false-positive storms inside mixed-language documents
@@ -97,7 +97,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |
-| SC-01 | Phase 3 | Complete |
+| SC-01 | Phase 03.1 | Pending (Phase 3 landed Zipf math; v1.0 audit re-opened — browser wiring defect) |
 | SC-02 | Phase 4 | Pending |
 | SC-03 | Phase 4 | Pending |
 | SC-04 | Phase 4 | Pending |
@@ -118,10 +118,11 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 **Phase Distribution:**
 - Phase 1 (Foundation): 3 requirements — INFRA-01, INFRA-02, INFRA-04
 - Phase 2 (Data Layer): 3 requirements — DATA-01, DATA-02, DATA-03
-- Phase 3 (Rule Architecture & Ranking): 7 requirements — INFRA-03, SC-01, SC-06, WP-01, WP-02, WP-03, WP-04
+- Phase 3 (Rule Architecture & Ranking): 6 requirements — INFRA-03, SC-06, WP-01, WP-02, WP-03, WP-04
+- Phase 03.1 (Close SC-01 browser wiring): 1 requirement — SC-01 (re-assigned from Phase 3 by v1.0 audit gap closure)
 - Phase 4 (False-Positive Reduction): 4 requirements — SC-02, SC-03, SC-04, SC-05
 - Phase 5 (Student Experience Polish): 2 requirements — UX-01, UX-02
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-17 after roadmap creation (traceability filled)*
+*Last updated: 2026-04-20 after v1.0 milestone audit (SC-01 re-opened, re-assigned to Phase 03.1 for browser-wiring closure)*
