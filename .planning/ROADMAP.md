@@ -20,7 +20,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - [x] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03 (completed 2026-04-19)
 - [x] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages ✓ Complete 2026-04-20
 - [x] **Phase 03.1: Close SC-01 browser wiring (INSERTED)** - Bridge `vocab.freq` from `__lexiVocab` seam through `spell-check.js:runCheck()` so the Zipf tiebreaker is live in the Chrome extension, not just in the fixture runner (completed 2026-04-20)
-- [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
+- [x] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving ✓ Complete 2026-04-20 (pending `/gsd:verify-work 04` SC-02/03/04/05 mark)
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
 
 ## Phase Details
@@ -110,7 +110,7 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md — SC-03 rail: wire vocab.sisterValidWords through seam + adapter + install SC-03 adapter-contract regression guard in check-fixtures (Wave 1, autonomous) ✓ 2026-04-20
 - [x] 04-02-PLAN.md — SC-02 + SC-04 rules: author nb-codeswitch.js (priority 1, density window) + nb-propernoun-guard.js (priority 5, name/loan layers), init ctx.suppressed in core, opt typo-curated / typo-fuzzy / sarskriving into suppression, register in manifest (Wave 2, autonomous) ✓ 2026-04-20
-- [ ] 04-03-PLAN.md — SC-02/03/04/05 fixture expansion + SC-05 threshold gate: codeswitch.jsonl (new) + expanded clean/typo/saerskriving + THRESHOLDS table in check-fixtures (Wave 3, human-verify checkpoint for threshold-value lock)
+- [x] 04-03-PLAN.md — SC-02/03/04/05 fixture expansion + SC-05 threshold gate: codeswitch.jsonl (new) + expanded clean/typo/saerskriving + THRESHOLDS table in check-fixtures (Wave 3, decision checkpoint for threshold-value lock) ✓ Complete 2026-04-20
 
 ### Phase 5: Student Experience Polish
 **Goal**: The spell-check popover explains errors in student-friendly Norwegian instead of bare class labels, and both spell-check popovers and word-prediction dropdowns cap visible suggestions at top-3 with a "vis flere" reveal — reducing cognitive load for dyslexic learners.
@@ -141,7 +141,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
 | 3. Rule Architecture & Ranking Quality | 5/5 | Complete (SC-01 re-opened by 2026-04-20 audit — bridged in 03.1) | 2026-04-20 |
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
-| 4. False-Positive Reduction on NB/NN | 2/3 | In Progress | - |
+| 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 
 ---
