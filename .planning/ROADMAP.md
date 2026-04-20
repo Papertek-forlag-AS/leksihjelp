@@ -121,7 +121,13 @@ Plans:
   2. When there are more than 3 spell-check suggestions or word-prediction candidates, the UI shows only the top 3 with a "vis flere" / "show more" control; clicking reveals the rest
   3. A dyslexic-persona reviewer (or a proxy reviewer using the dyslexia persona criteria from PROJECT.md) confirms that the popover copy avoids jargon, explains the rule in one short sentence, and does not read as accusatory
   4. Explanation copy is present for both NB and NN register for each of the four error classes — verified by a one-screen copy review document alongside the release
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 05-01-PLAN.md — Foundation: expose escapeHtml on __lexiSpellCore, ship check-explain-contract gate + self-test + CLAUDE.md Release Workflow entry, seed i18n strings, scaffold COPY-REVIEW.md, update spell-rules/README.md (Wave 1, autonomous)
+- [ ] 05-02-PLAN.md — Rule-side UX-01 + UX-02 data source: upgrade 5 popover-surfacing rules to explain: (finding) => ({nb,nn}) callables with XSS-safe `<em>` templates, add priority to emitted findings (Pitfall 1), expand fuzzy findFuzzyNeighbor to top-K (Pitfall 7) emitting finding.suggestions[], populate COPY-REVIEW.md cells (Wave 2, autonomous, depends_on 05-01)
+- [ ] 05-03-PLAN.md — UX-02 word-prediction dropdown: cap visible at 3 default / 8 expanded with "Vis flere ⌄" reveal + ArrowDown auto-reveal, preserve compound-injection priority (Pitfall 6) + reset-on-new-session (Pitfall 5) + click-guard (Wave 2, autonomous, depends_on 05-01)
+- [ ] 05-04-PLAN.md — UX-02 control surface: add "Vis alternative skriveforslag" toggle to popup Settings tab, chrome.storage.local default false (Wave 2, autonomous, depends_on 05-01)
+- [ ] 05-05-PLAN.md — UX-01 + UX-02 popover render: renderExplain + chrome.storage.onChanged subscriber + single/multi-suggest branches in showPopover, new CSS classes, XSS fixture + dyslexia-persona proxy self-review (Wave 3, human-verify checkpoint, depends_on 05-02 + 05-04)
 
 ## Progress
 
@@ -142,7 +148,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5
 | 3. Rule Architecture & Ranking Quality | 5/5 | Complete (SC-01 re-opened by 2026-04-20 audit — bridged in 03.1) | 2026-04-20 |
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
-| 5. Student Experience Polish | 0/TBD | Not started | - |
+| 5. Student Experience Polish | 0/5 | Not started | - |
 
 ---
 *Roadmap created: 2026-04-17*
