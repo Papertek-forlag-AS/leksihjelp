@@ -780,6 +780,35 @@
   #lexi-spell-overlay .lh-spell-decline:hover {
     background: rgba(255, 255, 255, 0.12);
   }
+
+  /* UX-01 + UX-02 dark-mode variants (Phase 5 Plan 05) — match palette of the
+     existing dark popover styles above. */
+  #lexi-spell-overlay .lh-spell-explain {
+    color: #e2e8f0;
+  }
+
+  #lexi-spell-overlay .lh-spell-explain em,
+  #lexi-spell-overlay .lh-spell-emph {
+    color: #5eead4;
+  }
+
+  #lexi-spell-overlay .lh-spell-sugg-row {
+    color: #e2e8f0;
+  }
+
+  #lexi-spell-overlay .lh-spell-sugg-row:hover,
+  #lexi-spell-overlay .lh-spell-sugg-row:focus-visible {
+    background: rgba(17, 180, 154, 0.18);
+  }
+
+  #lexi-spell-overlay .lh-spell-vis-flere {
+    color: #94a3b8;
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  #lexi-spell-overlay .lh-spell-vis-flere:hover {
+    color: #e2e8f0;
+  }
 }
 
 /* ── Spell-check overlay (per-word markers + popover) ── */
@@ -909,4 +938,77 @@
 
 #lexi-spell-overlay .lh-spell-decline:hover {
   background: rgba(0, 0, 0, 0.08);
+}
+
+/* UX-01 (Phase 5 Plan 05): student-friendly explanation row. Larger than the
+   retired .lh-spell-note (which was a 10px uppercase label) — dyslexia-aware
+   body text at 13px with 1.4 line-height, wrapping naturally. Student's typed
+   word is wrapped in <em> + .lh-spell-emph accent by the rule.explain() template. */
+#lexi-spell-overlay .lh-spell-explain {
+  padding: 6px 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #1e293b;
+}
+
+#lexi-spell-overlay .lh-spell-explain em,
+#lexi-spell-overlay .lh-spell-emph {
+  font-style: italic;
+  color: #0d8a75;
+  background: transparent;
+}
+
+/* UX-02 (Phase 5 Plan 05): multi-suggest row list — shown only when the
+   popup Settings alternates toggle is ON AND finding carries >1 suggestion.
+   Rows are buttons styled flat so they read as "clickable words", not
+   "button bar". Dyslexia-friendly hit target (min-height 32px). */
+#lexi-spell-overlay .lh-spell-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0 0;
+  margin-bottom: 6px;
+}
+
+#lexi-spell-overlay .lh-spell-sugg-row {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 7px 10px;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: #1e293b;
+  cursor: pointer;
+  border-radius: 6px;
+  min-height: 32px;
+}
+
+#lexi-spell-overlay .lh-spell-sugg-row:hover,
+#lexi-spell-overlay .lh-spell-sugg-row:focus-visible {
+  background: rgba(17, 180, 154, 0.08);
+  outline: none;
+}
+
+/* Visual twin of .lh-pred-vis-flere in word-prediction (Plan 03) — same
+   dyslexia-friendly underlined text-link pattern, scoped to the spell-check
+   overlay so the two surfaces share affordance without style bleed. */
+#lexi-spell-overlay .lh-spell-vis-flere {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #64748b;
+  text-decoration: underline;
+  cursor: pointer;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  text-align: center;
+  margin-top: 4px;
+  user-select: none;
+  font-family: inherit;
+}
+
+#lexi-spell-overlay .lh-spell-vis-flere:hover {
+  color: #1e293b;
 }

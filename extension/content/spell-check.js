@@ -72,6 +72,23 @@
 
     chrome.runtime.onMessage.addListener(handleRuntimeMessage);
 
+    // Phase 5 / UX-02: hydrate + subscribe to the alternates-visible toggle
+    // (storage key written by popup.js initSettings — Plan 04). A live flip
+    // re-renders the active popover in place so the user sees the layout
+    // change without having to close and re-open it.
+    chrome.storage.local.get('spellCheckAlternatesVisible', (r) => {
+      alternatesVisible = r && r.spellCheckAlternatesVisible === true;
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'local') return;
+      if ('spellCheckAlternatesVisible' in changes) {
+        alternatesVisible = changes.spellCheckAlternatesVisible.newValue === true;
+        if (popover && activePopoverIdx >= 0 && lastFindings[activePopoverIdx]) {
+          showPopover(activePopoverIdx, lastFindings[activePopoverIdx]);
+        }
+      }
+    });
+
     // Expose state for ad-hoc inspection from devtools.
     if (typeof window !== 'undefined') {
       window.__lexiSpell = {
@@ -250,6 +267,10 @@
   let lastFindings = [];
   const dismissed = new Set();
   let posRefreshRaf = null;
+  // Phase 5 / UX-02: popup Settings toggle subscriber. Plan 04 writes the key;
+  // this module hydrates on init and re-reads via chrome.storage.onChanged so
+  // a live toggle flips the active popover layout without a re-open.
+  let alternatesVisible = false;
 
   function ensureOverlay() {
     if (overlay) return overlay;
@@ -352,19 +373,78 @@
     popover = document.createElement('div');
     popover.className = `lh-spell-popover lh-spell-popover-${finding.type}`;
     popover.addEventListener('mousedown', e => e.preventDefault());
-    popover.innerHTML = `
-      <div class="lh-spell-head">
-        <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
-        <span class="lh-spell-arrow">→</span>
-        <span class="lh-spell-fix-text">${escapeHtml(finding.fix)}</span>
-      </div>
-      <div class="lh-spell-note">${escapeHtml(typeLabel(finding.type))}</div>
-      <div class="lh-spell-actions">
-        <button type="button" class="lh-spell-btn lh-spell-accept">✓ Fiks</button>
-        <button type="button" class="lh-spell-btn lh-spell-decline">✕ Avvis</button>
-      </div>
-    `;
-    popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
+
+    const lang = VOCAB.getLanguage();
+    const suggestions = Array.isArray(finding.suggestions) && finding.suggestions.length
+      ? finding.suggestions
+      : [finding.fix];
+
+    const useMulti = alternatesVisible && suggestions.length > 1;
+    const explainHtml = renderExplain(finding, lang);
+
+    if (useMulti) {
+      const topK = suggestions.slice(0, 3);
+      const rest = suggestions.slice(3, 8);
+      const rowsHtml = topK.map(s =>
+        `<button type="button" class="lh-spell-sugg-row" data-fix="${escapeAttr(s)}">${escapeHtml(s)}</button>`
+      ).join('');
+      const visFlereHtml = rest.length
+        ? `<button type="button" class="lh-spell-vis-flere" data-state="collapsed">Vis flere \u2304</button>`
+        : '';
+      popover.innerHTML = `
+        <div class="lh-spell-head">
+          <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
+        </div>
+        <div class="lh-spell-explain">${explainHtml}</div>
+        <div class="lh-spell-suggestions">${rowsHtml}${visFlereHtml}</div>
+        <div class="lh-spell-actions">
+          <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
+        </div>
+      `;
+      popover.querySelectorAll('.lh-spell-sugg-row').forEach(row => {
+        row.addEventListener('click', () => applyFix({ ...finding, fix: row.dataset.fix }));
+      });
+      if (rest.length) {
+        const visFlereBtn = popover.querySelector('.lh-spell-vis-flere');
+        visFlereBtn.addEventListener('click', () => {
+          const state = visFlereBtn.dataset.state;
+          const suggList = popover.querySelector('.lh-spell-suggestions');
+          if (state === 'collapsed') {
+            rest.forEach(s => {
+              const row = document.createElement('button');
+              row.type = 'button';
+              row.className = 'lh-spell-sugg-row';
+              row.dataset.fix = s;
+              row.textContent = s;
+              row.addEventListener('click', () => applyFix({ ...finding, fix: s }));
+              suggList.insertBefore(row, visFlereBtn);
+            });
+            visFlereBtn.textContent = 'Vis f\u00e6rre \u2303';
+            visFlereBtn.dataset.state = 'expanded';
+          } else {
+            const extraRows = popover.querySelectorAll('.lh-spell-sugg-row');
+            for (let i = 3; i < extraRows.length; i++) extraRows[i].remove();
+            visFlereBtn.textContent = 'Vis flere \u2304';
+            visFlereBtn.dataset.state = 'collapsed';
+          }
+        });
+      }
+    } else {
+      popover.innerHTML = `
+        <div class="lh-spell-head">
+          <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
+          <span class="lh-spell-arrow">\u2192</span>
+          <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
+        </div>
+        <div class="lh-spell-explain">${explainHtml}</div>
+        <div class="lh-spell-actions">
+          <button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>
+          <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
+        </div>
+      `;
+      popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
+    }
+
     popover.querySelector('.lh-spell-decline').addEventListener('click', () => {
       dismissed.add(dismissKey(finding));
       hidePopover();
@@ -382,6 +462,43 @@
       case 'sarskriving': return 'Særskriving';
       default: return '';
     }
+  }
+
+  // Phase 5 / UX-01: look up the per-rule `explain` callable and return the
+  // NB- or NN-register student-friendly sentence (already HTML-safe:
+  // rule.explain() templates call escapeHtml on every interpolated token).
+  // Graceful fallback chain (Pitfall 9): callable.lang → callable.nb → string
+  // → typeLabel. Curated-typo (priority 40) vs fuzzy-typo (priority 50) share
+  // rule_id 'typo' — route by (id, priority) to hit the correct callable
+  // (Pitfall 1 disambiguation).
+  function renderExplain(finding, lang) {
+    const host = typeof self !== 'undefined' ? self : globalThis;
+    const rules = host.__lexiSpellRules || [];
+    let rule = rules.find(r =>
+      r.id === finding.rule_id &&
+      r.priority === finding.priority &&
+      Array.isArray(r.languages) && r.languages.includes(lang)
+    );
+    if (!rule) {
+      rule = rules.find(r =>
+        r.id === finding.rule_id &&
+        Array.isArray(r.languages) && r.languages.includes(lang)
+      );
+    }
+    if (!rule) return escapeHtml(typeLabel(finding.type || finding.rule_id));
+
+    let result;
+    try {
+      result = typeof rule.explain === 'function' ? rule.explain(finding) : rule.explain;
+    } catch (e) {
+      console.warn('[lexi-spell] rule.explain threw', rule.id, e);
+      return escapeHtml(typeLabel(finding.type || finding.rule_id));
+    }
+
+    if (typeof result === 'string') return result;
+    if (result && typeof result[lang] === 'string') return result[lang];
+    if (result && typeof result.nb === 'string') return result.nb;
+    return escapeHtml(typeLabel(finding.type || finding.rule_id));
   }
 
   function positionPopover(rect) {
@@ -566,5 +683,12 @@
     const d = document.createElement('span');
     d.textContent = String(s ?? '');
     return d.innerHTML;
+  }
+
+  // escapeHtml escapes &, <, >. Attribute values must ALSO escape " since
+  // the multi-suggest branch interpolates each suggestion into a data-fix="..."
+  // attribute. Layered on top of escapeHtml — same shape as word-prediction.js.
+  function escapeAttr(s) {
+    return escapeHtml(s).replace(/"/g, '&quot;');
   }
 })();
