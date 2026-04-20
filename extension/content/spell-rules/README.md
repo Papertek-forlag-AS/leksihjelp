@@ -98,3 +98,108 @@ at decision time instead of modifying the shared set.
 
 The runner in `spell-check-core.js` initializes `ctx.suppressed = new Set()`
 before any rule runs, so every rule can trust `ctx.suppressed instanceof Set`.
+
+## Explain contract — `explain: { nb, nn }` callable (Phase 5 / UX-01)
+
+Plan 05-02 upgrades the rule shape from a single static string to a
+finding-aware callable that returns per-register copy:
+
+```javascript
+// Before (Phase 3):
+explain: 'Kjent skrivefeil — slå opp i ordboken.',
+
+// After (Phase 5):
+explain: (finding) => ({
+  nb: `<em>${escapeHtml(finding.original)}</em> er en vanlig skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+  nn: `<em>${escapeHtml(finding.original)}</em> er ein vanleg skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+}),
+```
+
+Static copy (copy that doesn't interpolate any finding field) is supported
+by wrapping the string in an arrow lambda that ignores the argument:
+
+```javascript
+explain: () => ({
+  nb: 'Artikkel og substantiv må ha samme kjønn.',
+  nn: 'Artikkel og substantiv må ha same kjønn.',
+}),
+```
+
+The renderer in `spell-check.js` picks `nb` or `nn` based on the finding's
+document language. Both registers MUST be non-empty strings.
+
+### Pitfall 1 — priority disambiguation for shared rule IDs
+
+`nb-typo-curated.js` (priority 40) and `nb-typo-fuzzy.js` (priority 50) BOTH
+emit `rule_id: 'typo'`. The popover renderer picks which `explain()` to call
+by matching BOTH `rule_id` AND `priority` on the finding. Starting in Plan
+05-02, every emitted finding MUST carry `priority: <rule.priority>` so the
+renderer can disambiguate:
+
+```javascript
+out.push({
+  rule_id: 'typo',
+  priority: 40,              // ← mirrors rule.priority, required from Plan 05-02 onwards
+  start: t.start,
+  end: t.end,
+  original: t.display,
+  fix: matchCase(t.display, correct),
+  message: `Skrivefeil: "${t.display}" → "${correct}"`,
+});
+```
+
+Rules that don't share `rule_id` with another rule still set the field —
+it's a convention, not a conditional. Omitting it silently routes the
+renderer to whichever rule happens to appear first in the registry, which
+is a race condition.
+
+### XSS-escape rule — `escapeHtml` is mandatory inside `<em>`
+
+Any interpolation of a user-typed token (e.g., `finding.original`,
+`finding.fix`, `finding.message`) inside HTML output — including inside
+`<em>` wrappers — MUST go through `escapeHtml` exported on
+`self.__lexiSpellCore`. Users paste arbitrary content; without escaping, a
+pasted `<script>` token becomes a script-execution surface.
+
+```javascript
+// ✓ DO — pull escapeHtml from the core surface, escape every interpolated token
+const host = typeof self !== 'undefined' ? self : globalThis;
+const { escapeHtml } = host.__lexiSpellCore || {};
+const rule = {
+  explain: (f) => ({
+    nb: `<em>${escapeHtml(f.original)}</em> er feil — prøv <em>${escapeHtml(f.fix)}</em>.`,
+    nn: `<em>${escapeHtml(f.original)}</em> er feil — prøv <em>${escapeHtml(f.fix)}</em>.`,
+  }),
+};
+
+// ✗ DON'T — direct template interpolation is an XSS surface
+const rule = {
+  explain: (f) => ({
+    nb: `<em>${f.original}</em> er feil.`,
+    nn: `<em>${f.original}</em> er feil.`,
+  }),
+};
+```
+
+The `escapeHtml` helper in `spell-check-core.js` is the Node-safe version
+(String.replace, not `document.createElement`) so it works in both the
+browser and the Node fixture harness.
+
+### Suppression rules are exempt from the callable contract
+
+`nb-codeswitch.js` (priority 1) and `nb-propernoun-guard.js` (priority 5)
+never surface to the popover — they emit `return []` and only mutate
+`ctx.suppressed`. Their existing string `explain` stays untouched; the
+contract gate excludes them.
+
+### CI enforcement
+
+`npm run check-explain-contract` — must exit 0 on every release. Loads each
+of the 5 popover-surfacing rule files (`nb-gender`, `nb-modal-verb`,
+`nb-sarskriving`, `nb-typo-curated`, `nb-typo-fuzzy`) and asserts
+`typeof rule.explain === 'function'` and that calling it returns an object
+with non-empty `nb` and `nn` string keys. Paired self-test
+`npm run check-explain-contract:test` plants a broken explain, verifies the
+gate fires, restores, verifies it passes — belt-and-braces against regex
+drift making the gate silently permissive (same pattern as
+`check-network-silence:test` from Plan 03-05).

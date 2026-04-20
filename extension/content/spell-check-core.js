@@ -254,6 +254,23 @@
     return replacement;
   }
 
+  // Node-safe HTML escape — used by rule explain() builders to safely
+  // interpolate user-typed tokens inside <em> wrappers. Phase 5 / UX-01.
+  //
+  // Uses String.replace (not document.createElement) so the helper runs in
+  // both the Node fixture harness AND the browser content-script context.
+  // The popover in spell-check.js has its own DOM-based escapeHtml (line ~565)
+  // which stays in place; Plan 03 may or may not consolidate.
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[c]));
+  }
+
   // ── Dual-export footer ──
   // Writes `self.__lexiSpellCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path. `self` is defined
@@ -265,6 +282,7 @@
     tokenize,
     editDistance,
     matchCase,
+    escapeHtml,
     dedupeOverlapping,
     sharedPrefixLen,
     sharedSuffixLen,
