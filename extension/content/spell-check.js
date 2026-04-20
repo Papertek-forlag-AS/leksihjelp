@@ -210,6 +210,7 @@
       validWords:     VOCAB.getValidWords(),
       typoFix:        VOCAB.getTypoFix(),
       compoundNouns:  VOCAB.getCompoundNouns(),
+      freq:           VOCAB.getFreq(),  // Phase 03.1 / SC-01: Zipf tiebreaker Map (nb/nn populated, empty for others)
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

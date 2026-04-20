@@ -237,6 +237,13 @@
     getValidWords: () => (state && state.validWords) ? state.validWords : new Set(),
     getTypoFix: () => (state && state.typoFix) ? state.typoFix : new Map(),
     getCompoundNouns: () => (state && state.compoundNouns) ? state.compoundNouns : new Set(),
+    // Frequency Map (Zipf-scored unigrams from freq-{lang}.json sidecar).
+    // NB/NN: populated ~13k / ~11k entries. DE/ES/FR/EN: empty Map (no sidecar shipped).
+    // Consumers (spell-rules/nb-typo-fuzzy.js) pass this through core.check → rule.check
+    // and read via vocab.freq.get(word). Empty-Map default matches the Set/Map pattern
+    // of the other pre-built indexes above, so the rule's null-guard on vocab.freq
+    // stays truthful and the inner `typeof z === 'number'` catches undefined lookups.
+    getFreq: () => (state && state.freq instanceof Map) ? state.freq : new Map(),
   };
 
   // Kick off loading. Content scripts run at document_idle which is late
