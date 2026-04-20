@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: in_progress
-last_updated: "2026-04-20T20:04:40Z"
+status: unknown
+last_updated: "2026-04-20T20:18:36.837Z"
 progress:
   total_phases: 7
   completed_phases: 6
   total_plans: 24
-  completed_plans: 20
+  completed_plans: 21
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 05 of 6 — Student Experience Polish — 1 of 5 plans COMPLETE 2026-04-20 (Plan 05-01 foundation). Phase 4 plan execution closed end-to-end 2026-04-20; `/gsd:verify-work 04` owns SC-02/03/04/05 requirement marking at phase close (not yet run).
-Plan: 1 of 5 in Phase 05 — 05-01-PLAN.md COMPLETE 2026-04-20 (foundation: escapeHtml exported on __lexiSpellCore + check-explain-contract gate + paired self-test + i18n key seeds + COPY-REVIEW.md scaffold + spell-rules/README.md contract docs + CLAUDE.md Release Workflow step 2). No extension user-facing behavior change — all edits are infrastructure that Wave-2 plans (05-02/03/04/05) consume with commit-time contract enforcement.
-Status: Plan 05-01 shipped as 3 atomic commits, 0 deviations. Commits: 1328317 (feat: expose escapeHtml on __lexiSpellCore + document explain contract in spell-rules/README.md — Node-safe String.replace impl so it runs in both browser content-script and Node fixture harness; README now covers the { nb, nn } callable shape, Pitfall-1 priority disambiguation for shared rule_id='typo' findings, XSS-escape rule with do/don't example, suppression-rule exemption for nb-codeswitch + nb-propernoun-guard), 9a23d09 (feat: check-explain-contract gate + self-test + package.json + CLAUDE.md — zero-dep gate asserts rule.explain is a callable returning {nb, nn} non-empty strings for the 5 popover-surfacing rules; paired self-test uses dual-scenario plant-broken-then-plant-fixed pattern with node -e source injection to isolate scratch-file validation; gate today exits 1 as designed since rules still carry legacy string explain, Plan 05-02 flips to 0; CLAUDE.md Release Workflow step 2 added between check-fixtures and check-network-silence), 0f033f2 (feat: 10 new i18n entries + COPY-REVIEW.md — settings_spellcheck_alternates_title/_toggle/_note for Plan 05 settings toggle and pred_vis_flere / pred_vis_faerre for Plan 04 dropdown reveal, across both nb + nn locales with correct NN morphology; COPY-REVIEW.md scaffolds 5-row copy table + tone-check checklist + review-log stub). All 3 pre-existing release gates still pass: check-fixtures 280/280, check-network-silence PASS, check-bundle-size unchanged (no extension-surface changes). New check-explain-contract gate exits 1 by design today (acceptance signal for Plan 05-02 flip).
-Last activity: 2026-04-20 — Plan 05-01 completed in 7 min. Task commits: 1328317 (feat Task 1), 9a23d09 (feat Task 2), 0f033f2 (feat Task 3). Files modified: extension/content/spell-check-core.js, extension/content/spell-rules/README.md, scripts/check-explain-contract.js (NEW), scripts/check-explain-contract.test.js (NEW), package.json, CLAUDE.md, extension/i18n/strings.js, .planning/phases/05-student-experience-polish/COPY-REVIEW.md (NEW). Zero deviations — plan landed exactly as written.
+Phase: 05 of 6 — Student Experience Polish — 2 of 5 plans COMPLETE 2026-04-20 (Plan 05-01 foundation + Plan 05-04 settings toggle). Wave 2 still in progress — Plans 05-02 and 05-03 running concurrently alongside 05-04; 05-04 completed first of the Wave-2 trio. Phase 4 plan execution closed end-to-end 2026-04-20; `/gsd:verify-work 04` owns SC-02/03/04/05 requirement marking at phase close (not yet run).
+Plan: 2 of 5 in Phase 05 — 05-04-PLAN.md COMPLETE 2026-04-20 (Wave 2: UX-02 settings toggle surface — extension/popup/popup.html + popup.js only). Adds `#setting-spellcheck-alternates` checkbox in popup Settings tab (between prediction and grammar groups), wires to `chrome.storage.local.spellCheckAlternatesVisible` (boolean, default false), storage-subscribe pattern rather than runtime-message fan-out so Plan 05's spell-check.js consumer reacts via `chrome.storage.onChanged`. File-ownership-isolated from parallel plans 05-02 (rule files — in-flight on nb-typo-fuzzy.js) and 05-03 (word-prediction.js + content.css).
+Status: Plan 05-04 shipped as 1 atomic commit, 1 deviation (Rule 3 — plan's Task 1 verify regex had a 400-char window that false-positively flagged correctly-placed alternatesToggle; replaced with precise alternates-block-only regex inline; no code change required). Commit: e45eacd (feat(05-04): add spell-check alternates toggle to popup Settings — new settings-group block with toggle-row + settings-note mirroring setting-prediction precedent; initSettings declares alternatesToggle, hydrates from chrome.storage.local.spellCheckAlternatesVisible with default-false semantics via === true guard, installs change listener that writes storage only — no chrome.runtime.sendMessage since Plan 05 consumer subscribes via chrome.storage.onChanged). During Task 2's release-gate sweep, check-fixtures showed Plan 05-02's in-flight findFuzzyNeighbors rename breaking 134/280 cases; diagnosed as concurrent Wave-2 crossover (not caused by 05-04), verified 280/280 pass against baseline by stashing 05-02's + 05-03's unrelated edits, restored stash after verification (05-02 landed commit 62e51a8 mid-verification so nb-sarskriving.js stash content was stale — dropped cleanly). Plan 05-04 gates all PASS: check-fixtures 280/280 (baseline), check-network-silence PASS, check-bundle-size 10.13 MiB / 20 MiB cap with 9.87 MiB headroom. check-explain-contract still exits 1 by design (Plan 05-02 flips it when 05-02 completes).
+Last activity: 2026-04-20 — Plan 05-04 completed in 3 min 9 sec. Task commit: e45eacd (Task 1). Task 2 was verification-only (release-gate sweep + integration probe) with no file changes. Files modified: extension/popup/popup.html (+10 lines), extension/popup/popup.js (+9 lines). One Rule-3 deviation (verify-command miscalibration, no code change).
 
-Progress: [██░░░░░░░░] 20%  (Phase 05 — 1 of 5 plans complete. Plan 05-01 foundation shipped — escapeHtml + check-explain-contract gate + self-test + i18n seeds + COPY-REVIEW scaffold + spell-rules/README docs + CLAUDE.md Release Workflow all in place. Wave 2 (05-02/03/04/05) unblocked: rule-file upgrade, word-prediction dropdown, settings toggle, popover render can now land concurrently with commit-time contract enforcement from the new gate.)
+Progress: [████░░░░░░] 40%  (Phase 05 — 2 of 5 plans complete. Plan 05-04 settings toggle shipped; Plan 05-01 foundation shipped. Wave 2 still in progress — Plans 05-02 (rule explain callable + top-K suggestions) and 05-03 (word-prediction dropdown + content.css styling) running concurrently; 05-04 completed first in the Wave-2 trio via its file-ownership-isolated popup-surface changes.)
 
 ## Performance Metrics
 
@@ -71,6 +71,7 @@ Progress: [██░░░░░░░░] 20%  (Phase 05 — 1 of 5 plans compl
 | Phase 04 P02 | 6m 37s | 3 tasks | 8 files |
 | Phase 04-false-positive-reduction-nb-nn P03 | 6 min | 3 tasks | 11 files |
 | Phase 05-student-experience-polish P01 | 7 min | 3 tasks tasks | 8 files files |
+| Phase 05 P04 | 3 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -164,6 +165,9 @@ Recent decisions affecting current work:
 - [Phase 04-false-positive-reduction-nb-nn]: [Phase 04-03] Pre-plan Rule-1 auto-fixes (prior session): 383552c closed SC-03 gap in nb-typo-curated.js by adding the sister-validWords early-exit that nb-typo-fuzzy.js already had from Plan 04-02 — Task 1 fixture authoring surfaced that NN-valid words were leaking through the curated-typo branch in NB documents (plan 04-02 had covered the fuzzy side of the rule but not curated). 8ea74c5 fixed the check-fixtures runner to load sister-dialect raw vocab and pass it into buildIndexes — without this, sisterValidWords was empty Set in the Node runner and all SC-03 fixture cases would either pass via other means OR fail loudly with false-positives; the browser adapter was correctly loading sisterRaw but the fixture path was bypassing it entirely.
 - [Phase 05]: Phase 5 contract-gate-before-upgrade pattern — Plan 05-01 lands escapeHtml + check-explain-contract gate + self-test + i18n seeds BEFORE any rule-file edit. Wave-2 plans (05-02/03/04/05) then land concurrently with commit-time contract enforcement. Gate today exits 1 (rules still string explain); Plan 05-02 flips to 0.
 - [Phase 05]: Dual-scenario self-test pattern — check-explain-contract.test.js plants broken scratch THEN well-formed scratch; both assertions required. Stronger than check-network-silence.test.js's plant-broken-only because the explain-contract gate CANNOT pass baseline today (5 rules still string explain pre-Plan-05-02). Source-injection via node -e isolates scratch-file validation without touching the gate file.
+- [Phase 05]: [Plan 05-04] Storage-subscribe over runtime-message pattern — alternates toggle writes chrome.storage.local only; consumer uses chrome.storage.onChanged. Fires in all contexts including originating tab, no message-type string contract to maintain. Precedent split from setting-prediction (which ships sendMessage).
+- [Phase 05]: [Plan 05-04] Default OFF preserves today's low-noise popover — first-time + never-touch-settings users see single-suggestion layout; multi-suggest is opt-in. Power-user power, dyslexia-persona safety. Opposite of prediction's default-true.
+- [Phase 05]: [Plan 05-04] Concurrent Wave-2 execution discipline — stash-and-verify-baseline pattern when check-fixtures fails mid-run: git stash push -m 'plan-parallel-wave-stash' <unrelated-files>, rerun gate, restore. Proves scope-boundary: the failure is NOT caused by this plan. Dropped stash when a sibling plan landed a commit that superseded stashed content.
 
 ### Roadmap Evolution
 

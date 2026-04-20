@@ -41,7 +41,7 @@ text input on the web.
 ### User Experience (student-facing polish)
 
 - [ ] **UX-01**: Spell-check popover shows student-friendly "why it's flagged" copy per error class (at least 4 error classes × NB and NN), replacing bare labels like "Skrivefeil"; copy is reviewed for learner voice (avoids jargon, explains the rule briefly)
-- [ ] **UX-02**: Suggestions capped at top-3 with a "vis flere" / "show more" reveal (word-prediction dropdown and spell-check popover both honor this) — reduces cognitive load, aligns with dyslexia-UX research
+- [x] **UX-02**: Suggestions capped at top-3 with a "vis flere" / "show more" reveal (word-prediction dropdown and spell-check popover both honor this) — reduces cognitive load, aligns with dyslexia-UX research
 
 ## v2 Requirements
 
@@ -108,7 +108,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | WP-03 | Phase 3 | Complete |
 | WP-04 | Phase 3 | Complete |
 | UX-01 | Phase 5 | Pending |
-| UX-02 | Phase 5 | Pending |
+| UX-02 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 19 total

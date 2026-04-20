@@ -126,7 +126,7 @@ Plans:
 - [x] 05-01-PLAN.md — Foundation: expose escapeHtml on __lexiSpellCore, ship check-explain-contract gate + self-test + CLAUDE.md Release Workflow entry, seed i18n strings, scaffold COPY-REVIEW.md, update spell-rules/README.md (Wave 1, autonomous) ✓ Complete 2026-04-20
 - [ ] 05-02-PLAN.md — Rule-side UX-01 + UX-02 data source: upgrade 5 popover-surfacing rules to explain: (finding) => ({nb,nn}) callables with XSS-safe `<em>` templates, add priority to emitted findings (Pitfall 1), expand fuzzy findFuzzyNeighbor to top-K (Pitfall 7) emitting finding.suggestions[], populate COPY-REVIEW.md cells (Wave 2, autonomous, depends_on 05-01)
 - [ ] 05-03-PLAN.md — UX-02 word-prediction dropdown: cap visible at 3 default / 8 expanded with "Vis flere ⌄" reveal + ArrowDown auto-reveal, preserve compound-injection priority (Pitfall 6) + reset-on-new-session (Pitfall 5) + click-guard (Wave 2, autonomous, depends_on 05-01)
-- [ ] 05-04-PLAN.md — UX-02 control surface: add "Vis alternative skriveforslag" toggle to popup Settings tab, chrome.storage.local default false (Wave 2, autonomous, depends_on 05-01)
+- [x] 05-04-PLAN.md — UX-02 control surface: add "Vis alternative skriveforslag" toggle to popup Settings tab, chrome.storage.local default false (Wave 2, autonomous, depends_on 05-01) ✓ Complete 2026-04-20
 - [ ] 05-05-PLAN.md — UX-01 + UX-02 popover render: renderExplain + chrome.storage.onChanged subscriber + single/multi-suggest branches in showPopover, new CSS classes, XSS fixture + dyslexia-persona proxy self-review (Wave 3, human-verify checkpoint, depends_on 05-02 + 05-04)
 
 ## Progress
