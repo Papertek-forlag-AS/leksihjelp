@@ -12,10 +12,10 @@
 
 | Rule ID | Rule File | NB copy (template) | NN copy (template) | Reviewer notes |
 |---------|-----------|--------------------|--------------------|----------------|
-| typo (curated, priority 40) | nb-typo-curated.js | _(filled in Plan 02)_ | _(filled in Plan 02)_ | |
+| typo (curated, priority 40) | nb-typo-curated.js | `<em>{word}</em> er en vanlig skrivefeil — prøv <em>{fix}</em>.` | `<em>{word}</em> er ein vanleg skrivefeil — prøv <em>{fix}</em>.` | |
 | typo (fuzzy, priority 50) | nb-typo-fuzzy.js | _(filled in Plan 02)_ | _(filled in Plan 02)_ | |
-| gender (priority 10) | nb-gender.js | _(filled in Plan 02)_ | _(filled in Plan 02)_ | |
-| modal_form (priority 20) | nb-modal-verb.js | _(filled in Plan 02)_ | _(filled in Plan 02)_ | |
+| gender (priority 10) | nb-gender.js | `<em>{word}</em> kan være feil kjønn — prøv <em>{fix}</em>.` | `<em>{word}</em> kan vere feil kjønn — prøv <em>{fix}</em>.` | |
+| modal_form (priority 20) | nb-modal-verb.js | `Etter modalverb skal hovedverbet stå i infinitiv — bytt <em>{word}</em> med <em>{fix}</em>.` | `Etter modalverb skal hovudverbet stå i infinitiv — byt <em>{word}</em> med <em>{fix}</em>.` | |
 | sarskriving (priority 30) | nb-sarskriving.js | _(filled in Plan 02)_ | _(filled in Plan 02)_ | |
 
 ## Tone-check checklist (dyslexia-persona proxy self-review)

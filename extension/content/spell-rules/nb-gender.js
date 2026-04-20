@@ -14,7 +14,7 @@
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
-  const { matchCase } = host.__lexiSpellCore || {};
+  const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
   const ARTICLE_GENUS = {
     nb: { 'en': 'm', 'ei': 'f', 'et': 'n' },
@@ -29,7 +29,10 @@
     id: 'gender',
     languages: ['nb', 'nn'],
     priority: 10,
-    explain: 'Artikkel og substantiv må ha samme kjønn.',
+    explain: (finding) => ({
+      nb: `<em>${escapeHtml(finding.original)}</em> kan være feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+      nn: `<em>${escapeHtml(finding.original)}</em> kan vere feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+    }),
     check(ctx) {
       const { tokens, vocab, cursorPos, lang } = ctx;
       const nounGenus = vocab.nounGenus || new Map();
@@ -56,6 +59,7 @@
             if (correctArticle) {
               out.push({
                 rule_id: 'gender',
+                priority: rule.priority,
                 start: articleTok.start,
                 end: articleTok.end,
                 original: articleTok.display,

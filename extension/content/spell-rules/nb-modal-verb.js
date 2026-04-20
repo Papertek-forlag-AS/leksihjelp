@@ -10,7 +10,7 @@
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
-  const { matchCase } = host.__lexiSpellCore || {};
+  const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
   const MODAL_VERBS = new Set([
     'kan', 'kunne', 'kunna',
@@ -25,7 +25,10 @@
     id: 'modal_form',
     languages: ['nb', 'nn'],
     priority: 20,
-    explain: 'Etter modalverb skal hovedverbet stå i infinitiv.',
+    explain: (finding) => ({
+      nb: `Etter modalverb skal hovedverbet stå i infinitiv — bytt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,
+      nn: `Etter modalverb skal hovudverbet stå i infinitiv — byt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,
+    }),
     check(ctx) {
       const { tokens, vocab, cursorPos } = ctx;
       const verbInfinitive = vocab.verbInfinitive || new Map();
@@ -39,6 +42,7 @@
           if (inf && inf !== t.word) {
             out.push({
               rule_id: 'modal_form',
+              priority: rule.priority,
               start: t.start,
               end: t.end,
               original: t.display,

@@ -16,13 +16,16 @@
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
-  const { matchCase } = host.__lexiSpellCore || {};
+  const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
   const rule = {
     id: 'typo',
     languages: ['nb', 'nn'],
     priority: 40,
-    explain: 'Kjent skrivefeil — slå opp i ordboken.',
+    explain: (finding) => ({
+      nb: `<em>${escapeHtml(finding.original)}</em> er en vanlig skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+      nn: `<em>${escapeHtml(finding.original)}</em> er ein vanleg skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+    }),
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
@@ -47,6 +50,7 @@
           const correct = typoFix.get(t.word);
           out.push({
             rule_id: 'typo',
+            priority: rule.priority,
             start: t.start,
             end: t.end,
             original: t.display,
