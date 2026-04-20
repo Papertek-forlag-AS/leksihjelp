@@ -35,6 +35,15 @@
 |------|----------|---------|-------|
 | _(Plan 03 phase-close)_ | dyslexia-persona proxy | _(Pass / Fix)_ | |
 
+## Probe log
+
+Defence-in-depth evidence from Plan 05-02 Task 3 — confirms priority + suggestions fields flow end-to-end through the core runner and that the Zipf tiebreaker (shipped in Plan 03-03) is still load-bearing post top-K refactor.
+
+| Date | Probe | Result |
+|------|-------|--------|
+| 2026-04-20 | priority + suggestions flow through core.check() dedupe | **PASS** — 1 finding emitted on `berde resultat xxyyzz` (NB vocab): `rule_id=typo, priority=50, fix=bedre, suggestions=[bedre, burde]` (fuzzy-path). Every finding has numeric `priority`; the fuzzy finding has `Array.isArray(suggestions)` with ≥1 entries. `xxyyzz` correctly drops (no fuzzy neighbor within k=1 for a 6-letter word). |
+| 2026-04-20 | Zipf mutation (ZIPF_MULT=0) → nb-typo-zipf-001/002 fail; restored byte-identical → 280/280 pass | **PASS** — Mutation step: npm run check-fixtures dropped nb/typo to P=0.900 R=0.900 (24/26) with exit=1. Probe: `hagde` flipped from `hadde` → `hagle`, `hatde` flipped from `hadde` → `hate` (the Zipf bonus for `hadde` ≈ 6.98 × 0 = 0, so length/prefix penalties win). Restore step: `cp /tmp/nb-typo-fuzzy.backup.js …` restored ZIPF_MULT=10; `git diff` on the rule file empty (byte-identical); npm run check-fixtures returned to 280/280 green. |
+
 ---
 
 *Filled in Plan 02 (rule-file upgrade). Reviewed in Plan 03 (phase close).*
