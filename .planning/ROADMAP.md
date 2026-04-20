@@ -92,7 +92,10 @@ Plans:
 **Depends on:** Phase 3
 **Requirements**: SC-01 (REQUIREMENTS.md — re-opened pending closure)
 **Gap Closure:** Closes integration gap from v1.0 audit (spell-check.js:runCheck → nb-typo-fuzzy.js:scoreCandidate), the SC-01 partial requirement, and the "Type a typo → Zipf-correct top candidate" flow gap. Must land before Phase 4 so new Phase 4 rules can assume `vocab.freq` is reliably present in browser runtime.
-**Plans:** TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 03.1-01-PLAN.md — Add `VOCAB.getFreq()` seam getter + wire `freq: VOCAB.getFreq()` into `spell-check.js:runCheck` vocab literal + install adapter-contract source-regex guard in `scripts/check-fixtures.js` (Wave 1, autonomous)
 
 ### Phase 4: False-Positive Reduction on NB/NN
 **Goal**: Proper-noun guard, dialect tolerance, code-switching detection, and particularly særskriving all pass the regression fixture's precision/recall thresholds — so the tool stays quiet on correct Norwegian text, tolerates mixed-language documents, and only fires særskriving when it's genuinely wrong.
@@ -133,7 +136,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
 | 3. Rule Architecture & Ranking Quality | 5/5 | Complete (SC-01 re-opened by 2026-04-20 audit — bridged in 03.1) | 2026-04-20 |
-| 03.1 Close SC-01 browser wiring (INSERTED) | 0/TBD | Not started | - |
+| 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Not started | - |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 
