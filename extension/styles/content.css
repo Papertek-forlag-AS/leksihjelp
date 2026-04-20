@@ -464,6 +464,29 @@
   border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
+/* UX-02 (Phase 5 Plan 03): "Vis flere" / "Vis færre" reveal link.
+   Dyslexia-friendly text-link sizing (13px ≥ 14px-safe with the 1.4 line-
+   height the dropdown inherits), underlined so the affordance reads as
+   "clickable" to screen-reader + low-vision users, and subtle border-top
+   separator so it doesn't look like another pred item. Match the existing
+   .lh-pred-hint colour palette (conservative grays) rather than introducing
+   new CSS variables — the file doesn't use any today. */
+#lexi-prediction-dropdown .lh-pred-vis-flere {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: underline;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  user-select: none;
+}
+
+#lexi-prediction-dropdown .lh-pred-vis-flere:hover {
+  color: #1e293b;
+  background: rgba(0, 0, 0, 0.03);
+}
+
 #lexi-prediction-dropdown .lh-pred-icon {
   width: 12px;
   height: 12px;
@@ -684,6 +707,16 @@
 
   #lexi-prediction-dropdown .lh-pred-footer {
     border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  #lexi-prediction-dropdown .lh-pred-vis-flere {
+    color: #94a3b8;
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  #lexi-prediction-dropdown .lh-pred-vis-flere:hover {
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.05);
   }
 
   #lexi-prediction-dropdown .lh-pred-hint {

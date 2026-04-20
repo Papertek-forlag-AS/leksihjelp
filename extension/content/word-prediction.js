@@ -37,6 +37,20 @@
   let knownPresens = new Set();    // Known present-tense verb forms for tense detection (rebuilt from VOCAB)
   let knownPreteritum = new Set(); // Known past-tense verb forms for tense detection (rebuilt from VOCAB)
 
+  // ── UX-02: top-3 default with "Vis flere" reveal to 8 (Phase 5 Plan 03) ──
+  // VISIBLE_DEFAULT: rows shown on first render (dyslexia-friendly cognitive
+  // load). VISIBLE_EXPANDED: rows shown after user clicks "Vis flere" or
+  // ArrowDowns past the last visible row.
+  const VISIBLE_DEFAULT = 3;
+  const VISIBLE_EXPANDED = 8;
+  // lastSuggestions: captured from runPrediction so the reveal-click handler
+  // can re-render in place without re-running findSuggestions.
+  let lastSuggestions = [];
+  // expanded: per-session reveal state. RESET to false at the top of every
+  // showDropdown() call (Pitfall 5 from 05-RESEARCH.md) so a previously-
+  // expanded list doesn't leak into the next keystroke's dropdown.
+  let expanded = false;
+
   // ── Frequency helpers (Phase 3-04: WP-01 + WP-03 + WP-04) ──
   //
   // getEffectiveFreq: Zipf sidecar (NB/NN via VOCAB.getFrequency, populated
@@ -506,7 +520,7 @@
       const pronounContext = getPronounContext(previousWord);
       // Infinitive markers (å, zu) only count when immediately preceding
       const hasInfinitiveMarker = hasModalVerb || INFINITIVE_MARKERS.has(previousWord);
-      const suggestions = findSuggestions(currentWord, 5, pronounContext, hasInfinitiveMarker, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
+      const suggestions = findSuggestions(currentWord, 8, pronounContext, hasInfinitiveMarker, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
 
       // NB/NN: check for compound word matches (særskriving detection)
       // If student typed "skole sekk", search for "skolesekk" as a compound
@@ -525,7 +539,11 @@
             });
           }
         }
-        suggestions.splice(5);
+        // Pitfall 6 (05-RESEARCH.md): splice cap must equal the max-reveal cap
+        // (VISIBLE_EXPANDED=8), not the visible-default cap. Otherwise a
+        // 4-hit compound unshift would knock out regular top-3 candidates
+        // before renderDropdownBody gets a chance to slice for the view.
+        suggestions.splice(8);
       }
 
       if (suggestions.length > 0) {
@@ -547,8 +565,29 @@
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       e.stopPropagation();
-      selectedIndex = (selectedIndex + 1) % items.length;
-      updateSelection(items);
+      // Auto-reveal path: if stepping past the last visible item AND more
+      // candidates are available in lastSuggestions, expand in place and
+      // advance selection onto the first newly-revealed row (zero extra
+      // keystrokes for keyboard users). Pitfall 5: expanded is reset on
+      // every new showDropdown() call so reveal state doesn't leak across
+      // keystrokes.
+      if (
+        selectedIndex === items.length - 1 &&
+        !expanded &&
+        lastSuggestions.length > items.length
+      ) {
+        expanded = true;
+        renderDropdownBody(activeElement);
+        const newItems = dropdown.querySelectorAll('.lh-pred-item');
+        // Advance selection onto the first newly-revealed row. items.length
+        // is the pre-expand visible count (e.g. 3); clamp to newItems.length-1
+        // defensively in case renderDropdownBody revealed fewer than expected.
+        selectedIndex = Math.min(items.length, newItems.length - 1);
+        updateSelection(newItems);
+      } else {
+        selectedIndex = (selectedIndex + 1) % items.length;
+        updateSelection(items);
+      }
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       e.stopPropagation();
@@ -1139,22 +1178,63 @@
   }
 
   // ── Show / hide dropdown ──
+  //
+  // Thin wrapper: (a) captures the full suggestions array for reveal-click
+  // re-render, (b) resets expanded state (Pitfall 5 — reveal doesn't leak
+  // across keystrokes), (c) delegates rendering to renderDropdownBody so
+  // the reveal-click path can re-render in place without re-running
+  // findSuggestions.
   function showDropdown(suggestions, el) {
     selectedIndex = 0;
+    expanded = false;                 // Pitfall 5: reset on every new dropdown session
+    lastSuggestions = suggestions;    // capture for reveal-click re-render path
+    renderDropdownBody(el);
+    positionDropdown(el);
+    dropdown.classList.add('visible');
+  }
 
-    dropdown.innerHTML = suggestions.map((s, i) => {
+  // renderDropdownBody: assembles dropdown.innerHTML + attaches handlers.
+  // Called by showDropdown (initial render) AND by the Vis-flere reveal
+  // handler / ArrowDown auto-reveal path (re-render in place). Reads the
+  // module-scoped expanded flag to pick the visible cap.
+  function renderDropdownBody(el) {
+    const visibleCap = expanded ? VISIBLE_EXPANDED : VISIBLE_DEFAULT;
+    const visible = lastSuggestions.slice(0, visibleCap);
+    const hasMore = lastSuggestions.length > visible.length;
+    const visLabel = expanded ? t('pred_vis_faerre') : t('pred_vis_flere');
+    // ⌃ (U+2303) for collapse (expanded state), ⌄ (U+2304) for expand.
+    const visChevron = expanded ? '\u2303' : '\u2304';
+
+    const itemsHtml = visible.map((s, i) => {
       const posLabel = s.bank ? bankToPosShort(s.bank) : '';
       const typoHint = s.type === 'typo' ? `<span class="lh-pred-typo">${escapeHtml(t('pred_typo_hint'))}</span>` : '';
       const compoundHint = s.type === 'compound' ? `<span class="lh-pred-typo">${escapeHtml(t('pred_compound_hint'))}</span>` : '';
       const compoundAttr = s.compoundReplaceLen ? ` data-compound-len="${s.compoundReplaceLen}"` : '';
       return `
-      <div class="lh-pred-item ${i === 0 ? 'selected' : ''}" data-word="${escapeAttr(s.display)}"${compoundAttr}>
+      <div class="lh-pred-item ${i === selectedIndex ? 'selected' : ''}" data-word="${escapeAttr(s.display)}"${compoundAttr}>
         <span class="lh-pred-word">${escapeHtml(s.display)}${typoHint}${compoundHint}</span>
         ${posLabel ? `<span class="lh-pred-pos">${escapeHtml(posLabel)}</span>` : ''}
         <span class="lh-pred-translation">${escapeHtml(s.translation)}</span>
       </div>`;
-    }).join('') + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="${escapeAttr(t('pred_switch_lang'))}">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">${escapeHtml(t('pred_tab_hint'))}</span><button class="lh-pred-pause" title="${escapeAttr(lexiPaused ? t('pred_resume') : t('pred_pause'))}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
+    }).join('');
 
+    // Vis-flere link: shown when either more candidates are available
+    // (hasMore) OR we're currently expanded (so users can collapse back).
+    const visFlereHtml = hasMore || expanded
+      ? `<div class="lh-pred-vis-flere" role="button" tabindex="-1">${escapeHtml(visLabel)} ${visChevron}</div>`
+      : '';
+
+    dropdown.innerHTML = itemsHtml + visFlereHtml + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="${escapeAttr(t('pred_switch_lang'))}">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">${escapeHtml(t('pred_tab_hint'))}</span><button class="lh-pred-pause" title="${escapeAttr(lexiPaused ? t('pred_resume') : t('pred_pause'))}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
+
+    attachDropdownHandlers(el);
+  }
+
+  // attachDropdownHandlers: wires up language switcher, pause button,
+  // item-click handlers, AND the Vis-flere reveal link. Called from
+  // renderDropdownBody after every (re-)render — event listeners on the
+  // previous innerHTML are discarded when innerHTML is replaced, so
+  // re-attaching is mandatory on each render pass.
+  function attachDropdownHandlers(el) {
     // Attach language switcher handler
     const langBtn = dropdown.querySelector('.lh-pred-lang');
     if (langBtn) {
@@ -1185,9 +1265,19 @@
       });
     });
 
-    // Position near the input
-    positionDropdown(el);
-    dropdown.classList.add('visible');
+    // Attach Vis-flere reveal handler (flip expanded + re-render in place).
+    // Mirrors the .lh-pred-item mousedown guard: preventDefault keeps the
+    // editor focused; stopPropagation prevents the click from bubbling to
+    // the item-level handler and triggering applySuggestion.
+    const visFlereEl = dropdown.querySelector('.lh-pred-vis-flere');
+    if (visFlereEl) {
+      visFlereEl.addEventListener('mousedown', (e) => {
+        e.preventDefault();           // keep focus in the editor
+        e.stopPropagation();          // don't bubble into item-click
+        expanded = !expanded;
+        renderDropdownBody(el);       // NOT showDropdown — that would reset expanded
+      });
+    }
   }
 
   function positionDropdown(el) {
