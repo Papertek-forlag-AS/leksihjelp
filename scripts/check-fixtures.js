@@ -42,6 +42,41 @@ const path = require('path');
 const vocabCore = require(path.join(__dirname, '..', 'extension', 'content', 'vocab-seam-core.js'));
 const spellCore = require(path.join(__dirname, '..', 'extension', 'content', 'spell-check-core.js'));
 
+// ── Phase 4 / SC-05: per-rule P/R gates ──
+//
+// THRESHOLDS[lang][ruleId] = { P: 0.XX, R: 0.YY }
+//
+// When a rule has an entry AND the current run's observed P or R drops below
+// the threshold, the runner exits 1 with a diagnostic naming the rule, the
+// language, and the target. Values were locked in Plan 04-03 after fixture
+// expansion — see the Task 3 commit body for the observed P/R snapshot.
+//
+// Only the sarskriving rule (fixture file `saerskriving.jsonl` — ASCII
+// filename per fixtures/README.md span convention) is gated today; other
+// rules report P/R but are not gated (gating them would block Phase 5 UX
+// work on ranking noise unrelated to false-positive reduction).
+//
+// The key `saerskriving` matches the fixture filename basename — that is
+// the ruleId the runner loop uses to bucket results. The finding-side
+// rule_id emitted by spell-check-core.check() is `sarskriving` (no 'ae')
+// per fixtures/README.md; the two names are DELIBERATELY different (file
+// ASCII-safe, finding rule_id ASCII-safe but without æ-digraph expansion).
+//
+// Pitfall 4 (04-RESEARCH.md): picked at `observed - 0.05` per Plan 04-03
+// checkpoint decision (option-a). Observed at lock time (Plan 04-03 Task 1
+// expanded corpus — >=30 positive + >=15 acceptance cases per language):
+//   nb/saerskriving: P=0.974 R=1.000  →  locked P>=0.92, R>=0.95
+//   nn/saerskriving: P=0.968 R=1.000  →  locked P>=0.92, R>=0.95
+// NN observed P (0.968) is the binding number — both languages rounded to
+// the same 0.92 floor for simplicity. Paper floor from RESEARCH was
+// P>=0.90, R>=0.60 — both languages clear it comfortably, so the lock
+// margin protects against regression without accepting lower quality
+// than the spec asks for.
+const THRESHOLDS = {
+  nb: { saerskriving: { P: 0.92, R: 0.95 } },
+  nn: { saerskriving: { P: 0.92, R: 0.95 } },
+};
+
 // INFRA-03 rule registry: load rule files AFTER spell-check-core.js so that
 // self.__lexiSpellRules and self.__lexiSpellCore are initialized before any
 // rule IIFE runs. Deterministic alphabetical order — matches manifest ordering.
@@ -263,6 +298,24 @@ function main() {
       });
 
       if (failed > 0) hardFail = true;
+
+      // ── Phase 4 / SC-05 threshold gate ──
+      //
+      // When THRESHOLDS has an entry for this (lang, rule), verify observed
+      // P and R stay at or above the locked floor. Any dip flips hardFail
+      // and prints a named diagnostic. Locked values live in the THRESHOLDS
+      // table at the top of this file; see Plan 04-03 SUMMARY for rationale.
+      const req = THRESHOLDS[l] && THRESHOLDS[l][ruleId];
+      if (req) {
+        if (stats.P < req.P) {
+          console.log('[' + l + '/' + ruleId + '] THRESHOLD FAIL: P=' + stats.P.toFixed(3) + ' < ' + req.P);
+          hardFail = true;
+        }
+        if (stats.R < req.R) {
+          console.log('[' + l + '/' + ruleId + '] THRESHOLD FAIL: R=' + stats.R.toFixed(3) + ' < ' + req.R);
+          hardFail = true;
+        }
+      }
 
       if (!json) {
         console.log(
