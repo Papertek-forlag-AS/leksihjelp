@@ -1729,10 +1729,13 @@ async function initSettings() {
   const verifyBtn = document.getElementById('verify-code-btn');
   const codeStatus = document.getElementById('code-status');
   const predictionToggle = document.getElementById('setting-prediction');
+  const alternatesToggle = document.getElementById('setting-spellcheck-alternates');
   const savedCode = await chromeStorageGet('accessCode');
   if (savedCode) codeInput.value = savedCode;
   const predEnabled = await chromeStorageGet('predictionEnabled');
   predictionToggle.checked = predEnabled !== false;
+  const altStored = await chromeStorageGet('spellCheckAlternatesVisible');
+  alternatesToggle.checked = altStored === true;  // default false when unset
 
   // Initialize language list with download status
   await updateLanguageListStatus();
@@ -1834,6 +1837,12 @@ async function initSettings() {
       type: 'PREDICTION_TOGGLED',
       enabled: predictionToggle.checked
     });
+  });
+
+  // Spell-check multi-suggest alternates toggle — Plan 05 consumer reads
+  // via chrome.storage.onChanged in spell-check.js. No runtime message needed.
+  alternatesToggle.addEventListener('change', async () => {
+    await chromeStorageSet({ spellCheckAlternatesVisible: alternatesToggle.checked });
   });
 }
 
