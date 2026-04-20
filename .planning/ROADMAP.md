@@ -18,7 +18,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - [x] **Phase 1: Foundation (Vocab Seam + Regression Fixture)** - Extract `__lexiVocab` and land a ground-truth fixture harness so all later work is safety-netted ✓ Complete 2026-04-18
 - [x] **Phase 2: Data Layer (Frequency, Bigrams, Typo Bank)** - Ship Zipf frequency tables, expanded bigrams, and coordinated typo-bank growth in `papertek-vocabulary` ✓ Complete 2026-04-18 (SC-4 bundle-size gap closure added 2026-04-19 as 02-05-PLAN.md, remediation locked: audit+remove extension/data/en.json)
 - [x] **Phase 02.1: Close SC-4 bundle-size cap (INSERTED)** - Raise the internal engineering ceiling from 10 MiB to 20 MiB, drop the false "publicly-stated promise" framing across live docs, reword SC-4 + DATA-03 (completed 2026-04-19)
-- [ ] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages
+- [x] **Phase 3: Rule Architecture & Ranking Quality** - Rule-plugin refactor plus frequency-aware ranking for spell-check and word-prediction across all 6 languages ✓ Complete 2026-04-20
 - [ ] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
 
@@ -77,12 +77,12 @@ Plans:
   3. In word-prediction across DE/ES/FR/NB/NN/EN, the top-3 suggestions for a shared-prefix query (e.g., typing "ber" in NB) are visibly ranked by frequency and bigram context rather than by arbitrary insertion order — verified by manual inspection in at least 3 of the 6 languages
   4. DevTools Network tab shows zero outbound requests from spell-check or word-prediction code paths during a 30-second typing session (SC-06 constraint: no new external dependencies, stays free and offline)
   5. Sampled top-3 word-prediction suggestions feel useful to a developer reviewer in at least 80% of test scenarios (measurement method: review at least 20 sampled contexts per language against a simple yes/no "would a learner find this useful?" judgment)
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 Plans:
 - [x] 03-01-PLAN.md — Foundation: wire freq-{lang}.json through seam + core + fixture runner (Wave 1, autonomous) — lights up VOCAB.getFrequency for NB/NN ✓ Complete 2026-04-19
 - [x] 03-02-PLAN.md — INFRA-03: extract spell-check rules to extension/content/spell-rules/*.js plugin registry; slim core to a runner; update manifest + fixture-runner require sweep (Wave 2, autonomous) ✓ Complete 2026-04-19
-- [ ] 03-03-PLAN.md — SC-01: add Zipf tiebreaker to fuzzy scoreCandidate in nb-typo-fuzzy.js + author new fixture case targeting Zipf (not adjacent-transposition) (Wave 3, autonomous)
-- [ ] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 3, depends on 03-01 + 03-02 to avoid vocab-seam-core.js conflict with Plan 02; human-verify checkpoint for 3-language top-3 inspection)
+- [x] 03-03-PLAN.md — SC-01: add Zipf tiebreaker to fuzzy scoreCandidate in nb-typo-fuzzy.js + author new fixture case targeting Zipf (not adjacent-transposition) (Wave 3, autonomous) ✓ Complete 2026-04-19
+- [x] 03-04-PLAN.md — WP-01/03/04: entry.zipf normalization at seam + applyBoosts signal-table refactor in word-prediction.js + deterministic sort tiebreakers + low-frequency demotion (Wave 3, depends on 03-01 + 03-02 to avoid vocab-seam-core.js conflict with Plan 02; human-verify checkpoint for 3-language top-3 inspection) ✓ Complete 2026-04-20
 - [x] 03-05-PLAN.md — WP-02 (EN bigrams hand-authored) + SC-06 release gate (check-network-silence.js + self-test + CLAUDE.md Release Workflow step) (Wave 1, autonomous) ✓ Complete 2026-04-19
 
 ### Phase 4: False-Positive Reduction on NB/NN
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 4 → 5
 | 1. Foundation (Vocab Seam + Regression Fixture) | 3/3 | Complete | 2026-04-18 |
 | 2. Data Layer (Frequency, Bigrams, Typo Bank) | 5/5 plans ran | Halted with SC-4 OPEN (02-05 halted-by-design 2026-04-19; en.json audit VERDICT=BLOCKED; SC-1/SC-2/SC-3 VERIFIED, SC-4 awaits Phase 02.1) | - |
 | 02.1 Close SC-4 bundle-size cap (INSERTED) | 2/2 | Complete    | 2026-04-19 |
-| 3. Rule Architecture & Ranking Quality | 3/5 | In Progress | - |
+| 3. Rule Architecture & Ranking Quality | 5/5 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 0/TBD | Not started | - |
 | 5. Student Experience Polish | 0/TBD | Not started | - |
 
