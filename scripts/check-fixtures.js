@@ -169,6 +169,26 @@ function summarize(tp, fp, fn) {
 
 function main() {
   const { lang, rule, verbose, json } = parseArgs(process.argv.slice(2));
+
+  // ── Phase 03.1 / SC-01 adapter-contract guard ──
+  //
+  // The fixture runner bypasses extension/content/spell-check.js entirely —
+  // vocab comes straight from vocabCore.buildIndexes() with freq Map attached.
+  // Browser runtime flows instead through spell-check.js:runCheck, which
+  // hand-assembles a vocab object from __lexiVocab getters. If that literal
+  // ever drops `freq: VOCAB.getFreq()` again, the Zipf tiebreaker silently
+  // reverts to pre-Phase-3 ranking and the fixture suite cannot detect it
+  // (Pitfall 2 in 03.1-RESEARCH.md). Fail loud here.
+  const adapterSrc = fs.readFileSync(
+    path.join(__dirname, '..', 'extension', 'content', 'spell-check.js'),
+    'utf8'
+  );
+  if (!/freq:\s*VOCAB\.getFreq\(\)/.test(adapterSrc)) {
+    throw new Error(
+      '[check-fixtures] spell-check.js:runCheck vocab object missing `freq: VOCAB.getFreq()` — SC-01 browser-wiring regression. See .planning/phases/03.1-close-sc-01-browser-wiring/.'
+    );
+  }
+
   const langs = (!lang || lang === 'all') ? ['nb', 'nn'] : [lang];
   let hardFail = false;
   const report = {};
