@@ -26,6 +26,7 @@
     isAdjacentTransposition,
     isLikelyProperNoun,
     matchCase,
+    escapeHtml,
   } = core;
 
   // Scoring heuristic — higher is better. Mirrors the formula in core for
@@ -72,15 +73,19 @@
 
   // Local fuzzy neighbor lookup — owns its own scoring surface so future
   // ranker tuning stays in this one file.
-  function findFuzzyNeighbor(word, vocab) {
+  //
+  // Phase 5 / UX-02: returns a top-K list (cap 8) sorted by scoreCandidate
+  // descending. The previous single-best return is preserved at index 0 —
+  // `suggestions[0] === (what fix used to be)` for every pre-Phase-5 fixture
+  // case. The cap of 8 matches the UX-02 "Vis flere alternativer" reveal max.
+  function findFuzzyNeighbors(word, vocab) {
     const validWords = vocab.validWords || new Set();
     const len = word.length;
     // Tighter threshold for short words — 1 edit out of 4 chars is already
     // a lot of signal to drop, but 1 edit out of 8+ is common.
     const k = len <= 6 ? 1 : 2;
-    let best = null;
-    let bestScore = -Infinity; // higher is better
     const first = word[0];
+    const scored = [];
     for (const cand of validWords) {
       const cl = cand.length;
       if (Math.abs(cl - len) > k) continue;
@@ -88,20 +93,20 @@
       if (cand === word) continue;
       const d = editDistance(word, cand, k);
       if (d > k) continue;
-      const score = scoreCandidate(word, cand, d, vocab);
-      if (score > bestScore) {
-        bestScore = score;
-        best = cand;
-      }
+      scored.push({ cand, score: scoreCandidate(word, cand, d, vocab) });
     }
-    return best;
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, 8).map(s => s.cand);
   }
 
   const rule = {
     id: 'typo',
     languages: ['nb', 'nn'],
     priority: 50,
-    explain: 'Ord ikke funnet i ordboken — foreslår nærmeste treff.',
+    explain: (finding) => ({
+      nb: `<em>${escapeHtml(finding.original)}</em> står ikke i ordboken — kanskje du mente <em>${escapeHtml(finding.fix)}</em>?`,
+      nn: `<em>${escapeHtml(finding.original)}</em> står ikkje i ordboka — kanskje du meinte <em>${escapeHtml(finding.fix)}</em>?`,
+    }),
     check(ctx) {
       const { text, tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
@@ -124,15 +129,18 @@
           !validWords.has(t.word) &&
           !isLikelyProperNoun(t, i, tokens, text)
         ) {
-          const fuzzy = findFuzzyNeighbor(t.word, vocab);
-          if (fuzzy) {
+          const neighbors = findFuzzyNeighbors(t.word, vocab);
+          if (neighbors.length > 0) {
+            const suggestions = neighbors.map(n => matchCase(t.display, n));
             out.push({
               rule_id: 'typo',
+              priority: rule.priority,
               start: t.start,
               end: t.end,
               original: t.display,
-              fix: matchCase(t.display, fuzzy),
-              message: `Skrivefeil: "${t.display}" → "${fuzzy}"`,
+              fix: suggestions[0],       // winner — back-compat with fixture harness
+              suggestions,               // top-K for UX-02 multi-suggest layout
+              message: `Skrivefeil: "${t.display}" → "${suggestions[0]}"`,
             });
           }
         }

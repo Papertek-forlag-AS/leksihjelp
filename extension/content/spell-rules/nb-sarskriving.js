@@ -12,6 +12,7 @@
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
+  const { escapeHtml } = host.__lexiSpellCore || {};
 
   // Words that should never trigger særskriving even when the concatenation
   // happens to exist as a compound. Tuned conservatively to avoid false
@@ -42,7 +43,18 @@
     id: 'sarskriving',
     languages: ['nb', 'nn'],
     priority: 30,
-    explain: 'To ord som hører sammen som ett sammensatt ord skal skrives uten mellomrom.',
+    explain: (finding) => {
+      if (!finding.original || !finding.fix) {
+        return {
+          nb: 'To ord som kanskje hører sammen.',
+          nn: 'To ord som kanskje høyrer saman.',
+        };
+      }
+      return {
+        nb: `<em>${escapeHtml(finding.original)}</em> kan være to ord som hører sammen som <em>${escapeHtml(finding.fix)}</em>.`,
+        nn: `<em>${escapeHtml(finding.original)}</em> kan vere to ord som høyrer saman som <em>${escapeHtml(finding.fix)}</em>.`,
+      };
+    },
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const compoundNouns = vocab.compoundNouns || new Set();
@@ -63,6 +75,7 @@
         ) {
           out.push({
             rule_id: 'sarskriving',
+            priority: rule.priority,
             start: prev.start,
             end: t.end,
             original: `${prev.display} ${t.display}`,
