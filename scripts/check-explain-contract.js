@@ -1,0 +1,195 @@
+#!/usr/bin/env node
+/**
+ * Leksihjelp — Explain Contract Release Gate (UX-01, Phase 5-01)
+ *
+ * Every popover-surfacing spell-check rule MUST expose `rule.explain` as a
+ * function `(finding) => ({ nb: string, nn: string })`. This gate loads each
+ * target rule file under `extension/content/spell-rules/` and asserts:
+ *
+ *   1. `typeof rule.explain === 'function'`                      (callable)
+ *   2. `rule.explain(fakeFinding)` does not throw                (safe)
+ *   3. Return value is an object (not null / not string / not array)
+ *   4. `typeof result.nb === 'string'` && `result.nb.length > 0` (NB register)
+ *   5. `typeof result.nn === 'string'` && `result.nn.length > 0` (NN register)
+ *
+ * Target files (the 5 rules that surface to the spell-check popover):
+ *   - extension/content/spell-rules/nb-gender.js
+ *   - extension/content/spell-rules/nb-modal-verb.js
+ *   - extension/content/spell-rules/nb-sarskriving.js
+ *   - extension/content/spell-rules/nb-typo-curated.js
+ *   - extension/content/spell-rules/nb-typo-fuzzy.js
+ *
+ * Excluded (never reach the popover — emit return [] only):
+ *   - extension/content/spell-rules/nb-codeswitch.js       (priority 1, pre-pass)
+ *   - extension/content/spell-rules/nb-propernoun-guard.js (priority 5, pre-pass)
+ *
+ * Exits 0 when all 5 target rules satisfy the contract. Exits 1 with a
+ * per-failure diagnostic on any violation.
+ *
+ * This gate lands BEFORE Plan 05-02 upgrades the rules. On first run it is
+ * EXPECTED to exit 1 — today's rules still carry the legacy string explain.
+ * Plan 05-02 flips each rule to the { nb, nn } callable, flipping this gate
+ * to exit 0.
+ *
+ * Usage:
+ *   node scripts/check-explain-contract.js
+ *
+ * Zero npm deps. Node 18+. CommonJS. Mirrors check-network-silence.js style.
+ */
+'use strict';
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const SPELL_RULES_DIR = path.join(ROOT, 'extension/content/spell-rules');
+const CORE_PATH = path.join(ROOT, 'extension/content/spell-check-core.js');
+
+// The 5 popover-surfacing rule files, relative to ROOT. Order matches the
+// priority-ascending sequence in the runner (gender 10 → modal 20 →
+// sarskriving 30 → typo-curated 40 → typo-fuzzy 50).
+const TARGETS = [
+  'extension/content/spell-rules/nb-gender.js',
+  'extension/content/spell-rules/nb-modal-verb.js',
+  'extension/content/spell-rules/nb-sarskriving.js',
+  'extension/content/spell-rules/nb-typo-curated.js',
+  'extension/content/spell-rules/nb-typo-fuzzy.js',
+];
+
+// Reset the shared globals the rule files register onto. Without this the
+// registry accumulates across loads — not strictly harmful to the gate's
+// correctness but keeps the per-file assertions cleanly isolated.
+function resetGlobals() {
+  if (typeof global.self === 'undefined') global.self = global;
+  global.self.__lexiSpellRules = [];
+  delete global.self.__lexiSpellCore;
+}
+
+function clearRequireCache() {
+  const corePath = require.resolve(CORE_PATH);
+  if (require.cache[corePath]) delete require.cache[corePath];
+  for (const rel of TARGETS) {
+    try {
+      const abs = require.resolve(path.join(ROOT, rel));
+      if (require.cache[abs]) delete require.cache[abs];
+    } catch (_) { /* not loaded yet, fine */ }
+  }
+}
+
+function loadCore() {
+  // The core IIFE attaches __lexiSpellCore onto self; importing it once per
+  // rule-file load keeps the helper surface available to rules that
+  // destructure from host.__lexiSpellCore in their IIFE preamble.
+  require(CORE_PATH);
+}
+
+function fail(code, ruleId, file, detail) {
+  process.stderr.write(
+    '[check-explain-contract] FAIL: ' + code + ' ' +
+    (ruleId || '<no id>') + ' ' +
+    path.relative(ROOT, file) + ' :: ' + detail + '\n'
+  );
+  process.exit(1);
+}
+
+function validateRule(rule, file) {
+  const ruleId = rule && rule.id;
+  if (!rule || typeof rule !== 'object') {
+    return { ok: false, code: 'RULE_NOT_OBJECT', ruleId: '<no id>', detail: 'require() did not return a rule object' };
+  }
+  if (typeof rule.explain !== 'function') {
+    return {
+      ok: false,
+      code: 'EXPLAIN_NOT_CALLABLE',
+      ruleId,
+      detail: 'typeof rule.explain is ' + typeof rule.explain + ' (expected: function)',
+    };
+  }
+
+  // Placeholder finding — every field the current rule set references on
+  // findings, plus the rule's own id/priority so disambiguation-aware copy
+  // can read them.
+  const fakeFinding = {
+    rule_id: rule.id,
+    priority: rule.priority,
+    original: 'testword',
+    fix: 'testfix',
+    start: 0,
+    end: 8,
+    message: 'test',
+  };
+
+  let result;
+  try {
+    result = rule.explain(fakeFinding);
+  } catch (e) {
+    return { ok: false, code: 'EXPLAIN_THREW', ruleId, detail: String(e && e.message || e) };
+  }
+
+  if (!result || typeof result !== 'object' || Array.isArray(result)) {
+    return {
+      ok: false,
+      code: 'EXPLAIN_RETURN_NOT_OBJECT',
+      ruleId,
+      detail: 'explain() returned ' + (result === null ? 'null' : Array.isArray(result) ? 'array' : typeof result) + ' (expected: {nb, nn})',
+    };
+  }
+
+  const missing = [];
+  if (typeof result.nb !== 'string') missing.push('nb (' + typeof result.nb + ')');
+  if (typeof result.nn !== 'string') missing.push('nn (' + typeof result.nn + ')');
+  if (missing.length) {
+    return {
+      ok: false,
+      code: 'EXPLAIN_MISSING_REGISTER',
+      ruleId,
+      detail: 'missing/wrong-type register(s): ' + missing.join(', '),
+    };
+  }
+
+  if (result.nb.length === 0 || result.nn.length === 0) {
+    return {
+      ok: false,
+      code: 'EXPLAIN_EMPTY_STRING',
+      ruleId,
+      detail: 'nb.length=' + result.nb.length + ' nn.length=' + result.nn.length + ' (both must be non-empty)',
+    };
+  }
+
+  return { ok: true, ruleId };
+}
+
+function main() {
+  let passed = 0;
+  for (const rel of TARGETS) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) {
+      fail('RULE_FILE_MISSING', '<no id>', abs, 'expected rule file not found on disk');
+    }
+
+    resetGlobals();
+    clearRequireCache();
+    try {
+      loadCore();
+    } catch (e) {
+      fail('CORE_LOAD_THREW', '<no id>', CORE_PATH, String(e && e.message || e));
+    }
+
+    let rule;
+    try {
+      rule = require(abs);
+    } catch (e) {
+      fail('RULE_LOAD_THREW', '<no id>', abs, String(e && e.message || e));
+    }
+
+    const res = validateRule(rule, abs);
+    if (!res.ok) {
+      fail(res.code, res.ruleId, abs, res.detail);
+    }
+    passed++;
+  }
+
+  console.log('[check-explain-contract] PASS: ' + passed + '/' + TARGETS.length + ' popover-surfacing rules have valid explain contract');
+  process.exit(0);
+}
+
+main();
