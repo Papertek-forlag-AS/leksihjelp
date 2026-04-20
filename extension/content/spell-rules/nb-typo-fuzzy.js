@@ -103,12 +103,22 @@
     priority: 50,
     explain: 'Ord ikke funnet i ordboken — foreslår nærmeste treff.',
     check(ctx) {
-      const { text, tokens, vocab, cursorPos } = ctx;
+      const { text, tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
+      const sisterValidWords = vocab.sisterValidWords || new Set(); // Phase 4 / SC-03
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
+        if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
+        // Phase 4 / SC-03: token is valid in the OTHER Norwegian variant —
+        // don't fuzzy-flag. E.g., NN `ikkje` in an NB document, or NB
+        // `jeg` in NN text. Plumbed via Plan 04-01 at the seam; consumed
+        // at the rule layer here. Belt-and-braces with propernoun-guard /
+        // codeswitch paths: even if neither of them put token i into
+        // ctx.suppressed, the sister lookup still short-circuits the
+        // fuzzy match.
+        if (sisterValidWords.has(t.word)) continue;
         if (
           t.word.length >= 4 &&
           !validWords.has(t.word) &&

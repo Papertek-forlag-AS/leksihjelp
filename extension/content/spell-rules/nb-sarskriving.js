@@ -30,13 +30,16 @@
     priority: 30,
     explain: 'To ord som hører sammen som ett sammensatt ord skal skrives uten mellomrom.',
     check(ctx) {
-      const { tokens, vocab, cursorPos } = ctx;
+      const { tokens, vocab, cursorPos, suppressed } = ctx;
       const compoundNouns = vocab.compoundNouns || new Set();
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         const prev = tokens[i - 1];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
+        // Phase 4 / SC-02 + SC-04: skip if EITHER current or previous token
+        // is suppressed — the finding spans both so both must be eligible.
+        if (suppressed && (suppressed.has(i) || (i > 0 && suppressed.has(i - 1)))) continue;
         if (
           prev &&
           prev.word.length >= 2 && t.word.length >= 2 &&

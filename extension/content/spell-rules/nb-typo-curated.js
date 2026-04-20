@@ -24,13 +24,14 @@
     priority: 40,
     explain: 'Kjent skrivefeil — slå opp i ordboken.',
     check(ctx) {
-      const { tokens, vocab, cursorPos } = ctx;
+      const { tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
       const typoFix = vocab.typoFix || new Map();
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
+        if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
         if (typoFix.has(t.word) && !validWords.has(t.word)) {
           const correct = typoFix.get(t.word);
           out.push({
