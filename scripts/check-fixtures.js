@@ -189,6 +189,22 @@ function main() {
     );
   }
 
+  // ── Phase 04 / SC-03 adapter-contract guard ──
+  //
+  // Mirror of the SC-01 guard above: Plans 04-02 / 04-03 consume
+  // `vocab.sisterValidWords` for cross-dialect tolerance in NB/NN rules.
+  // The fixture runner passes a full buildIndexes output (sisterValidWords
+  // populated from the sister's raw vocab), so a regression that drops the
+  // adapter's `sisterValidWords: VOCAB.getSisterValidWords()` field would
+  // revert NB↔NN tolerance in the browser while the fixture suite stays
+  // green. Fail loud here on adapter re-regression. Pitfall 6 in
+  // 04-RESEARCH.md.
+  if (!/sisterValidWords:\s*VOCAB\.getSisterValidWords\(\)/.test(adapterSrc)) {
+    throw new Error(
+      '[check-fixtures] spell-check.js:runCheck vocab object missing `sisterValidWords: VOCAB.getSisterValidWords()` — SC-03 browser-wiring regression. See .planning/phases/04-false-positive-reduction-nb-nn/.'
+    );
+  }
+
   const langs = (!lang || lang === 'all') ? ['nb', 'nn'] : [lang];
   let hardFail = false;
   const report = {};
