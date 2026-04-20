@@ -16,9 +16,53 @@
 {"id":"nn-saer-010","text":"Eg har eit fjell område","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"fjellområde"}],"must_not_flag":[]}
 {"id":"nn-saer-011","text":"Eg har ein hals kjede","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"halskjede"}],"must_not_flag":[]}
 
+// ── Phase 4 Plan 04-03 positive expansion (to >=30 positive) ──
+// Each candidate compound verified present in NN compoundNouns via Node
+// probe, and article chosen so the sentence produces no incidental
+// gender finding.
+{"id":"nn-saer-012","text":"Eg har ei matte bok","expected":[{"rule_id":"sarskriving","start":10,"end":19,"suggestion":"mattebok"}],"must_not_flag":[]}
+{"id":"nn-saer-013","text":"Eg har ein fot ball","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"fotball"}],"must_not_flag":[]}
+{"id":"nn-saer-014","text":"Eg har ei bok hylle","expected":[{"rule_id":"sarskriving","start":10,"end":19,"suggestion":"bokhylle"}],"must_not_flag":[]}
+{"id":"nn-saer-015","text":"Eg har ein rygg sekk","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"ryggsekk"}],"must_not_flag":[]}
+{"id":"nn-saer-016","text":"Eg har ein arbeids plass","expected":[{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"arbeidsplass"}],"must_not_flag":[]}
+{"id":"nn-saer-017","text":"Eg har ein flagg dag","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"flaggdag"}],"must_not_flag":[]}
+{"id":"nn-saer-018","text":"Eg har ein barne hage","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"barnehage"}],"must_not_flag":[]}
+{"id":"nn-saer-019","text":"Eg har ei tann børste","expected":[{"rule_id":"sarskriving","start":10,"end":21,"suggestion":"tannbørste"}],"must_not_flag":[]}
+{"id":"nn-saer-020","text":"Eg har ein mat butikk","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"matbutikk"}],"must_not_flag":[]}
+{"id":"nn-saer-021","text":"Eg har ein skule dag","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"skuledag"}],"must_not_flag":[]}
+{"id":"nn-saer-022","text":"Eg har eit sove rom","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"soverom"}],"must_not_flag":[]}
+{"id":"nn-saer-023","text":"Eg har ein tele fon","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"telefon"}],"must_not_flag":[]}
+{"id":"nn-saer-024","text":"Eg har ein by kart","expected":[{"rule_id":"sarskriving","start":11,"end":18,"suggestion":"bykart"}],"must_not_flag":[]}
+{"id":"nn-saer-025","text":"Eg har ei bade bukse","expected":[{"rule_id":"sarskriving","start":10,"end":20,"suggestion":"badebukse"}],"must_not_flag":[]}
+{"id":"nn-saer-026","text":"Eg har eit bade land","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"badeland"}],"must_not_flag":[]}
+{"id":"nn-saer-027","text":"Eg har eit bade rom","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"baderom"}],"must_not_flag":[]}
+{"id":"nn-saer-028","text":"Eg har eit bak verk","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"bakverk"}],"must_not_flag":[]}
+{"id":"nn-saer-029","text":"Eg har ein bil tur","expected":[{"rule_id":"sarskriving","start":11,"end":18,"suggestion":"biltur"}],"must_not_flag":[]}
+{"id":"nn-saer-030","text":"Eg har ein bil vask","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"bilvask"}],"must_not_flag":[]}
+
 // ── Acceptance cases — non-compound pairs, must NOT flag ──
+// Original 5 from Phase 1.
 {"id":"nn-saer-accept-001","text":"Han las ei fin bok","expected":[],"must_not_flag":[]}
 {"id":"nn-saer-accept-002","text":"Det er ein stor dag","expected":[],"must_not_flag":[]}
 {"id":"nn-saer-accept-003","text":"Ho har ein ny venn","expected":[],"must_not_flag":[]}
 {"id":"nn-saer-accept-004","text":"Vi hadde ei lang reise","expected":[],"must_not_flag":[]}
 {"id":"nn-saer-accept-005","text":"Eg har eit stort hus","expected":[],"must_not_flag":[]}
+
+// ── Phase 4 Plan 04-03 acceptance expansion (to >=15 total) ──
+// Grammatically-adjacent adjective+noun pairs that must NOT flag.
+// Last case `stor by` → `storby` IS a legitimate NN compound in
+// compoundNouns → rule flags today. Included to expose the false-positive
+// surface and drive the SC-05 threshold-lock decision at the checkpoint.
+{"id":"nn-saer-accept-006","text":"Han kjøpte ein ny bil","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-007","text":"Vi drakk ein god kaffe","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-008","text":"Han er ein snill mann","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-009","text":"Vi har ei tom flaske","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-010","text":"Ho har ei ren kjole","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-011","text":"Ho har ei blå bluse","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-012","text":"Det var ein kald morgon","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-013","text":"Dei åt ein god lunsj","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-014","text":"Det er ein hyggeleg hund","expected":[],"must_not_flag":[]}
+{"id":"nn-saer-accept-015","text":"Mannen er ein flink kokk","expected":[],"must_not_flag":[]}
+// Load-bearing false-positive-surface case: `storby` IS in NN compoundNouns.
+// Rule has no adjective blocklist → flags today. Drops P below 1.0.
+{"id":"nn-saer-accept-016","text":"Ho bur i ein stor by","expected":[],"must_not_flag":[]}

@@ -15,9 +15,67 @@
 {"id":"nb-saer-010","text":"Jeg har en sol briller","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"solbriller"}],"must_not_flag":[]}
 {"id":"nb-saer-011","text":"Hun har en biologi bok","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"biologibok"}],"must_not_flag":[]}
 
+// ── Phase 4 Plan 04-03 positive expansion (to >=30 positive) ──
+// All candidate compounds verified present in compoundNouns via Node probe
+// (see plan Task 1 action item 7).
+{"id":"nb-saer-012","text":"Jeg har en skole gård","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"skolegård"}],"must_not_flag":[]}
+{"id":"nb-saer-013","text":"Jeg har en data maskin","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"datamaskin"}],"must_not_flag":[]}
+{"id":"nb-saer-014","text":"Jeg har en rygg sekk","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"ryggsekk"}],"must_not_flag":[]}
+{"id":"nb-saer-015","text":"Jeg har en foreldre møte","expected":[{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"foreldremøte"}],"must_not_flag":[]}
+{"id":"nb-saer-016","text":"Jeg har en telefon nummer","expected":[{"rule_id":"sarskriving","start":11,"end":25,"suggestion":"telefonnummer"}],"must_not_flag":[]}
+{"id":"nb-saer-017","text":"Jeg har en spise stue","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"spisestue"}],"must_not_flag":[]}
+{"id":"nb-saer-018","text":"Jeg har en arbeids plass","expected":[{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"arbeidsplass"}],"must_not_flag":[]}
+{"id":"nb-saer-019","text":"Jeg har en flagg dag","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"flaggdag"}],"must_not_flag":[]}
+{"id":"nb-saer-020","text":"Jeg har en hoved stad","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"hovedstad"}],"must_not_flag":[]}
+{"id":"nb-saer-021","text":"Jeg har en barne hage","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"barnehage"}],"must_not_flag":[]}
+{"id":"nb-saer-022","text":"Jeg har en tann børste","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"tannbørste"}],"must_not_flag":[]}
+{"id":"nb-saer-023","text":"Jeg har en tog stasjon","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"togstasjon"}],"must_not_flag":[]}
+{"id":"nb-saer-024","text":"Jeg har en buss holdeplass","expected":[{"rule_id":"sarskriving","start":11,"end":26,"suggestion":"bussholdeplass"}],"must_not_flag":[]}
+{"id":"nb-saer-025","text":"Jeg har en bok handel","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"bokhandel"}],"must_not_flag":[]}
+{"id":"nb-saer-026","text":"Jeg har en mat butikk","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"matbutikk"}],"must_not_flag":[]}
+{"id":"nb-saer-027","text":"Jeg har en sove pose","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"sovepose"}],"must_not_flag":[]}
+{"id":"nb-saer-028","text":"Jeg har en mat pakke","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"matpakke"}],"must_not_flag":[]}
+{"id":"nb-saer-029","text":"Jeg kjøpte regn frakk i går","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"regnfrakk"}],"must_not_flag":[]}
+{"id":"nb-saer-030","text":"Jeg har en is krem","expected":[{"rule_id":"sarskriving","start":11,"end":18,"suggestion":"iskrem"}],"must_not_flag":[]}
+{"id":"nb-saer-031","text":"Jeg har en kaffe kopp","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"kaffekopp"}],"must_not_flag":[]}
+{"id":"nb-saer-032","text":"Jeg har en tann børste","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"tannbørste"}],"must_not_flag":[]}
+{"id":"nb-saer-033","text":"Jeg har en vinter ferie","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"vinterferie"}],"must_not_flag":[]}
+{"id":"nb-saer-034","text":"Jeg har en høst ferie","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"høstferie"}],"must_not_flag":[]}
+{"id":"nb-saer-035","text":"Jeg har en påske ferie","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"påskeferie"}],"must_not_flag":[]}
+{"id":"nb-saer-036","text":"Jeg har en leke plass","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"lekeplass"}],"must_not_flag":[]}
+{"id":"nb-saer-037","text":"Jeg har en sand kasse","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"sandkasse"}],"must_not_flag":[]}
+{"id":"nb-saer-038","text":"Han kjøpte et kjæle dyr","expected":[{"rule_id":"sarskriving","start":14,"end":23,"suggestion":"kjæledyr"}],"must_not_flag":[]}
+
 // ── Acceptance cases — non-compound noun pairs, must NOT flag ──
+// Original 5 from Phase 1.
 {"id":"nb-saer-accept-001","text":"Han leser en god bok","expected":[],"must_not_flag":[]}
 {"id":"nb-saer-accept-002","text":"Hun gikk på en lang tur","expected":[],"must_not_flag":[]}
 {"id":"nb-saer-accept-003","text":"Det er en fin dag","expected":[],"must_not_flag":[]}
 {"id":"nb-saer-accept-004","text":"Jeg har en god venn","expected":[],"must_not_flag":[]}
 {"id":"nb-saer-accept-005","text":"De har ei stor bok","expected":[],"must_not_flag":[]}
+
+// ── Phase 4 Plan 04-03 acceptance expansion (to >=15 total) ──
+// Adjective+noun pairs. Most DON'T concatenate to a compound (e.g. `nybil`
+// doesn't exist in compoundNouns) so they pass as clean even with the
+// current no-blocklist-against-adjectives rule. One case (`stor by` →
+// `storby` IS in compoundNouns) intentionally exercises the rule's
+// false-positive surface — per plan: "Prefer cases where the adjective
+// is BOTH in the adjective-bank and the concatenation exists as a
+// compound, so the rule's blocklist is the load-bearing gate." This
+// case drives the observed P value below 1.0, which is the SC-05 signal
+// the checkpoint consumes to lock the threshold.
+{"id":"nb-saer-accept-006","text":"Han kjøpte en ny bil","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-007","text":"Vi drakk en god kaffe","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-008","text":"Han er en snill mann","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-009","text":"Vi har en tom flaske","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-010","text":"Hun har en ren kjole","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-011","text":"Det er en rød ball","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-012","text":"Hun har en blå bluse","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-013","text":"Det var en kald morgen","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-014","text":"De spiste en god lunsj","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-015","text":"Det er en hyggelig hund","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-016","text":"Mannen er en flink kokk","expected":[],"must_not_flag":[]}
+// Load-bearing false-positive-surface case: `storby` IS in compoundNouns.
+// Rule has no adj+noun blocklist → flags today. Acceptance assertion
+// forces the P value down, driving the SC-05 threshold-lock decision.
+{"id":"nb-saer-accept-017","text":"Hun bor i en stor by","expected":[],"must_not_flag":[]}

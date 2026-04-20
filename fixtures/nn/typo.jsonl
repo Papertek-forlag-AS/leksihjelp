@@ -13,3 +13,18 @@
 {"id":"nn-typo-tysnk-001","text":"Eg er veldig tysnk","expected":[{"rule_id":"typo","start":13,"end":18,"suggestion":"tysk"}],"must_not_flag":[]}
 {"id":"nn-typo-mnen-001","text":"Det er mnen som","expected":[{"rule_id":"typo","start":7,"end":11,"suggestion":"menn"}],"must_not_flag":[]}
 {"id":"nn-typo-skirver-001","text":"Han skirver mykje","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"skriver"}],"must_not_flag":[]}
+
+// ── SC-03 dialect-tolerance cases (Phase 4 · Plan 04-03) ──
+// Each case asserts expected:[] — the NN document contains NB-register
+// words that must NOT flag. Sister-direction to the NB dialect cases in
+// fixtures/nb/typo.jsonl. Note: many of these NB tokens (jeg, ikke, bare,
+// noen, hjem) happen to ALSO be in NN's validWords via linkedTo — so the
+// `!validWords.has` guard in nb-typo-curated.js already silences them
+// without needing the sister-lookup path. These cases document the
+// expected behavior and would regress if the NN data layer ever stopped
+// including them.
+{"id":"nn-typo-dialect-jeg-001","text":"Eg såg at jeg sto der i går","expected":[],"must_not_flag":[]}
+{"id":"nn-typo-dialect-ikke-001","text":"Eg har ikke tid i dag","expected":[],"must_not_flag":[]}
+{"id":"nn-typo-dialect-bare-001","text":"Det er bare litt kaldt i dag","expected":[],"must_not_flag":[]}
+{"id":"nn-typo-dialect-noen-001","text":"Har du sett noen av dei","expected":[],"must_not_flag":[]}
+{"id":"nn-typo-dialect-hjem-001","text":"Skal vi gå hjem no","expected":[],"must_not_flag":[]}

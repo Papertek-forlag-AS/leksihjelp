@@ -10,3 +10,50 @@
 {"id":"nb-clean-006","text":"Jeg har en bok og en penn.","expected":[],"must_not_flag":[]}
 {"id":"nb-clean-007","text":"Mannen kjører bilen.","expected":[],"must_not_flag":[]}
 {"id":"nb-clean-008","text":"Katten sover på stolen.","expected":[],"must_not_flag":[]}
+
+// ── SC-02 Phase 4 · real-NB long-form learner text (>=500 words) ──
+// SOURCE: Hand-authored A1-A2 learner-core Norwegian passage composed from
+// individually-verified clean sentences, stitched for multi-paragraph
+// coverage. Retrieved (authored): 2026-04-20.
+//
+// A 2025/2026 copy-pasted NRK/Aftenposten article was attempted first but
+// every candidate flagged multiple pre-existing fuzzy / data-layer false
+// positives (e.g., `siterte` → `sintere`; `boken` → `boksen`; `sykehuset`
+// → `sykehuser`; `Mange` → `Mangel`). These are NOT rule bugs introduced
+// by Phase 4 — they are pre-existing vocab-data gaps in the Papertek
+// dictionary that would require data-source fixes (candidate Phase 5 /
+// sibling-repo PR). Per the Plan 04-03 honest-ground-truth policy:
+//   "If the finding is a real bug — document in plan's deferred-issues and
+//    ship a narrower fixture case covering only the non-bug portion."
+// Result: a learner-text passage that exercises the >=500-word SC-02
+// acceptance intent without importing unrelated data-layer regressions.
+// See .planning/phases/04-false-positive-reduction-nb-nn/04-03-SUMMARY.md
+// "Deferred Issues" for the list of data-layer false-positives surfaced.
+{"id":"nb-clean-news-500w-001","text":"Familien min bor i Oslo i en gammel leilighet. Vi er fire i familien og vi liker hverandre. Far arbeider som lærer på en stor skole i byen. Min søster heter Anna og hun er elleve år gammel. Min bror heter Ola og han er åtte år gammel. Om morgenen spiser vi frokost sammen på kjøkkenet. Vi drikker kaffe eller te og spiser brød med ost. Etter frokost går alle på skolen eller til arbeid. Om ettermiddagen kommer jeg hjem klokka tre. Da gjør jeg lekser eller leser en bok i stolen. Vi spiser ofte kjøtt med poteter og grønnsaker. Om kvelden ser vi en film sammen på TV. Alle i familien er glad i fotball og ski. Om vinteren går vi ofte på ski i fjellet. Jeg liker å lese bøker om dyr og natur. Min bror spiller fotball tre ganger i uken. Min søster danser ballett to kvelder hver uke. Vi har en hund som heter Bjørn og en katt som heter Mia. Hunden er stor og svart og han liker å løpe i skogen. Katten er liten og hvit og hun sover mye på sofaen. Bestemor og bestefar bor på landet i et gult hus. Vi besøker dem ofte i helger og ferier. De har en stor hage med epler og pærer. Men om vinteren er det kaldt og snøen ligger overalt. Da må vi ha varme klær og gode sko ute. Vi spiser god mat og åpner gaver sammen. I mai feirer vi Norges nasjonaldag med parade. Min familie reiser ofte til utlandet i sommerferien. Vi har vært i Spania og Italia og Hellas. Jeg liker best å reise til varme steder med sol. Der kan vi bade i havet og spise god mat. Vi treffer nye mennesker og lærer nye ting. Når vi kommer hjem forteller vi familien om reisen. Jeg er glad for at jeg har en så fin familie. Vi har det bra sammen og vi hjelper hverandre. I dag begynner vinter og jeg er klar for snø. Jeg gleder meg til å stå på ski i helger. Uten dem ville livet vært mye mindre morsomt. Om høsten blir bladene gule og røde på trærne. Regnet faller ofte i oktober og november i Norge. Vi tar på oss regnjakke når vi går ut. Når det er mørkt tidlig tenner vi stearinlys hjemme. På julaften samler familien seg rundt juletreet om kvelden. Vi synger sanger og gir hverandre gaver. Bestemor baker alltid gode kaker og pepperkaker til jul. Hele familien spiser en stor frokost med brød og ost. Vi spiser svineribbe eller pinnekjøtt med poteter. Vi har fag som norsk og matte og engelsk på skolen. Om våren kommer blomstene opp av jorda. Vi er glade for at vinteren er over. Jeg har en favoritt bok som jeg leser om og om. Til slutt kommer han hjem igjen til familien sin. Jeg vil gjerne skrive min egen bok en gang. Kanskje blir jeg forfatter når jeg er voksen. Eller kanskje blir jeg lege som mamma er nå. Men først må jeg bli ferdig med skolen. Jeg har noen år igjen før jeg må velge. Vi liker å besøke museer og gallerier i byen. Vi kan se nordlys om vinteren når det er klart vær. Det er som en magisk forestilling på himmelen. I sommer var vi på ferie i Lofoten i nord.","expected":[],"must_not_flag":[]}
+
+// ── SC-02 Phase 4 · loan-word acceptance cases (>=3) ──
+// Every loan word is drawn from the 70-entry curated LOAN_WORDS Set in
+// extension/content/spell-rules/nb-propernoun-guard.js — propernoun-guard
+// populates ctx.suppressed for these tokens; the finding-emitting rules
+// honor the set and short-circuit. Without Plan 04-02's layer, `brown`
+// would fuzzy-resolve to `broen`, `smoothie` to the nearest 1-edit
+// neighbor, etc.
+{"id":"nb-clean-loan-001","text":"Jeg liker en smoothie til frokost","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-loan-002","text":"Vi har en deadline på fredag","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-loan-003","text":"Han drikker en milkshake etter trening","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-loan-004","text":"Jeg tok en laptop med meg","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-loan-005","text":"Hun leser en blog om mat","expected":[],"must_not_flag":[]}
+
+// ── SC-02 Phase 4 · proper-noun acceptance cases (>=3) ──
+// nb-clean-propnoun-001 exercises single mid-sentence capitalization —
+// handled by isLikelyProperNoun (pre-existing), NOT by the new four-layer
+// propernoun-guard. It's here for regression coverage.
+// nb-clean-propnoun-002 uses a consecutive-cap span "Anne Grethe" —
+// Layer 4 of propernoun-guard via isConsecutiveCapSpan.
+// nb-clean-propnoun-003 uses an all-caps acronym "NATO" — Layer 2 of
+// propernoun-guard via isAllCaps.
+{"id":"nb-clean-propnoun-001","text":"Jeg bor i Oslo og jobber i Bergen","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-propnoun-002","text":"Hun heter Anne Grethe og er lærer","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-propnoun-003","text":"Møtet med NATO starter klokka ti","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-propnoun-004","text":"Vi bor i Trondheim i Norge","expected":[],"must_not_flag":[]}
+{"id":"nb-clean-propnoun-005","text":"FN og NRK var på konferansen","expected":[],"must_not_flag":[]}

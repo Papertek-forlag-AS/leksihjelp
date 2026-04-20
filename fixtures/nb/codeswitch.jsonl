@@ -1,0 +1,57 @@
+// NB codeswitch corpus — SC-04 Phase 4, NEW fixture file (Plan 04-03).
+//
+// Each case contains a contiguous span of >=3 non-Norwegian tokens inside
+// NB surrounding text. Expected is either `[]` (full suppression, SC-04
+// acceptance criterion #3 "at most 1 flag per paragraph") or a single
+// finding on a real Norwegian typo outside the codeswitched span.
+//
+// The `nb-codeswitch.js` rule (priority 1) populates ctx.suppressed for
+// every token index inside a dense unknown-to-NB-AND-NN window; the
+// finding-emitting rules honor ctx.suppressed with a one-line early exit.
+// MIN_TOKENS=8 gate prevents short mixed greetings from triggering
+// density suppression (Pitfall 8).
+//
+// Runner auto-discovers `fixtures/{lang}/*.jsonl` files — no edit to
+// `scripts/check-fixtures.js` needed when adding this NEW file.
+//
+// Authoring notes (Plan 04-03):
+//   - Ich, Guten, Bonjour, Morgen etc. are mid-sentence-capitalized and
+//     the density predicate's isLikelyProperNoun filter excludes them
+//     from the unknown count (Pitfall 2) — so German cases with capital
+//     nouns often fall below the 3-unknowns-in-5 threshold and suppress
+//     less aggressively than a superficial reading would suggest. The
+//     cases below use LOWERCASE English/French phrases to exercise the
+//     density heuristic as actually specified; German cases that rely on
+//     capitalized nouns are tracked as deferred-issues for Plan 04-02's
+//     acknowledged tuning window.
+
+// ── English code-switching (density suppression active) ──
+{"id":"nb-codeswitch-en-001","text":"Sitatet var the quick brown fox jumps over the lazy dog fra en engelsk bok","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-002","text":"Boken sier please pass me the salt tomorrow and we go","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-003","text":"Jeg skrev the brown fox jumps over the lazy dog in boka mi i går","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-004","text":"De sa please give me a moment tomorrow we must talk","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-005","text":"Han sa that was really nice today i boka hans","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-006","text":"Læreren skrev come tomorrow and we will talk more på tavla","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-007","text":"Vi hørte where did you go yesterday morning i radioen","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-en-008","text":"I cv sto senior software engineer and project manager i ti år","expected":[],"must_not_flag":[]}
+
+// ── French code-switching ──
+{"id":"nb-codeswitch-fr-001","text":"Han sa aller mes amis comment allez vous aujourd hui","expected":[],"must_not_flag":[]}
+{"id":"nb-codeswitch-fr-002","text":"Oversettelsen var but wait for me tomorrow morning please","expected":[],"must_not_flag":[]}
+
+// ── Mixed-register acceptance: codeswitched span + real NB typo ──
+// Windowed suppression silences the foreign span; the NB typo outside the
+// suppression window is still flagged. Pitfall 2 in RESEARCH.md.
+{"id":"nb-codeswitch-typo-001","text":"Jeg sa please give me a moment og jeg komer straks","expected":[{"rule_id":"typo","start":38,"end":43,"suggestion":"kommer"}],"must_not_flag":[]}
+
+// ── Short-input non-activation (Pitfall 8) ──
+// Total tokens = 3, below MIN_TOKENS=8 → window never activates → no
+// suppression but also no false-flag (neither Wow nor kult triggers
+// fuzzy against NB validWords).
+{"id":"nb-codeswitch-short-001","text":"Wow så kult","expected":[],"must_not_flag":[]}
+
+// ── Proper-noun density guard (Pitfall 2) ──
+// Three capitalized names in a row — isLikelyProperNoun filters them out
+// of the unknown count, so density doesn't fire on name-rich sentences.
+// A nearby Norwegian typo outside the name cluster still flags.
+{"id":"nb-codeswitch-name-typo-001","text":"Vi møtte Siri Hallgrim Pettersen og jeg komer hjem","expected":[{"rule_id":"typo","start":40,"end":45,"suggestion":"kommer"}],"must_not_flag":[]}

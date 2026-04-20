@@ -49,3 +49,28 @@
 // hatde: today picks 'hatte' (Zipf 3.62), should be 'hadde' (Zipf 6.71).
 {"id":"nb-typo-zipf-001","text":"Vi hagde fest i går.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
 {"id":"nb-typo-zipf-002","text":"De hatde ferie da.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
+
+// ── SC-03 dialect-tolerance cases (Phase 4 · Plan 04-03) ──
+// Each case asserts expected:[] — the NB document contains NN-register
+// words that must NOT flag. Close of SC-03 at the fixture layer — Plan
+// 04-01 shipped the seam rail (vocab.sisterValidWords), Plan 04-02 shipped
+// rule-layer consumption in nb-typo-fuzzy.js, Plan 04-03 (this commit)
+// includes a Rule-1 auto-fix that also adds sisterValidWords consultation
+// to nb-typo-curated.js — without that fix, `eg` in NB text flags as
+// `eg → egg` (typoFix-triggered) despite being valid NN.
+{"id":"nb-typo-dialect-ikkje-001","text":"Jeg har ikkje tid til det","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-eg-001","text":"Om dagen eg gir deg mer","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-berre-001","text":"Det er berre litt kaldt i dag","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-nokon-001","text":"Har du sett nokon av dem","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-heim-001","text":"Dei kom heim til oss","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-ho-001","text":"Ho er ikkje her","expected":[],"must_not_flag":[]}
+
+// ── SC-03 Pitfall-5 anti-leakage case (Phase 4 · Plan 04-03) ──
+// A real NB typo (`komer` → `kommer`) must still flag. The Pitfall-1 typo
+// filter in vocab-seam-core.buildIndexes guarantees NN's typoFix rows do
+// NOT leak into NB sisterValidWords — so `komer` remains absent from
+// sisterValidWords and the fuzzy rule resolves it correctly. If this case
+// ever fails, it means the typo-filter regressed and the SC-03 machinery
+// is silently tolerating known typos cross-dialect (see SUMMARY for
+// 04-01's seam probe: 14,754 pure-typo NN entries, 0 leaked).
+{"id":"nb-typo-known-typo-still-flags-001","text":"Han komer snart hjem","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"kommer"}],"must_not_flag":[]}

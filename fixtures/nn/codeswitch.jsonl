@@ -1,0 +1,44 @@
+// NN codeswitch corpus — SC-04 Phase 4, NEW fixture file (Plan 04-03).
+//
+// Mirror of fixtures/nb/codeswitch.jsonl for NN-register surrounding text.
+// Each case contains a contiguous span of >=3 non-Norwegian tokens inside
+// NN Nynorsk text (eg, ikkje, berre, heim, skreiv, skulen, kvar, etc.).
+// Expected is either `[]` (full suppression) or a single finding on a
+// real NN typo (like `lkar` → `likar`) outside the codeswitched span.
+//
+// The `nb-codeswitch.js` rule is language-registered for both 'nb' and
+// 'nn' — the rule name is historical, it applies symmetrically.
+//
+// Authoring notes (Plan 04-03):
+//   - Use lowercase English/French phrases for density-window coverage
+//     (German capital nouns are excluded from the unknown count via
+//     isLikelyProperNoun and can't drive density-based suppression at
+//     the current MIN_TOKENS=8 / UNKNOWN_THRESHOLD=3 parameter tuple).
+
+// ── English code-switching ──
+{"id":"nn-codeswitch-en-001","text":"Boka seier please pass me the salt tomorrow and we go","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-002","text":"Eg skreiv the brown fox jumps over the lazy dog i boka mi","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-003","text":"Dei sa please give me a moment tomorrow we must talk","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-004","text":"Han sa that was really nice today i boka hans","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-005","text":"Læraren skreiv come tomorrow and we will talk more på tavla","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-006","text":"Vi høyrde where did you go yesterday morning i radioen","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-007","text":"I cv sto senior software engineer and project manager i ti år","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-en-008","text":"Det var the lazy dog jumps over the fence i hagen vår","expected":[],"must_not_flag":[]}
+
+// ── French code-switching ──
+{"id":"nn-codeswitch-fr-001","text":"Han sa aller mes amis comment allez vous aujourd hui","expected":[],"must_not_flag":[]}
+{"id":"nn-codeswitch-fr-002","text":"Omsetjinga var but wait for me tomorrow morning please","expected":[],"must_not_flag":[]}
+
+// ── Mixed-register acceptance: codeswitched span + real NN typo ──
+// `lkar` is a known NN typo for `likar` (established in fixtures/nn/typo.jsonl
+// nn-typo-lkar-001). Used here to pair a typo outside the codeswitch
+// window with a codeswitched span — only the typo flags.
+{"id":"nn-codeswitch-typo-001","text":"Eg sa please give me a moment og eg lkar han ikkje","expected":[{"rule_id":"typo","start":36,"end":40,"suggestion":"likar"}],"must_not_flag":[]}
+
+// ── Short-input non-activation (Pitfall 8) ──
+{"id":"nn-codeswitch-short-001","text":"Wow så kult","expected":[],"must_not_flag":[]}
+
+// ── Proper-noun density guard (Pitfall 2) ──
+// Consecutive capitalized names must not trigger density suppression.
+// A real NN typo elsewhere in the sentence still flags.
+{"id":"nn-codeswitch-name-typo-001","text":"Vi møtte Siri Hallgrim Pettersen og eg lkar pizza","expected":[{"rule_id":"typo","start":39,"end":43,"suggestion":"likar"}],"must_not_flag":[]}
