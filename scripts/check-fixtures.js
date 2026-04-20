@@ -110,7 +110,21 @@ function loadVocab(lang) {
   if (fs.existsSync(freqFile)) {
     freq = JSON.parse(fs.readFileSync(freqFile, 'utf8'));
   }
-  const vocab = vocabCore.buildIndexes({ raw, bigrams, freq, lang, isFeatureEnabled: () => true });
+
+  // Phase 4 / SC-03: load sister-dialect raw vocab for NB↔NN cross-dialect
+  // tolerance. Without this, sisterValidWords is empty Set in the fixture
+  // path — the SC-03 rule-layer short-circuits in nb-typo-fuzzy.js and
+  // nb-typo-curated.js would never fire, and the SC-04 codeswitch rule's
+  // `isUnknown` predicate would wrongly count valid sister-dialect tokens
+  // as unknown. Mirrors what vocab-seam.js does in the browser runtime
+  // via loadRawSister(lang) + Promise.all.
+  let sisterRaw = null;
+  if (lang === 'nb' || lang === 'nn') {
+    const sisterLang = lang === 'nb' ? 'nn' : 'nb';
+    sisterRaw = JSON.parse(fs.readFileSync(path.join(DATA_DIR, sisterLang + '.json'), 'utf8'));
+  }
+
+  const vocab = vocabCore.buildIndexes({ raw, sisterRaw, bigrams, freq, lang, isFeatureEnabled: () => true });
 
   // Pitfall 2 (RESEARCH.md): fail loud if a language we expect to have Zipf
   // data somehow lost it. NB/NN shipped freq sidecars in Phase 2; if they
@@ -118,6 +132,17 @@ function loadVocab(lang) {
   if ((lang === 'nb' || lang === 'nn') && (!(vocab.freq instanceof Map) || vocab.freq.size === 0)) {
     throw new Error(`[check-fixtures] Expected populated freq Map for ${lang}, got empty. Check extension/data/freq-${lang}.json.`);
   }
+
+  // Phase 4 / SC-03 data-contract guard: if NB/NN sisterValidWords Set is
+  // empty, the runner silently bypasses the entire cross-dialect tolerance
+  // path and SC-03 fixture cases would pass via other means (or fail
+  // loudly with fuzzy false-positives on valid sister-dialect words).
+  // Mirrors the freq Map guard above.
+  if ((lang === 'nb' || lang === 'nn') &&
+      (!(vocab.sisterValidWords instanceof Set) || vocab.sisterValidWords.size === 0)) {
+    throw new Error(`[check-fixtures] Expected populated sisterValidWords Set for ${lang}, got empty. Check sister-dialect data loading (Plan 04-01 seam, Plan 04-03 runner wiring).`);
+  }
+
   return vocab;
 }
 
