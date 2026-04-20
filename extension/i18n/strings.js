@@ -140,6 +140,9 @@ const _STRINGS = {
 
     settings_prediction_title: 'Ordforslag',
     settings_prediction_toggle: 'Aktiver ordforslag ved skriving',
+    settings_spellcheck_alternates_title: 'Skriveforslag',
+    settings_spellcheck_alternates_toggle: 'Vis alternative skriveforslag',
+    settings_spellcheck_alternates_note: 'Viser opptil 3 forslag om gangen i stedet for bare ett',
     settings_grammar_title: 'Grammatikk i ordboken',
     settings_grammar_note: 'Hvor mye grammatikk vil du se?',
     settings_grammar_customize: 'Tilpass selv',
@@ -214,6 +217,8 @@ const _STRINGS = {
     pred_resume: 'Fortsett ordforslag',
     pred_paused: 'Ordforslag pauset',
     pred_resume_short: 'Fortsett',
+    pred_vis_flere: 'Vis flere',
+    pred_vis_faerre: 'Vis færre',
 
     // ── Context menus (service worker) ──
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
@@ -343,6 +348,9 @@ const _STRINGS = {
 
     settings_prediction_title: 'Ordforslag',
     settings_prediction_toggle: 'Aktiver ordforslag ved skriving',
+    settings_spellcheck_alternates_title: 'Skriveforslag',
+    settings_spellcheck_alternates_toggle: 'Vis alternative skriveforslag',
+    settings_spellcheck_alternates_note: 'Viser opptil 3 forslag om gongen i staden for berre eitt',
     settings_grammar_title: 'Grammatikk i ordboka',
     settings_grammar_note: 'Kor mykje grammatikk vil du sjå?',
     settings_grammar_customize: 'Tilpass sjølv',
@@ -412,6 +420,8 @@ const _STRINGS = {
     pred_resume: 'Hald fram ordforslag',
     pred_paused: 'Ordforslag pausa',
     pred_resume_short: 'Hald fram',
+    pred_vis_flere: 'Vis fleire',
+    pred_vis_faerre: 'Vis færre',
 
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
