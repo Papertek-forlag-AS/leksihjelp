@@ -97,7 +97,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |
-| SC-01 | Phase 03.1 | Pending (Phase 3 landed Zipf math; v1.0 audit re-opened — browser wiring defect) |
+| SC-01 | Phase 03.1 | Complete |
 | SC-02 | Phase 4 | Pending |
 | SC-03 | Phase 4 | Pending |
 | SC-04 | Phase 4 | Pending |
@@ -125,4 +125,4 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-20 after v1.0 milestone audit (SC-01 re-opened, re-assigned to Phase 03.1 for browser-wiring closure)*
+*Last updated: 2026-04-20 after Phase 03.1 closed SC-01 browser-wiring gap (traceability table synced with completed wiring)*
