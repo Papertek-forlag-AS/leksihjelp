@@ -26,6 +26,8 @@
         "content/floating-widget.js",
         "content/word-prediction.js",
         "content/spell-check-core.js",
+        "content/spell-rules/nb-codeswitch.js",
+        "content/spell-rules/nb-propernoun-guard.js",
         "content/spell-rules/nb-gender.js",
         "content/spell-rules/nb-modal-verb.js",
         "content/spell-rules/nb-sarskriving.js",
