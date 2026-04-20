@@ -380,7 +380,6 @@
       : [finding.fix];
 
     const useMulti = alternatesVisible && suggestions.length > 1;
-    const explainHtml = renderExplain(finding, lang);
 
     if (useMulti) {
       const topK = suggestions.slice(0, 3);
@@ -395,7 +394,7 @@
         <div class="lh-spell-head">
           <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
         </div>
-        <div class="lh-spell-explain">${explainHtml}</div>
+        <div class="lh-spell-explain">${renderExplain(finding, lang)}</div>
         <div class="lh-spell-suggestions">${rowsHtml}${visFlereHtml}</div>
         <div class="lh-spell-actions">
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
@@ -436,7 +435,7 @@
           <span class="lh-spell-arrow">\u2192</span>
           <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
         </div>
-        <div class="lh-spell-explain">${explainHtml}</div>
+        <div class="lh-spell-explain">${renderExplain(finding, lang)}</div>
         <div class="lh-spell-actions">
           <button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
