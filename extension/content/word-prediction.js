@@ -1260,15 +1260,26 @@
   }
 
   async function switchPredictionLang(lang) {
+    // Persist + broadcast. The service worker re-broadcasts LANGUAGE_CHANGED
+    // to all tabs (including this one), which triggers:
+    //   1. vocab-seam.js → loadForLanguage(lang) rebuilds indexes + bigrams
+    //      + freq, re-reading enabledGrammarFeatures from storage in the
+    //      process (so no separate loadGrammarFeatures call is needed here).
+    //   2. word-prediction.js onMessage (line ~107) → awaits loadRecentWords
+    //      then queues refreshFromVocab via VOCAB.onReady, which rebuilds
+    //      prefixIndex + knownPresens/knownPreteritum once the seam finishes.
+    // Pre-refactor (pre-Plan 01-02) this function called loadGrammarFeatures
+    // and loadWordList directly; both were deleted during the seam cutover
+    // (see 01-02-SUMMARY.md line 80) leaving ReferenceErrors on the inline-
+    // picker click path. Phase 3-04 verification surfaced the latent bug —
+    // the popup-driven switch path was unaffected because it already
+    // broadcasts LANGUAGE_CHANGED without going through this helper.
     currentLang = lang;
     await chromeStorageSet({ language: lang });
-    await loadGrammarFeatures(lang);
-    await loadRecentWords(lang);
-    await loadWordList(lang);
     chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
     hideDropdown();
-    // Re-run prediction with new language
-    if (activeElement) schedulePrediction(activeElement);
+    // Re-prediction on the active field is driven by the user's next keystroke;
+    // schedulePrediction here would race the seam's async reload.
   }
 
   function chromeStorageSet(obj) {
