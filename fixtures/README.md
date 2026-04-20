@@ -150,3 +150,54 @@ must produce **zero** findings. Any flag from any rule is a hard failure. The
 clean corpus is the backstop against over-triggering: a new rule or a
 widened fuzzy threshold that starts flagging correct text will fail here
 before it ships.
+
+---
+
+## Code-switching corpus
+
+`fixtures/{lang}/codeswitch.jsonl` (NEW in Phase 4) contains cases where a
+contiguous span of >=3 non-Norwegian tokens appears inside Norwegian text.
+The `nb-codeswitch.js` rule (priority 1) populates `ctx.suppressed` for
+every token index inside a dense unknown-to-NB-AND-NN window; typo rules
+opt in by early-exiting on `suppressed.has(i)`.
+
+Expected findings in this corpus are typically `[]` (full suppression) or
+a single finding on a Norwegian typo *outside* the codeswitched span
+(per SC-04 acceptance criterion: "at most 1 flag per paragraph, not per
+word"). A case where the runner emits a finding inside the codeswitched
+span is a bug — either in the `nb-codeswitch.js` density heuristic (window
+size, threshold, min-tokens) or in a typo rule that didn't opt into
+suppression.
+
+The runner auto-discovers new JSONL files in `fixtures/{lang}/` — adding
+`codeswitch.jsonl` requires no edit to `scripts/check-fixtures.js`.
+
+---
+
+## P/R threshold gate (Phase 4 / SC-05)
+
+Since Phase 4, `scripts/check-fixtures.js` hosts a `THRESHOLDS` table
+gating per-rule precision and recall. When an entry exists AND the run's
+observed P or R drops below, the runner exits 1 with a diagnostic like:
+
+    [nb/saerskriving] THRESHOLD FAIL: R=0.521 < 0.95
+
+Scope: `saerskriving` for both NB and NN is gated in Phase 4 (SC-05).
+Other rules report P/R but are not gated — gating them would block Phase 5
+UX work for unrelated ranking noise.
+
+The `THRESHOLDS` key is the **fixture filename basename** (e.g.,
+`saerskriving`, matching `saerskriving.jsonl`), not the finding-side
+`rule_id` emitted by `spell-check-core.check()` (which is `sarskriving`,
+no 'ae'). The runner buckets results by filename stem, so the gate table
+must mirror that spelling. A mismatch silently no-ops the gate.
+
+Locking a new threshold:
+
+1. Run the suite; observe the per-rule P/R output.
+2. Decide: does the observed value match the product bar? If yes,
+   pick `threshold = observed - 0.05` (safety margin ~1 sigma on a
+   ~90-case corpus; see 04-RESEARCH.md Pitfall 4).
+3. Edit the `THRESHOLDS` table and commit together with the reason
+   in the commit body — record both the observed value and the locked
+   threshold so future regressions have an audit trail.
