@@ -20,3 +20,15 @@
 {"id":"nn-modal-accept-003","text":"Ho vil sove no","expected":[],"must_not_flag":[]}
 {"id":"nn-modal-accept-004","text":"Han kan stå her","expected":[],"must_not_flag":[]}
 {"id":"nn-modal-accept-005","text":"Vi skal snakke saman","expected":[],"must_not_flag":[]}
+
+// ── Phase 05.1-05 smoke-test bug-fix regression — Bug 1 ──
+// `Eg vil skrive på nynorsk` — `skrive` IS the infinitive of å skrive. The
+// rule was firing with fix="skrive ut" because the NN vocab-seam's
+// verbInfinitive map overwrites `skrive → <phrasal-verb baseWord>` across
+// skrive_av / skrive_opp / skrive_ut (all share perfektum_partisipp="skrive").
+// Self-mapping guard (`inf !== w`) skipped skrive_verb's own row but not
+// the phrasal-verb siblings' rows. Fix: rule now short-circuits when
+// `validWords.has('å ' + word)` — the seam emits `å skrive` via
+// conjugations.presens.former.infinitiv for every verb entry, so a true
+// bare infinitive is always detectable by the "å X is valid" presence.
+{"id":"nn-modal-false-pos-skrive-001","text":"Eg vil skrive på nynorsk","expected":[],"must_not_flag":[]}

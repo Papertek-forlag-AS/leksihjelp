@@ -32,6 +32,7 @@
     check(ctx) {
       const { tokens, vocab, cursorPos } = ctx;
       const verbInfinitive = vocab.verbInfinitive || new Map();
+      const validWords = vocab.validWords || new Set();
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
@@ -40,6 +41,21 @@
         if (prev && MODAL_VERBS.has(prev.word) && verbInfinitive.has(t.word)) {
           const inf = verbInfinitive.get(t.word);
           if (inf && inf !== t.word) {
+            // Phase 05.1-05 bug-fix: the token after a modal is only a "wrong
+            // finite form" if it isn't ALREADY a legitimate bare infinitive.
+            // Example: NN "Eg vil skrive på nynorsk" — `skrive` is the
+            // infinitive of å skrive, but `verbInfinitive.get('skrive')`
+            // returns `skrive ut` because the vocab-seam's buildLookupIndexes
+            // over-writes the map as it iterates phrasal-verb conjugations
+            // (skrive_av, skrive_opp, skrive_ut) that all share
+            // `perfektum_partisipp: 'skrive'`. Self-mapping (`baseWord ===
+            // word`) is skipped for the own entry (`inf !== w`), but not
+            // for phrasal-verb siblings whose bare participle coincides
+            // with another verb's infinitive. Defence: if `å ${word}` is in
+            // validWords (the seam adds bare-infinitives from conjugation
+            // `infinitiv` forms like `å skrive`), the token IS itself a
+            // valid infinitive — skip the flag.
+            if (validWords.has('å ' + t.word)) continue;
             out.push({
               rule_id: 'modal_form',
               priority: rule.priority,
