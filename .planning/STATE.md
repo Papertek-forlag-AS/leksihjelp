@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-20T20:36:02Z"
+last_updated: "2026-04-21T07:02:53.598Z"
 progress:
-  total_phases: 7
-  completed_phases: 6
-  total_plans: 25
-  completed_plans: 25
+  total_phases: 8
+  completed_phases: 7
+  total_plans: 29
+  completed_plans: 26
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 05 of 6 — Student Experience Polish — **5 of 5 plans COMPLETE** 2026-04-20 (Plan 05-01 foundation + Plan 05-04 settings toggle + Plan 05-03 word-prediction top-3 reveal + Plan 05-02 rule-side explain callable + top-K suggestions + Plan 05-05 popover render). Plan execution closed end-to-end; `/gsd:verify-work 05` owns UX-01 + UX-02 requirement marking + Phase 5 close-out (including the 7-step Chrome smoke test deferred from Plan 05-05 Task 3 per Phase 4 precedent). Phase 4 plan execution closed end-to-end 2026-04-20; `/gsd:verify-work 04` owns SC-02/03/04/05 requirement marking at phase close (not yet run).
-Plan: 5 of 5 in Phase 05 — 05-05-PLAN.md COMPLETE 2026-04-20 (Wave 3: popover render — extension/content/spell-check.js + extension/styles/content.css + fixtures/nb/typo.jsonl + COPY-REVIEW.md). Added module-scoped alternatesVisible state + chrome.storage.onChanged subscriber that re-renders the active popover live when the popup Settings toggle flips. Added renderExplain(finding, lang) helper with (rule_id, priority, lang) three-way rule lookup + graceful fallback chain (callable[lang] → .nb → string → typeLabel). Added escapeAttr helper next to DOM-based escapeHtml. Rewrote showPopover with two branches: single-suggest (default) swaps typeLabel → renderExplain; multi-suggest (alternatesVisible && suggestions.length > 1) renders top-3 .lh-spell-sugg-row buttons + .lh-spell-vis-flere reveal expanding to 8 total. 5 new CSS classes + dark-mode variants. Added XSS-guard fixture nb-typo-xss-001. COPY-REVIEW.md reviewer-notes filled for all 5 rules + tone-check checklist actioned + review-log row PASS.
-Status: Plan 05-05 shipped as 3 atomic commits, 0 deviations. Commits: 87e0812 (feat: render student-friendly explain copy + multi-suggest popover — renderExplain + chrome.storage.onChanged subscriber + multi-suggest branch + 5 new CSS classes + escapeAttr helper), c35ab70 (refactor: inline renderExplain at each popover branch call-site — aligns with plan's grep -c renderExplain ≥ 3 literal intent; zero behavior change), 10b5488 (test: add XSS-guard fixture + dyslexia-persona proxy review outcome — nb-typo-xss-001 case + COPY-REVIEW.md reviewer notes + tone-check + review log PASS row). Plan 05-05 gates all PASS: check-fixtures 281/281 (nb/typo 27/27 including new XSS case), check-network-silence PASS, check-bundle-size 10.13 MiB / 20 MiB cap with 9.87 MiB headroom, check-explain-contract 5/5 PASS + self-test PASS. grep -c renderExplain = 3 (declaration + 2 call sites), grep -c alternatesVisible = 4 (declaration + hydration + onChanged branch + showPopover branch). Task 3 (checkpoint:human-verify — 7-step Chrome smoke test) deferred to `/gsd:verify-work 05` per Phase 4 precedent — all code-side must_haves verifiable via release gates + source inspection.
-Last activity: 2026-04-20 — Plan 05-05 completed in 6 min. Task commits: 87e0812 (feat Task 1), c35ab70 (refactor follow-up), 10b5488 (test Task 2). Files modified: extension/content/spell-check.js (+134/-12 lines), extension/styles/content.css (+85 lines), fixtures/nb/typo.jsonl (+12 lines — XSS case), .planning/phases/05-student-experience-polish/COPY-REVIEW.md (reviewer-notes + tone-check + review log). Zero deviations — plan landed exactly as written.
+Phase: 05.1 of 6 — Close UX-01 Gaps from Phase 5 Smoke Test — **2 of 5 plans COMPLETE** 2026-04-21 (Plan 05.1-02 shipped cross-repo in papertek-vocabulary; wave-1 other plans still pending).
+Plan: 2 of 5 in Phase 05.1 — 05.1-02-PLAN.md COMPLETE 2026-04-21 (Wave 1: Gap B — papertek-vocabulary/vocabulary/lexicon/{nb,nn}/languagesbank.json + nationalitiesbank.json created with 20 entries each + manifests updated + TYPE_TO_BANK fast-path routing added for _lang/_nat suffixes + search-index.json regenerated for NB/NN). All 7 files in papertek-vocabulary committed as a single atomic commit bf1bd07b pushed to origin/main.
+Status: Plan 05.1-02 shipped as 1 atomic commit in papertek-vocabulary (bf1bd07b). 3 Rule-3 blocking deviations auto-fixed: (1) TYPE_TO_BANK keys must be lang/nat not language/nationality (wordIdToBank splits on _ and looks up last segment); (2) manifest shape is simple integer counts, not {entries: N} objects; (3) search-index.json regeneration is a build artefact that MUST be committed alongside data edits (would otherwise silently drift). Zero NN linguistic review follow-ups — all 20 NN nationality entries confidently authored against grep-verified lærar/spelar/arbeidar agent-noun pattern (-ar/-arar/-aren/-arane). UTF-8 bokmål spot-check PASS (b'bokm\\xc3\\xa5l' = 6 bytes for 5 chars, å = 2 bytes). validate:all PASS, validate:lexicon 0 errors. Plan 05.1-01 status pre-advance: still pending (Plan 05.1-02 landed ahead of Plan 05.1-01 in the wave; no manifest coordination conflict since Plan 01 edits adjectivebank count and Plan 02 adds languagesbank+nationalitiesbank — non-overlapping hunks).
+Last activity: 2026-04-21 — Plan 05.1-02 completed in 4m 17s. Atomic commit in papertek-vocabulary: bf1bd07b feat(lexicon): add languagesbank + nationalitiesbank (Leksihjelp Phase 05.1 Gap B) — 9 files / 787 insertions / 4 deletions. Files created: vocabulary/lexicon/{nb,nn}/{languagesbank,nationalitiesbank}.json (4 new banks, 80 new vocabulary entries). Files modified: vocabulary/lexicon/{nb,nn}/manifest.json + search-index.json, api/vocab/v3/lookup/[language]/[wordId].js.
 
-Progress: [██████████] 100%  (Phase 05 — 5 of 5 plans complete. Plans 05-01 foundation + 05-02 rule-side data source + 05-03 word-prediction top-3 + 05-04 settings toggle + 05-05 popover render all shipped. UX-01 + UX-02 code-complete on both popover and word-prediction surfaces. Milestone v1.0 Phase 5 ready for /gsd:verify-work 05 phase-close audit.)
+Progress: [████------] 40%  (Phase 05.1 — 2 of 5 plans complete. Plan 05.1-02 Gap B cross-repo shipped. Plans 05.1-01, 05.1-03, 05.1-04, 05.1-05 pending. Plan 05.1-05 depends on Plan 05.1-02 — will pick up new banks via `npm run sync-vocab` once it runs.)
 
 ## Performance Metrics
 
@@ -75,6 +75,8 @@ Progress: [██████████] 100%  (Phase 05 — 5 of 5 plans comp
 | Phase 05-student-experience-polish P03 | 6 min | 2 tasks | 2 files |
 | Phase 05-student-experience-polish P02 | 6m 23s | 3 tasks | 6 files |
 | Phase 05-student-experience-polish P05 | 6 min | 2 auto + 1 deferred checkpoint | 4 files |
+| Phase 05.1 P02 | 4m 17s | 3 tasks | 9 files |
+| Phase 05.1 P03 | 5m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -182,6 +184,10 @@ Recent decisions affecting current work:
 - [Phase 05-student-experience-polish]: [Phase 05]: [Plan 05-03] Cap-invariant pattern for Pitfall 6 — irreversible operations (splice, truncate) must use the MAX-reveal cap (VISIBLE_EXPANDED=8), not the visible-default cap (VISIBLE_DEFAULT=3). If suggestions.splice used the default cap, 1-4 compound-type candidates prepended via unshift would knock regular top-3 ranker candidates OUT OF THE ARRAY before the view-layer slice could protect them. Raised splice(5) → splice(8) to match VISIBLE_EXPANDED. Reusable for any future multi-phase filtering where the UI has a visible cap + an expanded cap.
 - [Phase 05-student-experience-polish]: [Phase 05]: [Plan 05-03] ArrowDown auto-reveal keyboard pattern — detect `selectedIndex === items.length - 1 && !expanded && lastSuggestions.length > items.length`, flip expanded, re-render, advance `selectedIndex = Math.min(items.length, newItems.length - 1)` onto the first newly-revealed row (index 3 when VISIBLE_DEFAULT=3). Zero extra keystrokes for keyboard users. Math.min clamp is defensive — if renderDropdownBody yields fewer items than expected the selection won't go out of bounds. Reusable for any progressive-disclosure UI with keyboard navigation.
 - [Phase 05-student-experience-polish]: [Phase 05]: [Plan 05-03] Edit-tool silent-revert wrinkle during Wave-2 parallel execution — first Edit-tool pass across 5 edits on word-prediction.js reported success on all 5 but a subsequent Grep/Read confirmed file was at HEAD-state. Suspected race: sibling Wave-2 plan's working-tree churn invalidated the Edit-tool's stale cache. Re-ran all 5 edits after re-reading from disk; second pass persisted. Pattern to note: in Wave-2 parallel plan execution, Grep-verify first-edit-landed-on-disk before continuing to subsequent edits, especially on files the executor hasn't recently touched.
+- [Phase 05.1]: Plan 05.1-03: Option A (emit finding fields + getString helper) chosen for gender-rule three-beat explain; preserves {nb, nn} contract + fixture runner tolerates extra fields.
+- [Phase 05.1]: [Plan 05.1-02]: TYPE_TO_BANK keys match word-ID suffix (lang/nat), NOT the type string (language/nationality) — because wordIdToBank() in papertek-vocabulary splits on _ and looks up the LAST segment of the word ID. Plan's 'language'/'nationality' keys would have silently no-op'd fast-path routing. Fix requires 3-line inline comment in api/vocab/v3/lookup/[language]/[wordId].js documenting the suffix-key convention.
+- [Phase 05.1]: [Plan 05.1-02]: Typed-bank-shield pattern — new bank files (languagesbank, nationalitiesbank) carry custom type values ('language', 'nationality') that are invisible to downstream consumers' pre-built indexes keyed on specific type literals (e.g. Leksihjelp vocab-seam-core's nounGenus pipe only pulls bank='nounbank' || type='nounform'|'plural'). Reusable for any future semantic-category bank where entries share noun-morphology but need to NOT populate the default noun-genus index. Applied: nationalitiesbank has full genus/plural/definite data but stays out of nounGenus.
+- [Phase 05.1]: [Plan 05.1-02]: Plan-spec-vs-code-reality arbitration — when plan wording (e.g. manifest shape { entries: N } object) contradicts the actual code (integer counts), honor code reality not plan wording. Three such corrections this plan: TYPE_TO_BANK keys, manifest shape, and implicit search-index regeneration. All auto-fixed under Rule 3 blocking (silent-no-op prevention).
 
 ### Roadmap Evolution
 

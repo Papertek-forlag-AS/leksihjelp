@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5 →
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | 5/5 | Plans complete (awaiting `/gsd:verify-work 05` for UX-01 + UX-02 requirement close + deferred Chrome smoke test) | 2026-04-20 |
-| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 0/5 | Plans ready — awaiting execution (Wave 1 parallel: Plans 01-04; Wave 2: Plan 05 with human-verify Chrome smoke test) | - |
+| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 2/5 | In Progress|  |
 
 ---
 *Roadmap created: 2026-04-17*
@@ -168,7 +168,7 @@ UX-01 three-condition close gate: (1) all four gap-closure plans merged, (2) Chr
 
 **Requirements**: UX-01
 **Depends on:** Phase 5
-**Plans:** 0/5 plans complete
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] 05.1-01-PLAN.md — Gap A: NB blå_adj neuter fix + NB/NN adjectivebank audit validator + enrich-nb-lexicon monosyllabic-vowel branch + fin_adj addition (cross-repo papertek-vocabulary; Wave 1, autonomous)
