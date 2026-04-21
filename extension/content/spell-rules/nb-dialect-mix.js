@@ -124,6 +124,7 @@
       const validWords = vocab.validWords || new Set();
       const sisterValidWords = vocab.sisterValidWords || new Set();
       const out = [];
+      const crossMap = lang === 'nb' ? NN_TO_NB : NB_TO_NN;
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
@@ -131,8 +132,21 @@
         // Guard: fires ONLY when sister-valid AND NOT current-valid
         if (validWords.has(t.word)) continue;
         if (!sisterValidWords.has(t.word)) continue;
-        const rawFix = fixFor(t.word, lang);
-        const fix = rawFix ? matchCase(t.display, rawFix) : undefined;
+        // Phase 05.1 Gap D executor refinement (Rule 4 discovery at fixture
+        // run): `sisterValidWords \ validWords` is a 6.6K-word superset that
+        // includes many words genuinely shared between the two dialects but
+        // missing from one dialect's data (e.g. 'liker' in NN, 'klokka' in
+        // NB, 'jorda', 'havet', 'tavla' — noun-form definiteness, verb
+        // inflections, etc.). Firing on the full superset produces a storm
+        // of false positives on valid Norwegian text. Restrict to the
+        // CROSS_DIALECT_MAP (curated high-confidence dialect markers) —
+        // losing the no-fix fallback path in exchange for zero false
+        // positives. Documented in 05.1-04-SUMMARY.md as the authoritative
+        // rule-fire gate until the data layer (papertek-vocabulary) gains
+        // true cross-dialect equivalence metadata.
+        const rawFix = crossMap.get(t.word);
+        if (!rawFix) continue;
+        const fix = matchCase(t.display, rawFix);
         out.push({
           rule_id: 'dialect-mix',
           priority: rule.priority,
