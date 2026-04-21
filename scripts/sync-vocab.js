@@ -56,7 +56,9 @@ const BANKS = [
   'generalbank',
   'numbersbank',
   'phrasesbank',
-  'pronounsbank'
+  'pronounsbank',
+  'languagesbank',      // Phase 05.1 Gap B
+  'nationalitiesbank'   // Phase 05.1 Gap B
 ];
 
 async function fetchJson(url) {

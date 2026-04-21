@@ -21,7 +21,7 @@
 {"id":"nb-saer-012","text":"Jeg har en skole gård","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"skolegård"}],"must_not_flag":[]}
 {"id":"nb-saer-013","text":"Jeg har en data maskin","expected":[{"rule_id":"sarskriving","start":11,"end":22,"suggestion":"datamaskin"}],"must_not_flag":[]}
 {"id":"nb-saer-014","text":"Jeg har en rygg sekk","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"ryggsekk"}],"must_not_flag":[]}
-{"id":"nb-saer-015","text":"Jeg har en foreldre møte","expected":[{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"foreldremøte"}],"must_not_flag":[]}
+{"id":"nb-saer-015","text":"Jeg har en foreldre møte","expected":[{"rule_id":"gender","start":8,"end":10,"suggestion":"et"},{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"foreldremøte"}],"must_not_flag":[]}
 {"id":"nb-saer-016","text":"Jeg har en telefon nummer","expected":[{"rule_id":"sarskriving","start":11,"end":25,"suggestion":"telefonnummer"}],"must_not_flag":[]}
 {"id":"nb-saer-017","text":"Jeg har en spise stue","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"spisestue"}],"must_not_flag":[]}
 {"id":"nb-saer-018","text":"Jeg har en arbeids plass","expected":[{"rule_id":"sarskriving","start":11,"end":24,"suggestion":"arbeidsplass"}],"must_not_flag":[]}

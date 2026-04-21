@@ -979,7 +979,9 @@
     generalbank: 'pos_general',
     numbersbank: 'pos_number',
     phrasesbank: 'pos_phrase',
-    pronounsbank: 'pos_pronoun'
+    pronounsbank: 'pos_pronoun',
+    languagesbank: 'pos_language',       // Phase 05.1 Gap B
+    nationalitiesbank: 'pos_nationality' // Phase 05.1 Gap B
   };
 
   function bankToPos(bank) {

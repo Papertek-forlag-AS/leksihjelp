@@ -47,7 +47,9 @@ const BANK_TO_POS = {
   generalbank: 'ord',
   numbersbank: 'tall',
   phrasesbank: 'frase',
-  pronounsbank: 'pronomen'
+  pronounsbank: 'pronomen',
+  languagesbank: 'språk',          // Phase 05.1 Gap B
+  nationalitiesbank: 'nasjonalitet' // Phase 05.1 Gap B
 };
 
 // Genus to gender mapping (kept for reference; use genusToGender() for display)

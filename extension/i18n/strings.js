@@ -89,6 +89,8 @@ const _STRINGS = {
     pos_number: 'tall',
     pos_phrase: 'frase',
     pos_pronoun: 'pronomen',
+    pos_language: 'språk',           // Phase 05.1 Gap B
+    pos_nationality: 'nasjonalitet', // Phase 05.1 Gap B
     pos_verb_short: 'verb',
     pos_noun_short: 'subst.',
     pos_adjective_short: 'adj.',
@@ -305,6 +307,8 @@ const _STRINGS = {
     pos_number: 'tal',
     pos_phrase: 'frase',
     pos_pronoun: 'pronomen',
+    pos_language: 'språk',           // Phase 05.1 Gap B
+    pos_nationality: 'nasjonalitet', // Phase 05.1 Gap B
     pos_verb_short: 'verb',
     pos_noun_short: 'subst.',
     pos_adjective_short: 'adj.',
@@ -511,6 +515,8 @@ const _STRINGS = {
     pos_number: 'number',
     pos_phrase: 'phrase',
     pos_pronoun: 'pronoun',
+    pos_language: 'language',        // Phase 05.1 Gap B
+    pos_nationality: 'nationality',  // Phase 05.1 Gap B
     pos_verb_short: 'verb',
     pos_noun_short: 'noun',
     pos_adjective_short: 'adj.',

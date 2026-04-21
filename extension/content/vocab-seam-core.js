@@ -26,7 +26,9 @@
 
   const BANKS = [
     'verbbank', 'nounbank', 'adjectivebank', 'articlesbank',
-    'generalbank', 'numbersbank', 'phrasesbank', 'pronounsbank'
+    'generalbank', 'numbersbank', 'phrasesbank', 'pronounsbank',
+    'languagesbank',      // Phase 05.1 Gap B
+    'nationalitiesbank'   // Phase 05.1 Gap B
   ];
 
   // Pronoun labels per language — maps array index to pronoun string
@@ -340,6 +342,48 @@
             genus: entry.genus || null,
             zipf: zipf
           });
+        }
+
+        // Phase 05.1 Gap B — nationalitiesbank morphology seeding.
+        // Entries carry noun-shape fields (plural, definite, plural_definite) but
+        // stay out of the nounGenus pipe per the typed-bank-shield pattern
+        // (Plan 05.1-02). Seed the forms into wordList with genus: null so they
+        // populate validWords (preventing typo-fuzzy false-flags on plurals like
+        // "Nordmenn" / "svensker") without seeding nounGenus.
+        if (bank === 'nationalitiesbank') {
+          if (entry.plural) {
+            wordList.push({
+              word: entry.plural.toLowerCase(),
+              display: entry.plural,
+              translation: `${entry.word} (flertall)`,
+              type: 'nationalityform',
+              baseWord: entry.word,
+              genus: null,
+              zipf: zipf
+            });
+          }
+          if (entry.definite) {
+            wordList.push({
+              word: entry.definite.toLowerCase(),
+              display: entry.definite,
+              translation: `${entry.word} (bestemt)`,
+              type: 'nationalityform',
+              baseWord: entry.word,
+              genus: null,
+              zipf: zipf
+            });
+          }
+          if (entry.plural_definite) {
+            wordList.push({
+              word: entry.plural_definite.toLowerCase(),
+              display: entry.plural_definite,
+              translation: `${entry.word} (flertall bestemt)`,
+              type: 'nationalityform',
+              baseWord: entry.word,
+              genus: null,
+              zipf: zipf
+            });
+          }
         }
 
         // Add adjective comparison forms
