@@ -863,6 +863,7 @@
 #lexi-spell-overlay .lh-spell-gender { background: #f59e0b; }
 #lexi-spell-overlay .lh-spell-modal_form { background: #f59e0b; }
 #lexi-spell-overlay .lh-spell-sarskriving { background: #8b5cf6; }
+#lexi-spell-overlay .lh-spell-dialect-mix { background: #0ea5e9; }  /* sky-500 — Phase 05.1 Gap D */
 
 #lexi-spell-overlay .lh-spell-popover {
   position: fixed;
