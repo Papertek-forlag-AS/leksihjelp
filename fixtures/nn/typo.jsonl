@@ -16,33 +16,35 @@
 
 // ── Phase 05.1 Gap D: NN↔NB dialect-mix FLAG cases ──
 // Mirror of fixtures/nb/typo.jsonl. An NN document with NB-only tokens
-// flags via the new nb-dialect-mix rule (priority 35). Coexistence model:
-// non-curated sister-valid tokens (tokens in NN's sisterValidWords but
-// missing from curated NB_TO_NN) are silently tolerated by the Phase 4
-// sisterValidWords guard still present in typo-curated / typo-fuzzy.
+// flags via the nb-dialect-mix rule (priority 35).
 //
-// Reality observed at executor run: the 5 Phase 4 dialect tokens (jeg,
-// ikke, bare, noen, hjem) are all in NN's validWords via the vocab-seam
-// translation-entry path — NN entries with translation 'jeg' / 'ikke' /
-// etc. seed those strings into NN validWords. So dialect-mix doesn't
-// fire on them (the guard is "sister-valid AND NOT current-valid"). The
-// Phase 4 fixtures therefore stay expected:[] — the document-side data
-// considers these words valid NN (empirically, via translation entries).
-// New cases below test tokens that ARE genuinely NB-only per the data.
+// Phase 05.1-05 bug-fix (smoke-test follow-up): dialect-mix now uses
+// CROSS_DIALECT_MAP as the SINGLE authoritative fire-gate. The previous
+// guard (`validWords.has OR NOT sisterValidWords.has → skip`) silently
+// suppressed jeg, ikke, bare, noen, hjem — the rule's NB-marker tokens —
+// because NN's vocab-seam seeds them into validWords via every NN entry's
+// translation field (e.g. `eg_pron.translation = 'jeg'` seeds `jeg` into
+// NN validWords). With the guard dropped, every map-key NB token in the
+// NN document direction flags (rule_id='dialect-mix'). See
+// 05.1-05-SUMMARY.md for root-cause analysis.
 //
-// Runner contract: strict equality on (rule_id, start, end, fix === suggestion).
-{"id":"nn-typo-dialect-jeg-001","text":"Eg såg at jeg sto der i går","expected":[],"must_not_flag":[]}
-{"id":"nn-typo-dialect-ikke-001","text":"Eg har ikke tid i dag","expected":[],"must_not_flag":[]}
-{"id":"nn-typo-dialect-bare-001","text":"Det er bare litt kaldt i dag","expected":[],"must_not_flag":[]}
-{"id":"nn-typo-dialect-noen-001","text":"Har du sett noen av dei","expected":[],"must_not_flag":[]}
-{"id":"nn-typo-dialect-hjem-001","text":"Skal vi gå hjem no","expected":[],"must_not_flag":[]}
+// Non-map tokens still shielded by the Phase 4 sisterValidWords guards
+// preserved in typo-curated.js and typo-fuzzy.js (data-gap safety net).
+{"id":"nn-typo-dialect-jeg-001","text":"Eg såg at jeg sto der i går","expected":[{"rule_id":"dialect-mix","start":10,"end":13,"suggestion":"eg"}],"must_not_flag":[]}
+{"id":"nn-typo-dialect-ikke-001","text":"Eg har ikke tid i dag","expected":[{"rule_id":"dialect-mix","start":7,"end":11,"suggestion":"ikkje"}],"must_not_flag":[]}
+{"id":"nn-typo-dialect-bare-001","text":"Det er bare litt kaldt i dag","expected":[{"rule_id":"dialect-mix","start":7,"end":11,"suggestion":"berre"}],"must_not_flag":[]}
+{"id":"nn-typo-dialect-noen-001","text":"Har du sett noen av dei","expected":[{"rule_id":"dialect-mix","start":12,"end":16,"suggestion":"nokon"}],"must_not_flag":[]}
+{"id":"nn-typo-dialect-hjem-001","text":"Skal vi gå hjem no","expected":[{"rule_id":"dialect-mix","start":11,"end":15,"suggestion":"heim"}],"must_not_flag":[]}
 
-// ── Phase 05.1 Gap D: new NN-side with-fix cases ──
-// Tokens verified flaggable at plan execution time (sister-valid, NOT in
-// NN validWords, present in NB_TO_NN). These exercise the curated-fix path
-// on the NN side symmetric to the NB cases above.
+// ── Phase 05.1 Gap D: NN-side with-fix cases ──
 {"id":"nn-dialect-mix-hvor-001","text":"Eg veit ikkje hvor det er","expected":[{"rule_id":"dialect-mix","start":14,"end":18,"suggestion":"kvar"}],"must_not_flag":[]}
 {"id":"nn-dialect-mix-mente-001","text":"Eg mente at det var bra","expected":[{"rule_id":"dialect-mix","start":3,"end":8,"suggestion":"meinte"}],"must_not_flag":[]}
 {"id":"nn-dialect-mix-gjor-001","text":"Han gjør det kvar dag","expected":[{"rule_id":"dialect-mix","start":4,"end":8,"suggestion":"gjer"}],"must_not_flag":[]}
 {"id":"nn-dialect-mix-sier-001","text":"Han sier det er bra","expected":[{"rule_id":"dialect-mix","start":4,"end":8,"suggestion":"seier"}],"must_not_flag":[]}
 {"id":"nn-dialect-mix-ble-001","text":"Det ble ikkje så verst","expected":[{"rule_id":"dialect-mix","start":4,"end":7,"suggestion":"vart"}],"must_not_flag":[]}
+
+// ── Phase 05.1-05 smoke-test bug-fix regression cases ──
+// Bug 4: `Jeg vet ikke` in NN document. jeg→eg (NB pronoun), vet→veit
+// (NB presens of å vite, newly added to NB_TO_NN map), ikke→ikkje.
+// Also demonstrates multi-token dialect-mix output in one line.
+{"id":"nn-dialect-mix-jeg-vet-001","text":"Jeg vet ikke","expected":[{"rule_id":"dialect-mix","start":0,"end":3,"suggestion":"Eg"},{"rule_id":"dialect-mix","start":4,"end":7,"suggestion":"veit"},{"rule_id":"dialect-mix","start":8,"end":12,"suggestion":"ikkje"}],"must_not_flag":[]}

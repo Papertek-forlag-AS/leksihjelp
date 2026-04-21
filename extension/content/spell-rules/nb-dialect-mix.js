@@ -58,6 +58,7 @@
     ['meinte', 'mente'], ['meiner', 'mener'], ['meine', 'mene'],
     ['høyre', 'høre'], ['høyrer', 'hører'], ['høyrt', 'hørt'],
     ['såg', 'så'], ['seier', 'sier'],
+    ['veit', 'vet'],            // Phase 05.1-05 Bug 4 — NN presens of å vite
     ['byt', 'bytt'],
     // Common nouns / adverbs / adjectives
     ['heim', 'hjem'], ['heime', 'hjemme'], ['no', 'nå'],
@@ -84,6 +85,7 @@
     ['mente', 'meinte'], ['mener', 'meiner'], ['mene', 'meine'],
     ['høre', 'høyre'], ['hører', 'høyrer'], ['hørt', 'høyrt'],
     ['sier', 'seier'],
+    ['vet', 'veit'],            // Phase 05.1-05 Bug 4 — NB presens of å vite
     ['bytt', 'byt'],
     // Common nouns / adverbs / adjectives
     ['hjem', 'heim'], ['hjemme', 'heime'], ['nå', 'no'],
@@ -121,29 +123,36 @@
       const { tokens, vocab, cursorPos, suppressed, lang } = ctx;
       // Dialect-mix is NB/NN only — silent no-op for other languages.
       if (lang !== 'nb' && lang !== 'nn') return [];
-      const validWords = vocab.validWords || new Set();
-      const sisterValidWords = vocab.sisterValidWords || new Set();
       const out = [];
       const crossMap = lang === 'nb' ? NN_TO_NB : NB_TO_NN;
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
         if (suppressed && suppressed.has(i)) continue;
-        // Guard: fires ONLY when sister-valid AND NOT current-valid
-        if (validWords.has(t.word)) continue;
-        if (!sisterValidWords.has(t.word)) continue;
-        // Phase 05.1 Gap D executor refinement (Rule 4 discovery at fixture
-        // run): `sisterValidWords \ validWords` is a 6.6K-word superset that
-        // includes many words genuinely shared between the two dialects but
-        // missing from one dialect's data (e.g. 'liker' in NN, 'klokka' in
-        // NB, 'jorda', 'havet', 'tavla' — noun-form definiteness, verb
-        // inflections, etc.). Firing on the full superset produces a storm
-        // of false positives on valid Norwegian text. Restrict to the
-        // CROSS_DIALECT_MAP (curated high-confidence dialect markers) —
-        // losing the no-fix fallback path in exchange for zero false
-        // positives. Documented in 05.1-04-SUMMARY.md as the authoritative
-        // rule-fire gate until the data layer (papertek-vocabulary) gains
-        // true cross-dialect equivalence metadata.
+        // Phase 05.1-05 bug-fix: CROSS_DIALECT_MAP is the SINGLE AUTHORITATIVE
+        // signal for cross-dialect tokens. The previous guard —
+        //   if (validWords.has(t.word)) continue;
+        //   if (!sisterValidWords.has(t.word)) continue;
+        // — silently suppressed the rule's flagship test cases (ikkje in NB,
+        // ikke/jeg in NN) because the vocab-seam's translation-entry path
+        // seeds cross-dialect tokens into BOTH validWords sets. (See
+        // 05.1-04-SUMMARY.md Decision 4 for the diagnosis; the guard's
+        // intent was "fire only on sister-valid AND NOT current-valid",
+        // but `jeg` ends up in NN's validWords via every NN entry's
+        // translation field, so the guard short-circuited the whole rule
+        // for the tokens the rule was explicitly built for.)
+        //
+        // The Plan 05.1-04 CROSS_DIALECT_MAP narrowing (Rule 4 discovery)
+        // already protects against false-positive storms on the broader
+        // `sisterValidWords \ validWords` superset by making the map the
+        // fire-gate. We therefore collapse to "in-map ⇔ fire". Clean and
+        // codeswitch fixtures were verified (post-hoc scan in 05.1-05) to
+        // contain ZERO map-key tokens, so this change is a false-positive
+        // silent no-op outside the dialect-mix bucket.
+        //
+        // ctx.suppressed (codeswitch density) is still honored above so
+        // dense unknown spans still silence the rule for cross-dialect
+        // tokens that happen to live inside an English/French quotation.
         const rawFix = crossMap.get(t.word);
         if (!rawFix) continue;
         const fix = matchCase(t.display, rawFix);
@@ -154,8 +163,8 @@
           end: t.end,
           original: t.display,
           lang,                                 // carries document lang to explain()
-          fix,                                  // undefined → no-fix fallback copy
-          message: `Dialektblanding: "${t.display}" er ${lang === 'nb' ? 'nynorsk' : 'bokmål'}${fix ? ` → "${fix}"` : ''}`,
+          fix,                                  // always defined under the map-only gate
+          message: `Dialektblanding: "${t.display}" er ${lang === 'nb' ? 'nynorsk' : 'bokmål'} → "${fix}"`,
         });
       }
       return out;
