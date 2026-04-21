@@ -2,8 +2,9 @@
 phase: 05-student-experience-polish
 verified: 2026-04-20T20:44:12Z
 revised: 2026-04-21T00:00:00Z
-status: gaps_found
-score: 4/4 code-side must-haves verified; human Chrome smoke test PASS for UX-02 + XSS + NN; UX-01 surfaced 4 pre-existing data/rule gaps the new explain copy exposes
+status: resolved
+resolved_by: Phase 05.1 (2026-04-21)
+score: 4/4 code-side must-haves verified; human Chrome smoke test PASS for UX-02 + XSS + NN; UX-01 surfaced 4 gaps (A/B/C/D) all closed by Phase 05.1 and re-verified by 11-scenario Chrome smoke test
 human_verification:
   - test: "Trigger spell-check on all four NB error classes (kjønn / modalverb / særskriving / vanlig skrivefeil). For each: type a known-bad word in a textarea, wait for the red underline, click it, read the popover explanation."
     expected: "Popover shows a one-sentence student-friendly NB explanation — not the bare class label 'Skrivefeil' or 'Kjønn'. For gender: 'kan være feil kjønn'; for modal-verb: 'Etter modalverb skal hovedverbet stå i infinitiv'; for særskriving: 'kan være to ord som hører sammen'; for curated typo: 'er en vanlig skrivefeil'. Each wraps the student's typed word in <em>-highlighted text."
@@ -174,8 +175,41 @@ Human testing of UX-01 surfaced 4 gaps the new explain copy now EXPOSES. These a
 UX-01 should be marked complete in REQUIREMENTS.md ONCE Phase 05.1 lands — the render-layer is correct but the end-to-end experience is not yet "student-friendly" in the qualitative sense the requirement demands.
 UX-02 already marked complete by Plan 05-04 and re-verified by the Chrome smoke test — no revision needed.
 
+### Gaps Resolved (2026-04-21) — closed by Phase 05.1
+
+All four gaps identified above are now resolved. Phase 05.1 landed 5 plans across 2 waves, 10 leksihjelp commits + 5 cross-repo `papertek-vocabulary` commits, and surfaced (and fixed) 4 additional smoke-test bugs during the human-verify checkpoint.
+
+| Gap | Resolution | Commits |
+|-----|------------|---------|
+| A — NB/NN adjective neuter defects | 6 mono-vowel defects fixed (blå/bra/fri/grå/ny/rå), `fin_adj` added, generator branches added to `enrich-nb-lexicon.js` and `generate-nn-lexicon.js`, new `validate:adj-declensions` lint pass | `4307937c`, `c734f97e`, `dbdb8b12` (papertek-vocabulary) |
+| B — Language + nationality banks | 20 language entries + 20 nationality entries × NB/NN, `languagesbank` + `nationalitiesbank` wired through 4 extension-side registries + vocab API lookup route | `bf1bd07b`, `ad210a53` (papertek-vocabulary); `6877ec8` (leksihjelp — 4-registry wiring) |
+| C — Gender rule three-beat copy | `Et kan være feil kjønn — by er hankjønn. Prøv En.` now names the target gender; `gender_label_m/f/n` i18n keys + `getString` helper added | `9da46d2`, `6162a97`, `50da3c7` |
+| D — Dialect-mix rule | New `nb-dialect-mix.js` at priority 35 with `CROSS_DIALECT_MAP` as authoritative fire-gate; Phase 4 dialect-tolerance fixtures inverted; NB→NN and NN→NB both flag | `4a9b4de`, `9327a6c`, `ade5c40`, `a90fcc0`, `5718b39` |
+
+### Smoke-test bugs surfaced and fixed during Phase 05.1 checkpoint
+
+The human-verify loop surfaced 5 additional bugs beyond the original 4 gaps — all diagnosed and fixed inline:
+
+1. **Modal-verb silent on `kan gikk`** — `buildIndexes` fed feature-gated wordList to `buildLookupIndexes`; browser's basic preset skipped preteritum. Fix: unfiltered superset for lookup indexes. New release gate `check-spellcheck-features` prevents regression. Commit `ce343d9`.
+2. **Modal-verb false-pos on bare infinitive `skrive`** — NN phrasal-verb siblings (`skrive_av/opp/ut`) shared `perfektum_partisipp: "skrive"`, last-writer won map key. Fix: `validWords.has('å ' + word)` short-circuit. Commit `5aab727`.
+3. **Dialect-mix invisible in browser** — rule fired correctly but `.lh-spell-dialect-mix` CSS missing. Fix: added sky-500 underline color. New release gate `check-rule-css-wiring` prevents regression. Commits `5718b39`, `c592127`, `54c9137`.
+4. **Register badge UX gap** — popover didn't indicate which standard was applied. Fix: `register_label_nb/nn` i18n + small pill in popover header. Commit `a2d34e4`.
+5. **Dialect-mix over-suppressed by validWords guard** — translation-entry seeding polluted validWords; guard silenced target tokens. Fix: dropped guards, CROSS_DIALECT_MAP is sole fire-gate. Commit `a90fcc0`.
+
+### Human Smoke Test Results (2026-04-21 — Phase 05.1 re-verify)
+
+All 11 scenarios PASS. See `.planning/phases/05.1-close-ux-01-gaps-from-phase-5-smoke-test/05.1-05-SUMMARY.md` for the full matrix.
+
+### Deferred items (tracked in STATE.md Pending Todos)
+
+- `markeres` / s-passiv form missing from papertek-vocabulary (data gap, not Phase 05.1 scope)
+- `setningen` NB bestemt form missing alongside `setninga` (papertek-vocabulary data gap)
+- Demonstrative-mismatch (`Det boka`, `Den huset`) — Phase 06 candidate; extends `nb-gender` beyond en/ei/et scope
+- Triple-letter typo budget (`tykkkjer`) — Phase 06 candidate; requires frequency-weighted fuzzy-distance tiebreak
+
 ---
 
 _Verified: 2026-04-20T20:44:12Z_
 _Revised: 2026-04-21 — human smoke test results + gap findings_
+_Resolved: 2026-04-21 — Phase 05.1 closed all 4 gaps + 5 surfaced bugs, 11-scenario smoke test PASS_
 _Verifier: Claude (gsd-verifier)_
