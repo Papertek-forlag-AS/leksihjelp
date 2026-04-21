@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-04-21T10:11:02.056Z"
+last_updated: "2026-04-21T11:41:06.308Z"
 progress:
   total_phases: 8
   completed_phases: 8
@@ -15,10 +15,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-17)
+See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 05.1 CLOSED 2026-04-21 — UX-01 gaps from Phase 5 smoke test fully resolved. Release 2.3.1 packaged. Project awaiting user-owned publish + optional Phase 06 planning.
+**Current focus:** v1.0 Spell-Check & Prediction Quality **SHIPPED 2026-04-21** (19/19 requirements, 8 phases, 29 plans, 11/11 Chrome smoke-test PASS, 8 release gates exit 0). Archived to `.planning/milestones/v1.0-*`. Awaiting `/gsd:new-milestone` for v2.0 cycle.
 
 ## Current Position
 
@@ -217,13 +217,13 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- Live Chrome smoke test for Phase 1 (deferred 2026-04-18): load `extension/` unpacked, type `en hus` in a textarea, confirm red dot + `et hus` popover, DevTools console clean. Pick up at release time or during `/gsd:verify-work`.
-- **Live Chrome smoke test for Phase 4 (deferred 2026-04-20 at user request, same pattern as the Phase 1 deferral):** Load unpacked, paste the 558-word NB article from `fixtures/nb/clean.jsonl` case `nb-clean-news-500w-001` into a `<textarea>`, confirm zero red underlines (SC-02 must-have #1 live confirmation). Spot-check prompts documented in `.planning/phases/04-false-positive-reduction-nb-nn/04-VERIFICATION.md`. Fixture suite already proves SC-02/03/04/05 against the Node runner path (280/280 green); this test exercises the `loadRawSister` → `chrome.runtime.getURL` → fetch path that only runs in Chrome. Pick up at release time or during `/gsd:verify-work`.
+- ~~Live Chrome smoke test for Phase 1 (deferred 2026-04-18)~~ **CLOSED 2026-04-21 incidentally** by Phase 5 + Phase 05.1 Chrome sweeps (11/11 scenarios PASS across popover render + 558-word NB article paste; covers the Phase-1 `en hus` case via gender-rule coverage).
+- ~~Live Chrome smoke test for Phase 4 (deferred 2026-04-20)~~ **CLOSED 2026-04-21 incidentally** by Phase 05.1 Chrome sweep (500-word NB article pasted into `<textarea>`, zero red underlines on proper nouns / loan words; SC-02 live confirmation captured).
 - **[Plan 05.1-05 deferred 2026-04-21] papertek-vocabulary: add -s passiv conjugations.** `markere` verb lacks `markeres` passive form (and similar for other -ere verbs). Data gap surfaced in Chrome smoke test. Cross-repo data-authoring PR needed in `papertek-vocabulary` to extend verb conjugations with `-s passiv` forms. Not blocking.
 - **[Plan 05.1-05 deferred 2026-04-21] papertek-vocabulary: ensure `setningen` alongside `setninga` for NB `setning`.** NB-bestemt-form coverage gap — `setning_noun` in NB lemma has `setninga` but not `setningen`. Cross-repo data-authoring PR needed. Not blocking.
 - **[Plan 05.1-05 Phase 06 candidate] Demonstrative-mismatch rule.** `Det boka`, `Den huset` — extends nb-gender beyond en/ei/et indefinite-article scope to demonstrative-pronoun agreement. Smoke-test user surfaced the gap but accepted deferral. Different rule class from current nb-gender; different training required. Candidate for Phase 06 planning.
 - **[Plan 05.1-05 Phase 06 candidate] Expand fuzzy-distance budget for triple-letter keystrokes.** `tykkkjer` → `tykkjer` currently not caught with best candidate — needs frequency-weighted tiebreak or budget increase from 2 to 3 for one specific keystroke class (triple-letter repetition). May risk false-positives; needs fixture calibration before landing. Candidate for Phase 06 planning.
-- **Live bug discovered 2026-04-20, investigation deferred at user request — `ikkje` flags in NB documents in Chrome despite fixture coverage saying it should not.** Screenshot shows `ikkje` underlined in an otherwise-clean 558-word NB article paste. Code trace end-to-end looks clean: `extension/content/vocab-seam.js:loadRawSister` fetches sister raw vocab, `vocab-seam-core.js:buildIndexes` builds `sisterValidWords` Set, `spell-check.js:runCheck` adapter passes it via `sisterValidWords: VOCAB.getSisterValidWords()`, both `nb-typo-fuzzy.js:121` and `nb-typo-curated.js:45` have `if (sisterValidWords.has(t.word)) continue;` early-exit. `ikkje` is in `extension/data/nn.json` as `type: 'adv'` (not filtered by Pitfall-1 typo filter). Fixture `nb-typo-dialect-ikkje-001` in `fixtures/nb/typo.jsonl:61` passes in Node. Most likely causes in priority order: (1) extension wasn't reloaded after Phase 4 commits so user ran pre-Phase-4 code; (2) `loadRawSister` fetch is failing silently in Chrome (try/catch swallows and returns null → empty Set); (3) content-script context-isolation or MV3 fetch issue. Diagnostic plan (when picked up): reload extension; if still flags, open DevTools → pick Leksihjelp content-script context → run `__lexiVocab.getLanguage()`, `__lexiVocab.getSisterValidWords().size`, `__lexiVocab.getSisterValidWords().has('ikkje')` — expected `"nb"`, `~14773`, `true`. If any of those three is wrong, route to Phase 04.1 gap-closure plan mirroring Phase 03.1 (one task: fix the runtime path, add `sisterSize` field to `window.__lexiSpell.state()` for future diagnosability, add runtime-level guard in fixture runner beyond the existing source-regex guard). This would be SC-03's live-runtime close, analogous to Phase 03.1's SC-01 close.
+- ~~Live bug: `ikkje` flags in NB documents despite fixture coverage saying it should not~~ **RESOLVED 2026-04-21 by Phase 05.1 Gap D policy reversal.** The "dialect tolerance" framing was itself the bug — per user domain policy (memory `project_nb_nn_no_mixing.md`), cross-standard tokens ARE student errors and SHOULD flag. New `nb-dialect-mix.js` rule (priority 35) now flags `ikkje` in NB documents with a register-aware suggestion (`ikke`). Typo rules no longer early-exit into `sisterValidWords`; `CROSS_DIALECT_MAP` is the authoritative fire-gate. 11 Phase-4 dialect-tolerance fixtures inverted. Chrome smoke-test 2026-04-21 PASS across `Jeg/Hun/Eg/Hva/vet/ikke` cross-dialect sweep.
 
 ### Blockers/Concerns
 
