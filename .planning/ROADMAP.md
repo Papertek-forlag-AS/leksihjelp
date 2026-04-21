@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5 →
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | 5/5 | Plans complete (awaiting `/gsd:verify-work 05` for UX-01 + UX-02 requirement close + deferred Chrome smoke test) | 2026-04-20 |
-| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 5/5 | Complete   | 2026-04-21 |
+| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 5/5 | Complete    | 2026-04-21 |
 
 ---
 *Roadmap created: 2026-04-17*
