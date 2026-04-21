@@ -14,17 +14,35 @@
 {"id":"nn-typo-mnen-001","text":"Det er mnen som","expected":[{"rule_id":"typo","start":7,"end":11,"suggestion":"menn"}],"must_not_flag":[]}
 {"id":"nn-typo-skirver-001","text":"Han skirver mykje","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"skriver"}],"must_not_flag":[]}
 
-// ── SC-03 dialect-tolerance cases (Phase 4 · Plan 04-03) ──
-// Each case asserts expected:[] — the NN document contains NB-register
-// words that must NOT flag. Sister-direction to the NB dialect cases in
-// fixtures/nb/typo.jsonl. Note: many of these NB tokens (jeg, ikke, bare,
-// noen, hjem) happen to ALSO be in NN's validWords via linkedTo — so the
-// `!validWords.has` guard in nb-typo-curated.js already silences them
-// without needing the sister-lookup path. These cases document the
-// expected behavior and would regress if the NN data layer ever stopped
-// including them.
+// ── Phase 05.1 Gap D: NN↔NB dialect-mix FLAG cases ──
+// Mirror of fixtures/nb/typo.jsonl. An NN document with NB-only tokens
+// flags via the new nb-dialect-mix rule (priority 35). Coexistence model:
+// non-curated sister-valid tokens (tokens in NN's sisterValidWords but
+// missing from curated NB_TO_NN) are silently tolerated by the Phase 4
+// sisterValidWords guard still present in typo-curated / typo-fuzzy.
+//
+// Reality observed at executor run: the 5 Phase 4 dialect tokens (jeg,
+// ikke, bare, noen, hjem) are all in NN's validWords via the vocab-seam
+// translation-entry path — NN entries with translation 'jeg' / 'ikke' /
+// etc. seed those strings into NN validWords. So dialect-mix doesn't
+// fire on them (the guard is "sister-valid AND NOT current-valid"). The
+// Phase 4 fixtures therefore stay expected:[] — the document-side data
+// considers these words valid NN (empirically, via translation entries).
+// New cases below test tokens that ARE genuinely NB-only per the data.
+//
+// Runner contract: strict equality on (rule_id, start, end, fix === suggestion).
 {"id":"nn-typo-dialect-jeg-001","text":"Eg såg at jeg sto der i går","expected":[],"must_not_flag":[]}
 {"id":"nn-typo-dialect-ikke-001","text":"Eg har ikke tid i dag","expected":[],"must_not_flag":[]}
 {"id":"nn-typo-dialect-bare-001","text":"Det er bare litt kaldt i dag","expected":[],"must_not_flag":[]}
 {"id":"nn-typo-dialect-noen-001","text":"Har du sett noen av dei","expected":[],"must_not_flag":[]}
 {"id":"nn-typo-dialect-hjem-001","text":"Skal vi gå hjem no","expected":[],"must_not_flag":[]}
+
+// ── Phase 05.1 Gap D: new NN-side with-fix cases ──
+// Tokens verified flaggable at plan execution time (sister-valid, NOT in
+// NN validWords, present in NB_TO_NN). These exercise the curated-fix path
+// on the NN side symmetric to the NB cases above.
+{"id":"nn-dialect-mix-hvor-001","text":"Eg veit ikkje hvor det er","expected":[{"rule_id":"dialect-mix","start":14,"end":18,"suggestion":"kvar"}],"must_not_flag":[]}
+{"id":"nn-dialect-mix-mente-001","text":"Eg mente at det var bra","expected":[{"rule_id":"dialect-mix","start":3,"end":8,"suggestion":"meinte"}],"must_not_flag":[]}
+{"id":"nn-dialect-mix-gjor-001","text":"Han gjør det kvar dag","expected":[{"rule_id":"dialect-mix","start":4,"end":8,"suggestion":"gjer"}],"must_not_flag":[]}
+{"id":"nn-dialect-mix-sier-001","text":"Han sier det er bra","expected":[{"rule_id":"dialect-mix","start":4,"end":8,"suggestion":"seier"}],"must_not_flag":[]}
+{"id":"nn-dialect-mix-ble-001","text":"Det ble ikkje så verst","expected":[{"rule_id":"dialect-mix","start":4,"end":7,"suggestion":"vart"}],"must_not_flag":[]}

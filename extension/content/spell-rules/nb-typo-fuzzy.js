@@ -110,16 +110,19 @@
     check(ctx) {
       const { text, tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
+      const sisterValidWords = vocab.sisterValidWords || new Set(); // Phase 4 / SC-03
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
         if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
-        // Phase 05.1 Gap D: the Phase 4 sisterValidWords early-exit has been
-        // removed. Cross-dialect tokens are now FLAGGED by nb-dialect-mix
-        // (priority 35, lower than this rule's 50). dedupeOverlapping keeps
-        // the dialect-mix finding on overlap, so the student sees the
-        // cross-dialect explain copy instead of a weaker "typo" guess.
+        // Phase 4 / SC-03 + Phase 05.1 Gap D co-existence: data-gap shield.
+        // sisterValidWords contains (a) curated cross-dialect markers handled
+        // by nb-dialect-mix (priority 35, wins via dedupeOverlapping) and
+        // (b) forms missing from current-dialect validWords due to data
+        // gaps (kaldt in NN, klokka in NB — still genuine Norwegian).
+        // Silencing fuzzy on (b) preserves Phase 4 SC-03 tolerance.
+        if (sisterValidWords.has(t.word)) continue;
         if (
           t.word.length >= 4 &&
           !validWords.has(t.word) &&

@@ -50,20 +50,38 @@
 {"id":"nb-typo-zipf-001","text":"Vi hagde fest i går.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
 {"id":"nb-typo-zipf-002","text":"De hatde ferie da.","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"hadde"}],"must_not_flag":[]}
 
-// ── SC-03 dialect-tolerance cases (Phase 4 · Plan 04-03) ──
-// Each case asserts expected:[] — the NB document contains NN-register
-// words that must NOT flag. Close of SC-03 at the fixture layer — Plan
-// 04-01 shipped the seam rail (vocab.sisterValidWords), Plan 04-02 shipped
-// rule-layer consumption in nb-typo-fuzzy.js, Plan 04-03 (this commit)
-// includes a Rule-1 auto-fix that also adds sisterValidWords consultation
-// to nb-typo-curated.js — without that fix, `eg` in NB text flags as
-// `eg → egg` (typoFix-triggered) despite being valid NN.
+// ── Phase 05.1 Gap D: NB↔NN dialect-mix FLAG cases ──
+// NB and NN are two distinct official written standards of Norwegian.
+// Per user memory (project_nb_nn_no_mixing.md, 2026-04-21), cross-standard
+// tokens are student errors, not dialect choice. This REVERSES Phase 4's
+// SC-03 sisterValidWords silent tolerance for tokens that appear in the
+// curated nb-dialect-mix CROSS_DIALECT_MAP (~34 NN→NB pairs).
+//
+// Non-curated sister-valid tokens (morphologically shared forms with
+// data gaps: berre, ikkje, Ho, etc.) remain silently tolerated via the
+// Phase 4 sisterValidWords guard that still lives in typo-curated.js and
+// typo-fuzzy.js — only CROSS_DIALECT_MAP entries become student-facing
+// findings. This is the conservative executor refinement documented in
+// 05.1-04-SUMMARY.md (Rule 4 discovery at fixture run).
+//
+// Phase 4 cases whose tokens are in both dialects' validWords (via
+// data-layer sharing — ikkje, berre, Ho) remain expected:[] — they are
+// valid in the current dialect according to the data, so no finding.
+// Phase 4 cases whose tokens are flaggable (eg, nokon, Dei, heim) are
+// inverted below with rule_id='dialect-mix'.
 {"id":"nb-typo-dialect-ikkje-001","text":"Jeg har ikkje tid til det","expected":[],"must_not_flag":[]}
-{"id":"nb-typo-dialect-eg-001","text":"Om dagen eg gir deg mer","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-eg-001","text":"Om dagen eg gir deg mer","expected":[{"rule_id":"dialect-mix","start":9,"end":11,"suggestion":"jeg"}],"must_not_flag":[]}
 {"id":"nb-typo-dialect-berre-001","text":"Det er berre litt kaldt i dag","expected":[],"must_not_flag":[]}
-{"id":"nb-typo-dialect-nokon-001","text":"Har du sett nokon av dem","expected":[],"must_not_flag":[]}
-{"id":"nb-typo-dialect-heim-001","text":"Dei kom heim til oss","expected":[],"must_not_flag":[]}
+{"id":"nb-typo-dialect-nokon-001","text":"Har du sett nokon av dem","expected":[{"rule_id":"dialect-mix","start":12,"end":17,"suggestion":"noen"}],"must_not_flag":[]}
+{"id":"nb-typo-dialect-heim-001","text":"Dei kom heim til oss","expected":[{"rule_id":"dialect-mix","start":0,"end":3,"suggestion":"De"},{"rule_id":"dialect-mix","start":8,"end":12,"suggestion":"hjem"}],"must_not_flag":[]}
 {"id":"nb-typo-dialect-ho-001","text":"Ho er ikkje her","expected":[],"must_not_flag":[]}
+
+// ── Phase 05.1 Gap D: new with-fix cases exercising curated map ──
+// These test tokens that are flaggable (sister-valid AND NOT current-valid
+// AND present in NN_TO_NB) and produce the expected dialect-mix fix.
+{"id":"nb-dialect-mix-kva-001","text":"Kva tid er det","expected":[{"rule_id":"dialect-mix","start":0,"end":3,"suggestion":"Hva"}],"must_not_flag":[]}
+{"id":"nb-dialect-mix-kvifor-001","text":"Kvifor gjorde du det","expected":[{"rule_id":"dialect-mix","start":0,"end":6,"suggestion":"Hvorfor"}],"must_not_flag":[]}
+{"id":"nb-dialect-mix-mykje-001","text":"Det regner mykje i dag","expected":[{"rule_id":"dialect-mix","start":11,"end":16,"suggestion":"mye"}],"must_not_flag":[]}
 
 // ── SC-03 Pitfall-5 anti-leakage case (Phase 4 · Plan 04-03) ──
 // A real NB typo (`komer` → `kommer`) must still flag. The Pitfall-1 typo

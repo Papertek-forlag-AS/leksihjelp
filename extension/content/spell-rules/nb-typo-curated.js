@@ -29,18 +29,23 @@
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
+      const sisterValidWords = vocab.sisterValidWords || new Set(); // Phase 4 / SC-03
       const typoFix = vocab.typoFix || new Map();
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
         if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
-        // Phase 05.1 Gap D: the Phase 4 sisterValidWords early-exit has been
-        // removed. Cross-dialect tokens are now FLAGGED by the new
-        // nb-dialect-mix rule (priority 35) instead of being silently
-        // tolerated. On overlap, dedupeOverlapping keeps dialect-mix (lower
-        // priority number wins) — so cross-dialect tokens surface with the
-        // dialect-mix explain copy rather than the typo-curated copy.
+        // Phase 4 / SC-03 + Phase 05.1 Gap D co-existence: the cross-dialect
+        // early-exit is preserved as a data-gap shield. Tokens in
+        // sisterValidWords fall into two buckets: (a) genuine cross-dialect
+        // markers captured by the nb-dialect-mix CROSS_DIALECT_MAP (priority
+        // 35 — wins over this rule via dedupeOverlapping) and (b)
+        // morphologically shared forms missing from the current dialect's
+        // data (kjøkkenet, klokka, kaldt — still genuine Norwegian). The
+        // early-exit keeps Phase 4's silent-tolerance shield for bucket (b);
+        // dedupeOverlapping surfaces bucket (a) as dialect-mix.
+        if (sisterValidWords.has(t.word)) continue;
         if (typoFix.has(t.word) && !validWords.has(t.word)) {
           const correct = typoFix.get(t.word);
           out.push({
