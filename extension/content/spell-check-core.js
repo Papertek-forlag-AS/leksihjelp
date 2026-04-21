@@ -271,6 +271,29 @@
     }[c]));
   }
 
+  /**
+   * Per-target-locale string lookup for spell-rule explain() callables.
+   *
+   * Reads __lexiI18n.STRINGS[lang][key] DIRECTLY — bypasses __lexiI18n.t()
+   * which routes via the UI locale stored in chrome.storage. Gap C needs
+   * per-target-locale lookup because explain() produces both nb and nn
+   * strings in one call (routed by document lang, not UI lang).
+   *
+   * Falls back to NB then to the raw key if the requested locale+key is
+   * missing — defensive for early-render / partial-i18n-load scenarios
+   * (and for Node, where __lexiI18n is not loaded at all — fixture harness
+   * does not exercise explain(), and check-explain-contract only verifies
+   * shape using a fake finding, so the key-fallback is benign).
+   *
+   * Phase 05.1 / Gap C — added for nb-gender's three-beat copy. Reusable
+   * for future rules needing cross-locale labels.
+   */
+  function getString(key, lang) {
+    const host = typeof self !== 'undefined' ? self : globalThis;
+    const STRINGS = (host.__lexiI18n && host.__lexiI18n.STRINGS) || {};
+    return (STRINGS[lang] && STRINGS[lang][key]) || (STRINGS.nb && STRINGS.nb[key]) || key;
+  }
+
   // ── Dual-export footer ──
   // Writes `self.__lexiSpellCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path. `self` is defined
@@ -283,6 +306,7 @@
     editDistance,
     matchCase,
     escapeHtml,
+    getString,
     dedupeOverlapping,
     sharedPrefixLen,
     sharedSuffixLen,

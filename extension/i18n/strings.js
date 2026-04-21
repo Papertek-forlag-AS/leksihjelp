@@ -104,6 +104,11 @@ const _STRINGS = {
     gender_n: 'nøytrum',
     gender_pl: 'flertall',
 
+    // ── Gender class labels (used by nb-gender rule's three-beat explain, Phase 05.1 Gap C) ──
+    gender_label_m: 'hankjønn',
+    gender_label_f: 'hunkjønn',
+    gender_label_n: 'intetkjønn',
+
     // ── Verb tense names ──
     tense_presens: 'Presens',
     tense_preteritum: 'Preteritum',
@@ -314,6 +319,11 @@ const _STRINGS = {
     gender_n: 'nøytrum',
     gender_pl: 'fleirtal',
 
+    // ── Gender class labels (used by nb-gender rule's three-beat explain, Phase 05.1 Gap C) ──
+    gender_label_m: 'hankjønn',
+    gender_label_f: 'hokjønn',
+    gender_label_n: 'inkjekjønn',
+
     tense_presens: 'Presens',
     tense_preteritum: 'Preteritum',
     tense_perfektum: 'Perfektum',
@@ -514,6 +524,11 @@ const _STRINGS = {
     gender_f: 'feminine',
     gender_n: 'neuter',
     gender_pl: 'plural',
+
+    // ── Gender class labels (used by nb-gender rule's three-beat explain, Phase 05.1 Gap C) ──
+    gender_label_m: 'masculine',
+    gender_label_f: 'feminine',
+    gender_label_n: 'neuter',
 
     tense_presens: 'Present',
     tense_preteritum: 'Past',
