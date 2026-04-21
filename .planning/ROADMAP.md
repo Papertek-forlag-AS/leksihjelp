@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5 →
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | 5/5 | Plans complete (awaiting `/gsd:verify-work 05` for UX-01 + UX-02 requirement close + deferred Chrome smoke test) | 2026-04-20 |
-| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 3/5 | In Progress|  |
+| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 4/5 | In Progress|  |
 
 ---
 *Roadmap created: 2026-04-17*
@@ -168,10 +168,10 @@ UX-01 three-condition close gate: (1) all four gap-closure plans merged, (2) Chr
 
 **Requirements**: UX-01
 **Depends on:** Phase 5
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed (05.1-01 + 05.1-02 + 05.1-03 + 05.1-04 complete; 05.1-05 pending)
 
 Plans:
-- [ ] 05.1-01-PLAN.md — Gap A: NB blå_adj neuter fix + NB/NN adjectivebank audit validator + enrich-nb-lexicon monosyllabic-vowel branch + fin_adj addition (cross-repo papertek-vocabulary; Wave 1, autonomous)
+- [x] 05.1-01-PLAN.md — Gap A: NB blå_adj neuter fix + NB/NN adjectivebank audit validator + enrich-nb-lexicon monosyllabic-vowel branch + fin_adj addition (cross-repo papertek-vocabulary; Wave 1, autonomous) — **Complete 2026-04-21**
 - [ ] 05.1-02-PLAN.md — Gap B: New languagesbank + nationalitiesbank with ~20 entries each NB+NN + TYPE_TO_BANK lookup routing (cross-repo papertek-vocabulary; Wave 1, autonomous)
 - [ ] 05.1-03-PLAN.md — Gap C: gender-rule three-beat copy + getString(key,lang) helper on __lexiSpellCore + gender_label_m/f/n keys in nb/nn/en + COPY-REVIEW.md re-review (Wave 1, autonomous)
 - [ ] 05.1-04-PLAN.md — Gap D: nb-dialect-mix.js (priority 35) + remove sisterValidWords early-exits from typo-curated + typo-fuzzy + 11 fixtures inverted + new with-fix/no-fix/ctx.suppressed cases (Wave 1, autonomous)
