@@ -20,7 +20,9 @@
     "check-explain-contract:test": "node scripts/check-explain-contract.test.js",
     "check-network-silence": "node scripts/check-network-silence.js",
     "check-network-silence:test": "node scripts/check-network-silence.test.js",
-    "check-spellcheck-features": "node scripts/check-spellcheck-features.js"
+    "check-spellcheck-features": "node scripts/check-spellcheck-features.js",
+    "check-rule-css-wiring": "node scripts/check-rule-css-wiring.js",
+    "check-rule-css-wiring:test": "node scripts/check-rule-css-wiring.test.js"
   },
   "repository": {
     "type": "git",
