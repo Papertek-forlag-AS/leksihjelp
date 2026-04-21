@@ -92,6 +92,12 @@
 
   // ── Helpers ──
 
+  // Shared "all features enabled" predicate singleton. Declared at module
+  // scope so buildIndexes can reference-compare against it to skip a
+  // duplicate buildWordList call when the caller already passed the same
+  // identity predicate (fixture harness + first-load Node path).
+  const iffTrue = () => true;
+
   function getAllowedPronouns(lang, isFeatureEnabled) {
     const features = LANG_PRONOUN_FEATURES[lang];
     if (features) {
@@ -544,11 +550,28 @@
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
     // Default predicate: emit all forms (Node / test use — "superset" policy
     // per CONTEXT: consumers filter further at the seam level).
-    const iff = typeof isFeatureEnabled === 'function' ? isFeatureEnabled : () => true;
+    const iff = typeof isFeatureEnabled === 'function' ? isFeatureEnabled : iffTrue;
 
+    // wordList is feature-gated and drives word-PREDICTION — the student sees
+    // only the forms whose grammar features are enabled in the popup.
     const wordList = buildWordList(raw, lang, iff);
+
+    // Spell-check lookup indexes (nounGenus / verbInfinitive / validWords /
+    // typoFix / compoundNouns) MUST NOT be feature-gated. Example regression:
+    // with the default "basic" NB preset, grammar_nb_preteritum is OFF, so
+    // preteritum forms like `gikk` never enter the feature-gated wordList and
+    // verbInfinitive.get('gikk') returns undefined — the modal_form rule
+    // then silently fails on `Kan gikk` because the spell-check rule does
+    // not know `gikk` is a verb inflection of `gå`. Fixture harness missed
+    // this because it calls buildIndexes with isFeatureEnabled: () => true.
+    // Fix: always build lookup indexes from the unfiltered superset. Reuse
+    // the already-built wordList when iff is the identity predicate — avoids
+    // a second O(N) pass in the Node / test path. (Phase 05.1-05 post-hoc.)
+    const unfilteredWordList = (iff === iffTrue)
+      ? wordList
+      : buildWordList(raw, lang, iffTrue);
     const { nounGenus, verbInfinitive, validWords, typoFix, compoundNouns } =
-      buildLookupIndexes(wordList, lang);
+      buildLookupIndexes(unfilteredWordList, lang);
     const normBigrams = bigrams ? normalizeBigrams(bigrams) : null;
 
     // Hydrate Zipf frequency map from the sidecar shipped by Phase 2 DATA-01.

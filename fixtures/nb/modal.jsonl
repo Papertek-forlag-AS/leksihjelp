@@ -18,3 +18,18 @@
 {"id":"nb-modal-accept-001","text":"Jeg kan spise middag","expected":[],"must_not_flag":[]}
 {"id":"nb-modal-accept-002","text":"Han må lese boka","expected":[],"must_not_flag":[]}
 {"id":"nb-modal-accept-003","text":"Hun vil kjøpe bilen","expected":[],"must_not_flag":[]}
+
+// ── Preteritum-form regression (Phase 05.1-05 post-hoc) ──
+// Regression case: `Kan gikk på skolen` — user smoke test 2026-04-21 found
+// modal_form silent on preteritum-form main verb in the browser.
+// Root cause: vocab-seam-core.buildIndexes previously fed wordList
+// (feature-gated by popup's "basic" preset which excludes grammar_preteritum)
+// into buildLookupIndexes, so verbInfinitive.get('gikk') was undefined.
+// Fixture harness passes `() => true` so it missed this; these cases exist
+// to keep the full-superset spell-check path honest even when the feature
+// gate regression pattern re-emerges. See the vocab-seam-core.js comment
+// on buildIndexes for the fix rationale (unfiltered wordList for spell-check
+// lookup indexes, feature-gated wordList for word-prediction).
+{"id":"nb-modal-pret-001","text":"Jeg kan gikk på skolen","expected":[{"rule_id":"modal_form","start":8,"end":12,"suggestion":"gå"}],"must_not_flag":[]}
+{"id":"nb-modal-pret-002","text":"Han må leste boka","expected":[{"rule_id":"modal_form","start":7,"end":12,"suggestion":"lese"}],"must_not_flag":[]}
+{"id":"nb-modal-pret-003","text":"Hun vil kjøpte bilen","expected":[{"rule_id":"modal_form","start":8,"end":14,"suggestion":"kjøpe"}],"must_not_flag":[]}

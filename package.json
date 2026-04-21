@@ -19,7 +19,8 @@
     "check-explain-contract": "node scripts/check-explain-contract.js",
     "check-explain-contract:test": "node scripts/check-explain-contract.test.js",
     "check-network-silence": "node scripts/check-network-silence.js",
-    "check-network-silence:test": "node scripts/check-network-silence.test.js"
+    "check-network-silence:test": "node scripts/check-network-silence.test.js",
+    "check-spellcheck-features": "node scripts/check-spellcheck-features.js"
   },
   "repository": {
     "type": "git",
