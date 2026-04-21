@@ -111,6 +111,14 @@ const _STRINGS = {
     gender_label_f: 'hunkjønn',
     gender_label_n: 'intetkjønn',
 
+    // ── Spell-check register badge (Phase 05.1-05 inline UX gap-closure) ──
+    // Displayed as a small pill in the popover header so the student can tell
+    // which Norwegian standard the rule pipeline is running in. Resolved via
+    // __lexiSpellCore.getString('register_label_' + lang, lang) — per-target
+    // locale, matching the nb-gender three-beat pattern.
+    register_label_nb: 'Bokmål',
+    register_label_nn: 'Nynorsk',
+
     // ── Verb tense names ──
     tense_presens: 'Presens',
     tense_preteritum: 'Preteritum',
@@ -328,6 +336,10 @@ const _STRINGS = {
     gender_label_f: 'hokjønn',
     gender_label_n: 'inkjekjønn',
 
+    // ── Spell-check register badge (Phase 05.1-05 inline UX gap-closure) — see NB block. ──
+    register_label_nb: 'Bokmål',
+    register_label_nn: 'Nynorsk',
+
     tense_presens: 'Presens',
     tense_preteritum: 'Preteritum',
     tense_perfektum: 'Perfektum',
@@ -535,6 +547,11 @@ const _STRINGS = {
     gender_label_m: 'masculine',
     gender_label_f: 'feminine',
     gender_label_n: 'neuter',
+
+    // ── Spell-check register badge (Phase 05.1-05 inline UX gap-closure) — see NB block. ──
+    // Proper names of the two Norwegian written standards — kept as-is in EN. ──
+    register_label_nb: 'Bokmål',
+    register_label_nn: 'Nynorsk',
 
     tense_presens: 'Present',
     tense_preteritum: 'Past',

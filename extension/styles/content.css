@@ -763,6 +763,14 @@
     color: #f87171;
   }
 
+  /* Phase 05.1-05 inline UX gap-closure: dark-mode register-badge pill.
+     Softer slate on dark background; colour palette matches the existing
+     .lh-spell-note / .lh-spell-vis-flere dark variants above. */
+  #lexi-spell-overlay .lh-spell-register-badge {
+    background: rgba(148, 163, 184, 0.18);
+    color: #cbd5e1;
+  }
+
   #lexi-spell-overlay .lh-spell-btn {
     background: rgba(255, 255, 255, 0.06);
     color: #e2e8f0;
@@ -885,6 +893,27 @@
   color: #dc2626;
   text-decoration: line-through;
   font-weight: 500;
+}
+
+/* Phase 05.1-05 inline UX gap-closure: register badge in the popover header.
+   Small pill that tells the student which Norwegian standard (Bokmål / Nynorsk)
+   the rule pipeline ran in. Kept visually quieter than .lh-spell-orig so the
+   word-and-fix pair still reads as the primary content; pushed to the far
+   right of the header via margin-left:auto so multi-suggest (orig only) and
+   single-suggest (orig → fix) both dock it on the same edge. 10px uppercase
+   typography twins the existing .lh-spell-note label for a consistent
+   secondary-chrome feel. */
+#lexi-spell-overlay .lh-spell-register-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(100, 116, 139, 0.12);
+  color: #475569;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 #lexi-spell-overlay .lh-spell-arrow {

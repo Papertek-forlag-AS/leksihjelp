@@ -381,6 +381,15 @@
 
     const useMulti = alternatesVisible && suggestions.length > 1;
 
+    // Phase 05.1-05 inline UX gap-closure: small register-badge pill in the
+    // popover header so the student can tell which Norwegian standard the
+    // rule pipeline is running in (disambiguates the "skrevet valid NB but
+    // unknown NN" class of confusion when pages carry mixed-register text).
+    // Resolved per-target-locale: the label for "Bokmål" / "Nynorsk" is read
+    // from that locale's strings block, mirroring the nb-gender three-beat
+    // pattern. Rendered in BOTH the single- and multi-suggest branches.
+    const registerBadgeHtml = renderRegisterBadge(lang);
+
     if (useMulti) {
       const topK = suggestions.slice(0, 3);
       const rest = suggestions.slice(3, 8);
@@ -393,6 +402,7 @@
       popover.innerHTML = `
         <div class="lh-spell-head">
           <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
+          ${registerBadgeHtml}
         </div>
         <div class="lh-spell-explain">${renderExplain(finding, lang)}</div>
         <div class="lh-spell-suggestions">${rowsHtml}${visFlereHtml}</div>
@@ -434,6 +444,7 @@
           <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
           <span class="lh-spell-arrow">\u2192</span>
           <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
+          ${registerBadgeHtml}
         </div>
         <div class="lh-spell-explain">${renderExplain(finding, lang)}</div>
         <div class="lh-spell-actions">
@@ -461,6 +472,29 @@
       case 'sarskriving': return 'Særskriving';
       default: return '';
     }
+  }
+
+  // Phase 05.1-05 inline UX gap-closure: resolve the human-readable label for
+  // the active Norwegian standard (nb → "Bokmål", nn → "Nynorsk") and wrap it
+  // in a small pill, so the popover always tells the student which register
+  // the rule pipeline is running in. Uses __lexiSpellCore.getString so the
+  // label reads out of the SAME locale it names (per-target-locale pattern,
+  // matching nb-gender Gap C). Gracefully no-ops if i18n isn't loaded or lang
+  // is anything other than nb/nn (shouldn't happen — runCheck() early-exits
+  // for other locales — but belt-and-braces so we never render a raw key).
+  function renderRegisterBadge(lang) {
+    if (lang !== 'nb' && lang !== 'nn') return '';
+    const key = 'register_label_' + lang;
+    let label = key;
+    try {
+      if (CORE && typeof CORE.getString === 'function') {
+        label = CORE.getString(key, lang);
+      }
+    } catch (_) { /* noop — fall through to key fallback */ }
+    // If i18n wasn't loaded yet, getString returns the raw key. Prefer a
+    // short upper-case two-letter code over displaying the key itself.
+    if (!label || label === key) label = lang.toUpperCase();
+    return `<span class="lh-spell-register-badge" data-register="${escapeAttr(lang)}">${escapeHtml(label)}</span>`;
   }
 
   // Phase 5 / UX-01: look up the per-rule `explain` callable and return the
