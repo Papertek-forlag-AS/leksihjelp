@@ -51,6 +51,7 @@ const TARGETS = [
   'extension/content/spell-rules/nb-gender.js',
   'extension/content/spell-rules/nb-modal-verb.js',
   'extension/content/spell-rules/nb-sarskriving.js',
+  'extension/content/spell-rules/nb-dialect-mix.js',      // Phase 05.1 Gap D
   'extension/content/spell-rules/nb-typo-curated.js',
   'extension/content/spell-rules/nb-typo-fuzzy.js',
 ];

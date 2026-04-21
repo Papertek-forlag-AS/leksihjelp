@@ -31,6 +31,7 @@
         "content/spell-rules/nb-gender.js",
         "content/spell-rules/nb-modal-verb.js",
         "content/spell-rules/nb-sarskriving.js",
+        "content/spell-rules/nb-dialect-mix.js",
         "content/spell-rules/nb-typo-curated.js",
         "content/spell-rules/nb-typo-fuzzy.js",
         "content/spell-check.js"
