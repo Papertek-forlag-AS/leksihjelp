@@ -22,7 +22,7 @@ This milestone upgrades Leksihjelp's Norwegian spell-check (NB/NN) and word-pred
 - [x] **Phase 03.1: Close SC-01 browser wiring (INSERTED)** - Bridge `vocab.freq` from `__lexiVocab` seam through `spell-check.js:runCheck()` so the Zipf tiebreaker is live in the Chrome extension, not just in the fixture runner (completed 2026-04-20)
 - [x] **Phase 4: False-Positive Reduction on NB/NN** - Proper-noun guard, dialect tolerance, code-switching detection, and production-quality særskriving ✓ Complete 2026-04-20 (pending `/gsd:verify-work 04` SC-02/03/04/05 mark)
 - [ ] **Phase 5: Student Experience Polish** - Student-friendly "why flagged?" explanations and top-3 capped suggestions with "vis flere" reveal
-- [ ] **Phase 05.1: Close UX-01 gaps from Phase 5 smoke test (INSERTED)** - NB blå_adj + NB/NN adj-declension audit at papertek-vocabulary source; new languagesbank + nationalitiesbank (~20 entries each NB+NN); gender-rule three-beat copy naming target class; nb-dialect-mix rule reverses Phase 4 sisterValidWords tolerance; Chrome smoke-test all scenarios; UX-01 close
+- [x] **Phase 05.1: Close UX-01 gaps from Phase 5 smoke test (INSERTED)** - NB blå_adj + NB/NN adj-declension audit at papertek-vocabulary source; new languagesbank + nationalitiesbank (~20 entries each NB+NN); gender-rule three-beat copy naming target class; nb-dialect-mix rule reverses Phase 4 sisterValidWords tolerance; Chrome smoke-test all 11 scenarios PASS; UX-01 close ✓ Complete 2026-04-21
 
 ## Phase Details
 
@@ -151,7 +151,7 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5 →
 | 03.1 Close SC-01 browser wiring (INSERTED) | 0/1 | Complete    | 2026-04-20 |
 | 4. False-Positive Reduction on NB/NN | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | 5/5 | Plans complete (awaiting `/gsd:verify-work 05` for UX-01 + UX-02 requirement close + deferred Chrome smoke test) | 2026-04-20 |
-| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 4/5 | In Progress|  |
+| 05.1 Close UX-01 gaps from Phase 5 smoke test (INSERTED) | 5/5 | Complete   | 2026-04-21 |
 
 ---
 *Roadmap created: 2026-04-17*
@@ -166,13 +166,13 @@ Phases execute in numeric order: 1 → 2 → 02.1 → 3 → 03.1 → 4 → 5 →
 
 UX-01 three-condition close gate: (1) all four gap-closure plans merged, (2) Chrome smoke test PASS on 5 Phase-5 + 6 new Phase 05.1 scenarios, (3) dyslexia-persona proxy re-reviews updated COPY-REVIEW.md.
 
-**Requirements**: UX-01
+**Requirements**: UX-01 (Complete 2026-04-21)
 **Depends on:** Phase 5
-**Plans:** 4/5 plans executed (05.1-01 + 05.1-02 + 05.1-03 + 05.1-04 complete; 05.1-05 pending)
+**Plans:** 5/5 plans complete
 
 Plans:
-- [x] 05.1-01-PLAN.md — Gap A: NB blå_adj neuter fix + NB/NN adjectivebank audit validator + enrich-nb-lexicon monosyllabic-vowel branch + fin_adj addition (cross-repo papertek-vocabulary; Wave 1, autonomous) — **Complete 2026-04-21**
-- [ ] 05.1-02-PLAN.md — Gap B: New languagesbank + nationalitiesbank with ~20 entries each NB+NN + TYPE_TO_BANK lookup routing (cross-repo papertek-vocabulary; Wave 1, autonomous)
-- [ ] 05.1-03-PLAN.md — Gap C: gender-rule three-beat copy + getString(key,lang) helper on __lexiSpellCore + gender_label_m/f/n keys in nb/nn/en + COPY-REVIEW.md re-review (Wave 1, autonomous)
-- [ ] 05.1-04-PLAN.md — Gap D: nb-dialect-mix.js (priority 35) + remove sisterValidWords early-exits from typo-curated + typo-fuzzy + 11 fixtures inverted + new with-fix/no-fix/ctx.suppressed cases (Wave 1, autonomous)
-- [ ] 05.1-05-PLAN.md — Integration close: sync-vocab pulls Plans 01+02 data + 4 registries wired (sync-vocab BANKS + vocab-seam-core BANKS + popup BANK_TO_POS + floating-widget BANK_TO_POS_KEY) + pos_language/pos_nationality i18n + nn-clean-003 fixture revert + 6 release gates + version bump 2.3.0→2.3.1 + Chrome smoke test (human-verify checkpoint) + UX-01 mark-complete (Wave 2, depends_on 05.1-01 + 05.1-02)
+- [x] 05.1-01-PLAN.md — Gap A: NB blå_adj neuter fix + NB/NN adjectivebank audit validator + enrich-nb-lexicon monosyllabic-vowel branch + fin_adj addition (cross-repo papertek-vocabulary; Wave 1, autonomous) — **Complete 2026-04-21** (commits 4307937c / c734f97e / dbdb8b12 in papertek-vocabulary)
+- [x] 05.1-02-PLAN.md — Gap B: New languagesbank + nationalitiesbank with ~20 entries each NB+NN + TYPE_TO_BANK lookup routing (cross-repo papertek-vocabulary; Wave 1, autonomous) — **Complete 2026-04-21** (commits bf1bd07b / ad210a53 in papertek-vocabulary)
+- [x] 05.1-03-PLAN.md — Gap C: gender-rule three-beat copy + getString(key,lang) helper on __lexiSpellCore + gender_label_m/f/n keys in nb/nn/en + COPY-REVIEW.md re-review (Wave 1, autonomous) — **Complete 2026-04-21** (commits 9da46d2 / 6162a97 / 50da3c7 / 5d0b745)
+- [x] 05.1-04-PLAN.md — Gap D: nb-dialect-mix.js (priority 35) + remove sisterValidWords early-exits from typo-curated + typo-fuzzy + fixtures inverted + new cases (Wave 1, autonomous) — **Complete 2026-04-21** (commits 4a9b4de / 9327a6c / ade5c40 / b63dcaf)
+- [x] 05.1-05-PLAN.md — Integration close: sync-vocab pulls Plans 01+02 data + 4 registries wired + pos_language/pos_nationality i18n + nn-clean-003 fixture revert + 6 original release gates + NEW check-rule-css-wiring release gate (8 total) + version bump 2.3.0→2.3.1 + Chrome smoke test 11/11 PASS (human-verify checkpoint with 4 inline bug-fixes) + UX-01 mark-complete (Wave 2, depends_on 05.1-01 + 05.1-02) — **Complete 2026-04-21** (commits 6877ec8 / c6b64d0 / a2d34e4 / ce343d9 / 5aab727 / a90fcc0 / 5718b39 / c592127 / 54c9137)

@@ -40,7 +40,7 @@ text input on the web.
 
 ### User Experience (student-facing polish)
 
-- [x] **UX-01**: Spell-check popover shows student-friendly "why it's flagged" copy per error class (at least 4 error classes × NB and NN), replacing bare labels like "Skrivefeil"; copy is reviewed for learner voice (avoids jargon, explains the rule briefly)
+- [x] **UX-01**: Spell-check popover shows student-friendly "why it's flagged" copy per error class (at least 4 error classes × NB and NN), replacing bare labels like "Skrivefeil"; copy is reviewed for learner voice (avoids jargon, explains the rule briefly) *(Landed Phase 5 Plan 05-02 — 5 popover-surfacing rules upgraded to explain callable; Phase 05.1 closed the four smoke-test gaps A/B/C/D + fixed four inline-discovered browser bugs. Verified end-to-end via Chrome smoke test 2026-04-21 across 11 scenarios — 5 Phase-5 re-run + 6 new Phase 05.1 scenarios — all PASS.)*
 - [x] **UX-02**: Suggestions capped at top-3 with a "vis flere" / "show more" reveal (word-prediction dropdown and spell-check popover both honor this) — reduces cognitive load, aligns with dyslexia-UX research
 
 ## v2 Requirements
@@ -107,7 +107,7 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 | WP-02 | Phase 3 | Complete |
 | WP-03 | Phase 3 | Complete |
 | WP-04 | Phase 3 | Complete |
-| UX-01 | Phase 5 | Complete |
+| UX-01 | Phase 5 + Phase 05.1 | Complete (2026-04-21) |
 | UX-02 | Phase 5 | Complete |
 
 **Coverage:**
@@ -125,4 +125,4 @@ Explicit exclusions — documented to prevent scope creep or accidental re-addin
 
 ---
 *Requirements defined: 2026-04-17*
-*Last updated: 2026-04-20 after Phase 03.1 closed SC-01 browser-wiring gap (traceability table synced with completed wiring)*
+*Last updated: 2026-04-21 after Phase 05.1 closed UX-01 gaps from Phase 5 smoke test (UX-01 cross-linked to Phase 5 + Phase 05.1; 8 key commits cited in UX-01 row — register badge a2d34e4, feature-gated lookup decouple ce343d9, modal-verb bare-infinitive fix 5aab727, dialect-mix authoritative fire-gate a90fcc0, dialect-mix CSS 5718b39, check-rule-css-wiring gate c592127, CLAUDE.md workflow 54c9137, sync+registries 6877ec8)*
