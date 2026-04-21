@@ -348,18 +348,22 @@ After making changes to files under `extension/`:
 2. Verify every popover-surfacing rule has a valid student-friendly explain contract (UX-01):
    - `npm run check-explain-contract` — must exit 0. Loads each of the five rule files under `extension/content/spell-rules/` that surface to the spell-check popover (`nb-gender`, `nb-modal-verb`, `nb-sarskriving`, `nb-typo-curated`, `nb-typo-fuzzy`) and asserts `rule.explain` is a callable returning `{nb: string, nn: string}` with non-empty strings for both registers. Exits 1 with a pointer to the offending file on any deviation.
    - Paired self-test: `npm run check-explain-contract:test` — belt-and-braces against the gate going silently permissive via regex / shape drift. Plants a broken-shape scratch rule, confirms the gate fires; plants a well-formed scratch rule, confirms the gate passes. Mirrors the `check-network-silence:test` pattern.
-3. Verify the offline surface stays network-silent (SC-06):
+3. Verify every popover-surfacing rule also has a visible dot-colour CSS binding (Phase 05.1 Gap D):
+   - `npm run check-rule-css-wiring` — must exit 0. For each rule in the same popover-surfacing TARGETS list as `check-explain-contract`, asserts `extension/styles/content.css` contains a `.lh-spell-<rule.id> { ...background... }` binding. Exits 1 with a file:line pointer and an add-this-line fix suggestion.
+   - Paired self-test: `npm run check-rule-css-wiring:test` — plants a scratch rule with an unwired id (gate must fire) and one reusing a wired id (gate must pass). Mirrors the `check-explain-contract:test` pattern.
+   - Why this gate exists: Phase 05.1 shipped the `dialect-mix` rule without a matching CSS colour, so the 3px marker painted transparent. All other gates passed; users saw Chrome's native red squiggle instead of our dot and concluded the rule was silent. This gate catches that class of regression before it reaches the browser.
+4. Verify the offline surface stays network-silent (SC-06):
    - `npm run check-network-silence` — must exit 0. Scans `extension/content/spell-check*.js`, `extension/content/spell-rules/**`, and `extension/content/word-prediction.js` for `fetch(`, `XMLHttpRequest`, `sendBeacon`, and `http(s)://` URL literals. Whitelists `chrome.runtime.getURL` and `chrome-extension://` (local-resource access is fine). Exits 1 on any forbidden hit with file:line output.
    - Philosophically: this gate enforces the "free + offline forever" promise on the extension side. A PR that adds `fetch(...)` to a spell rule for "just one loan-word list" breaks the gate and gets the attention it needs.
-4. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
+5. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
    - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
-5. Update the version in all three places:
+6. Update the version in all three places:
    - `extension/manifest.json` (the Chrome extension version)
    - `package.json` (the project version)
    - `backend/public/index.html` (the landing page display version)
-6. Rebuild the zip: `npm run package`
-7. Upload the zip as a GitHub Release asset
+7. Rebuild the zip: `npm run package`
+8. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 
