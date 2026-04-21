@@ -186,6 +186,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - Phase 02.1 inserted after Phase 2: Close SC-4 bundle-size cap (URGENT)
+- Phase 05.1 inserted after Phase 5: Close UX-01 gaps from Phase 5 smoke test (URGENT)
 
 ### Pending Todos
 
