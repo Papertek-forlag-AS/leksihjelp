@@ -14,7 +14,7 @@
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
-  const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
+  const { matchCase, escapeHtml, getString } = host.__lexiSpellCore || {};
 
   const ARTICLE_GENUS = {
     nb: { 'en': 'm', 'ei': 'f', 'et': 'n' },
@@ -25,14 +25,38 @@
     nn: { 'm': 'ein', 'f': 'ei', 'n': 'eit' },
   };
 
+  // Phase 05.1 Gap C: maps the genus code carried on each finding
+  // (actualGenus field) to the i18n key for that gender class's canonical
+  // label. The label resolves per-target-register via __lexiSpellCore.getString
+  // — NB: hankjønn / hunkjønn / intetkjønn; NN: hankjønn / hokjønn / inkjekjønn.
+  const GENUS_TO_LABEL_KEY = { m: 'gender_label_m', f: 'gender_label_f', n: 'gender_label_n' };
+
   const rule = {
     id: 'gender',
     languages: ['nb', 'nn'],
     priority: 10,
-    explain: (finding) => ({
-      nb: `<em>${escapeHtml(finding.original)}</em> kan være feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
-      nn: `<em>${escapeHtml(finding.original)}</em> kan vere feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
-    }),
+    // Phase 05.1 Gap C: three-beat copy — names the target gender class
+    // ("<em>by</em> er hankjønn") so the student learns the classification,
+    // not just the fix. Falls back to the Phase 5 two-beat copy when the new
+    // fields (noun_display, actualGenus) are missing — defensive against
+    // external finding-shape mutation, older findings flowing through, and
+    // the check-explain-contract fake-finding path (which omits both fields).
+    explain: (finding) => {
+      const labelKey = GENUS_TO_LABEL_KEY[finding.actualGenus];
+      const nounDisplay = finding.noun_display;
+      if (!labelKey || !nounDisplay || typeof getString !== 'function') {
+        return {
+          nb: `<em>${escapeHtml(finding.original)}</em> kan være feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+          nn: `<em>${escapeHtml(finding.original)}</em> kan vere feil kjønn — prøv <em>${escapeHtml(finding.fix)}</em>.`,
+        };
+      }
+      const labelNb = getString(labelKey, 'nb');
+      const labelNn = getString(labelKey, 'nn');
+      return {
+        nb: `<em>${escapeHtml(finding.original)}</em> kan være feil kjønn — <em>${escapeHtml(nounDisplay)}</em> er ${escapeHtml(labelNb)}. Prøv <em>${escapeHtml(finding.fix)}</em>.`,
+        nn: `<em>${escapeHtml(finding.original)}</em> kan vere feil kjønn — <em>${escapeHtml(nounDisplay)}</em> er ${escapeHtml(labelNn)}. Prøv <em>${escapeHtml(finding.fix)}</em>.`,
+      };
+    },
     check(ctx) {
       const { tokens, vocab, cursorPos, lang } = ctx;
       const nounGenus = vocab.nounGenus || new Map();
@@ -63,6 +87,8 @@
                 start: articleTok.start,
                 end: articleTok.end,
                 original: articleTok.display,
+                noun_display: t.display,   // Phase 05.1 Gap C — cased noun form for three-beat copy
+                actualGenus: actual,       // Phase 05.1 Gap C — m/f/n so explain resolves label via i18n
                 fix: matchCase(articleTok.display, correctArticle),
                 message: `Kjønn: "${articleTok.display} ${t.display}" skulle vært "${correctArticle} ${t.display}"`,
               });
