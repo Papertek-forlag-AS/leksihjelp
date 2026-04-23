@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leksihjelp — Spellcheck Playground</title>
+  <link rel="stylesheet" href="../extension/styles/content.css">
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #f8fafc; color: #1e293b; }
+    #container { max-width: 800px; margin: 0 auto; }
+    textarea { width: 100%; height: 200px; padding: 12px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 20px; }
+    select { padding: 8px; font-size: 14px; margin-right: 10px; }
+    h1 { color: #11B49A; }
+    #status { font-size: 12px; color: #64748b; margin-top: 10px; }
+    .controls { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Spellcheck Playground</h1>
+    <p>Test your grammar rules in real-time without reloading the extension.</p>
+    
+    <div class="controls">
+      <label>Language: </label>
+      <select id="lang-select">
+        <option value="nb">Bokmål</option>
+        <option value="nn">Nynorsk</option>
+        <option value="en" selected>English</option>
+        <option value="de">German</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+      </select>
+      <span id="status">Loading vocabulary...</span>
+    </div>
+
+    <textarea id="test-input" placeholder="Type something to check... (e.g. 'i went and see')"></textarea>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../extension/content/vocab-seam-core.js"></script>
+  <script src="../extension/content/spell-check-core.js"></script>
+  
+  <!-- All rules (matches manifest) -->
+  <script src="../extension/content/spell-rules/de-capitalization.js"></script>
+  <script src="../extension/content/spell-rules/de-gender.js"></script>
+  <script src="../extension/content/spell-rules/de-grammar.js"></script>
+  <script src="../extension/content/spell-rules/de-modal-verb.js"></script>
+  <script src="../extension/content/spell-rules/en-grammar.js"></script>
+  <script src="../extension/content/spell-rules/es-accent-guard.js"></script>
+  <script src="../extension/content/spell-rules/es-coordination.js"></script>
+  <script src="../extension/content/spell-rules/es-grammar.js"></script>
+  <script src="../extension/content/spell-rules/es-fr-gender.js"></script>
+  <script src="../extension/content/spell-rules/es-fr-modal-verb.js"></script>
+  <script src="../extension/content/spell-rules/fr-contraction.js"></script>
+  <script src="../extension/content/spell-rules/fr-preposition.js"></script>
+  <script src="../extension/content/spell-rules/universal-agreement.js"></script>
+  <script src="../extension/content/spell-rules/nb-codeswitch.js"></script>
+  <script src="../extension/content/spell-rules/nb-gender.js"></script>
+  <script src="../extension/content/spell-rules/nb-modal-verb.js"></script>
+  <script src="../extension/content/spell-rules/nb-sarskriving.js"></script>
+  <script src="../extension/content/spell-rules/nb-dialect-mix.js"></script>
+  <script src="../extension/content/spell-rules/nb-typo-curated.js"></script>
+  <script src="../extension/content/spell-rules/nb-typo-fuzzy.js"></script>
+
+  <!-- Modified copy of spell-check.js to work without Chrome APIs -->
+  <script>
+    const textarea = document.getElementById('test-input');
+    const langSelect = document.getElementById('lang-select');
+    const status = document.getElementById('status');
+    let currentVocab = null;
+
+    // Minimal mock of the VOCAB seam
+    const VOCAB = {
+      getLanguage: () => langSelect.value,
+      getNounGenus: () => currentVocab.nounGenus,
+      getNounForms: () => currentVocab.nounForms,
+      getVerbInfinitive: () => currentVocab.verbInfinitive,
+      getValidWords: () => currentVocab.validWords,
+      getIsAdjective: () => currentVocab.isAdjective,
+      getKnownPresens: () => currentVocab.knownPresens,
+      getKnownPreteritum: () => currentVocab.knownPreteritum,
+      getVerbForms: () => currentVocab.verbForms,
+      getTypoFix: () => currentVocab.typoFix,
+      getCompoundNouns: () => currentVocab.compoundNouns,
+      getPitfalls: () => currentVocab.pitfalls || {},
+      getFreq: () => new Map(),
+      getSisterValidWords: () => new Set()
+    };
+
+    async function loadVocab(lang) {
+      status.innerText = `Loading ${lang}...`;
+      const res = await fetch(`../extension/data/${lang}.json`);
+      const raw = await res.json();
+      
+      let pitfalls = {};
+      try {
+        const pres = await fetch(`../extension/data/pitfalls-${lang}.json`);
+        if (pres.ok) pitfalls = await pres.json();
+      } catch(e) {}
+
+      currentVocab = __lexiVocabCore.buildIndexes({ raw, lang, isFeatureEnabled: () => true });
+      currentVocab.pitfalls = pitfalls;
+      status.innerText = `Ready (${lang})`;
+    }
+
+    langSelect.addEventListener('change', () => loadVocab(langSelect.value));
+    loadVocab(langSelect.value);
+
+    // Simple finding renderer (dot-only for now)
+    function runCheck() {
+      if (!currentVocab) return;
+      const text = textarea.value;
+      const findings = __lexiSpellCore.check(text, VOCAB, { lang: langSelect.value });
+      
+      // Remove old dots
+      document.querySelectorAll('.lh-spell-playground-dot').forEach(d => d.remove());
+      
+      console.log('Findings:', findings);
+      
+      // For this playground, we just log to console and show count.
+      // In a real version, we'd replicate the absolute positioning math from spell-check.js
+      status.innerText = `Ready (${langSelect.value}) — Found ${findings.length} issues. Check Console for details.`;
+    }
+
+    textarea.addEventListener('input', runCheck);
+  </script>
+</body>
+</html>

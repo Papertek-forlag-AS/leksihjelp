@@ -33,7 +33,8 @@
 
   // ── Tokenization ──
 
-  const WORD_RE = /[\p{L}]+/gu;
+  // WORD_RE: matches letters, but also allows internal apostrophes (e.g. they're, don't)
+  const WORD_RE = /[\p{L}]+(?:'[\p{L}]+)*/gu;
 
   function tokenize(text) {
     const out = [];
@@ -59,7 +60,8 @@
   function check(text, vocab, opts = {}) {
     const { cursorPos = null, lang = 'nb' } = opts;
     if (!text || text.length < 3) return [];
-    if (lang !== 'nb' && lang !== 'nn') return [];
+    const supported = ['nb', 'nn', 'en', 'de', 'es', 'fr'];
+    if (!supported.includes(lang)) return [];
 
     const tokens = tokenize(text);
     if (tokens.length < 2) return [];

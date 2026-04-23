@@ -51,16 +51,21 @@
   // Tense normalization — maps language-specific tense keys to common group names
   // Used for cross-language tense consistency detection
   const TENSE_GROUP = {
-    presens: 'present', presente: 'present',
-    preteritum: 'past', preterito: 'past',
+    presens: 'present', presente: 'present', present: 'present',
+    preteritum: 'past', preterito: 'past', past: 'past', simple: 'past',
     perfektum: 'perfect', perfecto: 'perfect', passe_compose: 'perfect',
-    perfektum_partisipp: 'perfect', // NB/NN form key
+    perfektum_partisipp: 'perfect',
+    participle: 'perfect',
+    present_participle: 'continuous'
   };
 
   // Tense keys to feature mapping (supports multiple languages)
   const TENSE_FEATURES = {
     presens: 'grammar_present',
     presente: 'grammar_present',
+    present: 'grammar_en_present',
+    past: 'grammar_en_past',
+    perfect: 'grammar_en_perfect',
     preteritum: 'grammar_preteritum',
     preterito: 'grammar_preterito',
     perfektum: 'grammar_perfektum',
@@ -106,7 +111,8 @@
       }
       return new Set(features[0].pronouns);
     }
-    return null; // No filtering for NB/NN/EN
+    // For NB/NN/EN, we don't filter by default, so return a Set that always returns true or handle as null
+    return null;
   }
 
   // ── buildWordList — copied verbatim from word-prediction.js:465–755 ──
@@ -234,8 +240,8 @@
                 // NB/NN uses form labels (infinitiv, presens, ...),
                 // EN uses English pronouns (I, you, he/she, ...)
                 for (const [key, form] of Object.entries(tenseData.former)) {
-                  // Only apply pronoun filtering for German
-                  if (lang === 'de' && allowedPronouns && !allowedPronouns.has(key)) continue;
+                  // Only apply pronoun filtering for German/English if allowedPronouns is set
+                  if ((lang === 'de' || lang === 'en') && allowedPronouns && !allowedPronouns.has(key)) continue;
 
                   // NB/NN: gate each form individually by its own grammar feature
                   if (isNorwegian && NB_NN_FORM_FEATURES[key]) {
@@ -243,8 +249,10 @@
                   }
 
                   // NB/NN: tense is derived from form key (presens, preteritum, etc.)
-                  // DE: tense is the outer loop variable (presens, preteritum, perfektum)
-                  const objTenseKey = isNorwegian ? (TENSE_GROUP[key] || null) : (TENSE_GROUP[tense] || null);
+                  // Other: tense is the outer loop (tense)
+                  const objTenseKey = isNorwegian 
+                    ? (TENSE_GROUP[key] || null) 
+                    : (TENSE_GROUP[tense] || null);
                   const formLower = form.toLowerCase();
 
                   wordList.push({
@@ -252,7 +260,7 @@
                     display: form,
                     translation: `${entry.word} (${key})`,
                     type: 'conjugation',
-                    pronoun: lang === 'de' ? key : null,
+                    pronoun: isNorwegian ? null : key,
                     formKey: isNorwegian ? key : null,
                     baseWord: entry.word,
                     tenseKey: objTenseKey,
@@ -497,12 +505,63 @@
     const nounGenus = new Map();        // 'hus' → 'n'
     const verbInfinitive = new Map();   // 'spiser' → 'spise'
     const validWords = new Set();       // every known lowercase form
+    const isAdjective = new Set();      // 'stor' → true
     const typoFix = new Map();          // 'komer' → 'kommer'
     const compoundNouns = new Set();    // noun-bank base entries
+    const knownPresens = new Set();     // 'spiser' → true
+    const knownPreteritum = new Set();  // 'spiste' → true
+    const verbForms = new Map();        // 'spise' → { present: Set, past: Set }
+    const nounForms = new Map();        // 'hus' → { singular: Set, plural: Set }
+
+    const isNorwegian = lang === 'nb' || lang === 'nn';
 
     for (const entry of wordList) {
       const w = entry.word;
       if (!w) continue;
+
+      if (entry.bank === 'adjectivebank' || entry.type === 'adjective' || (entry.type === 'plural' && entry.bank === 'adjectivebank')) {
+        isAdjective.add(w);
+      }
+
+      if ((entry.bank === 'nounbank' || entry.type === 'nounform' || entry.type === 'plural') && entry.baseWord) {
+        const base = entry.baseWord.toLowerCase();
+        if (!nounForms.has(base)) {
+          nounForms.set(base, { singular: new Set(), plural: new Set() });
+        }
+        const forms = nounForms.get(base);
+        if (entry.type === 'plural' || entry.wordKey === 'plural') {
+          forms.plural.add(w);
+        } else {
+          forms.singular.add(w);
+        }
+      }
+
+      if (entry.type === 'conjugation') {
+        const inf = (entry.baseWord || '').replace(/^å\s+/i, '').trim();
+        if (inf) {
+          if (!verbForms.has(inf)) {
+            verbForms.set(inf, { present: new Set(), past: new Set() });
+          }
+          const forms = verbForms.get(inf);
+          if (isNorwegian) {
+            if (entry.formKey === 'presens') {
+              knownPresens.add(w);
+              forms.present.add(w);
+            } else if (entry.formKey === 'preteritum') {
+              knownPreteritum.add(w);
+              forms.past.add(w);
+            }
+          } else {
+            if (entry.tenseKey === 'present') {
+              knownPresens.add(w);
+              forms.present.add(w);
+            } else if (entry.tenseKey === 'past') {
+              knownPreteritum.add(w);
+              forms.past.add(w);
+            }
+          }
+        }
+      }
       // Typo-type entries must NOT be added to validWords — they are
       // misspellings, not valid forms. The curated-typo branch in
       // spell-check-core.js skips any token that's in validWords, so
@@ -542,7 +601,7 @@
       }
     }
 
-    return { nounGenus, verbInfinitive, validWords, typoFix, compoundNouns };
+    return { nounGenus, verbInfinitive, validWords, isAdjective, knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns };
   }
 
   // ── Public API ──
@@ -570,11 +629,11 @@
     const unfilteredWordList = (iff === iffTrue)
       ? wordList
       : buildWordList(raw, lang, iffTrue);
-    const { nounGenus, verbInfinitive, validWords, typoFix, compoundNouns } =
-      buildLookupIndexes(unfilteredWordList, lang);
-    const normBigrams = bigrams ? normalizeBigrams(bigrams) : null;
-
-    // Hydrate Zipf frequency map from the sidecar shipped by Phase 2 DATA-01.
+    const { 
+      nounGenus, verbInfinitive, validWords, isAdjective, 
+      knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns 
+    } = buildLookupIndexes(unfilteredWordList, lang);
+     const normBigrams = bigrams ? normalizeBigrams(bigrams) : null;    // Hydrate Zipf frequency map from the sidecar shipped by Phase 2 DATA-01.
     // Freq is null for languages without a freq-{lang}.json sidecar (de/es/fr/en) —
     // consumers get an empty Map and VOCAB.getFrequency returns null for every word,
     // matching today's behaviour for those languages.
@@ -604,6 +663,11 @@
     return {
       wordList,
       nounGenus,
+      isAdjective,
+      knownPresens,
+      knownPreteritum,
+      verbForms,
+      nounForms,
       verbInfinitive,
       validWords,
       typoFix,

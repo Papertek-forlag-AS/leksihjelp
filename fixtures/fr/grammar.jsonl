@@ -1,0 +1,4 @@
+{"id": "fr-cont-1", "text": "le ami", "expected": [{"rule_id": "fr-contraction", "start": 0, "end": 6, "suggestion": "l'ami"}]}
+{"id": "fr-prep-1", "text": "de le", "expected": [{"rule_id": "fr-preposition", "start": 0, "end": 5, "suggestion": "du"}]}
+{"id": "fr-gender-1", "text": "le pomme", "expected": [{"rule_id": "gender", "start": 0, "end": 2, "suggestion": "la"}]}
+{"id": "fr-modal-1", "text": "je peux parles", "expected": [{"rule_id": "modal_form", "start": 8, "end": 14, "suggestion": "parler"}]}

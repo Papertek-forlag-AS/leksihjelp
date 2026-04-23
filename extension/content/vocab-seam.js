@@ -140,6 +140,17 @@
     }
   }
 
+  async function loadRawPitfalls(lang) {
+    try {
+      const url = chrome.runtime.getURL(`data/pitfalls-${lang}.json`);
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) {
+      return null;
+    }
+  }
+
   async function loadForLanguage(lang) {
     ready = false;
 
@@ -161,14 +172,16 @@
       return;
     }
 
-    const [bigrams, freq, sisterRaw] = await Promise.all([
+    const [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
       loadRawBigrams(lang),
       loadRawFrequency(lang),
-      loadRawSister(lang),   // Phase 4 / SC-03
+      loadRawSister(lang),
+      loadRawPitfalls(lang),
     ]);
     const isFeatureEnabled = buildFeaturePredicate(lang);
 
     state = core.buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled });
+    state.pitfalls = pitfalls || {};
     ready = true;
 
     // Drain ready callbacks. splice(0) so late subscribers arriving during
@@ -253,10 +266,16 @@
     // Pre-built lookup indexes (previously rebuilt inside spell-check.js:136–172).
     // Return empty Map/Set (never null) so consumers can skip null-guards.
     getNounGenus: () => (state && state.nounGenus) ? state.nounGenus : new Map(),
+    getNounForms: () => (state && state.nounForms) ? state.nounForms : new Map(),
+    getIsAdjective: () => (state && state.isAdjective) ? state.isAdjective : new Set(),
+    getKnownPresens: () => (state && state.knownPresens) ? state.knownPresens : new Set(),
+    getKnownPreteritum: () => (state && state.knownPreteritum) ? state.knownPreteritum : new Set(),
+    getVerbForms: () => (state && state.verbForms) ? state.verbForms : new Map(),
     getVerbInfinitive: () => (state && state.verbInfinitive) ? state.verbInfinitive : new Map(),
     getValidWords: () => (state && state.validWords) ? state.validWords : new Set(),
     getTypoFix: () => (state && state.typoFix) ? state.typoFix : new Map(),
     getCompoundNouns: () => (state && state.compoundNouns) ? state.compoundNouns : new Set(),
+    getPitfalls: () => (state && state.pitfalls) ? state.pitfalls : {},
     // Frequency Map (Zipf-scored unigrams from freq-{lang}.json sidecar).
     // NB/NN: populated ~13k / ~11k entries. DE/ES/FR/EN: empty Map (no sidecar shipped).
     // Consumers (spell-rules/nb-typo-fuzzy.js) pass this through core.check → rule.check

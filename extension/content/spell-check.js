@@ -219,14 +219,21 @@
     const { text, cursor } = readInput(activeEl);
     if (!text || text.length < 3) { hideOverlay(); return; }
     const lang = VOCAB.getLanguage();
-    if (lang !== 'nb' && lang !== 'nn') { hideOverlay(); return; }
+    const supported = ['nb', 'nn', 'en', 'de', 'es', 'fr'];
+    if (!supported.includes(lang)) { hideOverlay(); return; }
 
     const vocab = {
       nounGenus:        VOCAB.getNounGenus(),
+      nounForms:        VOCAB.getNounForms(),
       verbInfinitive:   VOCAB.getVerbInfinitive(),
       validWords:       VOCAB.getValidWords(),
+      isAdjective:      VOCAB.getIsAdjective(),
+      knownPresens:     VOCAB.getKnownPresens(),
+      knownPreteritum:  VOCAB.getKnownPreteritum(),
+      verbForms:        VOCAB.getVerbForms(),
       typoFix:          VOCAB.getTypoFix(),
       compoundNouns:    VOCAB.getCompoundNouns(),
+      pitfalls:         VOCAB.getPitfalls(),
       freq:             VOCAB.getFreq(),  // Phase 03.1 / SC-01: Zipf tiebreaker Map (nb/nn populated, empty for others)
       sisterValidWords: VOCAB.getSisterValidWords(),  // Phase 4 / SC-03: cross-dialect tolerance
     };
@@ -468,8 +475,18 @@
     switch (t) {
       case 'typo': return 'Skrivefeil';
       case 'gender': return 'Kjønn';
+      case 'agreement': return 'Samsvarsfeil';
       case 'modal_form': return 'Verbform etter hjelpeverb';
       case 'sarskriving': return 'Særskriving';
+      case 'de-capitalization': return 'Stor forbokstav';
+      case 'de-grammar': return 'Tysk grammatikk';
+      case 'en-grammar': return 'Engelsk grammatikk';
+      case 'es-accent': return 'Aksent / spesialtegn';
+      case 'es-coordination': return 'Sammenbinding';
+      case 'es-grammar': return 'Spansk grammatikk';
+      case 'fr-grammar': return 'Fransk grammatikk';
+      case 'fr-contraction': return 'Kontraksjon';
+      case 'fr-preposition': return 'Sammenslåing';
       default: return '';
     }
   }

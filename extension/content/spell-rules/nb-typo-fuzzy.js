@@ -53,6 +53,7 @@
   // gaps (3.39, 3.09) × 10 produce 33.9 / 30.9 points — comfortably above
   // the 5-point today-score gap.
   const ZIPF_MULT = 10;
+  const GLOBAL_WHITELIST = new Set(['will', 'die', 'der', 'das', 'den', 'ein', 'eine']);
 
   function scoreCandidate(query, cand, d, vocab) {
     const pref = sharedPrefixLen(query, cand);
@@ -101,7 +102,7 @@
 
   const rule = {
     id: 'typo',
-    languages: ['nb', 'nn'],
+    languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 50,
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> står ikke i ordboken — kanskje du mente <em>${escapeHtml(finding.fix)}</em>?`,
@@ -116,6 +117,8 @@
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
         if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
+
+        if (GLOBAL_WHITELIST.has(t.word)) continue;
         // Phase 4 / SC-03 + Phase 05.1 Gap D co-existence: data-gap shield.
         // sisterValidWords contains (a) curated cross-dialect markers handled
         // by nb-dialect-mix (priority 35, wins via dedupeOverlapping) and

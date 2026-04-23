@@ -1,0 +1,8 @@
+{"id": "es-accent-1", "text": "esta comido", "expected": [{"rule_id": "es-accent", "start": 0, "end": 4, "suggestion": "está"}]}
+{"id": "es-accent-2", "text": "el ano", "expected": [{"rule_id": "es-accent", "start": 3, "end": 6, "suggestion": "año"}]}
+{"id": "es-coord-1", "text": "padre y hijo", "expected": [{"rule_id": "es-coordination", "start": 6, "end": 7, "suggestion": "e"}]}
+{"id": "es-grammar-1", "text": "mucho bueno", "expected": [{"rule_id": "es-grammar", "start": 0, "end": 5, "suggestion": "muy"}]}
+{"id": "es-gender-1", "text": "el casa", "expected": [{"rule_id": "gender", "start": 0, "end": 2, "suggestion": "la"}]}
+{"id":"case-1776961736129","text":"Padre y hijo.","expected":[{"rule_id":"es-coordination","start":6,"end":7,"suggestion":"e"}],"comment":"Maby explain a bit more ","status":"ok"}
+{"id":"case-1776961752209","text":"Esta comido.","expected":[{"rule_id":"es-accent","start":0,"end":4,"suggestion":"Está"}],"comment":"also explain a bit more","status":"ok"}
+{"id":"case-1776961761019","text":"Mucho bueno.","expected":[{"rule_id":"es-grammar","start":0,"end":5,"suggestion":"Muy"}],"comment":"","status":"ok"}

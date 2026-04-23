@@ -18,9 +18,11 @@
   host.__lexiSpellRules = host.__lexiSpellRules || [];
   const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
+  const GLOBAL_WHITELIST = new Set(['will', 'die', 'der', 'das', 'den', 'ein', 'eine']);
+
   const rule = {
     id: 'typo',
-    languages: ['nb', 'nn'],
+    languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 40,
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> er en vanlig skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
@@ -36,6 +38,8 @@
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
         if (suppressed && suppressed.has(i)) continue; // Phase 4 / SC-02 + SC-04
+
+        if (GLOBAL_WHITELIST.has(t.word)) continue;
         // Phase 4 / SC-03 + Phase 05.1 Gap D co-existence: the cross-dialect
         // early-exit is preserved as a data-gap shield. Tokens in
         // sisterValidWords fall into two buckets: (a) genuine cross-dialect

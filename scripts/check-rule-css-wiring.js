@@ -51,9 +51,23 @@ const CSS_PATH = path.join(ROOT, 'extension/styles/content.css');
 // check-explain-contract.js TARGETS. If you add a new rule that surfaces to
 // the popover, add it to both gates.
 const TARGETS = [
+  'extension/content/spell-rules/de-capitalization.js',
+  'extension/content/spell-rules/de-gender.js',
+  'extension/content/spell-rules/de-grammar.js',
+  'extension/content/spell-rules/de-modal-verb.js',
+  'extension/content/spell-rules/en-grammar.js',
+  'extension/content/spell-rules/es-accent-guard.js',
+  'extension/content/spell-rules/es-coordination.js',
+  'extension/content/spell-rules/es-grammar.js',
+  'extension/content/spell-rules/es-fr-gender.js',
+  'extension/content/spell-rules/es-fr-modal-verb.js',
+  'extension/content/spell-rules/fr-contraction.js',
+  'extension/content/spell-rules/fr-grammar.js',
+  'extension/content/spell-rules/fr-preposition.js',
   'extension/content/spell-rules/nb-gender.js',
   'extension/content/spell-rules/nb-modal-verb.js',
   'extension/content/spell-rules/nb-sarskriving.js',
+  'extension/content/spell-rules/universal-agreement.js',
   'extension/content/spell-rules/nb-dialect-mix.js',
   'extension/content/spell-rules/nb-typo-curated.js',
   'extension/content/spell-rules/nb-typo-fuzzy.js',

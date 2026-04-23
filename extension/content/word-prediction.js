@@ -154,7 +154,8 @@
   // LANGUAGE_CHANGED / GRAMMAR_FEATURES_CHANGED.
   function refreshFromVocab() {
     buildPrefixIndex();
-    buildTenseSets();
+    knownPresens = VOCAB.getKnownPresens();
+    knownPreteritum = VOCAB.getKnownPreteritum();
   }
 
   function chromeStorageGet(keys) {
@@ -405,29 +406,6 @@
         const prefix = w.slice(0, len);
         if (!prefixIndex.has(prefix)) prefixIndex.set(prefix, []);
         prefixIndex.get(prefix).push(i);
-      }
-    }
-  }
-
-  // ── Tense-detection sets ──
-  // Reconstructs presens/preteritum verb-form sets from the seam's wordList.
-  // Mirrors the old loadWordList tense tracking (word-prediction.js:559–599
-  // pre-refactor). NB/NN uses entry.formKey ('presens'/'preteritum'); other
-  // languages use entry.tenseKey ('present'/'past') — both precomputed by
-  // vocab-seam-core.js.
-  function buildTenseSets() {
-    knownPresens.clear();
-    knownPreteritum.clear();
-    const wordList = VOCAB.getWordList();
-    const isNorwegian = currentLang === 'nb' || currentLang === 'nn';
-    for (const entry of wordList) {
-      if (entry.type !== 'conjugation') continue;
-      if (isNorwegian) {
-        if (entry.formKey === 'presens') knownPresens.add(entry.word);
-        else if (entry.formKey === 'preteritum') knownPreteritum.add(entry.word);
-      } else {
-        if (entry.tenseKey === 'present') knownPresens.add(entry.word);
-        else if (entry.tenseKey === 'past') knownPreteritum.add(entry.word);
       }
     }
   }

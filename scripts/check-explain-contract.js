@@ -48,9 +48,23 @@ const CORE_PATH = path.join(ROOT, 'extension/content/spell-check-core.js');
 // priority-ascending sequence in the runner (gender 10 → modal 20 →
 // sarskriving 30 → typo-curated 40 → typo-fuzzy 50).
 const TARGETS = [
+  'extension/content/spell-rules/de-capitalization.js',
+  'extension/content/spell-rules/de-gender.js',
+  'extension/content/spell-rules/de-grammar.js',
+  'extension/content/spell-rules/de-modal-verb.js',
+  'extension/content/spell-rules/en-grammar.js',
+  'extension/content/spell-rules/es-accent-guard.js',
+  'extension/content/spell-rules/es-coordination.js',
+  'extension/content/spell-rules/es-grammar.js',
+  'extension/content/spell-rules/es-fr-gender.js',
+  'extension/content/spell-rules/es-fr-modal-verb.js',
+  'extension/content/spell-rules/fr-contraction.js',
+  'extension/content/spell-rules/fr-grammar.js',
+  'extension/content/spell-rules/fr-preposition.js',
   'extension/content/spell-rules/nb-gender.js',
   'extension/content/spell-rules/nb-modal-verb.js',
   'extension/content/spell-rules/nb-sarskriving.js',
+  'extension/content/spell-rules/universal-agreement.js',
   'extension/content/spell-rules/nb-dialect-mix.js',      // Phase 05.1 Gap D
   'extension/content/spell-rules/nb-typo-curated.js',
   'extension/content/spell-rules/nb-typo-fuzzy.js',

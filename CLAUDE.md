@@ -372,11 +372,16 @@ The `check-bundle-size` script owns measurement and minification; never manually
 
 ## Papertek Vocabulary — Shared Data Source
 
-The vocabulary API (`papertek-vocabulary.vercel.app`) is a sibling project we control, located at `/Users/geirforbord/Papertek/papertek-vocabulary`. All dictionary data — words, conjugations, typos, grammar features — originates there.
+The vocabulary API (`papertek-vocabulary.vercel.app`) is a sibling project we control. All dictionary data — words, conjugations, typos, grammar features — originates there.
 
-**Prefer fixing data issues at the API source** over adding client-side workarounds in Leksihjelp. For example, if a word has incorrect typo entries or wrong conjugations, fix it in `papertek-vocabulary` rather than filtering it out in extension code.
+**Core Principle: Data-Logic Separation**
+- **Logic belongs in Leksihjelp:** Keep the extension code focused on algorithmic grammar rules and UI logic.
+- **Data belongs in Papertek Vocabulary:** Favor data-enrichment at the source (adding missing plurals, irregular forms, pitfalls) over hardcoding word lists in extension rules. 
+- **Active Planning:** We plan for data-enrichment in `papertek-vocabulary` whenever it enables more powerful features in Leksihjelp.
 
-**However**, `papertek-vocabulary` is also consumed by `papertek-webapps` and `papertek-nativeapps`. Changes to the API data or schema affect all three consumers, so consider cross-app impact before modifying the vocabulary API.
+**Prefer fixing data issues at the API source** over adding client-side workarounds in Leksihjelp. For example, if a word has incorrect typo entries or wrong conjugations, fix it in `papertek-vocabulary`.
+
+**However**, `papertek-vocabulary` is also consumed by other Papertek apps. Changes to the API data or schema affect all consumers, so consider cross-app impact.
 
 ## Development Notes
 

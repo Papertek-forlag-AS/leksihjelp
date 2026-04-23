@@ -861,7 +861,17 @@
 
 #lexi-spell-overlay .lh-spell-typo { background: #ef4444; }
 #lexi-spell-overlay .lh-spell-gender { background: #f59e0b; }
+#lexi-spell-overlay .lh-spell-agreement { background: #f59e0b; }
 #lexi-spell-overlay .lh-spell-modal_form { background: #f59e0b; }
+#lexi-spell-overlay .lh-spell-de-capitalization { background: #f59e0b; }
+#lexi-spell-overlay .lh-spell-de-grammar { background: #a855f7; }
+#lexi-spell-overlay .lh-spell-en-grammar { background: #a855f7; }
+#lexi-spell-overlay .lh-spell-es-accent { background: #38bdf8; }
+#lexi-spell-overlay .lh-spell-es-coordination { background: #a855f7; }
+#lexi-spell-overlay .lh-spell-es-grammar { background: #a855f7; }
+#lexi-spell-overlay .lh-spell-fr-grammar { background: #a855f7; }
+#lexi-spell-overlay .lh-spell-fr-contraction { background: #38bdf8; }
+#lexi-spell-overlay .lh-spell-fr-preposition { background: #38bdf8; }
 #lexi-spell-overlay .lh-spell-sarskriving { background: #8b5cf6; }
 #lexi-spell-overlay .lh-spell-dialect-mix { background: #0ea5e9; }  /* sky-500 — Phase 05.1 Gap D */
 

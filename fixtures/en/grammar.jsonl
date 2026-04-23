@@ -1,0 +1,13 @@
+{"id": "en-i-cap", "text": "i am here", "expected": [{"rule_id": "en-grammar", "start": 0, "end": 1, "suggestion": "I"}]}
+{"id": "en-a-an-1", "text": "a apple", "expected": [{"rule_id": "en-grammar", "start": 0, "end": 1, "suggestion": "an"}]}
+{"id": "en-a-an-2", "text": "an book", "expected": [{"rule_id": "en-grammar", "start": 0, "end": 2, "suggestion": "a"}]}
+{"id": "en-sv-1", "text": "he eat", "expected": [{"rule_id": "en-grammar", "start": 3, "end": 6, "suggestion": "eats"}]}
+{"id": "en-tense-1", "text": "I went and see", "expected": [{"rule_id": "en-grammar", "start": 7, "end": 14, "suggestion": "saw / to see"}]}
+{"id": "en-pronoun-1", "text": "He sees I", "expected": [{"rule_id": "en-grammar", "start": 8, "end": 9, "suggestion": "Me"}]}
+{"id": "en-much-many", "text": "much books", "expected": [{"rule_id": "en-grammar", "start": 0, "end": 4, "suggestion": "many"}]}
+{"id": "en-pitfall-1", "text": "there are", "expected": []}
+{"id": "en-pitfall-2", "text": "it is their are", "expected": [{"rule_id": "en-grammar", "start": 6, "end": 11, "suggestion": "there"}]}
+{"id":"en-sv-wants","text":"I wants to eat","expected":[{"rule_id":"en-grammar","start":2,"end":7,"suggestion":"want"}],"comment":"I should be followed by want, not wants."}
+{"id":"en-tense-multiple","text":"I went and see him.","expected":[{"rule_id":"en-grammar","start":7,"end":14,"suggestion":"saw / to see"}],"comment":"Should offer both options"}
+{"id":"en-theyre-their","text":"They are in they're house.","expected":[{"rule_id":"en-grammar","start":12,"end":19,"suggestion":"their"}],"comment":"Tokenizer fix test"}
+{"id":"en-will-coming","text":"I think there will coming.","expected":[{"rule_id":"en-grammar","start":19,"end":25,"suggestion":"come"}],"comment":"'will' should not be flagged as wild."}

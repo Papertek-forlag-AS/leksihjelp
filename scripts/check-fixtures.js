@@ -159,7 +159,14 @@ function loadVocab(lang) {
     sisterRaw = JSON.parse(fs.readFileSync(path.join(DATA_DIR, sisterLang + '.json'), 'utf8'));
   }
 
+  let pitfalls = {};
+  const pitfallFile = path.join(DATA_DIR, 'pitfalls-' + lang + '.json');
+  if (fs.existsSync(pitfallFile)) {
+    pitfalls = JSON.parse(fs.readFileSync(pitfallFile, 'utf8'));
+  }
+
   const vocab = vocabCore.buildIndexes({ raw, sisterRaw, bigrams, freq, lang, isFeatureEnabled: () => true });
+  vocab.pitfalls = pitfalls;
 
   // Pitfall 2 (RESEARCH.md): fail loud if a language we expect to have Zipf
   // data somehow lost it. NB/NN shipped freq sidecars in Phase 2; if they
@@ -265,7 +272,7 @@ function main() {
     );
   }
 
-  const langs = (!lang || lang === 'all') ? ['nb', 'nn'] : [lang];
+  const langs = (!lang || lang === 'all') ? ['nb', 'nn', 'en', 'de', 'es', 'fr'] : [lang];
   let hardFail = false;
   const report = {};
 
