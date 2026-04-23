@@ -2,7 +2,8 @@
 {"id": "de-gender-1", "text": "der Buch", "expected": [{"rule_id": "gender", "start": 0, "end": 3, "suggestion": "das"}]}
 {"id": "de-modal-1", "text": "ich kann spiele", "expected": [{"rule_id": "modal_form", "start": 9, "end": 15, "suggestion": "spielen"}]}
 {"id": "de-acc-1", "text": "ich habe der Ball", "expected": [{"rule_id": "de-grammar", "start": 9, "end": 12, "suggestion": "den"}]}
-{"id": "de-formal-1", "text": "Sie bist", "expected": [{"rule_id": "de-grammar", "start": 4, "end": 8, "suggestion": "sind"}]}
+{"id":"de-adj-ending-1","text":"mit dem großem Hund","expected":[{"rule_id":"de-grammar","start":8,"end":14,"suggestion":"großen"}],"comment":"Dative weak declension should end in -en"}
+{"id":"de-adj-ending-2","text":"aus der kleinem Stadt","expected":[{"rule_id":"de-grammar","start":8,"end":15,"suggestion":"kleinen"}],"comment":"Dative weak declension should end in -en"}
 {"id":"case-1776961501701","text":"Ich habe ein buch.","expected":[{"rule_id":"de-capitalization","start":13,"end":17,"suggestion":"Buch"}],"comment":"","status":"ok"}
 {"id":"case-1776961611819","text":"Du sind sehr nett.","expected":[{"rule_id":"de-grammar","start":3,"end":7,"suggestion":"bist"}],"comment":"Also the ich habe ein buch and this one should provide more pedagogical info. buch (Buch er substantiv, så derfor stor forbokstav) or something like that. And \"sind\" brukes sammen med \"wir\" eller \"sie,Sie\". Or something like that. You get the idea.","status":"ok"}
 {"id":"case-1776961642800","text":"Ich kaufe ein Tisch.","expected":[{"rule_id":"de-grammar","start":10,"end":13,"suggestion":"einen"}],"comment":"again, just more info, but precice info to the student why it should be einen.","status":"ok"}

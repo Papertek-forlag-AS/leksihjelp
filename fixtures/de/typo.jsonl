@@ -1,0 +1,1 @@
+{"id":"de-typo-phonetic-001","text":"Ich gehe in die Shule","expected":[{"rule_id":"typo","start":16,"end":21,"suggestion":"Schule"}],"must_not_flag":[]}

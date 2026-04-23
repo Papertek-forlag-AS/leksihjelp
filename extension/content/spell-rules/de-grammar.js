@@ -55,13 +55,42 @@
         'besuche', 'besuchst', 'besucht', 'besuchen'
       ]);
 
+      const DATIVE_PREPS = new Set(['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu']);
+      const DATIVE_ARTICLES = new Set([
+        'dem', 'der', 'einem', 'einer',
+        'meinem', 'meiner', 'deinem', 'deiner', 'seinem', 'seiner',
+        'unserem', 'unserer', 'eurem', 'eurer', 'ihrem', 'ihrer'
+      ]);
+
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         const next = tokens[i + 1];
         const nextNext = tokens[i + 2];
+        const nextNextNext = tokens[i + 3];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
 
         if (next) {
+          // 3. Adjective Endings (Dative Weak/Mixed Declension)
+          // Pattern: Prep (Dative) + Article (Dative) + Adjective + Noun
+          // Example: "mit dem großem Hund" -> "großen"
+          if (DATIVE_PREPS.has(t.word) && DATIVE_ARTICLES.has(next.word) && nextNext && nextNextNext) {
+            const adj = nextNext;
+            // If it ends in -em or -er, it might be a strong declension form used incorrectly after an article
+            if ((adj.word.endsWith('em') || adj.word.endsWith('er')) && adj.word.length > 3) {
+               const fix = adj.word.slice(0, -2) + 'en';
+               out.push({
+                rule_id: 'de-grammar',
+                subType: 'adj-ending-dative',
+                priority: rule.priority,
+                start: adj.start,
+                end: adj.end,
+                original: adj.display,
+                fix: matchCase(adj.display, fix),
+                suggestion: matchCase(adj.display, fix),
+                message: `Etter artikkelen "${next.display}" skal adjektivet ha svak bøying (-en).`,
+              });
+            }
+          }
           // 1. Formal vs. Informal
           if (t.word === 'sie' && t.display === 'Sie') {
             if (next.word === 'bist') {

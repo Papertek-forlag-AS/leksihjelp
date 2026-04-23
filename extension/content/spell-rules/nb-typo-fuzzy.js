@@ -53,9 +53,10 @@
   // gaps (3.39, 3.09) × 10 produce 33.9 / 30.9 points — comfortably above
   // the 5-point today-score gap.
   const ZIPF_MULT = 10;
+  const BIGRAM_MULT = 60;
   const GLOBAL_WHITELIST = new Set(['will', 'die', 'der', 'das', 'den', 'ein', 'eine']);
 
-  function scoreCandidate(query, cand, d, vocab) {
+  function scoreCandidate(query, cand, d, vocab, prevWord) {
     const pref = sharedPrefixLen(query, cand);
     const suff = sharedSuffixLen(query, cand);
     let s = pref * 15 + suff * 10 - d * 100;
@@ -69,6 +70,15 @@
       const z = vocab.freq.get(cand);
       if (typeof z === 'number') s += z * ZIPF_MULT;
     }
+
+    // Bigram boost — if we have a previous word, check if the candidate
+    // is a common next word. Similar to word-prediction logic.
+    if (prevWord && vocab && vocab.bigrams) {
+      const pairs = vocab.bigrams[prevWord.toLowerCase()];
+      if (pairs && pairs[cand]) {
+        s += pairs[cand] * BIGRAM_MULT;
+      }
+    }
     return s;
   }
 
@@ -79,7 +89,7 @@
   // descending. The previous single-best return is preserved at index 0 —
   // `suggestions[0] === (what fix used to be)` for every pre-Phase-5 fixture
   // case. The cap of 8 matches the UX-02 "Vis flere alternativer" reveal max.
-  function findFuzzyNeighbors(word, vocab) {
+  function findFuzzyNeighbors(word, vocab, prevWord, lang) {
     const validWords = vocab.validWords || new Set();
     const len = word.length;
     // Tighter threshold for short words — 1 edit out of 4 chars is already
@@ -94,8 +104,27 @@
       if (cand === word) continue;
       const d = editDistance(word, cand, k);
       if (d > k) continue;
-      scored.push({ cand, score: scoreCandidate(word, cand, d, vocab) });
+      scored.push({ cand, score: scoreCandidate(word, cand, d, vocab, prevWord) });
     }
+
+    // Phonetic fallback: if Levenshtein search yielded no results, try phonetic
+    // matching (Phonetic matching logic brought over from word-prediction.js).
+    const vocabCore = host.__lexiVocabCore;
+    if (scored.length === 0 && vocabCore && word.length >= 3) {
+      const qPhonetic = vocabCore.phoneticNormalize(word, lang);
+      for (const cand of validWords) {
+        if (cand === word) continue;
+        // Optimization: only check candidates with similar length
+        if (Math.abs(cand.length - word.length) > 2) continue;
+        const targetPhonetic = vocabCore.phoneticNormalize(cand, lang);
+        const pScore = vocabCore.phoneticMatchScore(qPhonetic, targetPhonetic);
+        if (pScore >= 70) {
+          // Normalize pScore to be competitive but generally lower than d=1 hits
+          scored.push({ cand, score: -150 + pScore });
+        }
+      }
+    }
+
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, 8).map(s => s.cand);
   }
@@ -127,11 +156,12 @@
         // Silencing fuzzy on (b) preserves Phase 4 SC-03 tolerance.
         if (sisterValidWords.has(t.word)) continue;
         if (
-          t.word.length >= 4 &&
+          t.word.length >= 3 &&
           !validWords.has(t.word) &&
-          !isLikelyProperNoun(t, i, tokens, text)
+          (ctx.lang === 'de' || !isLikelyProperNoun(t, i, tokens, text))
         ) {
-          const neighbors = findFuzzyNeighbors(t.word, vocab);
+          const prevWord = i > 0 ? tokens[i - 1].word : null;
+          const neighbors = findFuzzyNeighbors(t.word, vocab, prevWord, ctx.lang || 'nb');
           if (neighbors.length > 0) {
             const suggestions = neighbors.map(n => matchCase(t.display, n));
             out.push({

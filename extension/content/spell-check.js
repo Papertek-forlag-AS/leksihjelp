@@ -474,6 +474,8 @@
   function typeLabel(t) {
     switch (t) {
       case 'typo': return 'Skrivefeil';
+      case 'homophone': return 'Forveksling';
+      case 'context-typo': return 'Kontekst-feil';
       case 'gender': return 'Kjønn';
       case 'agreement': return 'Samsvarsfeil';
       case 'modal_form': return 'Verbform etter hjelpeverb';

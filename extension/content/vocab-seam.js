@@ -276,6 +276,8 @@
     getTypoFix: () => (state && state.typoFix) ? state.typoFix : new Map(),
     getCompoundNouns: () => (state && state.compoundNouns) ? state.compoundNouns : new Set(),
     getPitfalls: () => (state && state.pitfalls) ? state.pitfalls : {},
+    phoneticNormalize: (str) => core.phoneticNormalize(str, currentLang),
+    phoneticMatchScore: (queryPhonetic, targetPhonetic) => core.phoneticMatchScore(queryPhonetic, targetPhonetic),
     // Frequency Map (Zipf-scored unigrams from freq-{lang}.json sidecar).
     // NB/NN: populated ~13k / ~11k entries. DE/ES/FR/EN: empty Map (no sidecar shipped).
     // Consumers (spell-rules/nb-typo-fuzzy.js) pass this through core.check → rule.check

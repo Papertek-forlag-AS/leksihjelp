@@ -34,9 +34,14 @@
     'du', 'jeg', 'eg', 'han', 'hun', 'ho', 'vi', 'dere', 'dykk', 'meg',
     'deg', 'oss', 'dem', 'seg', 'min', 'din', 'sin', 'vår', 'ikke',
     'ikkje', 'nei', 'ja',
-    // Adjectives that can collide with compoundNouns as the left half
-    // (added in Plan 04-03 to clear adjective+noun acceptance cases).
-    'stor',
+    // Common adjectives that can collide with compoundNouns as the left half
+    'stor', 'liten', 'god', 'dårlig', 'ny', 'gammel', 'gamal', 'lang',
+    'kort', 'varm', 'kald', 'fin', 'snill', 'tom', 'full', 'ren', 'rein',
+    'skitten', 'rød', 'blå', 'hvit', 'kvit', 'svart', 'grønn', 'gul',
+    'syk', 'frisk', 'rask', 'sen', 'sein', 'hard', 'myk', 'våt', 'tørr',
+    'tynn', 'tykk', 'tjukk', 'bred', 'brei', 'smal', 'høy', 'høg', 'lav',
+    'låg', 'tung', 'lett', 'mye', 'litt', 'noen', 'noire', 'alle', 'hver',
+    'kvar', 'begge', 'selv', 'sjølv'
   ]);
 
   const rule = {

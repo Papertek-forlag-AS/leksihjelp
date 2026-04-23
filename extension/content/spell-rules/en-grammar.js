@@ -108,46 +108,21 @@
         const next = tokens[i + 1];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
 
-        // 1. PITFALLS (Homophones / Common mistakes)
-        if (pitfalls[t.word]) {
-          const p = pitfalls[t.word];
-          let foundPitfall = false;
-          
-          if (next) {
-             for (const [otherKey, otherP] of Object.entries(pitfalls)) {
-                if (otherP.next && otherP.next.includes(next.word) && otherKey !== t.word) {
-                   out.push({
-                    rule_id: 'en-grammar',
-                    subType: 'pitfall',
-                    priority: rule.priority,
-                    start: t.start,
-                    end: t.end,
-                    original: t.display,
-                    fix: matchCase(t.display, otherKey),
-                    suggestion: matchCase(t.display, otherKey),
-                    message: `Tips: ${otherP.note}. Prøv "${otherKey}".`,
-                  });
-                  foundPitfall = true;
-                  break;
-                }
-             }
-          }
-          
-          if (!foundPitfall && (t.word === 'dont' || t.word === "don't" || t.word === 'doesnt' || t.word === "doesn't")) {
-            for (let j = i + 1; j < Math.min(i + 5, tokens.length); j++) {
-              if (tokens[j].word === 'nothing') {
-                out.push({
-                  rule_id: 'en-grammar',
-                  subType: 'double-negative',
-                  priority: rule.priority,
-                  start: tokens[j].start,
-                  end: tokens[j].end,
-                  original: tokens[j].display,
-                  fix: 'anything',
-                  suggestion: 'anything',
-                  message: 'Dobbelt nektelse: Bruk "anything" i stedet for "nothing" etter "don\'t".',
-                });
-              }
+        // 1. Double Negative Check
+        if (t.word === 'dont' || t.word === "don't" || t.word === 'doesnt' || t.word === "doesn't") {
+          for (let j = i + 1; j < Math.min(i + 5, tokens.length); j++) {
+            if (tokens[j].word === 'nothing') {
+              out.push({
+                rule_id: 'en-grammar',
+                subType: 'double-negative',
+                priority: rule.priority,
+                start: tokens[j].start,
+                end: tokens[j].end,
+                original: tokens[j].display,
+                fix: 'anything',
+                suggestion: 'anything',
+                message: 'Dobbelt nektelse: Bruk "anything" i stedet for "nothing" etter "don\'t".',
+              });
             }
           }
         }
@@ -158,27 +133,37 @@
           const forms = verbForms.get(inf || next.word);
           let fix = null;
 
-          if (t.word === 'he' || t.word === 'she' || t.word === 'it') {
+          const is3rdPersonPronoun = (t.word === 'he' || t.word === 'she' || t.word === 'it');
+          const is1st2ndPluralPronoun = (t.word === 'i' || t.word === 'you' || t.word === 'we' || t.word === 'they');
+          
+          const prevWord = i > 0 ? tokens[i - 1].word.toLowerCase() : null;
+          const isSingularNoun = !is3rdPersonPronoun && !is1st2ndPluralPronoun && vocab.compoundNouns && vocab.compoundNouns.has(t.word) && !vocab.verbInfinitive.has(t.word) && (prevWord === 'the' || prevWord === 'a' || prevWord === 'an' || prevWord === 'this' || prevWord === 'that' || prevWord === 'my' || prevWord === 'his' || prevWord === 'her' || prevWord === 'our' || prevWord === 'your' || prevWord === 'their');
+
+          const isKnownVerb = forms && forms.present;
+
+          if ((is3rdPersonPronoun || (isSingularNoun && isKnownVerb)) && !MODAL_VERBS.has(next.word)) {
             // Needs -s form
-            if (forms && forms.present) {
-              for (const p of forms.present) {
-                if (p.endsWith('s') && p !== next.word) { fix = p; break; }
+            if (verbForms.has(next.word)) {
+              if (forms && forms.present) {
+                for (const p of forms.present) {
+                  if (p.endsWith('s') && p !== next.word) { fix = p; break; }
+                }
+              }
+              if (!fix && !next.word.endsWith('s')) {
+                const sForm = next.word + 's';
+                const esForm = next.word + 'es';
+                if (validWords.has(sForm)) fix = sForm;
+                else if (validWords.has(esForm)) fix = esForm;
               }
             }
-            if (!fix && !next.word.endsWith('s')) {
-              const sForm = next.word + 's';
-              const esForm = next.word + 'es';
-              if (validWords.has(sForm)) fix = sForm;
-              else if (validWords.has(esForm)) fix = esForm;
-            }
-          } else if (t.word === 'i' || t.word === 'you' || t.word === 'we' || t.word === 'they') {
+          } else if (is1st2ndPluralPronoun) {
             // Needs base form (no -s)
             if (next.word.endsWith('s') && inf && inf !== next.word) {
               fix = inf;
             }
           }
 
-          if (fix && fix !== next.word && !MODAL_VERBS.has(next.word)) {
+          if (fix && fix !== next.word) {
              out.push({
               rule_id: 'en-grammar',
               subType: 'sv-agreement',
@@ -284,14 +269,35 @@
         // 7. A/An Agreement
         if ((t.word === 'a' || t.word === 'an') && next) {
           const nextWord = next.word;
+          const nextDisplay = next.display;
           const startsWithVowel = VOWELS.has(nextWord[0]);
-          const expected = startsWithVowel ? 'an' : 'a';
-          const isException = (nextWord.startsWith('hour') || nextWord.startsWith('honest')) && !startsWithVowel;
-          const isConsonantException = (nextWord.startsWith('uni') || nextWord.startsWith('use')) && startsWithVowel;
-          let actualExpected = expected;
-          if (isException) actualExpected = 'an';
-          if (isConsonantException) actualExpected = 'a';
-          if (t.word !== actualExpected) {
+          
+          let expected = startsWithVowel ? 'an' : 'a';
+
+          // Handle Abbreviations (e.g., "an FBI", "an HTML", "a URL")
+          // If the word is ALL CAPS and starts with F, H, L, M, N, R, S, X -> "an"
+          const isAllCaps = nextDisplay.length > 1 && nextDisplay === nextDisplay.toUpperCase();
+          const vowelSoundAbbr = new Set(['f', 'h', 'l', 'm', 'n', 'r', 's', 'x']);
+          
+          if (isAllCaps && vowelSoundAbbr.has(nextWord[0])) {
+            expected = 'an';
+          } else if (isAllCaps && nextWord[0] === 'u') {
+            expected = 'a'; // a URL, a UFO
+          }
+
+          // Phonetic Exceptions for "h" (silent h)
+          const silentH = ['hour', 'honor', 'honest', 'heir'];
+          if (silentH.some(h => nextWord.startsWith(h))) {
+            expected = 'an';
+          }
+
+          // Phonetic Exceptions for "u" (consonant y-sound)
+          const consonantU = ['uni', 'use', 'url', 'ufo', 'utensil', 'usual', 'user'];
+          if (consonantU.some(u => nextWord.startsWith(u))) {
+            expected = 'a';
+          }
+
+          if (t.word !== expected) {
             out.push({
               rule_id: 'en-grammar',
               subType: 'a-an',
@@ -299,10 +305,10 @@
               start: t.start,
               end: t.end,
               original: t.display,
-              fix: matchCase(t.display, actualExpected),
-              suggestion: matchCase(t.display, actualExpected),
-              starts_with_vowel: startsWithVowel,
-              message: `Artikkel: Bruk "${actualExpected}" foran "${next.display}"`,
+              fix: matchCase(t.display, expected),
+              suggestion: matchCase(t.display, expected),
+              starts_with_vowel: expected === 'an',
+              message: `Artikkel: Bruk "${expected}" foran "${next.display}"`,
             });
           }
         }

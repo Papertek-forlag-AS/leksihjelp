@@ -95,7 +95,175 @@
     ]
   };
 
+  // ── Phonetic equivalence rules per language ──
+  // Maps common spelling confusions for dyslexic learners
+  const PHONETIC_RULES = {
+    de: [
+      // Vowel confusions
+      ['ä', 'ae'], ['ö', 'oe'], ['ü', 'ue'],
+      ['ß', 'ss'],
+      ['ei', 'ai'], ['ei', 'ey'], ['ai', 'ey'],
+      // Consonant confusions
+      ['sch', 'sh'], ['sch', 'sk'],
+      ['ch', 'k'], ['ch', 'ck'],
+      ['v', 'f'], ['v', 'w'],
+      ['th', 't'],
+      ['ph', 'f'],
+      ['ie', 'i'], ['ie', 'ih'],
+      ['z', 'ts'], ['z', 'tz'],
+      ['qu', 'kw'],
+      ['chs', 'x'], ['cks', 'x'],
+      ['dt', 't'], ['d', 't'],  // Word-final devoicing
+      ['b', 'p'], ['g', 'k'],   // Word-final devoicing
+    ],
+    es: [
+      // Common Spanish confusions
+      ['b', 'v'],
+      ['c', 's'], ['c', 'z'], ['s', 'z'],
+      ['ll', 'y'],
+      ['j', 'g'],  // before e/i
+      ['qu', 'k'], ['qu', 'c'],
+      ['h', ''],  // Silent h
+      ['rr', 'r'],
+      ['ñ', 'ny'], ['ñ', 'ni'],
+      ['gü', 'gu'],
+    ],
+    fr: [
+      // Common French confusions
+      ['é', 'e'], ['è', 'e'], ['ê', 'e'], ['ë', 'e'],
+      ['à', 'a'], ['â', 'a'],
+      ['ù', 'u'], ['û', 'u'],
+      ['î', 'i'], ['ï', 'i'],
+      ['ô', 'o'],
+      ['ç', 's'], ['ç', 'c'],
+      ['ph', 'f'],
+      ['qu', 'k'],
+      ['eau', 'o'], ['au', 'o'],
+      ['ai', 'e'], ['ei', 'e'],
+      ['ou', 'u'],
+      ['oi', 'wa'],
+      ['ch', 'sh'],
+      ['gn', 'ny'],
+    ],
+    nb: [
+      // Double vs single consonants (most common Norwegian spelling error)
+      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
+      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
+      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
+      // Sibilant confusions
+      ['skj', 'sj'], ['sk', 'sj'],
+      ['kj', 'tj'], ['kj', 'k'],
+      // Silent/weak consonants
+      ['hv', 'v'],       // hva/va, hvor/vor
+      ['gj', 'j'],       // gjøre/jøre
+      ['hj', 'j'],       // hjemme/jemme
+      ['lj', 'j'],       // ljug/jug
+      // Final devoicing / confusion
+      ['d', 't'], ['g', 'k'],
+      ['nd', 'nn'],       // band/bann
+      // Vowel confusions
+      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
+      ['ei', 'e'], ['ai', 'e'],
+      ['au', 'ø'],
+      ['y', 'i'],
+    ],
+    nn: [
+      // Double vs single consonants
+      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
+      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
+      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
+      // Sibilant confusions
+      ['skj', 'sj'], ['sk', 'sj'],
+      ['kj', 'tj'], ['kj', 'k'],
+      // Silent/weak consonants
+      ['hv', 'v'],
+      ['gj', 'j'],
+      ['hj', 'j'],
+      ['lj', 'j'],
+      // Final devoicing / confusion
+      ['d', 't'], ['g', 'k'],
+      ['nd', 'nn'],
+      // Vowel confusions
+      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
+      ['ei', 'e'], ['ai', 'e'],
+      ['au', 'ø'],
+      ['y', 'i'],
+    ]
+  };
+
+  /**
+   * Normalize a string using phonetic rules for the current language.
+   * Replaces common confusable patterns with a canonical form.
+   */
+  function phoneticNormalize(str, lang) {
+    const rules = PHONETIC_RULES[lang] || [];
+    let normalized = str.toLowerCase();
+
+    for (const [a, b] of rules) {
+      // Normalize both sides to the shorter/canonical form
+      const canonical = a.length <= b.length ? a : b;
+      const variant = a.length <= b.length ? b : a;
+
+      // Replace the variant with the canonical form
+      if (variant && normalized.includes(variant)) {
+        normalized = normalized.split(variant).join(canonical);
+      }
+    }
+
+    // Also strip accents as a final normalization
+    normalized = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    return normalized;
+  }
+
+  /**
+   * Score a phonetically normalized query against a phonetically normalized target.
+   * Used when standard matching fails, to catch spelling confusions.
+   */
+  function phoneticMatchScore(queryPhonetic, targetPhonetic) {
+    // Phonetic starts-with
+    if (targetPhonetic.startsWith(queryPhonetic)) {
+      return 70 + (queryPhonetic.length / targetPhonetic.length) * 20;
+    }
+
+    // Phonetic contains
+    if (targetPhonetic.includes(queryPhonetic)) {
+      return 35;
+    }
+
+    // Phonetic fuzzy (Levenshtein on normalized forms)
+    if (queryPhonetic.length >= 3) {
+      const maxDist = queryPhonetic.length <= 4 ? 1 : 2;
+      const targetPrefix = targetPhonetic.slice(0, queryPhonetic.length + maxDist);
+      const dist = levenshtein(queryPhonetic, targetPrefix);
+      if (dist <= maxDist) {
+        return 20 - dist * 5;
+      }
+    }
+
+    return 0;
+  }
+
+  function levenshtein(a, b) {
+    const m = a.length, n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        dp[i][j] = Math.min(
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)
+        );
+      }
+    }
+    return dp[m][n];
+  }
+
   // ── Helpers ──
+
+
 
   // Shared "all features enabled" predicate singleton. Declared at module
   // scope so buildIndexes can reference-compare against it to skip a
@@ -151,16 +319,18 @@
           ? Math.log10(rawFrequency + 1)
           : 0;
 
-        // Add base word
-        wordList.push({
-          word: entry.word.toLowerCase(),
-          display: entry.word,
-          translation: translation,
-          type: 'base',
-          bank: bank,
-          genus: bank === 'nounbank' ? (entry.genus || null) : null,
-          zipf: zipf
-        });
+        const baseWords = entry.word.split(';').map(w => w.trim()).filter(Boolean);
+        for (const w of baseWords) {
+          wordList.push({
+            word: w.toLowerCase(),
+            display: w,
+            translation: translation,
+            type: 'base',
+            bank: bank,
+            genus: bank === 'nounbank' ? (entry.genus || null) : null,
+            zipf: zipf
+          });
+        }
 
         // Add Norwegian translation for reverse prediction
         if (translation) {
@@ -686,9 +856,9 @@
 
   // ── Dual-export footer ──
   // Writes `self.__lexiVocabCore` in the browser (content script) AND
-  // `module.exports` in Node — same API, same code path. `self` is defined
-  // both in service workers / content scripts and in Node 18+.
-  const api = { buildIndexes };
+  // `module.exports` in Node — same API, same code path.
+  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
-  if (typeof self !== 'undefined') self.__lexiVocabCore = api;
+  const host = typeof self !== 'undefined' ? self : globalThis;
+  host.__lexiVocabCore = api;
 })();

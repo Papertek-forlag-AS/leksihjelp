@@ -28,6 +28,8 @@
 
   const GENUS_TO_LABEL_KEY = { m: 'gender_label_m', f: 'gender_label_f', n: 'gender_label_n' };
 
+  const DATIVE_PREPS = new Set(['aus', 'bei', 'mit', 'nach', 'seit', 'von', 'zu', 'an', 'auf', 'hinter', 'in', 'neben', 'über', 'unter', 'vor', 'zwischen']);
+
   const rule = {
     id: 'gender',
     languages: ['de'],
@@ -58,32 +60,43 @@
         const t = tokens[i];
         const prev = tokens[i - 1];
         const prevPrev = tokens[i - 2];
+        const prevPrevPrev = tokens[i - 3];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
 
         let articleTok = null;
-        if (prev && ARTICLE_GENUS[prev.word]) articleTok = prev;
-        else if (prevPrev && ARTICLE_GENUS[prevPrev.word]) articleTok = prevPrev;
+        let artIdx = -1;
+        if (prev && ARTICLE_GENUS[prev.word]) {
+          articleTok = prev;
+          artIdx = i - 1;
+        } else if (prevPrev && ARTICLE_GENUS[prevPrev.word]) {
+          articleTok = prevPrev;
+          artIdx = i - 2;
+        }
 
         if (articleTok && nounGenus.has(t.word)) {
           const expected = ARTICLE_GENUS[articleTok.word];
           const actual = nounGenus.get(t.word);
 
           if (actual && actual !== expected) {
-            // Special case for 'ein' is not handled here as it's not in ARTICLE_GENUS
-            // but if they wrote 'der' for an 'f' noun, we suggest 'die'.
-            const correctArticle = GENUS_ARTICLE[actual];
-            if (correctArticle) {
-              out.push({
-                rule_id: 'gender',
-                priority: rule.priority,
-                start: articleTok.start,
-                end: articleTok.end,
-                original: articleTok.display,
-                noun_display: t.display,
-                actualGenus: actual,
-                fix: matchCase(articleTok.display, correctArticle),
-                message: `Kjønn: "${articleTok.display} ${t.display}" skulle vært "${correctArticle} ${t.display}"`,
-              });
+            // Check for Dative Feminine: Prep + der + [adj] + noun(f)
+            const preArt = tokens[artIdx - 1];
+            const isDativeFem = actual === 'f' && articleTok.word === 'der' && preArt && DATIVE_PREPS.has(preArt.word);
+            
+            if (!isDativeFem) {
+              const correctArticle = GENUS_ARTICLE[actual];
+              if (correctArticle) {
+                out.push({
+                  rule_id: 'gender',
+                  priority: rule.priority,
+                  start: articleTok.start,
+                  end: articleTok.end,
+                  original: articleTok.display,
+                  noun_display: t.display,
+                  actualGenus: actual,
+                  fix: matchCase(articleTok.display, correctArticle),
+                  message: `Kjønn: "${articleTok.display} ${t.display}" skulle vært "${correctArticle} ${t.display}"`,
+                });
+              }
             }
           }
         }

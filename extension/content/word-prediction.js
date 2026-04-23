@@ -741,131 +741,10 @@
     return { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords, numberContext, definitenessContext };
   }
 
-  // ── Phonetic equivalence rules per language ──
-  // Maps common spelling confusions for dyslexic learners
-  const PHONETIC_RULES = {
-    de: [
-      // Vowel confusions
-      ['ä', 'ae'], ['ö', 'oe'], ['ü', 'ue'],
-      ['ß', 'ss'],
-      ['ei', 'ai'], ['ei', 'ey'], ['ai', 'ey'],
-      // Consonant confusions
-      ['sch', 'sh'], ['sch', 'sk'],
-      ['ch', 'k'], ['ch', 'ck'],
-      ['v', 'f'], ['v', 'w'],
-      ['th', 't'],
-      ['ph', 'f'],
-      ['ie', 'i'], ['ie', 'ih'],
-      ['z', 'ts'], ['z', 'tz'],
-      ['qu', 'kw'],
-      ['chs', 'x'], ['cks', 'x'],
-      ['dt', 't'], ['d', 't'],  // Word-final devoicing
-      ['b', 'p'], ['g', 'k'],   // Word-final devoicing
-    ],
-    es: [
-      // Common Spanish confusions
-      ['b', 'v'],
-      ['c', 's'], ['c', 'z'], ['s', 'z'],
-      ['ll', 'y'],
-      ['j', 'g'],  // before e/i
-      ['qu', 'k'], ['qu', 'c'],
-      ['h', ''],  // Silent h
-      ['rr', 'r'],
-      ['ñ', 'ny'], ['ñ', 'ni'],
-      ['gü', 'gu'],
-    ],
-    fr: [
-      // Common French confusions
-      ['é', 'e'], ['è', 'e'], ['ê', 'e'], ['ë', 'e'],
-      ['à', 'a'], ['â', 'a'],
-      ['ù', 'u'], ['û', 'u'],
-      ['î', 'i'], ['ï', 'i'],
-      ['ô', 'o'],
-      ['ç', 's'], ['ç', 'c'],
-      ['ph', 'f'],
-      ['qu', 'k'],
-      ['eau', 'o'], ['au', 'o'],
-      ['ai', 'e'], ['ei', 'e'],
-      ['ou', 'u'],
-      ['oi', 'wa'],
-      ['ch', 'sh'],
-      ['gn', 'ny'],
-    ],
-    nb: [
-      // Double vs single consonants (most common Norwegian spelling error)
-      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
-      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
-      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
-      // Sibilant confusions
-      ['skj', 'sj'], ['sk', 'sj'],
-      ['kj', 'tj'], ['kj', 'k'],
-      // Silent/weak consonants
-      ['hv', 'v'],       // hva/va, hvor/vor
-      ['gj', 'j'],       // gjøre/jøre
-      ['hj', 'j'],       // hjemme/jemme
-      ['lj', 'j'],       // ljug/jug
-      // Final devoicing / confusion
-      ['d', 't'], ['g', 'k'],
-      ['nd', 'nn'],       // band/bann
-      // Vowel confusions
-      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
-      ['ei', 'e'], ['ai', 'e'],
-      ['au', 'ø'],
-      ['y', 'i'],
-    ],
-    nn: [
-      // Double vs single consonants
-      ['ll', 'l'], ['mm', 'm'], ['nn', 'n'], ['tt', 't'],
-      ['kk', 'k'], ['pp', 'p'], ['ss', 's'], ['dd', 'd'],
-      ['gg', 'g'], ['ff', 'f'], ['bb', 'b'], ['rr', 'r'],
-      // Sibilant confusions
-      ['skj', 'sj'], ['sk', 'sj'],
-      ['kj', 'tj'], ['kj', 'k'],
-      // Silent/weak consonants
-      ['hv', 'v'],
-      ['gj', 'j'],
-      ['hj', 'j'],
-      ['lj', 'j'],
-      // Final devoicing / confusion
-      ['d', 't'], ['g', 'k'],
-      ['nd', 'nn'],
-      // Vowel confusions
-      ['æ', 'e'], ['ø', 'o'], ['å', 'o'],
-      ['ei', 'e'], ['ai', 'e'],
-      ['au', 'ø'],
-      ['y', 'i'],
-    ]
-  };
-
-  /**
-   * Normalize a string using phonetic rules for the current language.
-   * Replaces common confusable patterns with a canonical form.
-   */
-  function phoneticNormalize(str) {
-    const rules = PHONETIC_RULES[currentLang] || [];
-    let normalized = str.toLowerCase();
-
-    for (const [a, b] of rules) {
-      // Normalize both sides to the shorter/canonical form
-      const canonical = a.length <= b.length ? a : b;
-      const variant = a.length <= b.length ? b : a;
-
-      // Replace the variant with the canonical form
-      if (variant && normalized.includes(variant)) {
-        normalized = normalized.split(variant).join(canonical);
-      }
-    }
-
-    // Also strip accents as a final normalization
-    normalized = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
-    return normalized;
-  }
-
   // ── Fuzzy matching ──
   function findSuggestions(input, maxResults, pronounContext = null, hasModalVerb = false, detectedTense = null, expectedPOS = null, genderContext = null, posStrength = 0, caseContext = null, previousWord = '', previousTwoWords = '', numberContext = null, definitenessContext = null) {
     const q = input.toLowerCase();
-    const qPhonetic = phoneticNormalize(q);
+    const qPhonetic = VOCAB.phoneticNormalize(q);
 
     // Read wordList fresh from the seam each call. Prefix-index entries hold
     // indices into whatever wordList was live when buildPrefixIndex ran — and
@@ -914,8 +793,8 @@
       for (let i = 0; i < wordList.length; i++) {
         if (scoredIndices.has(i)) continue;
         const entry = wordList[i];
-        const targetPhonetic = phoneticNormalize(entry.word);
-        const score = phoneticMatchScore(qPhonetic, targetPhonetic);
+        const targetPhonetic = VOCAB.phoneticNormalize(entry.word);
+        const score = VOCAB.phoneticMatchScore(qPhonetic, targetPhonetic);
         if (score > 0) {
           applyBoosts(entry, score, scored, pronounContext, hasModalVerb, detectedTense, q, expectedPOS, genderContext, posStrength, caseContext, previousWord, previousTwoWords, numberContext, definitenessContext);
         }
@@ -979,7 +858,7 @@
 
     // 2. Recency
     if (recentWordsSet.has(workingEntry.word)) {
-      score += 50;
+      score += 150;
     }
 
     // 3. Modal verb + infinitive boost (DE/NB/NN/etc — guarded by entry shape)
@@ -1022,7 +901,7 @@
       if (isNounOrAdj) {
         score += posStrength >= 2 ? 150 : 100;
       } else if (isVerb && posStrength >= 2) {
-        score -= 100;
+        score -= 200;
       }
     }
 
@@ -1073,7 +952,7 @@
         if (pairs1) bigramWeight = pairs1[workingEntry.word] || 0;
       }
       if (bigramWeight > 0) {
-        score += bigramWeight * 40;
+        score += bigramWeight * 60;
       }
     }
 

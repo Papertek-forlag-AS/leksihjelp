@@ -75,7 +75,7 @@
     'sneakers', 'jumpsuit', 'layout', 'brand', 'fitness', 'wellness',
     'freelance', 'homeoffice', 'template', 'tutorial', 'benchmark', 'budget',
     'bestseller', 'brown', 'label', 'peanut', 'milkshake', 'toast',
-    'bacon', 'workflow', 'framework', 'keyword',
+    'bacon', 'workflow', 'framework', 'keyword', 'pai'
   ]);
 
   function isAllCaps(word) {

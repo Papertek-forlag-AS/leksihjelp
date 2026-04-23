@@ -48,6 +48,9 @@
         "content/spell-rules/nb-dialect-mix.js",
         "content/spell-rules/nb-typo-curated.js",
         "content/spell-rules/nb-typo-fuzzy.js",
+        "content/spell-rules/nb-homophones.js",
+        "content/spell-rules/en-homophones.js",
+        "content/spell-rules/universal-context-typo.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",
