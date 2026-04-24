@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-24T20:06:45.172Z"
+last_updated: "2026-04-24T20:28:55.533Z"
 progress:
   total_phases: 2
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 7 — Word-Order Violations (NB/DE/FR)
-Plan: 2 of 3 complete (07-01, 07-03 done)
-Status: Executing Phase 07
-Last activity: 2026-04-24 — Completed 07-03-PLAN.md (DE verb-final + FR BAGS rules)
+Plan: 3 of 3 complete (07-01, 07-02, 07-03 done)
+Status: Phase 07 Complete
+Last activity: 2026-04-24 — Completed 07-02-PLAN.md (NB V2 + DE V2 word-order rules)
 
-Progress: [███░░░░░░░] 17%
+Progress: [████░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -85,6 +85,7 @@ Progress: [███░░░░░░░] 17%
 | Phase 06 P03 | ~35min | 3 tasks (2 auto + 1 checkpoint) | 18 files |
 | Phase 07 P01 | 2m | 2 tasks | 3 files |
 | Phase 07 P03 | 16m | 2 tasks | 11 files |
+| Phase 07 P02 | 20min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -223,6 +224,8 @@ Recent decisions affecting current work:
 - [Phase 06 P03]: Governance banks (registerbank/collocationbank/phrasebank) extracted separately from word-prediction BANKS array to avoid polluting autocomplete
 - [Phase 06 P03]: REG-01 register rule defaults OFF via grammar_register toggle — opt-in to avoid false positives in informal student writing contexts
 - [Phase 07]: classifyPOS receives pre-lowercased input; acceptance ratio counted per rule-specific fixture file
+- [Phase 07]: Flag only subject pronoun span to avoid deduplication conflicts with other rules
+- [Phase 07]: Use direct knownPresens/knownPreteritum lookup instead of isFinite to avoid multi-word stem false positives
 
 ### Roadmap Evolution
 
