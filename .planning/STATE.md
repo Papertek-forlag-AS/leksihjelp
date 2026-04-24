@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: "Depth of Coverage — Grammar Governance Beyond Tokens"
-status: roadmap_ready
-last_updated: "2026-04-24T00:00:00.000Z"
+milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
+status: unknown
+last_updated: "2026-04-24T19:07:45.864Z"
 progress:
-  total_phases: 10
+  total_phases: 1
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 6 — Structural Infrastructure + Register & Stylistic Polish (not yet planned)
-Plan: —
-Status: Roadmap ready, awaiting phase planning
-Last activity: 2026-04-24 — v2.0 ROADMAP.md written (10 phases, 42 requirements, 100% coverage).
+Phase: 6 — Structural Infrastructure + Register & Stylistic Polish
+Plan: 2 of 3 complete
+Status: Executing phase 06
+Last activity: 2026-04-24 — Completed 06-02-PLAN.md (release gates: benchmark-coverage + governance-data)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 7%
 
 ## Performance Metrics
 
@@ -80,6 +80,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 05.1 P04 | 75min | 3 tasks | 7 files |
 | Phase 05.1 P01 | 19m52s | 3 tasks | 7 files |
 | Phase 05.1 P05 | ~90min (incl. ~15min inline bug-fix loop during human-verify) | 4 tasks (2 auto + 1 checkpoint:human-verify + 1 auto close) | 16 files |
+| Phase 06 P02 | 4min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -209,6 +210,8 @@ Recent decisions affecting current work:
 - [Phase 05.1]: [Plan 05.1-05]: Register badge in popover header (Bug 1 fix a2d34e4). Smoke test revealed users couldn't tell which register (NB vs NN) a rule was evaluating against. Added small `Bokmål`/`Nynorsk` badge in popover header via `vocab.getLanguage()` read at render. Pattern: explicit register-causality indicators in spell-check UI are essential for dialect-mix rules whose flag direction depends on document register (flagging `ikkje` in NB doc because NB is the register, not because `ikkje` is NN).
 - [Phase 05.1]: [Plan 05.1-05]: Inline bug-fix-during-human-verify is healthy pattern, not scope creep. Four bugs surfaced + resolved + retested + user-approved within a ~15 min debug loop inside the checkpoint. Without human-verify gate, all four would have shipped. Counts as plan scope: each fix was directly responsive to a smoke-test scenario the plan explicitly called for. Parent pattern: treat human-verify as a required stage, not a formality; allocate time budget for inline iteration.
 - [Phase 05.1]: [Plan 05.1-05]: Phase 05.1 close-out — all four UX-01 gaps (A/B/C/D) landed + Chrome smoke test PASS 11/11 scenarios + UX-01 marked complete in REQUIREMENTS.md with dual-phase cross-link (Phase 5 + Phase 05.1). Release 2.3.1 packaged; zip + GitHub release publish owned by user. Project has no further inserted phases planned on current ROADMAP.md; natural next step is `/gsd:verify-work 05.1` then optional Phase 06 add.
+- [Phase 06]: Empty expectations.json passes benchmark gate (ship-before-populate strategy)
+- [Phase 06]: Governance gate pass-through when no banks exist (pre-data-sync tolerance)
 
 ### Roadmap Evolution
 
