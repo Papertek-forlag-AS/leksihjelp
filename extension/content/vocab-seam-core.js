@@ -420,22 +420,24 @@
 
                   // NB/NN: tense is derived from form key (presens, preteritum, etc.)
                   // Other: tense is the outer loop (tense)
-                  const objTenseKey = isNorwegian 
-                    ? (TENSE_GROUP[key] || null) 
+                  const objTenseKey = isNorwegian
+                    ? (TENSE_GROUP[key] || null)
                     : (TENSE_GROUP[tense] || null);
-                  const formLower = form.toLowerCase();
-
-                  wordList.push({
-                    word: formLower,
-                    display: form,
-                    translation: `${entry.word} (${key})`,
-                    type: 'conjugation',
-                    pronoun: isNorwegian ? null : key,
-                    formKey: isNorwegian ? key : null,
-                    baseWord: entry.word,
-                    tenseKey: objTenseKey,
-                    zipf: zipf
-                  });
+                  const formValues = Array.isArray(form) ? form : [form];
+                  for (const formStr of formValues) {
+                    const formLower = formStr.toLowerCase();
+                    wordList.push({
+                      word: formLower,
+                      display: formStr,
+                      translation: `${entry.word} (${key})`,
+                      type: 'conjugation',
+                      pronoun: isNorwegian ? null : key,
+                      formKey: isNorwegian ? key : null,
+                      baseWord: entry.word,
+                      tenseKey: objTenseKey,
+                      zipf: zipf
+                    });
+                  }
                 }
               }
             }
@@ -497,20 +499,23 @@
         if (bank === 'nounbank' && entry.forms) {
           for (const [formType, forms] of Object.entries(entry.forms)) {
             if (!forms || typeof forms !== 'object') continue;
-            for (const [number, form] of Object.entries(forms)) {
-              if (!form || form.toLowerCase() === (entry.word || '').toLowerCase()) continue;
-              wordList.push({
-                word: form.toLowerCase(),
-                display: form,
-                translation: `${entry.word} (${formType} ${number})`,
-                type: 'nounform',
-                bank: bank,
-                baseWord: entry.word,
-                genus: entry.genus || null,
-                number: number,
-                definiteness: formType,
-                zipf: zipf
-              });
+            for (const [number, formRaw] of Object.entries(forms)) {
+              const formValues = Array.isArray(formRaw) ? formRaw : [formRaw];
+              for (const form of formValues) {
+                if (!form || form.toLowerCase() === (entry.word || '').toLowerCase()) continue;
+                wordList.push({
+                  word: form.toLowerCase(),
+                  display: form,
+                  translation: `${entry.word} (${formType} ${number})`,
+                  type: 'nounform',
+                  bank: bank,
+                  baseWord: entry.word,
+                  genus: entry.genus || null,
+                  number: number,
+                  definiteness: formType,
+                  zipf: zipf
+                });
+              }
             }
           }
         }
