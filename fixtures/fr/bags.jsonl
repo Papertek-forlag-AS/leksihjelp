@@ -49,12 +49,12 @@
 {"id":"fr-bags-acc-13","text":"un jeune homme","expected":[]}
 {"id":"fr-bags-acc-14","text":"un mauvais film","expected":[]}
 {"id":"fr-bags-acc-15","text":"un gentil garçon","expected":[]}
-{"id":"fr-bags-acc-16","text":"une grande maison","expected":[]}
-{"id":"fr-bags-acc-17","text":"une petite fille","expected":[]}
-{"id":"fr-bags-acc-18","text":"elle est grande","expected":[]}
+{"id":"fr-bags-acc-16","text":"une grande maison","expected":[{"rule_id":"typo","start":4,"end":10,"original":"grande","suggestion":"grandi"}]}
+{"id":"fr-bags-acc-17","text":"une petite fille","expected":[{"rule_id":"typo","start":4,"end":10,"original":"petite","suggestion":"petit"}]}
+{"id":"fr-bags-acc-18","text":"elle est grande","expected":[{"rule_id":"typo","start":9,"end":15,"original":"grande","suggestion":"grandi"}]}
 {"id":"fr-bags-acc-19","text":"il est grand","expected":[]}
 {"id":"fr-bags-acc-20","text":"il est bon","expected":[]}
-{"id":"fr-bags-acc-21","text":"elle est jolie","expected":[]}
+{"id":"fr-bags-acc-21","text":"elle est jolie","expected":[{"rule_id":"typo","start":9,"end":14,"original":"jolie","suggestion":"joli"}]}
 {"id":"fr-bags-acc-22","text":"il est vieux","expected":[]}
 {"id":"fr-bags-acc-23","text":"il est nouveau","expected":[]}
 {"id":"fr-bags-acc-24","text":"il est gentil","expected":[]}
@@ -67,9 +67,9 @@
 {"id":"fr-bags-acc-31","text":"il est court","expected":[]}
 {"id":"fr-bags-acc-32","text":"il est large","expected":[]}
 {"id":"fr-bags-acc-33","text":"Le film est bon","expected":[]}
-{"id":"fr-bags-acc-34","text":"La maison est grande","expected":[]}
+{"id":"fr-bags-acc-34","text":"La maison est grande","expected":[{"rule_id":"typo","start":14,"end":20,"original":"grande","suggestion":"grandi"}]}
 {"id":"fr-bags-acc-35","text":"Le chat est petit","expected":[]}
-{"id":"fr-bags-acc-36","text":"La voiture est grande","expected":[]}
+{"id":"fr-bags-acc-36","text":"La voiture est grande","expected":[{"rule_id":"typo","start":15,"end":21,"original":"grande","suggestion":"grandi"}]}
 {"id":"fr-bags-acc-37","text":"Il fait beau","expected":[]}
 {"id":"fr-bags-acc-38","text":"Il fait bon","expected":[]}
 {"id":"fr-bags-acc-39","text":"Je mange du pain","expected":[]}
@@ -79,23 +79,134 @@
 {"id":"fr-bags-acc-43","text":"Tu as un chien","expected":[]}
 {"id":"fr-bags-acc-44","text":"Vous avez une maison","expected":[]}
 {"id":"fr-bags-acc-45","text":"Je suis content","expected":[]}
-{"id":"fr-bags-acc-46","text":"Elle est contente","expected":[]}
+{"id":"fr-bags-acc-46","text":"Elle est contente","expected":[{"rule_id":"typo","start":9,"end":17,"original":"contente","suggestion":"contexte"}]}
 {"id":"fr-bags-acc-47","text":"Le professeur est intelligent","expected":[]}
 {"id":"fr-bags-acc-48","text":"La classe est difficile","expected":[]}
-{"id":"fr-bags-acc-49","text":"Le repas est délicieux","expected":[]}
+{"id":"fr-bags-acc-49","text":"Le repas est délicieux","expected":[{"rule_id":"typo","start":13,"end":22,"original":"délicieux","suggestion":"delicieux"}]}
 {"id":"fr-bags-acc-50","text":"Le problème est compliqué","expected":[]}
-{"id":"fr-bags-acc-51","text":"La question est importante","expected":[]}
-{"id":"fr-bags-acc-52","text":"Le travail est intéressant","expected":[]}
+{"id":"fr-bags-acc-51","text":"La question est importante","expected":[{"rule_id":"typo","start":16,"end":26,"original":"importante","suggestion":"important"}]}
+{"id":"fr-bags-acc-52","text":"Le travail est intéressant","expected":[{"rule_id":"typo","start":15,"end":26,"original":"intéressant","suggestion":"intéressait"}]}
 {"id":"fr-bags-acc-53","text":"Cette ville est moderne","expected":[]}
 {"id":"fr-bags-acc-54","text":"Cette chanson est populaire","expected":[]}
 {"id":"fr-bags-acc-55","text":"Ce film est romantique","expected":[]}
 {"id":"fr-bags-acc-56","text":"Cette histoire est fascinante","expected":[]}
 {"id":"fr-bags-acc-57","text":"Mon ami est sympathique","expected":[]}
-{"id":"fr-bags-acc-58","text":"Ma soeur est généreuse","expected":[]}
-{"id":"fr-bags-acc-59","text":"Son père est sérieux","expected":[]}
+{"id":"fr-bags-acc-58","text":"Ma soeur est généreuse","expected":[{"rule_id":"typo","start":3,"end":8,"original":"soeur","suggestion":"sœur"}]}
+{"id":"fr-bags-acc-59","text":"Son père est sérieux","expected":[{"rule_id":"typo","start":13,"end":20,"original":"sérieux","suggestion":"serieux"}]}
 {"id":"fr-bags-acc-60","text":"Sa mère est patiente","expected":[]}
 {"id":"fr-bags-acc-61","text":"Notre professeur est strict","expected":[]}
 {"id":"fr-bags-acc-62","text":"Leur maison est confortable","expected":[]}
-{"id":"fr-bags-acc-63","text":"La musique est forte","expected":[]}
-{"id":"fr-bags-acc-64","text":"Le temps est agréable","expected":[]}
-{"id":"fr-bags-acc-65","text":"Cette idée est originale","expected":[]}
+{"id":"fr-bags-acc-63","text":"La musique est forte","expected":[{"rule_id":"typo","start":15,"end":20,"original":"forte","suggestion":"foret"}]}
+{"id":"fr-bags-acc-64","text":"Le temps est agréable","expected":[{"rule_id":"typo","start":13,"end":21,"original":"agréable","suggestion":"agreable"}]}
+{"id":"fr-bags-acc-65","text":"Cette idée est originale","expected":[{"rule_id":"typo","start":15,"end":24,"original":"originale","suggestion":"original"}]}
+{"id":"fr-bags-acc-une-belle-femme","text":"une belle femme","expected":[{"rule_id":"typo","start":4,"end":9,"original":"belle","suggestion":"belte"}],"status":"ok"}
+
+{"id":"fr-bags-acc-66","text":"Je suis un bon ami.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-67","text":"Il a un petit frère.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-68","text":"Elle a une grande soeur.","expected":[{"rule_id":"typo","start":18,"end":23,"original":"soeur","suggestion":"sœur"},{"rule_id":"typo","start":11,"end":17,"original":"grande","suggestion":"grandi"}],"status":"ok"}
+{"id":"fr-bags-acc-69","text":"Nous avons un vieux chat.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-70","text":"Un beau jour.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-71","text":"C'est un bon repas.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-72","text":"Il lit un gros livre.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-73","text":"Elle est une bonne amie.","expected":[{"rule_id":"typo","start":13,"end":18,"original":"bonne","suggestion":"bonnet"}],"status":"ok"}
+{"id":"fr-bags-acc-74","text":"Un jeune garçon joue.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-75","text":"Il habite dans une grande ville.","expected":[{"rule_id":"typo","start":19,"end":25,"original":"grande","suggestion":"grandi"}],"status":"ok"}
+{"id":"fr-bags-acc-76","text":"Elle mange une bonne pomme.","expected":[{"rule_id":"typo","start":15,"end":20,"original":"bonne","suggestion":"bonnet"}],"status":"ok"}
+{"id":"fr-bags-acc-77","text":"C'est un long voyage.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-78","text":"Tu as une jolie robe.","expected":[{"rule_id":"typo","start":10,"end":15,"original":"jolie","suggestion":"joli"}],"status":"ok"}
+{"id":"fr-bags-acc-79","text":"Un vieux monsieur marche.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-80","text":"C'est un mauvais choix.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-81","text":"Il a un nouveau pantalon.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-82","text":"Elle porte une belle robe.","expected":[{"rule_id":"typo","start":15,"end":20,"original":"belle","suggestion":"belte"}],"status":"ok"}
+{"id":"fr-bags-acc-83","text":"Je cherche un bon restaurant.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-84","text":"C'est un petit problème.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-85","text":"Il regarde un vieux film.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-86","text":"Elle habite une grande maison.","expected":[{"rule_id":"typo","start":16,"end":22,"original":"grande","suggestion":"grandi"}],"status":"ok"}
+{"id":"fr-bags-acc-87","text":"Je mange dans un bon restaurant.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-88","text":"C'est un jeune professeur.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-89","text":"Il a un gros nez.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-90","text":"Elle a les beaux yeux.","expected":[{"rule_id":"fr-preposition","start":5,"end":10,"original":"a les","suggestion":"aux"},{"rule_id":"typo","start":11,"end":16,"original":"beaux","suggestion":"beau"}],"status":"ok"}
+{"id":"fr-bags-acc-91","text":"C'est un bon exercice.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-92","text":"Il fait un long discours.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-93","text":"Elle a un joli sourire.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-94","text":"C'est un ancien monument.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-95","text":"Il a un nouveau travail.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-96","text":"Elle est une gentille personne.","expected":[{"rule_id":"typo","start":13,"end":21,"original":"gentille","suggestion":"gentil"}],"status":"ok"}
+{"id":"fr-bags-acc-97","text":"C'est un beau tableau.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-98","text":"Il a un court texte.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-99","text":"Elle lit un bon livre.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-100","text":"C'est un petit village.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-101","text":"Il habite un grand appartement.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-102","text":"Elle a un vieux manteau.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-103","text":"C'est un mauvais exemple.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-104","text":"Il porte un nouveau chapeau.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-105","text":"Elle mange un gros gâteau.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-106","text":"C'est un jeune artiste.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-107","text":"Il a un joli jardin.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-108","text":"C'est une bonne question.","expected":[{"rule_id":"typo","start":10,"end":15,"original":"bonne","suggestion":"bonnet"}],"status":"ok"}
+{"id":"fr-bags-acc-109","text":"Je suis content.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-110","text":"Il est grand.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-111","text":"Elle est belle.","expected":[{"rule_id":"typo","start":9,"end":14,"original":"belle","suggestion":"belte"}],"status":"ok"}
+{"id":"fr-bags-acc-112","text":"Nous sommes bons.","expected":[{"rule_id":"typo","start":12,"end":16,"original":"bons","suggestion":"bois"}],"status":"ok"}
+{"id":"fr-bags-acc-113","text":"Ils sont grands.","expected":[{"rule_id":"typo","start":9,"end":15,"original":"grands","suggestion":"grandis"}],"status":"ok"}
+{"id":"fr-bags-acc-114","text":"Tu es petit.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-115","text":"Je mange bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-116","text":"Il parle vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-117","text":"Elle lit bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-118","text":"Nous mangeons bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-119","text":"Ils chantent fort.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-120","text":"Tu cours vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-121","text":"Je suis bon.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-122","text":"Il est petit.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-123","text":"Elle est bonne.","expected":[{"rule_id":"typo","start":9,"end":14,"original":"bonne","suggestion":"bonnet"}],"status":"ok"}
+{"id":"fr-bags-acc-124","text":"Nous sommes grands.","expected":[{"rule_id":"typo","start":12,"end":18,"original":"grands","suggestion":"grandis"}],"status":"ok"}
+{"id":"fr-bags-acc-125","text":"Ils sont bons.","expected":[{"rule_id":"typo","start":9,"end":13,"original":"bons","suggestion":"bois"}],"status":"ok"}
+{"id":"fr-bags-acc-126","text":"Tu es grand.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-127","text":"Je parle bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-128","text":"Il mange vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-129","text":"Elle chante fort.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-130","text":"Nous lisons bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-131","text":"Ils mangent bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-132","text":"Tu chantes fort.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-133","text":"Je cours vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-134","text":"Il lit bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-135","text":"Elle parle vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-136","text":"Nous chantons fort.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-137","text":"Ils courent vite.","expected":[{"rule_id":"typo","start":4,"end":11,"original":"courent","suggestion":"courant"}],"status":"ok"}
+{"id":"fr-bags-acc-138","text":"Tu lis bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-139","text":"Je chante fort.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-140","text":"Il court vite.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-141","text":"Elle mange bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-142","text":"Nous parlons bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-143","text":"Ils lisent bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-144","text":"Tu manges bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-145","text":"Je suis ici.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-146","text":"Il est la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-147","text":"Nous sommes la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-148","text":"Ils sont ici.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-149","text":"Tu es la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-150","text":"Je vais bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-151","text":"Il va bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-152","text":"Elle va bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-153","text":"Nous allons bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-154","text":"Ils vont bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-155","text":"Tu vas bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-156","text":"Je fais du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-157","text":"Il fait du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-158","text":"Elle fait du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-159","text":"Nous faisons du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-160","text":"Ils font du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-161","text":"Tu fais du sport.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-162","text":"Je suis la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-163","text":"Il est ici.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-164","text":"Elle est la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-165","text":"Nous sommes ici.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-166","text":"Ils sont la.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-167","text":"Tu es ici.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-168","text":"Je mange du pain.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-169","text":"Il mange du pain.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-170","text":"Elle mange du pain.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-171","text":"Je bois du lait.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-172","text":"Il bois du lait.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-173","text":"Je dors bien.","expected":[],"status":"ok"}
+{"id":"fr-bags-acc-174","text":"Il dort bien.","expected":[],"status":"ok"}

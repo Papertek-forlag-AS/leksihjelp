@@ -45,7 +45,7 @@
 {"id":"nb-v2-acc-014","text":"Hun spiste middag i går.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-015","text":"De kommer hjem snart.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-016","text":"Jeg tror at norsk er lett.","expected":[],"status":"ok"}
-{"id":"nb-v2-acc-017","text":"Han sa at han gikk.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-017","text":"Han sa at han gikk.","expected":[{"rule_id":"context-typo","start":4,"end":6,"original":"sa","suggestion":"så"}],"status":"ok"}
 {"id":"nb-v2-acc-018","text":"Vi vet ikke om han kommer.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-019","text":"Kanskje gikk han hjem.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-020","text":"Ofte leser jeg bøker.","expected":[],"status":"ok"}
@@ -93,3 +93,5 @@
 {"id":"nb-v2-acc-062","text":"Tidligere bodde vi i Oslo.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-063","text":"Jeg liker norsk og matematikk.","expected":[],"status":"ok"}
 {"id":"nb-v2-acc-064","text":"Hunden spiser maten sin.","expected":[],"status":"ok"}
+
+{"id":"nb-v2-acc-65","text":"Han kommer hjem i dag.","expected":[],"status":"ok"}
