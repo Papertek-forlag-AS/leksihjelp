@@ -23,17 +23,17 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 7 — Word-Order Violations (NB/DE/FR)
-Plan: 3 of 3 complete (07-01, 07-02, 07-03 done)
+Plan: 4 of 4 complete (07-01, 07-02, 07-03, 07-04 done)
 Status: Phase 07 Complete
-Last activity: 2026-04-24 — Completed 07-02-PLAN.md (NB V2 + DE V2 word-order rules)
+Last activity: 2026-04-24 — Completed 07-04-PLAN.md (Gap closure: nb-v2 false positives + fixture co-fires)
 
 Progress: [████░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 22m 14s
+- Total plans completed: 7
+- Average duration: 21m 22s
 - Total execution time: 2h 13m 24s
 
 **By Phase:**
@@ -86,6 +86,7 @@ Progress: [████░░░░░░] 20%
 | Phase 07 P01 | 2m | 2 tasks | 3 files |
 | Phase 07 P03 | 16m | 2 tasks | 11 files |
 | Phase 07 P02 | 20min | 2 tasks | 11 files |
+| Phase 07 P04 | 16min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -100,6 +101,9 @@ Recent decisions affecting current work:
 - Phase 07-03: Modal verbs (kann/muss/soll) treated as true finite verb in subordinate clause verb-final checking
 - Phase 07-03: Capitalized noun/verb homographs resolved via DE noun capitalization convention
 - Phase 07-03: FR verb/noun homographs only treated as noun when preceded by article
+- Phase 07-04: Question-initial guard restricted to sentences ending with "?" to avoid suppressing fronted-adverb V2 violations
+- Phase 07-04: Complement clause "det er/var" guard uses broad verb detection (isFinite + verbForms + verbInfinitive + MODAL_VERBS) to catch cross-dialect verbs
+- Phase 07-04: Added "fraa" to NN subordinator list; preposition-object guard prevents false positives on "Utan dei ville..."
 - Project init: NB first, NN second for spell-check; all 6 languages for word-prediction
 - Project init: Regression fixture is the quality-gate tool for this milestone
 - [Phase 01]: vocab-seam surface: getBigrams() returns null (not empty object) when file missing — matches existing consumer null-handling
