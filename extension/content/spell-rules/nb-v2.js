@@ -29,6 +29,17 @@
     nn: new Set(['eg', 'du', 'han', 'ho', 'den', 'det', 'vi', 'dykk', 'dei', 'ein']),
   };
 
+  const COORD_CONJUNCTIONS = new Set(['og', 'men', 'eller', 'for']);
+
+  // Modal verbs that can start yes/no questions but may not be in knownPresens
+  const MODAL_VERBS = new Set(['skal', 'kan', 'må', 'vil', 'bør', 'tør', 'skulle', 'kunne', 'måtte', 'ville', 'burde']);
+
+  // Prepositions that take pronoun objects — "Utan dei ville..." is NOT subject+verb
+  const PREPOSITIONS_WITH_OBJECTS = new Set([
+    'uten', 'utan', 'med', 'mot', 'til', 'fra', 'frå', 'mellom', 'blant',
+    'bak', 'foran', 'rundt', 'gjennom',
+  ]);
+
   function escapeHtml(s) {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
@@ -55,7 +66,7 @@
       // Subordinators from spell-check-core
       const SUBORDINATORS = {
         nb: new Set(['fordi', 'at', 'som', 'når', 'hvis', 'selv', 'om', 'da', 'mens', 'etter', 'før', 'siden', 'dersom', 'enda', 'skjønt', 'ettersom']),
-        nn: new Set(['fordi', 'at', 'som', 'når', 'viss', 'sjølv', 'om', 'då', 'mens', 'etter', 'før', 'sidan', 'dersom', 'endå', 'trass']),
+        nn: new Set(['fordi', 'at', 'som', 'når', 'viss', 'sjølv', 'om', 'då', 'mens', 'etter', 'før', 'sidan', 'dersom', 'endå', 'trass', 'frå']),
       };
       const subs = SUBORDINATORS[lang] || SUBORDINATORS.nb;
 
@@ -81,6 +92,18 @@
           const isAlsoWh = whWords.has(firstWord);
           const endsWithQuestion = sentence.text.trimEnd().endsWith('?');
           if (!isAlsoWh || !endsWithQuestion) continue;
+        }
+
+        // Guard: question-initial — if first word is a finite verb and the
+        // sentence ends with "?", this is a yes/no question where subject
+        // follows verb naturally (Kan du...? Skal vi...?).
+        // Requiring "?" avoids false-suppression on fronted adverbs that are
+        // verb-homonyms ("Så vi gikk hjem." — "så" = adverb "then", not verb "saw").
+        const endsQ = sentence.text.trimEnd().endsWith('?');
+        if (endsQ) {
+          const firstTagged = ctx.getTagged(range.start);
+          const firstIsVerb = (firstTagged && firstTagged.isFinite) || MODAL_VERBS.has(firstWord);
+          if (firstIsVerb && !whWords.has(firstWord)) continue;
         }
 
         // Strategy: find adjacent or near-adjacent [subject pronoun] [finite verb]
@@ -136,6 +159,56 @@
             }
           }
           if (hasSubBefore) continue;
+
+          // Guard: coordinate conjunction before subject — second clause SVO is correct
+          let hasCoordBefore = false;
+          for (let j = range.start; j < i; j++) {
+            const jTagged = ctx.getTagged(j);
+            if (jTagged && COORD_CONJUNCTIONS.has(jTagged.word)) {
+              hasCoordBefore = true;
+              break;
+            }
+          }
+          if (hasCoordBefore) continue;
+
+          // Guard: complement clause — "det er/var" after an earlier finite verb
+          // or after a position-0 subject+verb (SVO first clause), meaning
+          // "det er" is in a subordinate complement, not a main clause.
+          // Covers: "Han sier det er bra", "Eg veit ikkje hvor det er", etc.
+          if (tagged.word === 'det' && (nw === 'er' || nw === 'var')) {
+            let hasEarlierVerb = false;
+            for (let j = range.start; j < i; j++) {
+              const jTagged = ctx.getTagged(j);
+              if (!jTagged) continue;
+              const jw = jTagged.word;
+              if (jTagged.isFinite ||
+                  (ctx.vocab.verbForms && ctx.vocab.verbForms.has(jw)) ||
+                  (ctx.vocab.verbInfinitive && ctx.vocab.verbInfinitive.has(jw)) ||
+                  MODAL_VERBS.has(jw)) {
+                hasEarlierVerb = true;
+                break;
+              }
+            }
+            // Also check: subject pronoun at position 0 makes this a multi-clause
+            // sentence where later "det er/var" is subordinate
+            if (!hasEarlierVerb) {
+              const firstT = ctx.getTagged(range.start);
+              if (firstT && subjPronouns.has(firstT.word)) hasEarlierVerb = true;
+            }
+            if (hasEarlierVerb) continue;
+          }
+
+          // Guard: preposition + pronoun — "Utan dei ville..." where "dei" is
+          // the object of a preposition, not a sentence subject
+          if (i > range.start) {
+            const beforeTagged = ctx.getTagged(i - 1);
+            if (beforeTagged && PREPOSITIONS_WITH_OBJECTS.has(beforeTagged.word)) continue;
+          }
+
+          // Guard: NN "ein" as article, not pronoun — if next word is a known noun, skip
+          if (lang === 'nn' && tagged.word === 'ein') {
+            if (ctx.vocab.nounGenus && ctx.vocab.nounGenus.has(nw.toLowerCase())) continue;
+          }
 
           // Build finding: flag just the subject pronoun to avoid overlap
           // with other rules that may fire on the verb token.
