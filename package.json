@@ -38,7 +38,11 @@
     "check-network-silence:test": "node scripts/check-network-silence.test.js",
     "check-spellcheck-features": "node scripts/check-spellcheck-features.js",
     "check-rule-css-wiring": "node scripts/check-rule-css-wiring.js",
-    "check-rule-css-wiring:test": "node scripts/check-rule-css-wiring.test.js"
+    "check-rule-css-wiring:test": "node scripts/check-rule-css-wiring.test.js",
+    "check-benchmark-coverage": "node scripts/check-benchmark-coverage.js",
+    "check-benchmark-coverage:test": "node scripts/check-benchmark-coverage.test.js",
+    "check-governance-data": "node scripts/check-governance-data.js",
+    "check-governance-data:test": "node scripts/check-governance-data.test.js"
   },
   "repository": {
     "type": "git",

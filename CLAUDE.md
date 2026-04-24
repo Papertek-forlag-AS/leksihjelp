@@ -361,12 +361,18 @@ After making changes to files under `extension/`:
 6. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
    - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
-7. Update the version in all three places:
+7. Validate benchmark flip-rate expectations (INFRA-08):
+   - `npm run check-benchmark-coverage` — must exit 0. Reads `benchmark-texts/expectations.json` and validates that each expected rule fires on the corresponding benchmark line. Prints per-priority-band (P1/P2/P3) flip-rate percentages. Passes when expectations are empty (nothing to check) or all expectations are met.
+   - Paired self-test: `npm run check-benchmark-coverage:test` — plants a broken expectation (nonexistent rule on a benchmark line), confirms the gate fires; restores the empty (valid) manifest, confirms the gate passes.
+8. Validate governance data bank presence and shape (INFRA-09):
+   - `npm run check-governance-data` — must exit 0. Checks that governance data banks (`registerbank`, `collocationbank`, `phrasebank`) in bundled vocab have correct structural shape when present. Passes when no governance banks exist yet (pre-data-sync state).
+   - Paired self-test: `npm run check-governance-data:test` — plants a data file with a broken registerbank (missing required fields), confirms the gate fires; plants a well-formed data file, confirms the gate passes; verifies baseline (no governance data) also passes.
+9. Update the version in all three places:
    - `extension/manifest.json` (the Chrome extension version)
    - `package.json` (the project version)
    - `backend/public/index.html` (the landing page display version)
-8. Rebuild the zip: `npm run package`
-9. Upload the zip as a GitHub Release asset
+10. Rebuild the zip: `npm run package`
+11. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 
