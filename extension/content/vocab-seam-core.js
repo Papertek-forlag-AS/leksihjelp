@@ -612,35 +612,56 @@
 
           // NB/NN: emit declined adjective forms (maskulin/feminin/noytrum/flertall/bestemt)
           // so gender+number+definiteness agreement can surface the right form.
-          if (isNorwegian && entry.declension?.positiv) {
+          //
+          // Iterates all three degrees (positiv, komparativ, superlativ) so that
+          // inflected comparison forms like `beste` (superlativ.bestemt of `god`)
+          // enter validWords. Previously only `declension.positiv` was iterated,
+          // which meant the superlative-definite (`beste`) and comparative
+          // declension slots silently dropped — flipping typo-fuzzy into false-
+          // positive mode on clean sentences like "den beste venen min".
+          //
+          // Array values are tolerated: phase-36 NN migration introduced
+          // array-valued declension slots (e.g. `["sol-en", "sola", "solen"]`
+          // for multi-variant forms). Each array element is emitted.
+          if (isNorwegian && entry.declension) {
             const ADJ_FORM_META = {
               maskulin: { genus: 'm', number: 'entall', definiteness: 'ubestemt' },
               feminin: { genus: 'f', number: 'entall', definiteness: 'ubestemt' },
               noytrum: { genus: 'n', number: 'entall', definiteness: 'ubestemt' },
               flertall: { genus: null, number: 'flertall', definiteness: null },
               bestemt: { genus: null, number: 'entall', definiteness: 'bestemt' },
+              ubestemt: { genus: null, number: 'entall', definiteness: 'ubestemt' },
+              alle: { genus: null, number: null, definiteness: null },
             };
             const baseLower = (entry.word || '').toLowerCase();
-            for (const [formKey, form] of Object.entries(entry.declension.positiv)) {
-              if (!form || typeof form !== 'string') continue;
-              const meta = ADJ_FORM_META[formKey];
-              if (!meta) continue;
-              const lower = form.toLowerCase();
-              if (lower === baseLower) continue;
-              // Intentionally emit duplicates by word (e.g. flertall & bestemt
-              // both "store") — display-level dedup downstream keeps the
-              // highest-scoring match for the current agreement context.
-              wordList.push({
-                word: lower,
-                display: form,
-                translation: `${entry.word} (${formKey})`,
-                type: 'adjform',
-                baseWord: entry.word,
-                genus: meta.genus,
-                number: meta.number,
-                definiteness: meta.definiteness,
-                zipf: zipf
-              });
+            for (const degree of ['positiv', 'komparativ', 'superlativ']) {
+              const degreeBlock = entry.declension[degree];
+              if (!degreeBlock || typeof degreeBlock !== 'object') continue;
+              for (const [formKey, formRaw] of Object.entries(degreeBlock)) {
+                const formValues = Array.isArray(formRaw) ? formRaw : [formRaw];
+                for (const form of formValues) {
+                  if (!form || typeof form !== 'string') continue;
+                  const meta = ADJ_FORM_META[formKey] || { genus: null, number: null, definiteness: null };
+                  const lower = form.toLowerCase();
+                  if (degree === 'positiv' && lower === baseLower) continue;
+                  // Intentionally emit duplicates by word (e.g. flertall & bestemt
+                  // both "store") — display-level dedup downstream keeps the
+                  // highest-scoring match for the current agreement context.
+                  wordList.push({
+                    word: lower,
+                    display: form,
+                    translation: `${entry.word} (${degree} ${formKey})`,
+                    type: degree === 'komparativ' ? 'comparative'
+                        : degree === 'superlativ' ? 'superlative'
+                        : 'adjform',
+                    baseWord: entry.word,
+                    genus: meta.genus,
+                    number: meta.number,
+                    definiteness: meta.definiteness,
+                    zipf: zipf
+                  });
+                }
+              }
             }
           }
         }

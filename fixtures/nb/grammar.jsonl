@@ -1,0 +1,10 @@
+{"id":"case-1776981328980","text":"Kan du kommer hit?","expected":[{"rule_id":"modal_form","start":7,"end":13,"suggestion":"komme"}],"comment":"","status":"ok"}
+{"id":"case-1776981343524","text":"Må jeg gjør det?","expected":[{"rule_id":"modal_form","start":7,"end":11,"suggestion":"gjøre"}],"comment":"","status":"ok"}
+{"id":"case-1776981357959","text":"Skal vi spiser middag?","expected":[{"rule_id":"modal_form","start":8,"end":14,"suggestion":"spise"}],"comment":"","status":"ok"}
+{"id":"case-1776981432875","text":"Læreren forklarte oppgaven grundig.","expected":[],"comment":"This is datagap. We will fix in papertek-vocabulary. Læreren is the correct form here.","status":"ok"}
+{"id":"case-1776981487169","text":"Hunden bjeffet på katten.","expected":[],"comment":"Datagap - for papertek-vocabulary. bjeffet is correct form here","status":"ok"}
+{"id":"case-1776981538995","text":"De spiste middag klokken fem.","expected":[],"comment":"Klokken is correct. Probably data missing.","status":"ok"}
+{"id":"case-1776981582718","text":"Jeg vil gjerne ha et glass vann.","expected":[],"comment":"pending vocabulary fix","status":"ok"}
+{"id":"case-1776981610293","text":"Solen skinte gjennom vinduet.","expected":[],"comment":"Datagap — Solen and skinte missing from NB vocab","status":"ok"}
+{"id":"case-1776981616066","text":"Barna lekte ute i hagen.","expected":[],"comment":"Datagap — lekte past-form missing","status":"ok"}
+{"id":"case-1776981633726","text":"Vi må ikke glemme nøklene.","expected":[],"comment":"Datagap — nøklene definite-plural missing","status":"ok"}

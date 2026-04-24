@@ -21,6 +21,14 @@
     'får', 'fikk', 'fekk',
   ]);
 
+  // Subject pronouns that can sit between modal and finite verb in interrogatives
+  // and subject-inversion patterns: "Kan du kommer hit?", "Må jeg gjør det?".
+  // Covers NB + NN forms.
+  const SUBJECT_PRONOUNS = new Set([
+    'jeg', 'eg', 'du', 'han', 'hun', 'ho', 'den', 'det', 'vi', 'dere', 'dykk', 'de', 'dei',
+    'man', 'en',
+  ]);
+
   const rule = {
     id: 'modal_form',
     languages: ['nb', 'nn'],
@@ -37,8 +45,17 @@
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         const prev = tokens[i - 1];
+        const prev2 = tokens[i - 2];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
-        if (prev && MODAL_VERBS.has(prev.word) && verbInfinitive.has(t.word)) {
+
+        // Modal context: either directly after a modal ("kan spiser") or
+        // after a modal+subject-pronoun inversion ("Kan du kommer hit?",
+        // "Må jeg gjør det?"). The latter covers interrogatives and topicalised
+        // clauses where the finite verb is displaced two tokens from the modal.
+        const directModal = prev && MODAL_VERBS.has(prev.word);
+        const invertedModal = prev2 && prev && MODAL_VERBS.has(prev2.word) && SUBJECT_PRONOUNS.has(prev.word);
+        const modalTok = directModal ? prev : (invertedModal ? prev2 : null);
+        if (modalTok && verbInfinitive.has(t.word)) {
           const inf = verbInfinitive.get(t.word);
           if (inf && inf !== t.word) {
             // Phase 05.1-05 bug-fix: the token after a modal is only a "wrong
@@ -63,7 +80,7 @@
               end: t.end,
               original: t.display,
               fix: matchCase(t.display, inf),
-              message: `Etter "${prev.display}" skal verbet stå i infinitiv: "${inf}"`,
+              message: `Etter "${modalTok.display}" skal verbet stå i infinitiv: "${inf}"`,
             });
           }
         }

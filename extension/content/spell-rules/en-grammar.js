@@ -70,6 +70,13 @@
           en: `Use the object form of the personal pronoun ("${escapeHtml(finding.fix)}") after a verb or preposition.`,
         };
       }
+      if (finding.subType === 'modal-of') {
+        return {
+          nb: `Modalverb som <em>${escapeHtml(finding.modal)}</em> tar alltid <em>have</em>, aldri <em>of</em> — dette er en vanlig feil fra uttalen av sammendraget "should've".`,
+          nn: `Modalverb som <em>${escapeHtml(finding.modal)}</em> tek alltid <em>have</em>, aldri <em>of</em> — dette er ein vanleg feil frå uttalen av samandraget "should've".`,
+          en: `Modal verbs like <em>${escapeHtml(finding.modal)}</em> always take <em>have</em>, never <em>of</em> — a common mistake driven by the spoken contraction "should've".`,
+        };
+      }
       if (finding.subType === 'sv-agreement') {
         return {
           nb: `Subjekt-verb-samsvar: «${escapeHtml(finding.subject)}» trenger bøyning med -s — bruk <em>${escapeHtml(finding.fix)}</em>.`,
@@ -142,8 +149,16 @@
           const isKnownVerb = forms && forms.present;
 
           if ((is3rdPersonPronoun || (isSingularNoun && isKnownVerb)) && !MODAL_VERBS.has(next.word)) {
-            // Needs -s form
-            if (verbForms.has(next.word)) {
+            // Needs -s form — BUT skip if the token is a valid irregular
+            // past form (read, cut, put, hit, set, let, etc). Without this
+            // gate the rule flags "She read a book" as "read → reads",
+            // since `read` is also the 3rd-person-singular present.
+            // knownPreteritum contains past FORMS (not infinitives), so a
+            // membership hit is enough evidence that the token might be
+            // past tense rather than a missing-s present.
+            if (knownPreteritum.has(next.word)) {
+              // fall through without setting fix
+            } else if (verbForms.has(next.word)) {
               if (forms && forms.present) {
                 for (const p of forms.present) {
                   if (p.endsWith('s') && p !== next.word) { fix = p; break; }
@@ -313,7 +328,63 @@
           }
         }
 
-        // 8. Modal Verb Form
+        // 8a. "should/could/would of" → "have"
+        // Classic learner pitfall driven by the spoken contraction
+        // "should've" sounding identical to "should of". The fix is
+        // always "have".
+        if (MODAL_VERBS.has(t.word) && next && next.word === 'of') {
+          out.push({
+            rule_id: 'en-grammar',
+            subType: 'modal-of',
+            priority: rule.priority,
+            start: next.start,
+            end: next.end,
+            original: next.display,
+            fix: matchCase(next.display, 'have'),
+            suggestion: matchCase(next.display, 'have'),
+            modal: t.display,
+            message: `"${t.display} of" er en vanlig feil — det skal være "${t.display} have".`,
+          });
+        }
+
+        // 8b. Sentence-initial "Me and …" as subject → "I and …"
+        // (preferred natural phrasing is "X and I", but we surface the
+        // minimal case-swap rather than rewriting word order — the popover
+        // explainer notes the stylistic preference).
+        if (i === 0 && t.word === 'me' && next && next.word === 'and') {
+          out.push({
+            rule_id: 'en-grammar',
+            subType: 'pronoun-case',
+            priority: rule.priority,
+            start: t.start,
+            end: t.end,
+            original: t.display,
+            fix: 'I',
+            suggestion: 'I',
+            message: `Som subjekt skal det være "I", ikke "me". Prøv "John and I".`,
+          });
+        }
+
+        // 8c. he/she/it + don't → doesn't
+        // Handles the most common subject-verb-agreement pitfall on the
+        // contracted negative. Accepts both "don't" and "dont".
+        if (next && (next.word === "don't" || next.word === 'dont') &&
+            (t.word === 'he' || t.word === 'she' || t.word === 'it')) {
+          out.push({
+            rule_id: 'en-grammar',
+            subType: 'sv-agreement',
+            priority: rule.priority,
+            start: next.start,
+            end: next.end,
+            subject: t.display,
+            original: next.display,
+            fix: matchCase(next.display, "doesn't"),
+            suggestion: matchCase(next.display, "doesn't"),
+            message: `Subjekt-verb-samsvar: "${t.display}" skal ha "doesn't", ikke "${next.display}".`,
+          });
+        }
+
+        // 9. Modal Verb Form
         if (MODAL_VERBS.has(t.word) && next && verbInfinitive.has(next.word)) {
           const inf = verbInfinitive.get(next.word);
           if (inf && inf !== next.word) {

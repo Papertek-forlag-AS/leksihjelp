@@ -1,0 +1,63 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@papertek'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Enforce the release-gate contract from CLAUDE.md before the package
+      # reaches consumers (skriv.papertek.app and anything else pinned to
+      # @papertek/leksihjelp). A broken-state tag must not ship — if any of
+      # these gates fails, the whole workflow fails and npm publish never
+      # runs.
+      - name: Release gates — fixtures
+        run: npm run check-fixtures
+      - name: Release gates — explain contract
+        run: npm run check-explain-contract
+      - name: Release gates — rule CSS wiring
+        run: npm run check-rule-css-wiring
+      - name: Release gates — spell-check feature independence
+        run: npm run check-spellcheck-features
+      - name: Release gates — offline network silence
+        run: npm run check-network-silence
+
+      # Cross-check that the three version strings CLAUDE.md step 7 mandates
+      # bumping in lockstep (manifest.json, package.json, landing-page HTML)
+      # actually agree with the tag that triggered this workflow. A mismatch
+      # would publish to npm under one version while the extension zip and
+      # landing page advertise another — the exact failure mode CLAUDE.md
+      # warned about earlier in this project.
+      - name: Verify version triplet is in sync with tag
+        run: |
+          tag_version="${GITHUB_REF_NAME#v}"
+          pkg_version="$(node -p 'require("./package.json").version')"
+          ext_version="$(node -p 'require("./extension/manifest.json").version')"
+          html_version="$(grep -oE 'Versjon [0-9]+\.[0-9]+\.[0-9]+' backend/public/index.html | head -1 | sed 's/^Versjon //')"
+          echo "tag=$tag_version  package.json=$pkg_version  manifest=$ext_version  landing-html=$html_version"
+          if [ "$tag_version" != "$pkg_version" ] || [ "$tag_version" != "$ext_version" ] || [ "$tag_version" != "$html_version" ]; then
+            echo "::error::Version mismatch. Bump all three files to match the tag before retagging."
+            exit 1
+          fi
+
+      - name: Publish package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

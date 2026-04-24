@@ -92,11 +92,22 @@
               const weight = currentPairs[cand];
               const candZipf = (vocab.freq && vocab.freq.get(cand)) || 0;
 
-              // We only have Zipf data for NB/NN. 
+              // We only have Zipf data for NB/NN.
               // If we do, ensure we aren't suggesting a rare word.
               if (currentZipf > 0 && candZipf > 0 && candZipf < 3.0) continue;
 
-              if (weight >= 2) {
+              // Without Zipf data (e.g. EN has no freq sidecar), we lose the
+              // frequency gate that normally stops us suggesting a rare word
+              // as the "right" form. Compensate by demanding a stronger
+              // bigram signal. Symptom this guards against: "They ate
+              // dinner" → "ate → are" (bigram `they are` dominates the
+              // table, but `ate` is the correct word here). Raising the bar
+              // to 5 stops bigram-majority cases from overriding a token
+              // that was already valid.
+              const hasZipfData = vocab.freq && vocab.freq.size > 0;
+              const minWeight = hasZipfData ? 2 : 5;
+
+              if (weight >= minWeight) {
                 if (weight > bestScore) {
                   bestScore = weight;
                   bestNeighbor = cand;
@@ -105,7 +116,9 @@
             }
           }
 
-          if (bestNeighbor && bestScore >= 2) {
+          const hasZipfData = vocab.freq && vocab.freq.size > 0;
+          const minBestScore = hasZipfData ? 2 : 5;
+          if (bestNeighbor && bestScore >= minBestScore) {
             const fix = matchCase(t.display, bestNeighbor);
             out.push({
               rule_id: 'context-typo',

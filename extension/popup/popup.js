@@ -1670,6 +1670,11 @@ function renderNounCases(entry) {
 /**
  * Render NB/NN noun forms (ubestemt/bestemt × entall/flertall) as a 2×2 table
  */
+function fmtForm(val) {
+  if (!val) return '-';
+  return Array.isArray(val) ? val.join(' / ') : val;
+}
+
 function renderNounForms(entry) {
   if (!entry.forms) return '';
   const ub = entry.forms.ubestemt;
@@ -1684,8 +1689,8 @@ function renderNounForms(entry) {
           <tr><th></th><th>${t('decl_singular')}</th><th>${t('decl_plural')}</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>${t('decl_indefinite')}</strong></td><td>${escapeHtml(ub?.entall || '-')}</td><td>${escapeHtml(ub?.flertall || '-')}</td></tr>
-          <tr><td><strong>${t('decl_definite')}</strong></td><td>${escapeHtml(be?.entall || '-')}</td><td>${escapeHtml(be?.flertall || '-')}</td></tr>
+          <tr><td><strong>${t('decl_indefinite')}</strong></td><td>${escapeHtml(fmtForm(ub?.entall))}</td><td>${escapeHtml(fmtForm(ub?.flertall))}</td></tr>
+          <tr><td><strong>${t('decl_definite')}</strong></td><td>${escapeHtml(fmtForm(be?.entall))}</td><td>${escapeHtml(fmtForm(be?.flertall))}</td></tr>
         </tbody>
       </table>
     </div>

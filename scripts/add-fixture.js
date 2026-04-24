@@ -183,11 +183,28 @@ async function processSentence(text, lang, vocab, fixturePath) {
       findings.forEach((f, i) => {
         console.log(`${i + 1}) [${f.rule_id}] "${text.slice(f.start, f.end)}" -> "${f.suggestion || f.fix}" (${f.message})`);
       });
-      const feedback = (await question('\nIs the app correct? (y = Yes, n = No (hallucination), p = Partial/Guided Review, u = Unsure): ')).toLowerCase();
+      const feedback = (await question(
+        '\nIs the app correct? (y=Yes, n=No (hallucination), r=Reject all (clean, should pass now), d=Reject all (upstream Data fix pending), p=Partial/Guided Review, u=Unsure): '
+      )).toLowerCase();
       if (feedback === 'u') {
         currentCase.status = 'unsure';
       } else if (feedback === 'y') {
         currentCase.expected = findings.map(f => ({ rule_id: f.rule_id, start: f.start, end: f.end, suggestion: f.suggestion || f.fix }));
+      } else if (feedback === 'r') {
+        // Reject-all: every finding is a false positive and the sentence is
+        // clean. Use this when the rule is correct NOW and the fixture
+        // should pass immediately — check-fixtures will hard-fail if any
+        // finding fires.
+        currentCase.expected = [];
+      } else if (feedback === 'd') {
+        // Reject-all + pending upstream data fix: the rule is still firing
+        // because of a data gap at the Papertek vocabulary layer (missing
+        // inflected form, wrong genus, etc). Save as clean but tag with
+        // `pending: true` so check-fixtures parks the case until the
+        // upstream fix lands. When papertek-vocabulary ships the fix and
+        // the fixture starts passing, remove the `pending` flag.
+        currentCase.expected = [];
+        currentCase.pending = true;
       } else if (feedback === 'p') {
         console.log('\n--- Guided Review ---');
         for (let i = 0; i < findings.length; i++) {

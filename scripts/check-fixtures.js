@@ -282,14 +282,29 @@ function main() {
     const vocab = loadVocab(l);
     const files = rule
       ? [rule + '.jsonl']
-      : fs.readdirSync(ruleDir).filter(f => f.endsWith('.jsonl')).sort();
+      : fs.readdirSync(ruleDir).filter(f => f.endsWith('.jsonl')).sort()
+          // Exclude queue files consumed by scripts/add-fixture.js — these
+          // have no `expected` field and would otherwise be treated as
+          // "expect clean" fixtures and hard-fail the runner.
+          .filter(f => f !== 'ai-requests.jsonl');
     report[l] = {};
     for (const file of files) {
       const ruleId = path.basename(file, '.jsonl');
       const filePath = path.join(ruleDir, file);
       if (!fs.existsSync(filePath)) continue;
       const cases = loadJsonl(filePath);
-      const results = cases.map(c => runCase(c, vocab, l));
+      // Partition out pending fixtures — cases tagged `pending: true` are
+      // "known-failing pending upstream fix" (typically a data gap at the
+      // Papertek vocabulary layer). They're evaluated for reporting but
+      // don't contribute to P/R or the hard-fail exit. When the upstream
+      // fix lands the case will start matching its expected, at which
+      // point the `pending` flag should be removed so it joins the regular
+      // regression suite.
+      const pending = cases.filter(c => c.pending === true);
+      const active = cases.filter(c => c.pending !== true);
+      const results = active.map(c => runCase(c, vocab, l));
+      const pendingResults = pending.map(c => runCase(c, vocab, l));
+      const pendingNowPassing = pendingResults.filter(r => r.ok).length;
       const tp = results.reduce((s, r) => s + r.tp, 0);
       const fp = results.reduce((s, r) => s + r.fp, 0);
       const fn = results.reduce((s, r) => s + r.fn, 0);
@@ -325,12 +340,17 @@ function main() {
       }
 
       if (!json) {
+        const pendingNote = pending.length
+          ? '  (' + pending.length + ' pending, skipped' +
+              (pendingNowPassing ? '; ' + pendingNowPassing + ' now passing — remove `pending` flag' : '') + ')'
+          : '';
         console.log(
           '[' + l + '/' + ruleId + '] ' +
           'P=' + stats.P.toFixed(3) +
           ' R=' + stats.R.toFixed(3) +
           ' F1=' + stats.F1.toFixed(3) +
-          '  ' + passed + '/' + results.length + ' pass'
+          '  ' + passed + '/' + results.length + ' pass' +
+          pendingNote
         );
         if (verbose) {
           for (const r of results.filter(x => !x.ok)) {
