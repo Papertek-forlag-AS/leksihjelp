@@ -398,6 +398,42 @@ function main() {
     }
   }
 
+  // ── Phase 7 / INFRA-06: acceptance ratio enforcement for word-order rules ──
+  //
+  // Word-order rules (V2, verb-final, BAGS) carry a higher false-positive risk
+  // than token-level rules because they depend on POS-tagging accuracy. To
+  // guard against shipping under-tested rules, we enforce that each rule's
+  // fixture file contains at least 2x as many acceptance (clean) cases as
+  // positive (flagging) cases. This ensures every rule is tested against a
+  // broad set of correct sentences that must NOT be flagged.
+  //
+  // Counted per rule-specific fixture file (e.g. fixtures/nb/v2.jsonl):
+  //   positive  = cases where `expected` has at least one entry
+  //   acceptance = cases where `expected` is empty (clean sentence)
+  //
+  // Skipped if no fixture file exists yet (rule hasn't landed).
+  const ACCEPTANCE_RATIO_RULES = new Set(['nb-v2', 'de-v2', 'de-verb-final', 'fr-bags']);
+
+  // Map rule IDs to language + fixture filename
+  for (const ruleId of ACCEPTANCE_RATIO_RULES) {
+    const parts = ruleId.split('-');
+    const ruleLang = parts[0];
+    const fixtureBase = parts.slice(1).join('-');
+    const fixturePath = path.join(FIXTURE_DIR, ruleLang, fixtureBase + '.jsonl');
+    if (!fs.existsSync(fixturePath)) continue;
+    const cases = loadJsonl(fixturePath).filter(c => c.pending !== true);
+    if (cases.length === 0) continue;
+    const positive = cases.filter(c => Array.isArray(c.expected) && c.expected.length > 0).length;
+    const acceptance = cases.filter(c => !Array.isArray(c.expected) || c.expected.length === 0).length;
+    if (positive > 0 && acceptance < 2 * positive) {
+      console.log(
+        '[check-fixtures] FAIL: Rule ' + ruleId + ' has ' + positive +
+        ' positive and ' + acceptance + ' acceptance fixtures — need >=2x acceptance (minimum ' + (2 * positive) + ')'
+      );
+      hardFail = true;
+    }
+  }
+
   if (json) console.log(JSON.stringify(report, null, 2));
   process.exit(hardFail ? 1 : 0);
 }

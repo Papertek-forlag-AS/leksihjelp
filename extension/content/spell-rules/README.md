@@ -86,13 +86,15 @@ AND that the tier-level CSS classes (`.lh-spell-warn`, `.lh-spell-hint`)
 exist in `content.css`. Per-rule colour bindings still use the base
 `.lh-spell-<id>` class; the severity class is additive.
 
-## Phase 13 document-state seam (forward documentation)
+## Phase 13: Document-state seam shape (forward documentation)
 
-Future document-level rules (Phase 13+) will use:
-- `kind: 'document'` field on the rule object
-- `checkDocument(ctx, findings)` signature (receives existing findings)
-- Priority 200+ (runs after all token-level rules)
-- No code change now -- this is a pre-planned seam shape.
+No code change until Phase 13 lands. The following contract is agreed:
+
+- `kind: 'document'` — rule type for document-state rules (distinct from token-level `kind: 'token'` default)
+- `checkDocument(ctx, findings)` signature — receives full ctx plus all token-level findings; returns additional document-level findings
+- Priority 200+ — runs after ALL token-level rules complete
+- Invalidation protocol: content-hash keyed, never module-level mutable state
+- Rules: DOC-01 (DE du/Sie drift), DOC-02 (FR tu/vous drift), DOC-03 (NB bokmaal/riksmaal mixing), DOC-04 (NN a/e-infinitiv mixing)
 
 ## Structural suppression — `ctx.suppressedFor.structural` (Phase 6)
 
