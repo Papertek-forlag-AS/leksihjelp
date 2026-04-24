@@ -25,6 +25,7 @@
     id: 'fr-preposition',
     languages: ['fr'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => ({
       nb: `På fransk skal <em>${escapeHtml(finding.prep)}</em> og <em>${escapeHtml(finding.art)}</em> trekkes sammen til <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `På fransk skal <em>${escapeHtml(finding.prep)}</em> og <em>${escapeHtml(finding.art)}</em> trekkjast saman til <em>${escapeHtml(finding.fix)}</em>.`,

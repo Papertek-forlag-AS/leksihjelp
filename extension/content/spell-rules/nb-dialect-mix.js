@@ -103,6 +103,7 @@
     id: 'dialect-mix',
     languages: ['nb', 'nn'],
     priority: 35,
+    severity: 'error',
     explain: (finding) => {
       const other = finding.lang === 'nn' ? 'bokmål' : 'nynorsk';
       const docDialect = finding.lang === 'nn' ? 'nynorsk' : 'bokmål';

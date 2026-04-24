@@ -24,6 +24,7 @@
     id: 'typo',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 40,
+    severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> er en vanlig skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `<em>${escapeHtml(finding.original)}</em> er ein vanleg skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,

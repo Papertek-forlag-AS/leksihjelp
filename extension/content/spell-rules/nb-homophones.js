@@ -39,6 +39,7 @@
     id: 'homophone',
     languages: ['nb', 'nn'],
     priority: 40,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'og-aa') {
         return {

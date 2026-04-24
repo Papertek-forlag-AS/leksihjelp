@@ -30,6 +30,7 @@
     id: 'gender',
     languages: ['es', 'fr'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => {
       const labelKey = GENUS_TO_LABEL_KEY[finding.actualGenus];
       const nounDisplay = finding.noun_display;

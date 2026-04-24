@@ -25,6 +25,7 @@
     id: 'es-accent',
     languages: ['es'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => ({
       nb: `Mangler aksent eller spesialtegn. Bruk <em>${escapeHtml(finding.fix)}</em> her (verbform eller substantiv).`,
       nn: `Manglar aksent eller spesialtegn. Bruk <em>${escapeHtml(finding.fix)}</em> her (verbform eller substantiv).`,

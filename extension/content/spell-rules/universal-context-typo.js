@@ -39,6 +39,7 @@
     id: 'context-typo',
     languages: ['nb', 'nn', 'en'], // Enabled for languages with bigram data
     priority: 45, // Slightly higher priority than standard typo
+    severity: 'error',
     explain: (finding) => ({
       nb: `Mente du <em>${escapeHtml(finding.fix)}</em>? Ordet <em>${escapeHtml(finding.original)}</em> passer sjelden etter "${escapeHtml(finding.prev)}".`,
       nn: `Meinte du <em>${escapeHtml(finding.fix)}</em>? Ordet <em>${escapeHtml(finding.original)}</em> passar sjeldan etter "${escapeHtml(finding.prev)}".`,

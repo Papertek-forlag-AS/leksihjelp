@@ -121,6 +121,7 @@
     id: 'propernoun-guard',
     languages: ['nb', 'nn'],
     priority: 5,
+    severity: 'error',
     explain: 'Egennavn eller lånord — stoppes fra å utløse skrivefeil.',
     check(ctx) {
       const { tokens, text } = ctx;

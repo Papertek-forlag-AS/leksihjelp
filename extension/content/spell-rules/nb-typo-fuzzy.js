@@ -133,6 +133,7 @@
     id: 'typo',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 50,
+    severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> står ikke i ordboken — kanskje du mente <em>${escapeHtml(finding.fix)}</em>?`,
       nn: `<em>${escapeHtml(finding.original)}</em> står ikkje i ordboka — kanskje du meinte <em>${escapeHtml(finding.fix)}</em>?`,

@@ -33,6 +33,7 @@
     id: 'modal_form',
     languages: ['nb', 'nn'],
     priority: 20,
+    severity: 'error',
     explain: (finding) => ({
       nb: `Etter modalverb skal hovedverbet stå i infinitiv — bytt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `Etter modalverb skal hovudverbet stå i infinitiv — byt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,

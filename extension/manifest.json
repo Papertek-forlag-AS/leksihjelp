@@ -26,6 +26,7 @@
         "content/floating-widget.js",
         "content/word-prediction.js",
         "content/spell-check-core.js",
+        "content/spell-rules/quotation-suppression.js",
         "content/spell-rules/de-capitalization.js",
         "content/spell-rules/de-gender.js",
         "content/spell-rules/de-grammar.js",

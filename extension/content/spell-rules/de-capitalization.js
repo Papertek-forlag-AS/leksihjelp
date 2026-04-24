@@ -16,6 +16,7 @@
     id: 'de-capitalization',
     languages: ['de'],
     priority: 20,
+    severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> er et substantiv. På tysk skal alle substantiv ha stor forbokstav — prøv <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `<em>${escapeHtml(finding.original)}</em> er eit substantiv. På tysk skal alle substantiv ha stor førebokstav — prøv <em>${escapeHtml(finding.fix)}</em>.`,

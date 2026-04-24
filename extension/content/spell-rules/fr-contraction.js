@@ -17,6 +17,7 @@
     id: 'fr-contraction',
     languages: ['fr'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => ({
       nb: `Bruk <em>l'</em> foran ord som starter med vokal eller h — prøv <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `Bruk <em>l'</em> føre ord som startar med vokal eller h — prøv <em>${escapeHtml(finding.fix)}</em>.`,

@@ -17,6 +17,7 @@
     id: 'es-coordination',
     languages: ['es'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'y-e') {
         return {

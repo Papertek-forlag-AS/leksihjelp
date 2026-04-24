@@ -27,6 +27,7 @@
     id: 'en-grammar',
     languages: ['en'],
     priority: 20,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'i-capitalization') {
         return {

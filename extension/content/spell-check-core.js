@@ -66,6 +66,22 @@
     const tokens = tokenize(text);
     if (tokens.length < 2) return [];
 
+    // Phase 6: Sentence segmentation via Intl.Segmenter. Rules (priority 60+)
+    // that need sentence boundaries read ctx.sentences. Graceful fallback to
+    // a single whole-text sentence when the API is unavailable (Node < 18.x,
+    // older browsers).
+    let sentences = [];
+    if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+      const segmenter = new Intl.Segmenter(lang, { granularity: 'sentence' });
+      sentences = [...segmenter.segment(text)].map(seg => ({
+        text: seg.segment,
+        start: seg.index,
+        end: seg.index + seg.segment.length,
+      }));
+    } else {
+      sentences = [{ text, start: 0, end: text.length }];
+    }
+
     const vocabRef = vocab || {};
     // Phase 4: `suppressed` is the shared "do not flag this token index" Set.
     // Pre-pass rules (priority 1-9) populate it; typo/sarskriving rules
@@ -74,7 +90,17 @@
     // real-grammar patterns (article-mismatch, modal+finite-verb) regardless
     // of whether the span is a name or code-switched quote. See
     // spell-rules/README.md for the convention.
-    const ctx = { text, tokens, vocab: vocabRef, cursorPos, lang, suppressed: new Set() };
+    //
+    // Phase 6: `suppressedFor.structural` is populated by the
+    // quotation-suppression pre-pass (priority 3). Structural/register rules
+    // (priority 60+) honor it; token-local grammar rules (priority 10-55)
+    // do NOT check it — they only check `ctx.suppressed`.
+    const ctx = {
+      text, tokens, vocab: vocabRef, cursorPos, lang,
+      suppressed: new Set(),
+      suppressedFor: { structural: new Set() },
+      sentences,
+    };
 
     const host = typeof self !== 'undefined' ? self : globalThis;
     const allRules = host.__lexiSpellRules || [];
@@ -87,7 +113,14 @@
     for (const rule of rules) {
       try {
         const out = rule.check(ctx);
-        if (Array.isArray(out) && out.length) findings.push(...out);
+        if (Array.isArray(out) && out.length) {
+          // Phase 6: stamp severity from the parent rule onto each finding
+          // so the DOM adapter can map to the correct CSS tier.
+          for (const f of out) {
+            if (!f.severity && rule.severity) f.severity = rule.severity;
+          }
+          findings.push(...out);
+        }
       } catch (e) {
         if (!rule._warned) {
           console.warn('[lexi-spell] rule', rule.id, 'threw', e);

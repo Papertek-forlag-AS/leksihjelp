@@ -63,6 +63,7 @@
     id: 'codeswitch',
     languages: ['nb', 'nn'],
     priority: 1,
+    severity: 'error',
     explain: 'Tett klynge av ord som ikke er norske — sannsynligvis sitat eller fremmedspråk.',
     check(ctx) {
       const { tokens, text, vocab } = ctx;

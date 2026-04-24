@@ -48,6 +48,7 @@
     id: 'sarskriving',
     languages: ['nb', 'nn'],
     priority: 30,
+    severity: 'error',
     explain: (finding) => {
       if (!finding.original || !finding.fix) {
         return {

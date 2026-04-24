@@ -35,6 +35,7 @@
     id: 'gender',
     languages: ['nb', 'nn'],
     priority: 10,
+    severity: 'error',
     // Phase 05.1 Gap C: three-beat copy — names the target gender class
     // ("<em>by</em> er hankjønn") so the student learns the classification,
     // not just the fix. Falls back to the Phase 5 two-beat copy when the new

@@ -16,6 +16,7 @@
     id: 'es-grammar',
     languages: ['es'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'muy-mucho') {
         return {

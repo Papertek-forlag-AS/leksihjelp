@@ -24,6 +24,7 @@
     id: 'agreement',
     languages: ['fr', 'es', 'de'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => ({
       nb: `Samsvarsfeil: Artikkelen er i flertall, så substantivet <em>${escapeHtml(finding.noun)}</em> må også være det. Prøv <em>${escapeHtml(finding.fix)}</em>.`,
       nn: `Samsvarsfeil: Artikkelen er i fleirtal, så substantivet <em>${escapeHtml(finding.noun)}</em> må også vere det. Prøv <em>${escapeHtml(finding.fix)}</em>.`,

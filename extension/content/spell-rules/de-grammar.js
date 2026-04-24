@@ -16,6 +16,7 @@
     id: 'de-grammar',
     languages: ['de'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'formal-informal') {
         const correctPronouns = finding.original === 'sind' || finding.original === 'haben' ? '«wir» eller «sie/Sie»' : '«du»';

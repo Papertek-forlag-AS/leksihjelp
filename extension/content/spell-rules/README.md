@@ -60,6 +60,62 @@ The fuzzy rule (`nb-typo-fuzzy.js`) is the host for Plan 03's Zipf tiebreaker
 (SC-01). Phase 4 will add SC-02/03/04 as new rule files here without touching
 core.
 
+## Severity contract — priority bands (Phase 6)
+
+Every rule MUST declare a `severity` field. The `check-explain-contract`
+gate enforces this at release time. Three tiers:
+
+| Tier | Severity    | Visual treatment                                  | Popover prefix |
+|------|-------------|---------------------------------------------------|----------------|
+| P1   | `'error'`   | 3px solid red-family dot (per-rule colour)        | Feil --        |
+| P2   | `'warning'` | 3px solid amber/orange dot (`.lh-spell-warn`)     | Usikker --     |
+| P3   | `'hint'`    | Grey dotted underline, word-width (`.lh-spell-hint`) | Kanskje --  |
+
+All v1.0 rules ship as `severity: 'error'`. Phase 6 Plan 03 introduces
+the first `'warning'` and `'hint'` rules.
+
+The DOM adapter in `spell-check.js` maps `finding.severity` to the
+correct CSS suffix (`-warn` / `-hint` / base). The core runner in
+`spell-check-core.js` stamps `rule.severity` onto each finding
+automatically; rules do not need to set it on individual findings.
+
+### CSS wiring for severity tiers
+
+`check-rule-css-wiring` validates that every rule id has a CSS binding
+AND that the tier-level CSS classes (`.lh-spell-warn`, `.lh-spell-hint`)
+exist in `content.css`. Per-rule colour bindings still use the base
+`.lh-spell-<id>` class; the severity class is additive.
+
+## Phase 13 document-state seam (forward documentation)
+
+Future document-level rules (Phase 13+) will use:
+- `kind: 'document'` field on the rule object
+- `checkDocument(ctx, findings)` signature (receives existing findings)
+- Priority 200+ (runs after all token-level rules)
+- No code change now -- this is a pre-planned seam shape.
+
+## Structural suppression — `ctx.suppressedFor.structural` (Phase 6)
+
+The quotation-suppression pre-pass (priority 3) populates
+`ctx.suppressedFor.structural: Set<tokenIndex>` with token indices
+that fall inside matched quote pairs (`"..."`, guillemets, etc.).
+
+**Who populates:**
+- `quotation-suppression.js` (priority 3) -- marks tokens inside quotes.
+
+**Who honors (future):**
+- Structural/register rules (priority 60+) check
+  `ctx.suppressedFor.structural.has(i)` before flagging.
+
+**Who does NOT honor (intentional):**
+- Token-local grammar rules (priority 10-55) do NOT check
+  `ctx.suppressedFor.structural`. They only check `ctx.suppressed`.
+  A gender mismatch inside a quote is still a gender mismatch.
+
+**Convention:** `ctx.suppressedFor` is an object with named sets for
+different suppression reasons. Currently only `structural` exists.
+Future pre-passes may add `register`, `technical`, etc.
+
 ## Suppression convention — `ctx.suppressed` (Phase 4)
 
 Pre-pass rules (priority 1-9) populate `ctx.suppressed: Set<tokenIndex>`.

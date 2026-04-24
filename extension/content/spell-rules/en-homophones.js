@@ -33,6 +33,7 @@
     id: 'homophone',
     languages: ['en'],
     priority: 40,
+    severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'your-youre') {
         return {

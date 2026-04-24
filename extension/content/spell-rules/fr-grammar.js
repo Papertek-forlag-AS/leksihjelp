@@ -24,6 +24,7 @@
     id: 'fr-grammar',
     languages: ['fr'],
     priority: 15,
+    severity: 'error',
     explain: (finding) => ({
       nb: `Bruk <em>${escapeHtml(finding.fix)}</em> i stedet for <em>${escapeHtml(finding.original)}</em> foran ord som starter med vokal for å unngå vokalklasj.`,
       nn: `Bruk <em>${escapeHtml(finding.fix)}</em> i staden for <em>${escapeHtml(finding.original)}</em> føre ord som startar med vokal for å unngå vokalklasj.`,
