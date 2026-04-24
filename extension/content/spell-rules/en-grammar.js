@@ -78,10 +78,13 @@
         };
       }
       if (finding.subType === 'sv-agreement') {
+        const subj = escapeHtml(finding.subject);
+        const fix = escapeHtml(finding.fix);
+        const orig = escapeHtml(finding.original);
         return {
-          nb: `Subjekt-verb-samsvar: «${escapeHtml(finding.subject)}» trenger bøyning med -s — bruk <em>${escapeHtml(finding.fix)}</em>.`,
-          nn: `Subjekt-verb-samsvar: «${escapeHtml(finding.subject)}» treng bøyning med -s — bruk <em>${escapeHtml(finding.fix)}</em>.`,
-          en: `Subject-verb agreement: "${escapeHtml(finding.subject)}" needs the -s form — try <em>${escapeHtml(finding.fix)}</em>.`,
+          nb: `Når «${subj}» er subjekt (tredje person entall), må verbet bøyes med -s i presens. Bruk <em>${fix}</em>, ikke <em>${orig}</em>.`,
+          nn: `Når «${subj}» er subjekt (tredje person eintal), må verbet bøyast med -s i presens. Bruk <em>${fix}</em>, ikkje <em>${orig}</em>.`,
+          en: `When "${subj}" is the subject, the verb needs the -s ending in the present tense. Use <em>${fix}</em>, not <em>${orig}</em>.`,
         };
       }
       return {

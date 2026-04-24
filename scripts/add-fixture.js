@@ -87,10 +87,21 @@ async function pickRule() {
   return choice || 'grammar';
 }
 
+const BOX_WIDTH = 60;
+
+function printCaseHeader(label, text, why) {
+  console.log('\n' + '═'.repeat(BOX_WIDTH));
+  console.log(' ' + label);
+  console.log('═'.repeat(BOX_WIDTH));
+  console.log(`  SENTENCE: "${text}"`);
+  if (why) console.log(`  WHY:      ${why}`);
+  console.log('─'.repeat(BOX_WIDTH));
+}
+
 function printSummary(data) {
-  console.log('\n' + '='.repeat(50));
+  console.log('\n' + '═'.repeat(BOX_WIDTH));
   console.log('       PROPOSED TEST CASE SUMMARY');
-  console.log('='.repeat(50));
+  console.log('═'.repeat(BOX_WIDTH));
   console.log(`Text:       "${data.text}"`);
   if (data.status === 'unsure') {
     console.log(`Expectation: [UNSURE] (Needs AI Review)`);
@@ -102,7 +113,11 @@ function printSummary(data) {
     });
   }
   if (data.comment) console.log(`Comment:    "${data.comment}"`);
-  console.log('='.repeat(50));
+  console.log('═'.repeat(BOX_WIDTH));
+}
+
+function appendCase(fixturePath, currentCase) {
+  fs.appendFileSync(fixturePath, JSON.stringify({ id: `case-${Date.now()}`, ...currentCase }) + '\n');
 }
 
 async function main() {
@@ -133,10 +148,7 @@ async function main() {
 
       for (let i = 0; i < requests.length; i++) {
         const req = requests[i];
-        console.log(`\nAI REQUEST ${i+1}/${requests.length}:`);
-        console.log(`TEXT:    "${req.text}"`);
-        if (req.comment) console.log(`WHY:     ${req.comment}`);
-        
+        printCaseHeader(`AI REQUEST ${i + 1} / ${requests.length}`, req.text, req.comment);
         await processSentence(req.text, lang, vocab, fixturePath);
       }
       // Clear the queue after processing
@@ -145,16 +157,15 @@ async function main() {
     }
   }
 
-  console.log('TIP: Press Enter without typing to get a Challenge Sentence.');
+  console.log('\nTIP: Press Enter without typing to get a Challenge Sentence.');
 
   while (true) {
     let text = await question('\nType sentence (or Enter for challenge, "exit" to quit): ');
     if (text.toLowerCase() === 'exit') break;
     if (text.trim() === '') {
       text = generateChallenge(lang, vocab);
-      console.log(`CHALLENGE: "${text}"`);
     }
-
+    printCaseHeader('FREE-FORM CASE', text, null);
     await processSentence(text, lang, vocab, fixturePath);
   }
   rl.close();
@@ -163,39 +174,51 @@ async function main() {
 async function processSentence(text, lang, vocab, fixturePath) {
     const findings = host.__lexiSpellCore.check(text, vocab, { lang });
     let currentCase = { text, expected: [], comment: '', status: 'ok' };
+    // `fastPath` short-circuits the comment + save-confirmation prompts
+    // when the user picks an "I agree with what the app did" branch
+    // (Enter/y on a clean sentence, y/r/d on one with findings). The
+    // slow path (n, p, u) keeps both prompts so the user can add context.
+    let fastPath = false;
 
     if (findings.length === 0) {
-      console.log('\n--- App found NO errors.');
-      const fb = (await question('Is this correct? (y = Yes, n = No (missed error), u = Unsure): ')).toLowerCase();
+      console.log('  App found NO errors — sentence appears clean.');
+      const fb = (await question('  [Enter=Yes, n=No (missed error), u=Unsure] > ')).toLowerCase();
       if (fb === 'u') {
         currentCase.status = 'unsure';
       } else if (fb === 'n') {
-        const wrongWord = await question('Which word is WRONG? ');
+        const wrongWord = await question('  Which word is WRONG? ');
         const start = text.indexOf(wrongWord);
         if (start !== -1) {
-          const sug = await question(`What should "${wrongWord}" be? `);
+          const sug = await question(`  What should "${wrongWord}" be? `);
           const rid = await pickRule();
           currentCase.expected.push({ rule_id: rid, start, end: start + wrongWord.length, suggestion: sug });
         }
-      } else if (fb !== 'y') return;
+      } else if (fb === '' || fb === 'y') {
+        fastPath = true;
+      } else {
+        return; // unrecognized input — bail without saving
+      }
     } else {
-      console.log('\nApp Findings:');
+      console.log('  APP FINDINGS:');
       findings.forEach((f, i) => {
-        console.log(`${i + 1}) [${f.rule_id}] "${text.slice(f.start, f.end)}" -> "${f.suggestion || f.fix}" (${f.message})`);
+        console.log(`    ${i + 1}) [${f.rule_id}] "${text.slice(f.start, f.end)}" → "${f.suggestion || f.fix}"`);
+        if (f.message) console.log(`       ${f.message}`);
       });
       const feedback = (await question(
-        '\nIs the app correct? (y=Yes, n=No (hallucination), r=Reject all (clean, should pass now), d=Reject all (upstream Data fix pending), p=Partial/Guided Review, u=Unsure): '
+        '\n  [y=Yes, n=No, r=Reject all (clean), d=Reject all (pending data), p=Partial, u=Unsure] > '
       )).toLowerCase();
       if (feedback === 'u') {
         currentCase.status = 'unsure';
       } else if (feedback === 'y') {
         currentCase.expected = findings.map(f => ({ rule_id: f.rule_id, start: f.start, end: f.end, suggestion: f.suggestion || f.fix }));
+        fastPath = true;
       } else if (feedback === 'r') {
         // Reject-all: every finding is a false positive and the sentence is
         // clean. Use this when the rule is correct NOW and the fixture
         // should pass immediately — check-fixtures will hard-fail if any
         // finding fires.
         currentCase.expected = [];
+        fastPath = true;
       } else if (feedback === 'd') {
         // Reject-all + pending upstream data fix: the rule is still firing
         // because of a data gap at the Papertek vocabulary layer (missing
@@ -205,38 +228,50 @@ async function processSentence(text, lang, vocab, fixturePath) {
         // the fixture starts passing, remove the `pending` flag.
         currentCase.expected = [];
         currentCase.pending = true;
+        fastPath = true;
       } else if (feedback === 'p') {
-        console.log('\n--- Guided Review ---');
+        console.log('\n  Guided Review:');
         for (let i = 0; i < findings.length; i++) {
           const f = findings[i];
-          console.log(`\nIssue ${i + 1}/${findings.length}: [${f.rule_id}] "${text.slice(f.start, f.end)}" -> "${f.suggestion || f.fix}"`);
-          const action = (await question('Action? (Enter = Accept, d = Discard, e = Edit fix): ')).toLowerCase();
-          
+          console.log(`\n  Issue ${i + 1}/${findings.length}: [${f.rule_id}] "${text.slice(f.start, f.end)}" → "${f.suggestion || f.fix}"`);
+          const action = (await question('  Action? [Enter=Accept, d=Discard, e=Edit fix] > ')).toLowerCase();
           if (action === 'd') {
-            continue; // Skip this finding
+            continue;
           } else if (action === 'e') {
-            const override = await question(`Correct suggestion for "${text.slice(f.start, f.end)}": `);
+            const override = await question(`  Correct suggestion for "${text.slice(f.start, f.end)}": `);
             currentCase.expected.push({
               rule_id: f.rule_id, start: f.start, end: f.end, suggestion: override
             });
           } else {
-            // Default: Accept
             currentCase.expected.push({
               rule_id: f.rule_id, start: f.start, end: f.end, suggestion: f.suggestion || f.fix
             });
           }
         }
-      } else if (feedback !== 'n') return;
+      } else if (feedback !== 'n') {
+        return; // unrecognized input — bail without saving
+      }
     }
 
-    currentCase.comment = await question('\nMore info for AI (or press Enter): ');
+    if (fastPath) {
+      appendCase(fixturePath, currentCase);
+      const label = currentCase.pending ? '✓ Saved (pending upstream data fix)'
+                  : currentCase.expected.length === 0 ? '✓ Saved (clean)'
+                  : `✓ Saved (${currentCase.expected.length} expected finding${currentCase.expected.length === 1 ? '' : 's'})`;
+      console.log('  ' + label);
+      return;
+    }
+
+    // Slow path — user is in n/p/u territory; comment and save confirmation
+    // are useful here because the saved case diverges from the app's output.
+    currentCase.comment = await question('\n  More info for AI (or press Enter): ');
     printSummary(currentCase);
-    const saveConfirm = await question('Save? (Enter=yes, n=no): ');
+    const saveConfirm = await question('  Save? [Enter=yes, n=no] > ');
     if (saveConfirm.toLowerCase() !== 'n') {
-      fs.appendFileSync(fixturePath, JSON.stringify({ id: `case-${Date.now()}`, ...currentCase }) + '\n');
-      console.log('Saved.');
+      appendCase(fixturePath, currentCase);
+      console.log('  Saved.');
     } else {
-      console.log('Discarded.');
+      console.log('  Discarded.');
     }
 }
 

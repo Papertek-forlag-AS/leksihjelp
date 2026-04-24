@@ -47,9 +47,20 @@
         };
       }
       if (finding.subType === 'its-its') {
+        const fixLower = (finding.fix || '').toLowerCase();
+        if (fixLower === "it's") {
+          // User wrote `its`, sentence actually needs the contraction `it's`.
+          return {
+            nb: `Her passer bare «it is» — derfor sammentrekningen <strong>it's</strong>. <strong>Its</strong> (uten apostrof) er et eiendomsord (dens/dets).`,
+            nn: `Her passar berre «it is» — difor samandraget <strong>it's</strong>. <strong>Its</strong> (utan apostrof) er eit eigedomsord (dens/dets).`,
+            en: `This sentence needs "it is" — so use the contraction <strong>it's</strong>. <strong>Its</strong> (no apostrophe) is the possessive (belonging to it).`,
+          };
+        }
+        // User wrote `it's`, sentence actually needs the possessive `its`.
         return {
-          nb: `<strong>It's</strong> betyr "it is" (det er) eller "it has". <strong>Its</strong> er et eiendomsord (dens/dets).`,
-          en: `<strong>It's</strong> means "it is" or "it has". <strong>Its</strong> shows possession (belonging to it).`,
+          nb: `Her trengs eiendomsordet <strong>its</strong> (dens/dets). <strong>It's</strong> er bare sammentrekning av «it is» eller «it has».`,
+          nn: `Her trengst eigedomsordet <strong>its</strong> (dens/dets). <strong>It's</strong> er berre samandrag av «it is» eller «it has».`,
+          en: `This sentence needs the possessive <strong>its</strong> (belonging to it). <strong>It's</strong> is only a contraction of "it is" or "it has".`,
         };
       }
       if (finding.subType === 'then-than') {
