@@ -1,277 +1,439 @@
-# Feature Research
+# Feature Research — v2.0 Structural Grammar Governance
 
-**Domain:** Heuristic Norwegian (NB/NN) spell-check + multilingual word-prediction for language learners and students with dyslexia (browser extension)
-**Researched:** 2026-04-17
-**Confidence:** MEDIUM-HIGH
+**Domain:** Offline grammar-check surface for Norwegian students writing NB/NN/DE/ES/FR/EN
+**Researched:** 2026-04-24
+**Confidence:** HIGH (grounded in shipped v1.0 infrastructure + user-authored benchmark corpus; MEDIUM on a few phases the roadmap itself flags as aspirational)
 
-## Scope & Framing
+> **Scope note:** This file supersedes the v1.0 feature research dated 2026-04-17 for the purposes of the v2.0 milestone. v1.0 validated capabilities (dictionary, TTS, word-prediction, per-token spell-check) are already shipped and are **not re-researched**. The question here is: *what structural-grammar features should v2.0 add, in what categories, with what dependencies on the shipped v1.0 rule infrastructure?*
 
-This research informs a **subsequent milestone** on an existing product. Validated capabilities in `.planning/PROJECT.md` (dictionary, TTS, word-prediction v1, spell-check v1 with 4 error classes + Damerau-Levenshtein fuzzy matching + proper-noun guard, Norwegian adjective agreement) are **not re-researched**. The question is: what's the ceiling for a heuristic, free, offline, Norwegian-first tool before ML becomes mandatory, and where does Leksihjelp compete against Lingdys/IntoWords (the de-facto Norwegian dyslexia tools) and LanguageTool (the heuristic open-source benchmark)?
+## How Students Typically Make These Errors
 
-Findings are categorized along two axes simultaneously because the product has two surfaces:
-- **[SC]** = Norwegian spell-check (NB/NN)
-- **[WP]** = Word-prediction (all 6 languages)
-- **[UX]** = Cross-surface user experience / dyslexia support
+The target user is a Norwegian secondary-school student writing a foreign
+language. Their error profile is **transfer-dominated**: they apply NB
+mental grammar to DE/ES/FR/EN and miss closed-class morphology the NB
+system doesn't have (case, subjunctive, aspect, BAGS placement). The
+benchmark passages at `benchmark-texts/*.txt` were hand-authored to
+reproduce exactly that — every promised-to-flag line is a plausible
+mid-intermediate-learner artefact, not a stress test.
+
+Shared traits across the corpus:
+
+- **Syntactic transfer** is the single richest error class. NB V2
+  gets dropped when writing EN, and conversely NB V2 is broken by
+  EN interference ("Hvorfor du tror" in the NB benchmark). DE
+  subordinate verb-final is the inverse failure mode and shows up in
+  every DE benchmark paragraph.
+- **Closed-class governance failures** (DE case after prep, ES
+  ser/estar, FR auxiliary choice, FR participe passé agreement) are
+  the highest error-density items per token. They're also the most
+  tractable for a lookup-driven rule — trigger sets are finite and
+  authored once in `papertek-vocabulary`.
+- **Register drift** (du/Sie, tu/vous, bokmål/riksmål, a-inf/e-inf)
+  never fails *per-token* — each individual form is legal. It fails
+  at the *document* level when two legal registers appear in one
+  text. This is a fundamentally different detection mode from
+  everything v1.0 ships and needs its own document-state seam.
+- **Morphology overgeneration** (EN `goed/childs/mouses`, DE
+  `ich aufstehe`, ES `yo gusto`) follows from applying a productive
+  pattern to a lexical exception. Cheap to flag: check if the surface
+  form is a regular-pattern derivation of a word that carries an
+  irregular-override flag.
+- **Aspect/mood selection** (ES pretérito/imperfecto, subjuntivo,
+  FR subjonctif) is the hardest category. Triggers are closed
+  (`quiero que`, `il faut que`, `ayer`, `mientras`), but the rule
+  has to warn rather than hard-flag because legitimate variation
+  exists.
+
+**Expected spell-check behaviour (inherited from v1.0):**
+offline + deterministic + non-rewriting. A rule fires → a coloured
+dot marks the token(s) → click reveals a student-friendly
+`{nb, nn}` explainer + top-3 suggestions + "Vis flere". Structural
+rules have to fit that UI — which means picking a *canonical anchor
+token* per finding (not highlighting the whole clause). That
+constraint is the single biggest UX implication of Phases 7, 11, 13,
+and 16.
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+### Table Stakes (Students Expect These; Competing Extensions Ship Them)
 
-Norwegian students using Lingdys/IntoWords/LanguageTool assume these exist. Missing them = the product feels broken or they reach for a second tool.
+Students using LanguageTool, Grammarly-free, or the Bing Editor
+assume these categories work. Missing them makes v2.0 feel regressed
+vs a shipped competitor, even though the brand angle is offline-first.
 
-| Feature | Surface | Why Expected | Complexity | Notes |
-|---------|---------|--------------|------------|-------|
-| **Misspelling detection with tolerant fuzzy matching** | SC | Core of any spell-checker; Lingdys markets "help even with wrong first letter or multiple errors per word" | — (shipped v1) | Already in Damerau-Levenshtein layer; quality tuning in milestone |
-| **Contextual word-prediction (ordprediksjon)** | WP | Lingdys/IntoWords brand promise; "context-based suggestions while you type" | — (shipped v1) | Ranking/coverage push in milestone |
-| **Compound-word error detection (særskriving)** | SC | Most-cited Norwegian learner/native error; Korrekturavdelingen.no lists it as the #1 recurring language-advice topic | — (shipped v1) | Production-quality detection is the milestone's hardest technical ask |
-| **Homophone / confused-word detection (hjerne vs. gjerne, og vs. å)** | SC | Lingdys explicitly advertises "sentence-level checking for words used incorrectly in context (e.g. hjerne/gjerne, fot/fort)"; IntoWords ships an og/å toggle | HIGH | Requires sentence-context analysis; heuristic list + POS signal is achievable without ML |
-| **Proper-noun / already-correct-word false-positive guard** | SC | Frustration multiplier for dyslexic users per research; Word 2003 missed 48% of learner errors partly because it over-flagged valid tokens | — (shipped v1, with guard) | Keep expanding the allowlist / capitalization heuristic |
-| **Gender-article agreement (en/ei/et) and adjective agreement** | SC, WP | Norwegian grammar 101; LanguageTool COMPOUNDING/GRAMMAR rule categories cover this for many languages | — (shipped v1) | Extension for NN (kjønn, bestemt form) |
-| **Verb form after modal / infinitive marker å** | SC | "å ikke" is a textbook learner mistake per Norwegian language pedagogy sources | — (shipped v1) | |
-| **Click-to-accept suggestion (single-tap correction)** | UX | Every tool (Word, Grammarly, Lingdys, LanguageTool) works this way | — (shipped v1) | Keep; minimize clicks |
-| **Ignore / "this is not an error" action** | UX | Expected; without it, users learn to distrust flags (retrains them to ignore) | LOW | Should be per-word scope, session-lived; avoid persisting globally (privacy + simpler) |
-| **Works in any text input on any website** | UX | Differentiator of extensions over desktop tools — loss of ubiquity destroys value | — (shipped v1) | |
-| **Works offline** | UX, SC, WP | Landing page commits; classrooms often have flaky WiFi; dyslexic students cited as benefiting from no-dependency tools | — (shipped) | Bundle-size constraint (~20 MiB internal ceiling) flows from this |
-| **Support for NB and NN distinctly (not merged)** | SC | Students are explicitly tested on one or the other; mixing produces real-word errors (ikke/ikkje, jeg/eg) | MEDIUM | Detect target variant from page or setting; current v1 handles both |
-| **Word-prediction learns from frequency** | WP | Every competitor uses frequency; expected baseline of "useful ranking" | — (shipped v1, via bigrams) | Frequency tables + bigrams already bundled |
-| **Spell-check suggestions ranked by likelihood, not alphabet** | SC | Lingdys specifically brands "fewer, more precise suggestions" as a dyslexia adaptation — spraying 20 options at a dyslexic user is harmful | MEDIUM | Phonetic + edit-distance + frequency scoring; limit to top 3–5 |
-| **Don't flag words the user is still typing (debounce at word boundary)** | SC, UX | Word, Grammarly, LanguageTool all wait for space/punctuation; flagging mid-word is rage-inducing | LOW | Debounce logic; likely shipped but verify in milestone |
-| **Visual marking that's unambiguous but not alarming** | UX | Red squiggles = "mistake" per 30 years of OS convention; dyslexic UX research warns against aggressive visuals | LOW (shipped as dots) | Current dots are good; keep but verify contrast/position |
+| Feature | Phase | Why Expected | Complexity | Notes |
+|---------|-------|--------------|------------|-------|
+| **DE preposition-case governance** | 8.1 | Flagship rule in LanguageTool DE; most student errors are prep-case | M | Data: `papertek-vocabulary` prep table with `case: "dat"\|"acc"\|"gen"\|"two-way"`; rule: next-NP article-form check. Flips `de.txt` "mit den Schule", "in eine fabrik", "auf einem insel", "Wegen dem wetter" |
+| **DE separable-verb split** | 8.2 | High-frequency NB-student error; every classroom covers `aufstehen`/`mitkommen` | S | Additive `separable: true` flag on verbbank. Rule detects unsplit sep-verb in main clause. Flips `de.txt` "ich aufstehe" |
+| **DE perfekt auxiliary (haben vs sein)** | 8.3 | Textbook grammar point; closed verb list | S | `aux: "sein"` flag on movement/state-change verbs |
+| **DE compound-noun gender from last component** | 8.4 | NB students consistently gender compounds on first stem | M | Compound splitter + fallback to last-component gender. Flips `de.txt` "das Schultasche" pattern |
+| **ES ser vs estar** | 9.1 | Number-one ES classroom distinction; benchmark "Soy cansado" | M | Predicate-adjective list with `copula: "ser"\|"estar"\|"both"`. Closed set ~200 entries |
+| **ES por vs para** | 9.2 | Second-most-taught ES distinction; benchmark "comida por mi familia" + "por leer" | M | Decision tree over ~15 trigger patterns. Warn, don't hard-flag |
+| **ES personal "a"** | 9.3 | Finite human-object rule; distinctive mark of Spanish | S | `human: true` flag on pronouns/proper nouns. Rule: transitive verb + bare human DO → missing `a` |
+| **FR élision** | 10.1 | Deterministic; every FR textbook teaches it | S | Closed list `{le, la, je, que, si, ne, me, te, se}` + vowel/silent-h onset detection |
+| **FR être vs avoir auxiliary** | 10.2 | DR MRS VANDERTRAMP is named in FR pedagogy; benchmark "je ai" → "j'ai" | S | `aux: "être"` flag on verbbank |
+| **NB V2 word-order** | 7.1 | Most common NB structural error in wh-questions + fronted adverbials; benchmark "Hvorfor du tror" | M-L | High FP risk. Conservative trigger: wh-word / temporal adv at position 0 + subject + finite verb. Heavy acceptance-fixture budget |
+| **EN morphological overgeneration** | 14.1 | Every EN teacher's "top 10 NB-student errors" list; benchmark "childs", "eated" | S | Irregular-verb + irregular-plural lists in papertek |
+| **Stylistic redundancy** | 6.3 | Trivially detectable; high perceived value per LOC | S | Literal-match list per language: `return back`, `free gift`, `future plans` |
 
-### Differentiators (Competitive Advantage)
+### Differentiators (Competitive Advantage — Set Leksihjelp Apart)
 
-Features that earn Leksihjelp a preferred-tool position for Norwegian language learners and dyslexic students, above the "yet another spell-checker" baseline.
+Features that match or beat competitors on coverage but add value
+unique to the Leksihjelp brand: offline-first, NB-student-centric,
+dyslexia-supportive, free forever.
 
-| Feature | Surface | Value Proposition | Complexity | Notes |
-|---------|---------|-------------------|------------|-------|
-| **"Why was this flagged?" student-friendly explanation** | SC, UX | Supports Noticing Hypothesis (L2 acquisition research) — learners retain corrections better when they understand the rule, not just the fix. No mainstream Norwegian heuristic tool ships this in a learner-targeted voice (LanguageTool's explanations are terse and English-centric) | MEDIUM | Already in Active requirements; copy-writing is the bottleneck, not code. Tie to each of the 4 error classes |
-| **Pronunciation-confirmation path from spell-check → TTS** | SC, UX | Uniquely achievable because Leksihjelp bundles TTS; a dyslexic student can hear candidate corrections before committing. Lingdys has this; Grammarly/LanguageTool don't (they're text-only) | LOW | Wire existing TTS widget into spell-check popover; free TTS fallback means no paywall |
-| **Explicit dyslexia persona on landing page — brand positioning** | UX | Already shipped — named section "Perfekt for elever med dysleksi". Keep treating this as a first-class concern (not an afterthought) in feature decisions | — (shipped) | Drives prioritization: features that help dyslexics > features that add general polish |
-| **Cross-language word-prediction in one tool (6 languages)** | WP | Lingdys/IntoWords cover NB/NN/EN/DE/ES/FR but as separate products or paid add-ons; Leksihjelp bundles all 6 free | — (shipped) | Quality gap across languages is the milestone work |
-| **Regression test fixture for spell-check** | Infra | Internal differentiator: lets iteration stay tight without breaking existing catches. Most heuristic tools degrade on regressions silently | MEDIUM | Already in Active; growing text file with expected I/O, runnable as script |
-| **Damerau-Levenshtein + phonetic scoring for severe misspellings** | SC | Research shows 39% of dyslexic errors differ by >1 letter; pure edit-distance misses these, phonetic pass catches "skole" → "skåle". Ghotit brands phonetic-plus-context as its core differentiator | MEDIUM | Edit-distance layer exists; adding a Norwegian-tuned phonetic hash (simple rules for ⟨kj/skj/sj⟩, double consonants, å/o confusion) is the differentiator lift |
-| **Context-aware prediction that rides POS + gender + case + tense** | WP | Already shipped; Lingdys and IntoWords claim "context" but rarely expose grammatical dimensions this richly. Exploit: show users the grammatical reason a prediction was ranked first | — (shipped v1); explanation layer is new | |
-| **Inline correction without leaving the page** | UX | Grammarly/Lingdys often require copying into their window; Leksihjelp works in the textarea the student is already writing in | — (shipped) | Core extension advantage; keep |
-| **Typo bank / accepted-alternatives expansion from Papertek-vocabulary** | SC | Landing page publicly commits to this ("Veien videre" section); data-driven, avoids code changes, scales with corpus | HIGH (coordination) | Must land in papertek-vocabulary repo first, then sync; cross-app blast radius |
-| **Configurable grammar-feature visibility per student** | SC, WP | Already shipped; rare outside assistive-tech tools; reduces cognitive load for dyslexic users ("don't show me passive voice, I don't know what that is yet") | — (shipped) | Extend pattern to spell-check: let student hide classes they don't want flagged |
-| **"Slow reveal" / progressive suggestion disclosure for dyslexic readers** | UX | Dyslexia literature: a wall of 10 suggestions is worse than 3 good ones; reveal more on explicit request | LOW | UX-only; top-3 suggestions, "show more" link |
-| **Optional OpenDyslexic / dyslexia-friendly font on popover** | UX | Common in dyslexia assistive tools; trivial CSS | LOW | Opt-in toggle in settings; font only needs to apply inside Leksihjelp popover (not the whole page) |
-| **Accepts the free-forever covenant visibly inside the UI** | UX | Reinforces landing-page promise; builds trust with education-sector users who've been burned by freemium bait-and-switch | LOW | Micro-copy in popover footer: "Gratis. Åpen kildekode." |
+| Feature | Phase | Value Proposition | Complexity | Notes |
+|---------|-------|-------------------|------------|-------|
+| **NB bokmål/riksmål drift** | 13.3 | No competitor ships this — it's a Norwegian-in-Norwegian problem; directly serves the "elever med dysleksi" brand | L | Document-level state: collect norm markers per paragraph (`boken` vs `boka`, `efter` vs `etter`, `sne` vs `snø`), flag when both appear. Requires new cross-sentence state seam |
+| **NN a-infinitiv / e-infinitiv drift** | 13.4 | Zero competitors ship it; very NN-specific | M | NN-infinitive classification from papertek verbbank (carry-over debt already tracked: "NN phrase-infinitive triage ~214 entries") |
+| **FR BAGS adjective placement** | 7.3 | Closed-set (~40 adjs) rule; most grammar tools miss it or warn instead of flag | S-M | `bags: true` flag on adjbank |
+| **ES subjuntivo triggers** | 11.1 | Closed trigger set makes this cheap; most free tools don't cover it | M | Trigger list `{quiero que, espero que, dudo que, es importante que, …}` + embedded-verb inflection check. Reuses existing conjugation data. Flips `es.txt` "Quiero que mi hermano viene" |
+| **FR subjonctif triggers** | 11.3 | Mirror of 11.1; benchmark "Il faut que je parle mieux" | M | Trigger list `{il faut que, avant que, bien que, pour que}` + verb form check |
+| **FR participe passé agreement with preceding DO** | 10.3 | The famously hard rule; shipping it offline + free is a brand statement | L | DO-pronoun detection (`la/les/que`) preceding `avoir` + past participle. Ship behind `grammar_fr_pp_agreement` toggle so strict-threshold students can opt out |
+| **NB preposition collocations** | 15.1 | `glad i` vs `glad på`, `flink til` vs `flink i` — tight NB lexical governance; benchmark "flink i å gå" | S-M | Literal-match list in papertek (new `collocationbank` or extended generalbank). Data-driven |
+| **ES pro-drop overuse** | 12.1 | Distinctive NB-to-ES transfer pattern; benchmark every sentence-initial `yo` | S | Subject-pronoun + finite verb where agreement is unambiguous → soft flag |
+| **ES gustar-class syntax** | 12.2 | Deeply systematic error; ~30 gustar-class verbs; benchmark "Él no gusta ayudar" | M | `gustar_class: true` flag. Suggest dative restructuring |
+| **DE/FR/ES preposition collocation governance** | 15.2 | Parallel to 15.1 at scale; lookup-driven | M (×3) | Depends on Phase 6.2 proving the pattern. Data-authoring cost is real |
+| **Collocation errors (EN seed)** | 6.2 | "make a photo → take"; competitor coverage exists but is spotty | M | Curated bigram list. Start EN (highest NB-student base), expand language-by-language |
+| **Register/formality detector** | 6.1 | Matches brand + teaches good writing habits | S-M | Closed vocabulary lists per language + sentence-level formality heuristic (punctuation, length). Opt-in toggle. Flips `en.txt` "gonna" and `nb.txt` anglicism leakage |
+| **DE du/Sie + FR tu/vous register drift** | 13.1 + 13.2 | Document-level; reuses 13.3/13.4 seam | M (×2) | Build seam once in Phase 13, reuse across all four sub-rules |
+| **ES/FR opaque-noun gender** | 14.2 | `le problème`, `la voiture`; NB students default to -e→fem | S | Already supported by `genus` field; article-noun mismatch rule. Flips `fr.txt` "La problème", "un bon humeur" |
+| **EN word-family confusion** | 14.3 | `creative/creativity/creation`; `succeed/success/successful` | M | Closed family list in papertek + POS-of-slot detection |
+| **FR double-pronoun clitic order** | 12.3 | `je le lui donne` vs `je lui le donne`; closed cluster | M | Cluster detection + permutation check against fixed order |
+| **DE V2 + subordinate verb-final** | 7.2 | Classic NB-student DE error; benchmark "dass er ist nett", every main-clause V2 miss in `de.txt` | M | Shares syntactic reasoner with 7.1. Trigger on subordinator set `{dass, weil, wenn, ob, obwohl, damit, …}` |
 
-### Anti-Features (Commonly Requested, Often Problematic)
+### Anti-Features (Commonly Requested, Out-of-Scope or Actively Harmful)
 
-Features that seem valuable but break the product's constraints (free/open/offline/heuristic/Norwegian-first/brand-promise).
-
-| Anti-Feature | Why Requested | Why Problematic | Alternative |
-|--------------|---------------|-----------------|-------------|
-| **ML-based grammar rewrites / full Grammarly parity** | Grammarly is the prestige brand; feels aspirational | Forces external API costs → contradicts free-forever promise; needs online connectivity → contradicts offline constraint; training data / liability issues. PROJECT.md explicitly excludes this | Keep heuristic; advertise the honest scope ("catches common Norwegian learner errors") |
-| **Premium gating of spell-check** | Monetization hypothesis | Landing page publicly commits: "Alle funksjoner i selve utvidelsen er og forblir gratis." Breaking this destroys trust with existing Vipps subscribers and open-source community. Already excluded in PROJECT.md out-of-scope | External-API features (TTS) stay the paywall; extension-side features stay free |
-| **Spell-check for DE/ES/FR/EN (non-Norwegian)** | Symmetry with prediction coverage | Different grammar, different error classes, different data needs; diverts engineering from Norwegian production-quality push. Excluded in PROJECT.md | Separate milestone; maintain clear "Norwegian spell-check" framing in UI |
-| **Style suggestions (passive voice, wordiness, tone)** | Grammarly's "clarity score" is iconic | English-market feature; Norwegian learner texts are primarily judged on correctness, not style; style scoring is highly ML-dependent; risks flagging texts that are stylistically fine just different | Stick to grammar + spelling; if demand surfaces, consider teacher-facing only (not learner) |
-| **Plagiarism detection** | Grammarly Premium feature | Requires server-side corpus, huge storage/bandwidth, external API costs. Also philosophically mismatched with assistive-tech/dyslexia positioning (punitive, not supportive) | Do not build |
-| **Generative AI "rewrite this sentence"** | ChatGPT era expectation | External-API cost, contradicts heuristic-only rule, pedagogical downside: rewriting denies the learner the noticing-hypothesis benefit | Do not build; if requested, point to existing LLM tools |
-| **Real-time server-side checking** | Potential quality boost | Offline constraint violated; latency for students on poor classroom WiFi; privacy concerns (student texts sent to server) | Extension-side only; accept heuristic ceiling |
-| **Auto-correct (fix without confirmation)** | Mobile keyboard expectation | Research on dyslexic users: auto-correct without confirmation compounds errors silently because the "fix" is often wrong, and user can't learn from it. Also an accessibility anti-pattern | Always require explicit click-to-fix; never silent replacement |
-| **Flagging native Norwegian dialect variants as errors** | Fits "standard language" intuition | NB + NN coexist officially; flagging NN-in-NB-context or vice versa trains a punitive tool that teachers don't want. Dialect words (ikkje, eg) are NOT errors | Detect target variant; only flag within-variant violations |
-| **Cross-sentence / paragraph-level grammar analysis** | Grammarly's discourse checks | Heuristic feasibility ceiling; bundle-size impact; most learner errors are word- or clause-scoped anyway | Keep scope to word + immediate neighbors (bigram / short window) |
-| **Expansive "style" library (formality, politeness, tone)** | LanguageTool markets a STYLE category | Language-specific subjectivity; risk of teaching register mismatches for learners; English-centric norms | Do not build for Norwegian until demand is validated by actual teachers |
-| **Personal-dictionary sync across devices** | Grammarly/Word have this | Requires account + backend; data-retention complexity; contradicts offline | Per-device `chrome.storage.local` ignore list; no sync |
-| **Telemetry on student writing content** | Could drive quality improvements | Student data = minors + sensitive writing; GDPR/Schrems-II complications; breaks trust the landing page is built on | The "Veien videre" anonymous data-contributions clause is explicitly *opt-in* and *anonymous*; treat as future feature with legal review, not a default |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| **Auto-correct / silent rewrite** | "Grammarly does it, just fix my text" | Dyslexia research: silent fixes compound future errors. Already Out-of-Scope in PROJECT.md | Show candidate, require click — v1.0 pattern holds |
+| **ML-powered structural rewrite (Grammarly parity)** | LLM marketing drives expectation | Breaks offline (SC-06), breaks free-forever promise (inference costs), breaks deterministic release gate | Deterministic rules only — roadmap enforces |
+| **Phase 16 (tense harmony + anaphora + long-distance agreement)** | Would complete "full grammar-check" promise | Requires cross-sentence NLP that heuristics handle badly; high FP risk destroys trust; roadmap itself flags as "aspirational, may defer to v3.0" | Ship Phases 6–15; revisit each Phase-16 sub-rule individually only if it crosses an FP threshold |
+| **Idiomatic-literalism detection (15.3, "katter og hunder")** | Cute demo, memorable | Idiom detection requires semantic understanding; FP rate on creative writing is high; roadmap itself says "scope TBD" | Curated closed list of ~20 idioms, exact-match only. Skip open-ended detection |
+| **Dialect-specific rules beyond NB/NN (nordlandsk, sunnmørsk)** | Teacher regional-coverage requests | Infinite tail; already Out-of-Scope in roadmap | NB + NN official written standards only |
+| **Premium-gating any v2.0 grammar rule** | Obvious monetisation play | Contradicts landing-page public commitment; breaks trust; Out-of-Scope in PROJECT.md | Keep funding via TTS quota (ElevenLabs cost centre) |
+| **LLM-assisted explain popover ("why is this wrong")** | Richer explanations | Online call per flag; privacy concern on student writing; explain() contract is deterministic by design | Expand hand-authored `{nb, nn}` explains; bundle cost is tiny |
+| **Hunspell / spellchecker-wasm dependency** | "Why reinvent the wheel?" | All mature NO Hunspell dicts are GPL-2.0 — incompatible with MIT promise. Also: structural rules are the point, not base spelling | Roll-own — already proven in NB/NN at ~180 LOC |
+| **Grammar-check as online-only skriv.papertek.app integration** | "Students already work in skriv" | Online integration breaks offline gate | Native embedding via shared local code (tech-debt `project_lexi_in_skriv_integration.md`) — not an API |
+| **Telemetry on student writing content** | "Would drive quality improvements" | GDPR/Schrems-II; minors; breaks trust | Anonymous opt-in belongs in future milestone with legal review |
+| **Cross-sentence / discourse style suggestions (tone, flow)** | Grammarly marketing | English-centric subjectivity; wrong audience; risks teaching register mismatches | Do not build for student audience |
 
 ## Feature Dependencies
 
 ```
-[Regression fixture]
-    └──enables──> [Safe iteration on spell-check rules]
-                       └──enables──> [Production-quality særskriving detection]
-                       └──enables──> [Homophone/confused-word pairs (og/å, hjerne/gjerne)]
-                       └──enables──> [Phonetic-hash scoring layer]
+v1.0 Plugin Rule Architecture (INFRA-03, shipped)
+    │
+    ├──enables──> Phase 6 (Register + Collocation + Redundancy)
+    │                 │
+    │                 └──proves──> Phase 15 (Collocations at scale)
+    │
+    ├──enables──> Phase 7 (Word-order)           [shared: light syntactic reasoner]
+    │                 ├── 7.1 NB V2
+    │                 ├── 7.2 DE V2 + verb-final
+    │                 └── 7.3 FR BAGS
+    │
+    ├──enables──> Phase 8 (DE case/agreement)   [DE-siloed]
+    │                 ├──requires──> papertek verbbank `separable`/`aux` flags
+    │                 └──requires──> papertek prepbank with case map
+    │
+    ├──enables──> Phase 9 (ES ser/estar, por/para, personal a)  [ES-siloed]
+    │                 │
+    │                 └──gates──> Phase 11 (ES subjuntivo, aspect)
+    │                                 └── reuses Phase 9 trigger-detection infra
+    │
+    ├──enables──> Phase 10 (FR élision, aux, PP agreement)   [FR-siloed]
+    │                 │
+    │                 └──gates──> Phase 11 (FR subjonctif)
+    │                                 └── reuses Phase 10 trigger-detection infra
+    │
+    ├──enables──> Phase 12 (ES/FR pronoun)
+    │                 └──requires──> Phase 9/10 closed-class infra
+    │
+    ├──requires──> [NEW] Document-state seam
+    │                 ├──enables──> Phase 13 (all 4 register-drift rules)
+    │                 └──enables──> Phase 16 (tense harmony, anaphora) — if ever
+    │
+    └──enables──> Phase 14 (EN/ES/FR morphology)
+                      └──requires──> papertek irregular-lists
 
-[Typo bank expansion in papertek-vocabulary]
-    └──requires──> [Schema review with papertek-webapps + papertek-nativeapps]
-    └──enables──> [Higher recall on dyslexic-pattern errors]
-    └──enables──> [Accepted-alternatives for near-correct answers]
-
-[Frequency tables + bigrams (shipped)]
-    └──enables──> [Word-prediction ranking quality improvements]
-    └──enables──> [Homophone disambiguation in spell-check]
-    └──shared data──> Both WP and SC benefit → data work pays twice
-
-[4 error classes (shipped v1)]
-    └──blocked by──> [Missing student-friendly labels / explanations]
-                         └──requires──> [Per-class explanation copy]
-                         └──enhances──> [Trust, noticing-hypothesis learning value]
-
-[TTS infrastructure (shipped)]
-    └──enables──> [Pronunciation-confirmation from spell-check popover]
-                         └──requires──> [Free TTS fallback for non-subscribers (already shipped)]
-
-[Module separability via __lexiPrediction interface]
-    └──enables──> [Future extraction to skriv.papertek.app]
-    └──constrains──> [No premium/policy coupling inside spell-check]
-
-[Offline constraint]
-    └──forbids──> [Any server-side correction, ML-API calls, cloud-sync]
-    └──constrains──> [Bundle size budget → data growth must be justified]
+v1.0 __lexiVocab seam (INFRA-01) ──feeds──> every phase's lookup
+v1.0 check-fixtures gate (INFRA-02) ──enforces──> every phase's P/R/F1
+v1.0 explain() + CSS wiring gates (UX-01) ──enforces──> every popover rule
+v1.0 check-spellcheck-features gate ──enforces──> feature-gated lookup parity
+v1.0 check-network-silence gate ──enforces──> SC-06 for every new rule
 ```
 
 ### Dependency Notes
 
-- **Data work pays twice**: Improvements in `papertek-vocabulary` (typo bank, frequency, bigrams, accepted alternatives) benefit both spell-check and word-prediction. This argues for prioritizing data milestones early in the roadmap.
-- **Regression fixture is a prerequisite, not a nice-to-have**: Tuning heuristic rules without a fixture causes silent regressions (rule A fixes case X but re-breaks case Y). Ship the fixture before tuning rules, not after.
-- **Explanation copy is the unlock for the "Why flagged?" differentiator**, not new code. It's bounded work (4 classes × NB/NN × learner-register copy), but requires editorial pass, not engineering.
-- **Phonetic scoring depends on Norwegian-specific rules** (⟨kj/skj/sj⟩ collapse, å/o/aa variants, silent -t in neuter article, consonant doubling) — not a generic Soundex. Requires domain-knowledge review, not just code.
-- **Cross-app schema coordination blocks typo-bank expansion**: If spell-check recall improvements require new fields in `papertek-vocabulary` (e.g., `typos: []`, `acceptedAs: []`), coordinate with papertek-webapps + papertek-nativeapps before landing the schema change.
+- **Phase 6 is the opening phase because** it reuses 100% of v1.0
+  infrastructure (literal lookup + explain popover + CSS dot).
+  Zero new seams. Validates roadmap velocity before committing to
+  Phase 7's harder work.
+- **Phase 7.1 and 7.2 share a light syntactic reasoner.** Build
+  it in 7.1 (NB) first because fixture density is highest there;
+  reuse in 7.2 (DE). 7.3 (FR BAGS) is independent and can run
+  parallel.
+- **Phases 8, 9, 10 are language-siloed and independent.** They
+  can ship in any order or in parallel. Recommend Phase 8 first
+  because DE has the highest error-density per benchmark token.
+- **Phase 11 gates behind Phases 9 and 10** because it reuses their
+  trigger-detection infrastructure. Violating this = duplicated
+  closed-class lookup code.
+- **Phase 13 is the seam-change phase.** Every preceding phase
+  fires per-token or per-clause. Phase 13 needs a document-level
+  state collector (per-paragraph and per-document norm markers).
+  Introduce the seam *in* Phase 13; don't retrofit later.
+- **Phase 15 depends on Phase 6.2** proving the curated-collocation-list
+  pattern works before scaling to four languages.
+- **Phase 16 is conditional.** If Phase 13's seam generalises
+  cleanly to tense-tracking, Phase 16 becomes feasible. If not,
+  defer to v3.0 — roadmap explicitly allows this.
+- **Every phase depends on `papertek-vocabulary`** data authoring.
+  The data-authoring queue is a real bottleneck; requirements
+  phase should identify which papertek schema changes each phase
+  needs and open them as data-track tickets early.
 
-## MVP Definition
+## MVP Definition (for v2.0 Milestone)
 
-Because this is a **subsequent milestone** (not v1), "MVP" here means the minimum the milestone must ship to count as a release, not the minimum product.
+### Launch With (v2.0.0 — Phase 6 only)
 
-### Must Ship This Milestone (Release Bar)
+Minimum that validates the v2.0 theme and proves benchmark-driven
+release works. Ships fast, reuses v1.0 infra.
 
-Core quality bar that turns spell-check v1 into a tool students reach for *first*.
+- [ ] **Register/formality detector (6.1)** — EN + NB closed lists; proves opt-in toggle pattern
+- [ ] **Collocation errors EN seed (6.2)** — ~50 curated EN verb+object pairs; proves data-bigram rule shape
+- [ ] **Stylistic redundancy (6.3)** — ~20 per language literal matches; highest ROI per LOC
+- [ ] **Benchmark validation**: `en.txt` "gonna" + `nb.txt` anglicism leakage flip from unflagged → flagged
 
-- [ ] **Regression test fixture** — blocks safe iteration; without it, rule tuning is Russian roulette. `PROJECT.md:Active` already lists this
-- [ ] **"Why flagged?" explanations per error class** — the brand differentiator; currently blocks the popover from being more than a bare label
-- [ ] **Reduced false-positive rate on NB + NN** — specific metric target from fixture; false positives are the primary reason students stop using a spell-checker
-- [ ] **Word-prediction ranking improvement across all 6 languages** — measurable via top-k accuracy on a held-out set; current v1 is validated-but-rough
-- [ ] **Expanded typo bank in papertek-vocabulary + sync** — data-driven recall lift; publicly committed on landing page
-- [ ] **Preserve `__lexiPrediction` narrow interface** — guards future extraction option; explicit in PROJECT.md:Active
+### Add After Validation (v2.1 — Phases 7, 8, 9, 10, 14.1)
 
-### Add After This Milestone Validates (v1.x range)
+Language-specific structural coverage, siloed so each can ship alone.
 
-Features that earn their place once the production-quality bar is met.
+- [ ] **Phase 8 (DE case + separable + aux + compound gender)** — highest error-density; strong NB learner base
+- [ ] **Phase 9 (ES ser/estar + por/para + personal a)** — closed-trigger, paper-tractable
+- [ ] **Phase 10 (FR élision + aux)** — 10.1 + 10.2 easy; defer 10.3 (PP agreement) to v2.2 behind toggle
+- [ ] **Phase 7 (NB + DE + FR word-order)** — structural reasoner; budget generous acceptance fixtures
+- [ ] **Phase 14.1 (EN morphological overgeneration)** — low-cost, high-impact
+- [ ] **Benchmark validation target**: 80% of promised-lines flip per-language
 
-- [ ] **Phonetic-hash scoring layer (Norwegian-tuned)** — catches dyslexic multi-letter errors that edit-distance misses; implement after the fixture can measure the lift
-- [ ] **Pronunciation-confirmation path (popover → TTS)** — UX win; depends on verifying current TTS widget can be invoked from spell-check popover cleanly
-- [ ] **Optional OpenDyslexic font inside Leksihjelp popover** — low-cost dyslexia-brand reinforcement
-- [ ] **Session-scoped "ignore this word" with smarter scope** — expands current ignore beyond immediate flag
-- [ ] **More confused-word pairs beyond og/å** — hjerne/gjerne, fot/fort, da/når, som/som-relativ — data-driven expansion via typo bank
-- [ ] **Per-student spell-check class toggles** (parallel to grammar-feature toggles) — lets dyslexic users silence classes they're not ready to learn
+### Future Consideration (v2.2+ — Phases 10.3, 11, 12, 13, 14.2/14.3, 15)
 
-### Future Consideration (defer to later milestones)
+Larger structural bets. Each is its own minor release once preceding
+infra lands.
 
-- [ ] **Spell-check for non-Norwegian languages** — explicit PROJECT.md out-of-scope; separate milestone per target language
-- [ ] **Extraction of `spell-check.js` to skriv.papertek.app** — enabled by module separability but not triggered by this milestone
-- [ ] **Anonymous opt-in data contribution for improving typo bank** — landing page mentions this; requires legal/privacy review first
-- [ ] **Teacher-facing dashboard / reporting** — completely different surface, different user
-- [ ] **Pilot / classroom trial** — PROJECT.md:Key Decisions mentions "pilot later"; out-of-scope for this milestone
+- [ ] **Phase 10.3 (FR PP agreement)** — toggle-gated; ship when fixture bank stable
+- [ ] **Phase 11 (aspect + mood)** — requires Phase 9/10 trigger infra
+- [ ] **Phase 12 (ES/FR pronoun)** — requires Phase 9/10
+- [ ] **Phase 13 (register drift within text)** — requires new document-state seam; hardest seam change in v2.0
+- [ ] **Phase 14.2 / 14.3 (opaque gender, word-family)** — parallel to Phase 11/12
+- [ ] **Phase 15 (collocation bank at scale)** — requires Phase 6.2 as pattern proof
+
+### Out of v2.0 Scope (Defer v3.0 or Kill)
+
+- [ ] **Phase 16 (tense harmony + anaphora + long-distance agreement)** — defer unless one sub-rule independently passes FP threshold
+- [ ] **15.3 Idiomatic-literalism detection** — kill unless curated-only
+- [ ] **Leksi-in-skriv native embedding** — owns its own milestone
 
 ## Feature Prioritization Matrix
 
-Scoped to **within this milestone**. Items from v1 are excluded.
-
-| Feature | User Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| Regression fixture (NB + NN sentences with expected I/O) | HIGH (quality gate) | MEDIUM | P1 |
-| "Why flagged?" explanations for 4 error classes | HIGH (learner pedagogy, brand) | LOW-MEDIUM (copy-heavy) | P1 |
-| False-positive reduction (proper-noun guard expansion, dialect-tolerance for NB↔NN) | HIGH (trust) | MEDIUM | P1 |
-| Typo-bank expansion in papertek-vocabulary | HIGH (recall) | HIGH (cross-app) | P1 |
-| Word-prediction ranking push (frequency × bigram × POS/case/tense tuning) | HIGH | MEDIUM | P1 |
-| Phonetic-scoring layer (Norwegian-tuned hash) | MEDIUM-HIGH (dyslexia-specific lift) | MEDIUM | P2 |
-| Pronunciation-confirmation from spell-check popover | MEDIUM (delightful, brand-fit) | LOW | P2 |
-| More confused-word pairs beyond og/å | MEDIUM | LOW (data-driven) | P2 |
-| Top-3 ranked suggestions with "show more" reveal | MEDIUM (dyslexia UX) | LOW | P2 |
-| Per-class silence toggle (extend grammar-feature pattern) | MEDIUM | LOW | P3 |
-| OpenDyslexic font toggle inside popover | LOW-MEDIUM | LOW | P3 |
-| Debounce-at-word-boundary verification (likely already correct, confirm) | LOW (hygiene) | LOW | P3 |
-| "Gratis. Åpen kildekode." micro-copy in popover footer | LOW (trust reinforcement) | LOW | P3 |
+| Feature | Student Impact | Implementation Cost | Priority |
+|---------|----------------|---------------------|----------|
+| 6.3 Stylistic redundancy | MEDIUM | LOW | P1 |
+| 6.1 Register/formality | MEDIUM | LOW | P1 |
+| 6.2 Collocation errors EN | HIGH | MEDIUM | P1 |
+| 8.1 DE prep-case governance | HIGH | MEDIUM | P1 |
+| 8.2 DE separable verbs | HIGH | LOW | P1 |
+| 8.3 DE perfekt aux | MEDIUM | LOW | P1 |
+| 8.4 DE compound gender | MEDIUM | MEDIUM | P1 |
+| 9.1 ES ser/estar | HIGH | MEDIUM | P1 |
+| 9.2 ES por/para | HIGH | MEDIUM | P1 |
+| 9.3 ES personal "a" | MEDIUM | LOW | P1 |
+| 10.1 FR élision | MEDIUM | LOW | P1 |
+| 10.2 FR être/avoir | HIGH | LOW | P1 |
+| 14.1 EN morphological overgeneration | HIGH | LOW | P1 |
+| 7.1 NB V2 | HIGH | MEDIUM-HIGH | P2 |
+| 7.2 DE V2 + verb-final | HIGH | MEDIUM | P2 |
+| 7.3 FR BAGS | MEDIUM | LOW-MEDIUM | P2 |
+| 10.3 FR PP agreement (toggle) | MEDIUM | HIGH | P2 |
+| 11.1 ES subjuntivo | HIGH | MEDIUM | P2 |
+| 11.3 FR subjonctif | HIGH | MEDIUM | P2 |
+| 14.2 ES/FR opaque gender | MEDIUM | LOW | P2 |
+| 14.3 EN word-family | MEDIUM | MEDIUM | P2 |
+| 12.1 ES pro-drop overuse | MEDIUM | LOW | P2 |
+| 12.2 ES gustar-class | MEDIUM | MEDIUM | P2 |
+| 11.2 ES pretérito/imperfecto | MEDIUM | MEDIUM | P2 |
+| 13.3 NB bokmål/riksmål drift | HIGH (brand-distinctive) | HIGH | P2 |
+| 13.4 NN a-inf/e-inf drift | MEDIUM (brand-distinctive) | MEDIUM | P2 |
+| 13.1 DE du/Sie drift | MEDIUM | MEDIUM | P3 |
+| 13.2 FR tu/vous drift | MEDIUM | MEDIUM | P3 |
+| 12.3 FR clitic order | MEDIUM | MEDIUM | P3 |
+| 15.1 NB prep collocations | HIGH | MEDIUM | P3 |
+| 15.2 DE/FR/ES prep collocations | MEDIUM | MEDIUM (×3) | P3 |
+| 15.3 Idiomatic literalism | LOW (risk) | HIGH | defer/kill |
+| 16.1 Tense harmony | LOW-MEDIUM (FP risk) | HIGH | defer v3.0 |
+| 16.2 Anaphora ambiguity | LOW (FP risk) | HIGH | defer v3.0 |
+| 16.3 Long-distance SV agreement | MEDIUM | HIGH | defer v3.0 |
 
 **Priority key:**
-- P1: Must ship this milestone
-- P2: Should ship if time/data allows; release without doesn't block
-- P3: Nice-to-have; defer freely without narrative cost
+- P1 — v2.0 MVP + immediate next (Phases 6, 8, 9, 10-lite, 14.1)
+- P2 — v2.1 / v2.2 release candidates (Phases 7, 10.3, 11, 13.3/13.4, 12, 14.2/14.3)
+- P3 — later release or scope-reduce (Phases 12.3, 13.1/13.2, 15)
+
+## Dependencies on Existing v1.0 Rule Infrastructure
+
+Every v2.0 phase rides on shipped v1.0 infrastructure. The mapping:
+
+| v1.0 Infrastructure | v2.0 Phases That Need It | Change Required? |
+|---------------------|---------------------------|-------------------|
+| `__lexiVocab` shared seam (INFRA-01) | All phases | No — additive reads only |
+| Plugin rule architecture (INFRA-03, one-file-per-rule) | All phases | No — same pattern |
+| `check-fixtures` P/R/F1 gate (INFRA-02) | All phases | Extend fixture bank per language; thresholds table grows |
+| `explain()` + CSS dot-colour contract (UX-01) | All popover-surfacing phases | New CSS class per new rule; extend `check-explain-contract` + `check-rule-css-wiring` TARGETS lists |
+| `check-spellcheck-features` (feature-gated indexes) | Any phase that gates on a grammar-feature toggle | Extend predicates per new feature |
+| `check-network-silence` (SC-06) | All phases | No — additive scan paths |
+| `check-bundle-size` (20 MiB cap) | Especially Phase 15 (collocation lists), 14 (irregular lists) | No structural change, but data growth budget tracked |
+| `papertek-vocabulary` data source | Every phase with a data lookup | Schema extension per phase: `aux`, `separable`, `copula`, `human`, `gustar_class`, `bags`, `trigger_subjuntivo`, … All additive |
+| `chrome.storage.local.enabledGrammarFeatures` | Phases with opt-in (6.1, 10.3, 13.x, 11.2) | Add feature IDs to `grammarfeatures-{lang}.json` |
+| Frequency-aware ranking tables (DATA-01, WP-01/03/04, SC-01) | Phases with fuzzy fallback | No change |
+| Proper-noun + code-switch guards (SC-02, SC-04) | Phase 7 (word-order FP mitigation) | Possibly reuse proper-noun guard inside V2 detector to skip names |
+| NB↔NN CROSS_DIALECT_MAP (SC-03) | Phase 13.3 (bokmål/riksmål drift) | Extend to `BOKMAL_RIKSMAL_MAP` sibling structure |
+
+**New infrastructure v2.0 must build:**
+
+1. **Light syntactic reasoner** — shared by 7.1, 7.2, 7.3, and many
+   Phase 8/9/10 rules. POS-aware token stream with tagged
+   "finite verb", "subject", "adverbial", "subordinator" slots.
+   Built once, reused everywhere. Introduce in Phase 7 because
+   pressure is highest there.
+2. **Document-state seam** — for Phase 13 (and Phase 16 if ever).
+   Per-document collection of norm markers, address-form counts,
+   tense counts. New module in `extension/content/spell-check.js`
+   or a sibling. Introduce in Phase 13.
+3. **Trigger-set matching utility** — for 8.2, 9.1/9.2/9.3,
+   10.1/10.2, 11.1/11.3, 12.1/12.2, 15.x. Closed-vocabulary fast
+   lookup with context window. Likely partially present from
+   bigram work; extract and generalise in Phase 8.
+4. **Compound splitter** — for 8.4 and potentially 14.3.
+   Greedy longest-suffix match against nounbank. New helper;
+   modest LOC.
+
+## Benchmark-Line Validation Anchors
+
+Preserved verbatim so requirements and fixtures can grep them.
+
+**nb.txt:**
+- Phase 7.1: `"Hvorfor du tror at norsk er lett?"` (wh-question SV inversion)
+- Phase 7.1: `"I går jeg gikk på kino"` (roadmap-named; fronted-adv + uninverted)
+- Phase 13.3: `boken` + `efter` + `sne` in same paragraph (roadmap-named)
+- Phase 15.1: `"flink i å gå i bånd"` → `flink til`
+- Adjacent (double definiteness, not explicitly scoped but flagged in benchmark comments): `"Den store huset"`
+
+**nn.txt:**
+- Phase 13.4: `"Boka var vakker, men boken kosta mykje"` (hokjønn + hankjønn mixing within paragraph)
+- Phase 13 crossover: `"Hva tenker du om det?"` + `"Jeg syns"` in NN text — already partly in dialect-mix but merits doc-level register check
+- Phase 7.1 (NN): `"Hvorfor du trur at nynorsk er lett?"`
+
+**de.txt (most-covered benchmark):**
+- Phase 7.2 main-clause V2: `"Letzte montag ich bin gegangen zu der supermarkt"`, `"Dann ich aufstehe"`, `"Am abend wir haben gegessen"`
+- Phase 7.2 subordinate verb-final: `"dass er ist nett"` (roadmap-named), benchmark `"dass ich bin besser geworden"`
+- Phase 8.1 prep-case: `"mit den Schule"` (roadmap-named), `"in eine fabrik"`, `"auf einem insel"`, `"Wegen dem wetter"`
+- Phase 8.2 separable: `"ich aufstehe"`
+- Phase 8.3 perfekt aux: `"ich habe gegangen"` (roadmap-named) vs correct `"ich bin gegangen"` (acceptance)
+- Phase 8.4 compound gender: `"das Schultasche"` (roadmap-named pattern)
+
+**es.txt:**
+- Phase 9.1 ser/estar: `"Soy cansado"`, `"yo era en un humor bueno"` → `estaba`, `"Estaba mucho queso"` (hay vs estar adjacent)
+- Phase 9.2 por/para: `"comida por mi familia"`, `"por leer un libro"`, `"para comprar comida por mi familia"`
+- Phase 9.3 personal "a": `"Veo Juan todos los dias"`
+- Phase 11.1 subjuntivo: `"Quiero que mi hermano viene conmigo"` → `venga`
+- Phase 12.1 pro-drop: `"yo voy a la playa"`, `"Yo pienso"`, `"yo fui a la tienda"` (every sentence-initial `yo`)
+- Phase 12.2 gustar-class: `"Él no gusta ayudar"` → `"A él no le gusta ayudar"`
+
+**fr.txt:**
+- Phase 10.1 élision: `"je avais"` → `j'avais`, `"si il pleut"` → `s'il`, `"je ai"` → `j'ai`
+- Phase 10.2 être/avoir: `"je ai amélioré"`; roadmap pattern `"j'ai allé"` → `"je suis allé"`
+- Phase 10.3 PP agreement: `"la pomme que j'ai mangée"` (acceptance from roadmap)
+- Phase 11.3 subjonctif: `"Il faut que je parle mieux"` (roadmap-named; borderline — form syncretism, fixture validates the trigger + mood check)
+- Phase 14.2 opaque gender: `"La problème"`, `"un bon humeur"` (article-gender mismatch)
+- Phase 7.3 BAGS: no explicit wrong-placement line; add acceptance fixture from `"une belle femme"`
+
+**en.txt:**
+- Phase 6.1 register: `"gonna"` in essay prose
+- Phase 6.3 redundancy: no explicit `"return back"` in current text; add fixture
+- Phase 14.1 morphology: `"childs"`, `"eated"`, `"clothe for childrens"`, `"i still makes"`, `"when i writes"`
+- Phase 14.3 word-family: `"i have improve"` (overlaps morphology)
+- Phase 15.x EN prep collocations: `"help in the house"` → `"help around/with"` (borderline)
 
 ## Competitor Feature Analysis
 
-| Feature | LanguageTool (open-source, rule-based) | Lingdys / IntoWords (Norwegian dyslexia tools, paid) | Grammarly (commercial, ML) | Leksihjelp Approach |
-|---------|----------------------------------------|-------------------------------------------------------|----------------------------|---------------------|
-| Misspelling detection | Yes; Norwegian dictionary-based | Yes; dyslexia-tuned ("fewer, more precise") | Yes; ML-strong | Match quality via fuzzy + phonetic + typo-bank; stay heuristic |
-| Compound-word (særskriving) detection | Yes; COMPOUNDING category | Yes | Partial (English-centric model) | **Shipped v1**; tune to production in this milestone |
-| Homophone / real-word errors | Yes (CONFUSED_WORDS) | Yes (advertised for hjerne/gjerne, fot/fort) | Yes (very strong) | **Add og/å + hjerne/gjerne + data-driven expansion** |
-| Explanation per error | Terse; English-centric | Minimal | Rich explanations, in English | **Differentiator: Norwegian learner-voice explanations** |
-| NB + NN distinct support | Partial; limited NN rule coverage | Yes; separate dictionaries | Not supported for NN | **Keep; improve NN recall this milestone** |
-| Offline operation | Self-hostable server (not truly offline) | Desktop app = yes; Cloud extension = no | No | **Yes, extension-side; landing page commits to this** |
-| Works in any browser text input | LanguageTool browser extension = yes | IntoWords Cloud browser extension = yes; Lingdys app = limited to specific keyboards | Yes, via browser extension | **Yes — core advantage** |
-| Dyslexia-specific features (phonetic, tolerant matching, pronunciation) | No (general-purpose) | Yes, flagship selling point | Partial; not their primary audience | **Match Lingdys feature-for-feature on the free tier** |
-| Pronunciation (TTS) integration with spell-check | No | Yes (Lingdys ships TTS in same product) | No | **Unique opportunity: bundle existing TTS into spell-check popover** |
-| Word-prediction in text inputs | No | Yes (core feature) | No (uses autocomplete only in its own editor) | **Shipped v1; quality push this milestone** |
-| Grammar style / tone analysis | Yes (STYLE, REDUNDANCY) | Limited | Yes, strong | **Do not build (anti-feature)** — wrong audience, English-centric |
-| Pricing for students | Free; Premium tier for more rules | Paid (subscription), typically school/district licensed | Paid for Premium | **Free forever for extension-side features; paid TTS only** |
-| Heuristic-only (no ML / no API) | Yes (mostly) | Mixed; some cloud features | No (strong ML core) | **Yes, explicit in PROJECT.md constraints** |
+| Feature | LanguageTool (free) | Grammarly (free) | Leksihjelp v2.0 |
+|---------|---------------------|-------------------|-------------------|
+| Online required | Yes (free tier limits) | Yes | **No — offline-first** |
+| NB + NN coverage | Partial NB, weak NN | Effectively none | **First-class, NB + NN equal footing** |
+| DE prep-case | Yes (partial) | Weak | **Full, benchmark-validated** |
+| ES ser/estar | Partial | Yes | **Closed-list deterministic** |
+| FR PP agreement | Partial, noisy | Yes, often wrong | **Toggle-gated, low-FP** |
+| Register/formality | Yes | Yes | **Opt-in, NB-student-aware** |
+| Bokmål/riksmål drift | No | No | **Brand-distinctive differentiator** |
+| NN a-/e-inf consistency | No | No | **Brand-distinctive differentiator** |
+| Free forever | Yes (limited) | No (freemium) | **Yes, publicly committed** |
+| Open source | Yes (LGPL) | No | **Yes (MIT)** |
+| Dyslexia-optimised UX | No | Partial | **Named brand feature** |
+| Silent auto-correct | Warn only | Yes (default) | **Never — show candidate, require confirm** |
 
-**Where we can credibly beat Lingdys/IntoWords on the free tier:**
-- Ubiquity (any browser, any input) vs. their custom keyboard or dedicated editor.
-- Open source / MIT license — teachers can verify, schools can deploy without procurement.
-- No login required for spell-check or prediction.
-- Integrated TTS pronunciation path that's free-tier usable (browser speechSynthesis).
+**Positioning:** Leksihjelp v2.0 doesn't try to out-recall Grammarly
+on EN. It trades recall for (a) offline, (b) free-forever,
+(c) NB/NN first-class, (d) dyslexia-supportive confirm-don't-autocorrect
+UX, (e) deterministic rules authored in the open.
 
-**Where we cannot credibly beat Lingdys/IntoWords:**
-- They have decades of Norwegian dyslexia-specific corpus and error patterns; our typo bank is early.
-- They are officially approved as exam aids in Norway; we are not.
-- They have dedicated support + training + school contracts; we do not.
+## Confidence & Gaps
 
-**Strategy implication:** Don't position against Lingdys. Position as complementary — the free everyday tool students keep on while doing homework; Lingdys for formal exams/IEP needs.
+**HIGH confidence on:**
+- Category splits (table stakes / differentiator / anti-feature) —
+  driven by competitor analysis + user-memory domain policy +
+  PROJECT.md Out-of-Scope list.
+- Dependency graph — flows directly from v1.0 shipped infrastructure
+  and roadmap sequencing notes.
+- Benchmark-line anchors — hand-authored by user, verified line-by-line.
+- Complexity S/M/L ratings — anchored to roadmap estimates and
+  v1.0 comparable-LOC patterns (särskriving was M; lands-anchor
+  for what M means in this codebase).
 
-## Norwegian-Specific Feature Call-Outs
+**MEDIUM confidence on:**
+- Phase 11 trigger-set completeness — roadmap lists canonical
+  triggers but real-language coverage needs a papertek-data audit
+  in the requirements phase.
+- Phase 13 seam design — never built in this codebase; the
+  "document state collector" abstraction is sketched but not proven.
+- FR BAGS adjective list — roadmap says ~40; real closed set may
+  be 30 or 60; papertek audit needed.
 
-| Norwegian Concept | Status | Notes |
-|-------------------|--------|-------|
-| **Særskriving** (compound word wrongly split) | Shipped v1 | #1 Norwegian native + learner error per language-advice sources; the flagship Norwegian heuristic to nail |
-| **NB vs NN distinction** | Shipped v1 | Non-negotiable; see homophone table |
-| **Og vs å** | Active milestone | IntoWords ships an explicit toggle for this; Lingdys handles it via sentence-level check; heuristic possible with POS + bigram |
-| **Hjerne vs gjerne, fot vs fort** | Active milestone | Lingdys advertises these specifically; learnable via confused-word pair list |
-| **En / ei / et gender agreement** | Shipped v1 | Bokmål has optional feminine article (ei/en for feminine nouns); don't flag either as wrong; avoid over-correcting |
-| **Adjective agreement (gender + number + definiteness)** | Shipped v1 | Core grammar; verify NN-specific rules (partially shared, partially diverged) |
-| **Modal verb + infinitive (å + verb form)** | Shipped v1 | "wrong-form-after-modal" class |
-| **Double consonants (kk/ll/nn) for short vowel** | Not flagged explicitly | Candidate for phonetic-hash scoring layer; high frequency dyslexic error |
-| **Silent H in hva, hvor, hvorfor** | Not flagged | Phonetic hash candidate; common dyslexic pattern |
-| **Å / aa / Å-circle digraph confusion** | Partial via fuzzy | Keyboard-layout-switch artifact; phonetic equivalence is trivial |
-| **NN-specific infinitive -a vs -e** | Relevant but non-milestone | Per user MEMORY.md (`project_nn_infinitive_fix.md`): NN dictionary data mixes -a/-e infinitives — must fix at papertek-vocabulary source. **Directly impacts NN spell-check recall if unfixed.** |
-| **Dialect words (ikkje, eg) inside NB context** | Must tolerate | Flagging would be pedagogically wrong and teacher-rejecting |
-
-## Dyslexia-Specific Feature Call-Outs
-
-Features that earn the "Perfekt for elever med dysleksi" landing-page claim. Research-backed (International Dyslexia Association 2025 definition, Ghotit / Lingdys / Spell Better patterns).
-
-| Feature | Status | Research Source |
-|---------|--------|-----------------|
-| **Tolerant fuzzy matching (handles wrong first letter)** | Shipped v1 | Lingdys markets this; dyslexia research shows 39% of errors differ by >1 letter |
-| **Short suggestion lists (3–5, not 20)** | Partial — verify | Dyslexia UX research: cognitive load of large option lists = abandonment |
-| **Phonetic-first scoring** | To build (P2) | Ghotit's flagship; dyslexic users spell phonetically more than visually |
-| **Pronunciation path (hear the candidate)** | Available via TTS widget, not wired to popover | Lingdys' combination of spell-check + TTS is a documented dyslexia-UX win |
-| **Context-aware disambiguation** | Shipped v1 (prediction); partial (spell-check) | Real-word errors are 20–30% of dyslexic errors and invisible to non-contextual checkers |
-| **No silent auto-correct** | Shipped (click-to-fix only) | Research: auto-correct trains the user wrong when it guesses wrong |
-| **Optional dyslexia-friendly font** | Not shipped (P3) | OpenDyslexic, Lexia Readable; low cost, high symbolic value |
-| **High contrast / unambiguous visual marking (not alarming)** | Shipped as dots | Dyslexia UX: avoid red squiggles for entire words; subtle markers reduce anxiety |
-| **Works without login (no barrier for children)** | Shipped | Not directly dyslexia-specific but parents of dyslexic children cite account friction as adoption barrier |
-| **Explanation in simple Norwegian (not jargon)** | In this milestone | Dyslexia doesn't imply low intelligence, but tool copy is often overly technical |
+**LOW confidence / explicit gaps:**
+- Phase 16 feasibility — roadmap flags as aspirational. Defer to v3.0.
+- 15.3 Idiomatic literalism scope — roadmap says "TBD"; open scope
+  is a trap; recommend curated-only or kill.
+- Exact papertek schema shape for each new flag (`aux`, `separable`,
+  `copula`, `human`, `bags`, `trigger_subjuntivo`, …) — cross-app
+  coordination with papertek-webapps / papertek-nativeapps required.
+  Research for STACK.md, not FEATURES.md.
 
 ## Sources
 
-### High confidence (authoritative / multi-source verified)
-- [LanguageTool rule categories (GitHub)](https://github.com/languagetool-org/languagetool/blob/master/languagetool-core/src/main/java/org/languagetool/rules/Categories.java) — full categorization: STYLE, COMPOUNDING, CONFUSED_WORDS, FALSE_FRIENDS, GRAMMAR, TYPOS, PUNCTUATION etc.
-- [LanguageTool Norwegian Wiki](http://wiki.languagetool.org/norwegian) — NB + NN supported; spelling support first, then grammar
-- [Lingit / Lingdys Pluss product page](https://lingit.no/produkter/lingdys-pluss/) — dyslexia-tuned spell-check, word prediction, TTS, keyboard
-- [IntoWords Cloud / Chrome Web Store](https://chromewebstore.google.com/detail/intowords-cloud/nopjifljihndhkfeogabcclpgpceapln) — Norwegian NB/NN + EN/DE/ES/FR context-based word suggestions, og/å grammar toggle
-- [Korrekturavdelingen: Særskriving og sammenskriving](https://www.korrekturavdelingen.no/sammenskriving.htm) — særskriving as #1 Norwegian writing-advice topic
-- [Ghotit Dyslexia](https://www.ghotit.com/) — phonetic + contextual spell-check for dyslexia; reference for the heuristic ceiling
-- [Dysleksi Norge: Skrivehjelpemidler](https://dysleksinorge.no/skrivehjelpemidler/) — canonical Norwegian dyslexia-tool inventory
-- [International Dyslexia Association 2025 Definition](https://dyslexiaida.org/2025-dyslexia-definition-project/) — authoritative current definition shaping accessibility UX
-
-### Medium confidence (research / academic)
-- [Frontiers: Analysis of spelling errors from dyslexic sight words list (2024)](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2024.1160247/full)
-- [Springer: An Adaptive Spellchecker and Predictor for People with Dyslexia (PoliSpell)](https://link.springer.com/chapter/10.1007/978-3-642-38844-6_51)
-- [Springer: Spelling errors made by people with dyslexia](https://link.springer.com/article/10.1007/s10579-022-09603-6) — 39% of errors differ in >1 letter
-- [HowStuffWorks: Why spellcheck is good and grammar check is bad](https://people.howstuffworks.com/why-spellcheck-is-so-good-and-grammar-check-is-so-bad.htm) — Word 2003 missed 48% of learner errors
-- [Noticing Hypothesis (Schmidt) in L2 writing feedback research](https://link.springer.com/article/10.1007/s44217-025-00919-3) — pedagogical basis for "Why flagged?" explanations
-- [Norwegian homophones & homonyms (NLS)](https://nlsnorwegian.no/norwegian-homonyms-and-homophones-20-examples-explained/)
-
-### Lower confidence (single source / community)
-- [Sapling: Norwegian spell checker](https://sapling.ai/lang/norwegian) — commercial comparison
-- [GiellaLT Norwegian Bokmål grammar checker](https://giellalt.github.io/lang-nob/tools-grammarcheckers-grammarchecker.cg3.html) — research/FST-based, not directly comparable
-- [OpenDyslexic](https://opendyslexic.org/) — font project
+- `.planning/PROJECT.md` — shipped v1.0 requirements and Out-of-Scope list (HIGH)
+- `.planning/v2.0-benchmark-driven-roadmap.md` — 11 phase groupings, dependencies, non-goals, validation protocol (HIGH)
+- `benchmark-texts/*.txt` — 6 hand-authored student-error corpora with explicit roadmap-phase tags in comment headers (HIGH)
+- User-memory entries (HIGH):
+  - `project_spelling_grammar_check.md` — origin of grammar-check feature set
+  - `project_nb_nn_no_mixing.md` — NB/NN are distinct standards; cross-standard = student error
+  - `project_data_logic_separation_philosophy.md` — pattern for data-vs-rule authoring
+  - `project_preposition_polysemy_feature.md` — Level-A sense grouping (roadmap-adjacent)
+  - `project_false_friends_feature.md` — cross-language look-alike warnings (roadmap-adjacent)
+  - `project_phase5_manual_spellcheck_button.md` — carry-over debt relevant to v2.0 UX
+- Competitor analysis (training-data, MEDIUM confidence):
+  - [LanguageTool (languagetool.org)](https://languagetool.org) — open-source LGPL, online
+  - Grammarly free tier — freemium, online, silent auto-correct default
+- `.planning/milestones/v1.0-MILESTONE-AUDIT.md` (referenced in PROJECT.md) — carry-over tech-debt source
 
 ---
-*Feature research for: Heuristic Norwegian spell-check + multilingual word-prediction, dyslexia-first positioning*
-*Researched: 2026-04-17*
+*Feature research for: v2.0 structural grammar governance*
+*Researched: 2026-04-24*

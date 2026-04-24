@@ -1,200 +1,294 @@
 # Project Research Summary
 
-**Project:** Leksihjelp — spell-check + word-prediction quality milestone
-**Domain:** Heuristic offline NB/NN spell-check + multilingual word-prediction in a Chrome MV3 extension, dyslexia-first audience
-**Researched:** 2026-04-17
+**Project:** Leksihjelp v2.0 — Depth of Coverage: Grammar Governance Beyond Tokens
+**Domain:** Offline structural grammar rules for a Chrome MV3 extension; Norwegian students writing DE/ES/FR/EN/NB/NN
+**Researched:** 2026-04-24
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone upgrades an already-shipping extension from "v1 proof of concept" to "production-quality tool students reach for first." The product is a heuristic, offline, free-forever Norwegian spell-checker and word-prediction engine embedded in a Chrome extension. Experts building comparable tools (Harper, LanguageTool, Voikko, Lingdys) converge on a small set of clear architectural patterns: a shared runtime vocab layer consumed by separate analysis pipelines, a plugin-style rule registry where each error class is its own small file, an additive signal-scoring pipeline rather than a chain-of-responsibility, and a ground-truth regression fixture that drives quality metrics rather than locking in v1 bugs. All four patterns are compatible with the existing vanilla-JS, no-build-step codebase and can be introduced incrementally without rewrites.
+v2.0 extends the shipped v1.0 per-token spell-check surface into structural
+grammar: word order, case/agreement governance, aspect/mood selection, register
+drift, and collocation errors. The research is unusually well-grounded — v1.0 is
+already in production, all constraints are binding, the benchmark corpus is
+hand-authored, and the codebase was read directly. The recommended approach
+requires exactly one new browser primitive (`Intl.Segmenter`), zero new npm
+dependencies, and additive data schema changes in `papertek-vocabulary`. Every
+new capability is achieved through three new architectural seams — a sentence
+segmenter (Phase 6), a tagged-token view with syntax-lite helpers (Phase 7), and
+a document-state two-pass runner (Phase 13) — layered on top of the existing
+plugin rule architecture and `__lexiVocab` seam.
 
-The recommended approach is data-first, then architecture, then features. Frequency and bigram tables from NB N-gram 2021 (CC-0, safe to bundle) are the single highest-leverage data investment: they fix ranking bugs (the most visible failure mode), improve word-prediction ordering, and feed both pipelines simultaneously. Architecturally, extracting a shared `__lexiVocab` module out of `word-prediction.js` unlocks every subsequent improvement — rule extraction, signal scoring, fixture-driven testing — at low risk because it moves existing code without changing observable behavior. Feature additions ("Why flagged?" explanations, phonetic scoring, pronunciation path) are cheap once the data and architecture foundations are solid. Attempting the reverse order is the most common way heuristic tools stall.
+The dominant delivery risk is not technical novelty but discipline: structural
+rules have an open-ended acceptance surface that token-local rules did not.
+Fixture green is a necessary but insufficient release criterion for structural
+rules; the new `check-benchmark-acceptance` gate (≤2 stray flags per 500-word
+passage) is equally binding. A second compounding risk is data-track latency:
+every phase depends on `papertek-vocabulary` schema additions (`aux`, `separable`,
+`copula`, `human`, `bags`, governance tables, trigger banks), and that authoring
+queue must be opened as data-track tickets in parallel with logic work, not after.
 
-The dominant risks are: (1) ranking bugs that confidently return a wrong-dialect word as the top suggestion, destroying user trust instantly; (2) false positives on correctly-spelled words — especially proper nouns and code-switched foreign-language text — which is fatal for a dyslexia-first audience that cannot easily verify whether the tool is right; (3) a regression fixture designed as a v1 snapshot rather than ground-truth, which locks in existing bugs instead of measuring improvement. All three are preventable with decisions made in the first phase. Frequency-based tie-breaking, a multi-layer proper-noun guard, a fail-silent threshold for low-confidence fuzzy matching, and ground-truth fixture structure must all be in place before any new error classes are added.
+Phase 6 is deliberately overloaded: beyond its own register/collocation/redundancy
+features, it must land the sentence segmenter, quotation-span suppression tier,
+hint-tier CSS and severity contract, priority-band documentation, the P1/P2/P3
+benchmark-line labeling convention, the `papertek-vocabulary` SCHEMA.md ownership
+model, and the skeleton of `check-benchmark-acceptance`. If Phase 6 is scoped as
+"just register polish" these infrastructure items slip to Phase 7, where they
+arrive too late because Phase 7 is the first high-FP-risk word-order phase.
+Phase 6 is the infrastructure phase.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The correct stack for this milestone is zero new runtime dependencies. All candidate npm packages were evaluated and rejected: GPL-licensed Hunspell dictionaries contaminate the MIT extension; `spellchecker-wasm` adds 800 KB of wasm and requires CSP relaxation the Chrome Web Store flags; `nspell` depends on a Hunspell dictionary; phonetic libraries are unmaintained or recall-first in a precision-first task. The one genuine data dependency — unigram and bigram frequency — is met by NB N-gram 2021 from Nasjonalbiblioteket, which is CC-0 and safe to bundle. Frequency values are pre-computed as Zipf floats at build time, stored as a sidecar `data/freq-{lang}.json` file, and loaded as another signal at runtime.
+v2.0 requires no new runtime dependencies. The addition set is: `Intl.Segmenter`
+(browser-native since Chromium 87, ICU-backed, Baseline 2024-04, zero bundle
+cost) for locale-aware sentence and word segmentation; additive JSON fields on
+`papertek-vocabulary` banks; and rolled-own micro-helpers of 40–200 LOC each for
+light syntactic reasoning. All alternatives considered (sentencex-js, compromise,
+de-compromise, NLP libraries, WASM Hunspell, ML taggers) were rejected for bundle
+cost, license incompatibility (GPL-2.0 Norwegian dicts), or mismatch with the
+closed-set, deterministic, offline requirements.
 
 **Core technologies:**
-- **Vanilla JS (ES2022+) + inlined Damerau-Levenshtein (~60 LOC):** extends the existing `levenshtein` at `word-prediction.js:1480` with adjacent-transpose case and bounded early-exit; no external dep buys anything here
-- **Hand-rolled SymSpell deletion index (~120 LOC):** 1000-1800x faster than BK-tree for 25k-word fuzzy lookup; eliminates current first-match-wins artefact; built once on language load
-- **NB N-gram 2021 (CC-0) as Zipf frequency floats:** pre-computed via `scripts/build-frequencies.mjs`; stored as `data/freq-{lang}.json`; used as primary ranking tie-breaker; ~200 KB uncompressed per language
-- **Existing bigram schema extended:** `{prev: {next: weight}}` with integer buckets already ships and already scored; grow coverage from the same CC-0 corpus
-- **Plain Node script for regression testing:** `scripts/check-fixtures.js` loads vocab directly (bypassing Chrome APIs), runs the analysis pipeline, diffs against ground-truth JSONL; zero deps; upgrades to `node --test` when fixtures exceed ~200 cases
+- `Intl.Segmenter` — locale-aware sentence/word segmentation — zero bundle cost, ICU-backed, handles DE/FR/ES/NB punctuation edge cases (`¿?`, `«»`, decimals, abbreviations) that a regex segmenter cannot
+- Additive `papertek-vocabulary` schema — authoritative data source for governance fields (`aux`, `separable`, `copula`, `human`, `bags`, governance tables, trigger banks) — cross-app single source of truth; additive-only to protect sibling consumers
+- Rolled-own rule-local helpers (~40–200 LOC each) — closed-set syntactic reasoning (V2 detection, subordinator lookup, clitic-cluster order, prefix-stranding) — lighter than any library candidate by 10–100×
+
+**New gate scripts (v2.0 additions):**
+- `check-benchmark-coverage` (~80 LOC) — phase-close criterion anchored to P1/P2/P3-weighted benchmark flip-rate; not a bare 80% percentage
+- `check-governance-data` (~60 LOC) — asserts verbbank entries matching aux/separable heuristics have the expected field; guards against silent no-ops when sync drops a field
+- `check-stateful-rule-invalidation` — edit-sequence simulator for Phase 13 discourse-state rules; asserts findings match final text after paste, undo, delete
 
 ### Expected Features
 
-**Must have (this milestone release bar):**
-- Regression fixture with ground-truth structure — blocks safe iteration; without it, rule tuning is Russian roulette
-- "Why flagged?" student-friendly explanation per error class — the brand differentiator; copy-heavy, not code-heavy
-- Reduced false-positive rate on NB + NN — measured against fixture; false positives are the primary reason students abandon a spell-checker
-- Word-prediction ranking improvement across all six languages — measurable via top-k accuracy on held-out set
-- Expanded typo bank in `papertek-vocabulary` + sync — data-driven recall lift publicly committed on landing page
-- `__lexiPrediction` interface preserved or upgraded to `__lexiVocab` — guards future extraction option
+**Must have — P1 (table stakes, v2.0.0–v2.1):**
+- 6.3 Stylistic redundancy (`return back`, `free gift`) — highest ROI per LOC; literal-match
+- 6.1 Register/formality detector — EN `gonna` + NB anglicisms; proves opt-in toggle pattern
+- 6.2 Collocation errors EN seed — `make a photo → take`; proves data-bigram rule shape
+- 8.1 DE preposition-case governance — highest error-density per benchmark token
+- 8.2 DE separable verbs (`ich aufstehe`)
+- 8.3 DE perfekt auxiliary (`haben` vs `sein`)
+- 8.4 DE compound-noun gender from last component
+- 9.1 ES ser vs estar
+- 9.2 ES por vs para
+- 9.3 ES personal "a"
+- 10.1 FR élision — deterministic, closed set
+- 10.2 FR être vs avoir
+- 14.1 EN morphological overgeneration (`childs`, `eated`)
 
-**Should have (competitive differentiators, ship after quality bar met):**
-- Phonetic-hash scoring layer (Norwegian-tuned: ⟨kj/skj/sj⟩, double-consonant, å/o confusion) — catches dyslexic multi-letter errors that edit-distance misses
-- Pronunciation-confirmation path from spell-check popover to TTS widget — Lingdys has this; Leksihjelp already bundles TTS; low integration cost
-- More confused-word pairs beyond og/å (hjerne/gjerne, fot/fort) — data-driven expansion via typo bank
-- Top-3 ranked suggestions with "show more" reveal — dyslexia UX: cognitive load of 10+ options causes abandonment
-- Session-scoped "ignore this word" with 3-dismiss auto-ignore
+**Should have — P2 (differentiators, v2.1–v2.2):**
+- 7.1 NB V2 word-order (`Hvorfor du tror`) — HIGH impact, MEDIUM-HIGH FP risk
+- 7.2 DE V2 + subordinate verb-final (`dass er ist nett`) — shares syntactic reasoner with 7.1
+- 7.3 FR BAGS adjective placement — closed ~40-adj list; competitors miss it
+- 10.3a FR participe passé agreement — tight adjacent-window scope, default-off toggle; 10.3b explicitly deferred
+- 11.1 ES subjuntivo triggers
+- 11.3 FR subjonctif triggers
+- 13.3 NB bokmål/riksmål drift — brand-distinctive; no competitor ships it
+- 13.4 NN a-infinitiv/e-infinitiv drift — brand-distinctive for NN users
+- 12.1 ES pro-drop overuse (soft hint)
+- 12.2 ES gustar-class syntax
+- 14.2 ES/FR opaque-noun gender mismatch
 
-**Defer to later milestones:**
-- å/og detection — requires sentence-level parsing, not word-level; documented in user memory as out-of-scope; a 50% precision detector is worse than nothing
-- Spell-check for DE/ES/FR/EN — different grammar, different error classes; separate milestone per language
-- Anonymous opt-in data contribution — requires legal/privacy review first
-- Teacher-facing dashboard, classroom pilot — different surface entirely
+**Defer to v3.0 or kill:**
+- Phase 16 (tense harmony, anaphora, long-distance SV agreement) — high FP risk; defer unless Phase 13 seam generalizes cleanly
+- 15.3 Idiomatic literalism detection — "scope TBD" is a trap; curated exact-match only or kill
+- P3 features (13.1 DE du/Sie drift, 13.2 FR tu/vous drift, 12.3 FR clitic order, 15.x collocation banks at scale) — after Phase 6/13 seams proven
+
+**Anti-features (never build):** auto-correct/silent rewrite, ML-powered grammar rewrites, online-only integration, premium gating for any spell-check rule.
 
 ### Architecture Approach
 
-The existing codebase has all the right pieces but they are coupled in the wrong direction: `word-prediction.js` owns all runtime indexes and spell-check borrows through a narrow interface. The key architectural move is extracting a shared `vocab-index.js` module exposing read-only handles (`self.__lexiVocab`) to both pipelines. Once that seam exists, four further improvements become routine: a rule-pack plugin registry (`self.__lexiSpellRules`, one file per error class), a signal-scoring table in `scoring.js` replacing the 150-line `applyBoosts()` chain, language tags on every rule (enabling DE spell-check later with zero runner changes), and a fixture-driven regression loop runnable in Node without Chrome APIs. None of these require rewriting existing logic — they move and re-expose it.
+v2.0 extends the existing `spell-check-core.js` → plugin rule registry pipeline
+with three new seams, each introduced at its first point of need. The plugin
+registry, `__lexiVocab` getter contract, popover rendering, and all six v1.0
+release gates are unchanged. The only structural edit to `spell-check.js` is the
+Phase 13 two-pass runner (~50 LOC). Everything else is additive.
 
-**Major components:**
-1. **`vocab-index.js` (NEW)** — builds all runtime indexes once per language; exposes `self.__lexiVocab` with read-only getters and `onReady` lifecycle; decouples load-order dependency between spell-check and prediction
-2. **`spell-rules/` directory (NEW)** — one IIFE file per error class, each exporting `{ id, languages, priority, explain, check(ctx) → Finding[] }`; adding rule #5 = new file, no core edits
-3. **`scoring.js` (NEW)** — declared signal table `[{ id, weight, fn }]` replacing interleaved if-branches; pure functions callable from Node fixture runner; weighted-sum with veto escape hatch
-4. **`fixtures/` directory (NEW)** — JSONL per language per error class with ground-truth `expected_errors` fields (not snapshots); runner exits non-zero on regression; false-positive sentences use `expected_errors: []`
-5. **`data/freq-{lang}.json` sidecar (NEW)** — Zipf float per word, NB and NN only this milestone; kept separate from `{lang}.json` to avoid cross-app schema blast radius
+**Three new seams (lands-in phase):**
+
+1. **Sentence segmenter `segmentSentences(text, tokens) → Sentence[]`** — Phase 6, `spell-check-core.js`. Exposes `ctx.sentences`. Uses `Intl.Segmenter` + per-language abbreviation allow-list. Rules that do not need sentences ignore it.
+2. **Tagged-token view `ctx.getTagged(i) → TaggedToken` + syntax-lite helpers** — Phase 7, `spell-check-core.js`. Lazy lookup-based enrichment (not statistical). Helpers: `findFiniteVerb`, `findSubordinator`, `findCliticCluster`, `isMainClause`, `agree`. Memoized per `ctx`. Phases 8–12 reuse.
+3. **Document-state two-pass runner `kind: 'document'` + `checkDocument(ctx, findings)`** — Phase 13, `spell-check-core.js`. Shape agreed by design spike in Phase 7 (no code lands until Phase 13). Priority ranges: sentence rules 1–199, document rules 200+.
+
+**New `__lexiVocab` getters (additive, staggered):**
+`getRegisterLevel`, `getCollocationBank`, `getRedundancyPhrases` (Phase 6);
+`getBagsAdjectives` (Phase 7);
+`getPrepositionCase`, `getSeparablePrefixes`, `getAuxiliary`, `getCompoundSplitter` (Phase 8);
+`getCopulaTag`, `getPorParaPatterns`, `getHumanNouns` (Phase 9);
+`getElisionTriggers` (Phase 10);
+`getSubjunctiveTriggers`, `getAspectAdverbs` (Phase 11);
+`getGustarVerbs` (Phase 12);
+`getIrregularForms`, `getWordFamily` (Phase 14).
+All follow the existing empty-safe contract (`return new Map()`).
 
 ### Critical Pitfalls
 
-1. **Wrong-dialect word as top suggestion (the `berde → berre` case)** — first-match-wins fuzzy matching with no frequency tie-breaker; fix with Zipf frequency as primary tie-breaker, dialect bias toward active UI language, and multi-candidate display when distance is tied; must be in place before first release
-2. **False positives eroding trust, especially for dyslexic users** — over-flagging is the #1 spell-check complaint; dyslexic students cannot easily verify correctness; fix with layered proper-noun guard, fail-silent confidence threshold for fuzzy matching, and "stay silent when uncertain" default
-3. **Curated typo entries colliding with valid words in the other dialect** — `papertek-vocabulary` typo bank not cross-validated against NN vocabulary; fix at source with a CI check; add client-side cross-dialect safety net; this pitfall is confirmed by user memory entries on NN data drift
-4. **Code-switched text (DE/EN inside NB) flooding the document with dots** — language-learner students mix languages by definition; fix with per-span language detection heuristic, high-unknown-density kill-switch, and cross-language token allowlist
-5. **Regression fixture designed as snapshot rather than ground-truth** — locks in existing bugs; every improvement that changes output becomes a test failure; fix by authoring entries with human-judged `expected_errors`, measuring precision/recall per release, and marking known-wrong v1 behaviors as failing TODOs
+Top five of twelve identified:
+
+1. **FP avalanche on structural rules (Pitfall 1)** — Structural rules have open-ended acceptance surfaces; fixture-green alone is not enough. Prevention: ≥2× acceptance cases vs positive cases per structural rule; `check-benchmark-acceptance` gate (≤2 stray flags per 500-word passage) is binding alongside `check-fixtures`. Must land in Phase 7 before any word-order rule ships.
+
+2. **Discourse-state staleness in Phase 13 (Pitfall 4)** — Cross-sentence state goes stale on edit/paste/undo; ghost findings erode trust. Prevention: document-level state is derived never cached; content-hash keyed invalidation; `check-stateful-rule-invalidation` gate. Mandatory research step before any Phase 13 rule code.
+
+3. **Benchmark overfitting (Pitfall 2)** — The 80%-flip-rate incentive drives rules tuned to visible benchmark phrasings rather than underlying patterns. Prevention: hold-out corpus (30% of benchmark additions hidden during authoring); fixtures seeded from independent sources; P1/P2/P3 weighted closure (100% P1 required, not just 80% overall).
+
+4. **DE case governance parsing overreach (Pitfall 5)** — "Find the NP head after the preposition" breaks on adjective chains and embedded relatives. Prevention: Phase 8.1 scoped to adjacent-article-only window; precision floor ≥0.90 before recall optimization.
+
+5. **Feature-gated index starvation v2 (Pitfall 3)** — New vocab indexes (preposition tables, BAGS list, trigger banks) can be silently wired through `buildIndexes` (preset-filtered) instead of `buildLookupIndexes` (unfiltered), disabling rules under default presets. Prevention: extend `check-spellcheck-features` for every new index; `check-seam-routing` static grep asserts correct builder.
+
+Additional high-impact: Pitfall 7 (quoted-speech bleed-through — tier `ctx.suppressedFor.structural` in Phase 6), Pitfall 8 (hint tier never differentiated — Phase 6 builds dashed-underline tier), Pitfall 9 (schema drift — SCHEMA.md ownership per field), Pitfall 12 (80%-flip fetishism — P1/P2/P3 closure criterion required).
 
 ## Implications for Roadmap
 
-The dependency chain from research is clear: data and architecture must precede feature additions, and the fixture must precede rule tuning. The five-phase structure below reflects this; Phases 1 and 2 are load-bearing for everything that follows.
+The research validates the 11-phase grouping in the seed roadmap. The synthesis
+adds specific scoping decisions and sequencing constraints that were implicit in
+the seed.
 
-### Phase 1: Foundation — Shared Vocab Layer + Fixture Infrastructure
+### Phase 6 — Register, Collocations, Redundancy + Infrastructure Build-Out
+**Rationale:** Lowest-risk features open the milestone, but Phase 6 must be
+explicitly scoped as infrastructure delivery — not just feature delivery. Every
+cross-cutting convention needed by Phases 7–16 must land here.
+**Delivers:** 6.1 register/formality detector; 6.2 EN collocation errors seed;
+6.3 stylistic redundancy; sentence segmenter (`ctx.sentences`); quotation-span
+suppression tier (`ctx.suppressedFor.structural`); hint-tier CSS + `severity`
+contract; priority-band documentation; P1/P2/P3 benchmark labeling; SCHEMA.md
+ownership model; `check-benchmark-acceptance` skeleton; `check-spellcheck-features`
+extended for new indexes.
+**Avoids:** Pitfalls 7, 8, 9, 10, 12.
+**Research flag:** Design spikes at phase start (not pre-phase research) for sentence segmenter abbreviation lists and suppression tier shape.
 
-**Rationale:** Extracting `__lexiVocab` is the single highest-leverage architectural change; every other improvement is cheaper after this seam exists. The fixture must precede rule tuning — without it, improvements are unverifiable. Both are structural, touch no user-visible behavior, and eliminate the risk of every subsequent PR.
+### Phase 7 — Word-Order Violations (NB + DE + FR) + Seam Design Spike
+**Rationale:** First high-FP-risk structural phase. Tagged-token view lands here.
+A document-state seam design spike is embedded (shape agreed, no code) so Phase
+13 does not design it under pressure.
+**Delivers:** 7.1 NB V2; 7.2 DE V2 + verb-final; 7.3 FR BAGS (parallel-safe
+with 7.1/7.2); tagged-token view + helpers in `spell-check-core.js`;
+document-state seam shape stubbed in `spell-rules/README.md`;
+`check-benchmark-acceptance` fully active and green.
+**Avoids:** Pitfall 1 (≥2× acceptance fixtures mandatory), Pitfall 2 (hold-out corpus active).
+**Research flag:** Needs pre-phase research. NB V2 FP risk and acceptance-fixture strategy require upfront design.
 
-**Delivers:** `vocab-index.js` with `self.__lexiVocab`; `spell-check.js` migrated to read from it; `fixtures/` with initial NB corpus (30-50 cases per existing rule + 20 false-positive sentences); Node regression runner; ground-truth fixture structure documented.
+### Phases 8 / 9 / 10 — Language-Siloed Structural Coverage (Can Parallel)
+**Rationale:** Fully siloed languages; all depend only on Phase 6+7 seams.
+DE first (highest error-density). Phase 8 must deliver shared `grammar-tables.js`
+primitive before Phases 9/10 rule code starts.
+**Delivers (Phase 8 DE):** 8.1 prep-case (adjacent scope, precision ≥0.90 floor); 8.2 separable verbs; 8.3 perfekt aux; 8.4 compound gender; `grammar-tables.js` shared primitive.
+**Delivers (Phase 9 ES):** 9.1 ser/estar; 9.2 por/para (≤15 trigger patterns); 9.3 personal "a".
+**Delivers (Phase 10 FR):** 10.1 élision; 10.2 être/avoir; 10.3a PP agreement (adjacent-window, default-off; 10.3b explicitly deferred).
+**Avoids:** Pitfall 5 (parsing overreach), Pitfall 6 (FR PP eating phase), Pitfall 11 (zero-transfer language work — Phase 8 primitive enforced).
+**Research flag:** Phase 8 needs research on shared-primitive API shape. Phases 9/10 are standard patterns once primitive shape is known.
 
-**Addresses:** Module separability requirement; regression fixture requirement (both in PROJECT.md:Active).
+### Phase 11 — Aspect and Mood (ES + FR)
+**Rationale:** Gates on Phase 9/10 trigger infrastructure. Entry requires gate
+check confirming the trigger-detection primitive is shared. If not, refactor
+sub-phase blocks entry.
+**Delivers:** 11.1 ES subjuntivo triggers; 11.2 ES pretérito/imperfecto (hint tier only); 11.3 FR subjonctif triggers.
+**Avoids:** Pitfall 8 (11.2 aspect is a hint, not an error), Pitfall 11 (must consume Phase 8/9 primitive).
+**Research flag:** Gate check (not research) before opening: confirm primitive is reusable.
 
-**Avoids:** Coupling spell-check lifecycle to prediction (Architecture Anti-Pattern 2); snapshot-based fixture calcification (Pitfall 6).
+### Phase 12 — Pronoun and Pro-drop (ES + FR)
+**Rationale:** All three rules are soft hints or complex patterns. Parallel-safe
+with Phase 11. All must use hint tier.
+**Delivers:** 12.1 ES pro-drop (soft hint); 12.2 ES gustar-class syntax; 12.3 FR clitic cluster order.
+**Avoids:** Pitfall 8 (all Phase 12 rules must be hint tier, not error tier).
+**Research flag:** Standard patterns; no dedicated research needed.
 
-**Research flag:** Standard patterns — LanguageTool and Harper are direct references. No phase research needed.
+### Phase 13 — Register Consistency Within a Text (Document-State Seam)
+**Rationale:** Highest-risk phase in v2.0. Mandatory pre-phase research step
+on invalidation protocol before any rule code. The seam shape was agreed in
+Phase 7 spike; now it becomes code.
+**Delivers:** Two-pass runner in `spell-check-core.js`; 13.1 DE du/Sie drift;
+13.2 FR tu/vous drift; 13.3 NB bokmål/riksmål drift (brand-distinctive);
+13.4 NN a-/e-infinitiv drift; `check-stateful-rule-invalidation` gate active.
+**Avoids:** Pitfall 4 (content-hash invalidation, never module-level mutable state, edit-sequence gate).
+**Research flag:** Mandatory pre-phase research on document-state invalidation protocol. Do not start rule code before seam design passes review.
 
-### Phase 2: Data — Frequency Tables + Ranking Fix + Typo Bank
+### Phase 14 — Morphology and Agreement Beyond Tokens (EN + ES + FR)
+**Rationale:** Language-siloed; reuses tagged-token infra. Low seam cost. 14.1
+is P1 and ships earliest.
+**Delivers:** 14.1 EN morphological overgeneration; 14.2 ES/FR opaque-noun gender mismatch; 14.3 EN word-family confusion.
+**Avoids:** Pitfall 9 (SCHEMA.md entry per new field — word-family map, irregular-form map).
+**Research flag:** Standard patterns; no dedicated research needed.
 
-**Rationale:** Ranking bugs are the most visible failure mode and fastest trust-destroyer. Frequency data fixes them and simultaneously improves word-prediction ordering — data work that pays twice. Typo bank expansion at `papertek-vocabulary` is a public commitment with cross-app coordination overhead that benefits from being started early.
+### Phase 15 — Collocations and Idioms at Scale
+**Rationale:** Depends on Phase 6.2 proving the collocation-list pattern works.
+Data-heavy, little new logic. 15.3 must be explicitly decided — kill unless
+curated-only exact-match.
+**Delivers:** 15.1 NB preposition collocations; 15.2 DE/FR/ES preposition governance; (15.3 curated exact-match only if approved).
+**Avoids:** Pitfall 11 (must share Phase 6.2 list data shape).
+**Research flag:** Standard patterns. Kill/scope decision on 15.3 required in phase plan.
 
-**Delivers:** `scripts/build-frequencies.mjs` generating `data/freq-nb.json` and `data/freq-nn.json` from NB N-gram 2021; `freqIndex` in `__lexiVocab`; fuzzy matcher upgraded to bounded Damerau-Levenshtein with Zipf tie-breaking; dialect-biased candidate selection; expanded typo bank in `papertek-vocabulary`; fixture cases for the berde/berre ranking bug class.
-
-**Addresses:** Spell-check quality to production level; word-prediction ranking improvement.
-
-**Avoids:** Ranking/wrong-suggestion pitfall (Pitfall 1); dialect typo collision (Pitfall 3); bundle-size creep (Pitfall 17) — Zipf floats are ~200 KB uncompressed per language.
-
-**Research flag:** Cross-app coordination with `papertek-vocabulary` before adding new typo bank fields. Additive change is safe; confirm scope before starting. Also: NN infinitive drift (user memory `project_nn_infinitive_fix.md`) should be fixed at source in this phase.
-
-### Phase 3: Rule Extraction + Signal Scoring + False-Positive Reduction
-
-**Rationale:** With the fixture catching regressions and frequency data available, it is now safe to restructure the rule surface and scoring pipeline. Extracting the four existing rules into `spell-rules/nb-*.js` makes adding new rules in Phase 4 a one-file operation. The proper-noun guard and code-switching detection reduce false positives to a level where the tool can be shown to dyslexic students.
-
-**Delivers:** `spell-rules/` with `nb-gender.js`, `nb-modal-verb.js`, `nb-sarskriving.js`, `nb-typo-curated.js`, `nb-typo-fuzzy.js`; `spell-check.js` refactored to generic rule-pack runner; `scoring.js` with explicit signal table; layered proper-noun guard (consecutive capitalized spans + per-user allowlist); code-switching detection (per-span heuristic + density kill-switch); fixture extended with proper-noun and code-switching cases.
-
-**Addresses:** False-positive rate reduction; word-prediction ranking via consolidated scoring signals.
-
-**Avoids:** Piling new rules into one monolithic check loop (Architecture Anti-Pattern 1); false positive trust erosion (Pitfall 2); code-switched text flag-forest (Pitfall 4).
-
-**Research flag:** Code-switching detection accuracy for Norwegian vs. Germanic neighbors (Swedish, Danish, German) needs empirical calibration. Plan a small test with sample sentences before committing to specific thresholds.
-
-### Phase 4: Feature Polish — Explanations, UX, New Error Classes
-
-**Rationale:** With ranking correct, false positives reduced, and rule infrastructure in place, additive feature work is low-risk. "Why flagged?" explanations require editorial copy more than engineering. New error classes are each a new file in `spell-rules/`. UX improvements require no architecture changes.
-
-**Delivers:** Student-friendly explanation copy for all four error classes (NB and NN register); `rule.explain` field on every rule; density cap in overlay (max ~5 dots per viewport); session-scoped dismiss with 3-dismiss auto-ignore; additional confused-word pairs from typo bank; keyboard navigation (Tab/Enter/Escape); pronunciation path wired from popover to existing TTS widget.
-
-**Addresses:** "Why flagged?" explanation (PROJECT.md:Active); dyslexia-hostile UI (Pitfall 5); dismiss-loop rage-quit (Pitfall 13); accessibility gaps (Pitfall 12).
-
-**Avoids:** å/og detection — document as out-of-scope; requires sentence-level parsing per user memory; a 50% precision detector is worse than the current silence.
-
-**Research flag:** Standard patterns — explanation copy and UX changes are well-understood. No phase research needed.
-
-### Phase 5: Pre-Release Hardening
-
-**Rationale:** Heuristic tools work on dev prose and break on real-student text and real editors. A dedicated hardening pass prevents shipping something that looks done but isn't.
-
-**Delivers:** Fixture extended with student-sourced sentences (anonymized, multiple grade levels); third-party editor testing matrix (Gmail compose, Google Docs, Notion, Slack); performance audit (2000-char input, 16 ms budget, screen recording of dot stability); privacy audit (DevTools Network tab, CI grep for fetch in content scripts); bundle-size report; popup status indicator for spell-check initialization state.
-
-**Addresses:** Performance jitter (Pitfall 7); privacy regression (Pitfall 8); silent init failure (Pitfall 14); non-representative fixtures (Pitfall 20); third-party editor positioning (Pitfall 15).
-
-**Research flag:** Standard patterns. No phase research needed.
+### Phase 16 — Tense Harmony and Discourse (Conditional)
+**Rationale:** Defer to v3.0 unless Phase 13 seam generalizes cleanly to tense
+tracking. Do not duct-tape. Individual sub-rules may ship if they independently
+clear the FP threshold.
+**Avoids:** Pitfall 4 (same risk class as Phase 13, harder).
+**Research flag:** No planning until post-Phase-13 evaluation. Conditional on seam generalization.
 
 ### Phase Ordering Rationale
 
-- **Foundation before features:** Architecture research is explicit — extracting the shared vocab layer is the prerequisite for everything else; doing it after feature additions raises the cost significantly.
-- **Data before rules:** Frequency is used by the ranking fix, SymSpell index, and word-prediction scoring simultaneously. Adding it after rule extraction misses compounding benefit.
-- **Fixture before rule tuning:** Both PITFALLS.md and ARCHITECTURE.md identify this as non-negotiable. Weight changes without fixtures produce silent regressions.
-- **Explanations in Phase 4, not Phase 1:** Copy for explanations depends on knowing which rules survive Phase 3 in their final form. Writing copy against unstable rule IDs creates rework.
-- **å/og explicitly deferred:** User memory and FEATURES.md both identify this as requiring sentence-level parsing. Shipping a low-precision heuristic would be worse than current silence.
+- Phase 6 first because it lands the sentence segmenter and all cross-cutting infrastructure conventions (hint tier, priority bands, suppression tier, P-labeling) that every later phase depends on; opening with low-risk features validates velocity before harder structural phases
+- Phase 7 second because tagged-token view is needed by Phases 8/9/10 and the FP-risk mitigation gates must be proven green before high-risk structural phases open
+- Phases 8/9/10 parallel after Phase 7 because they are fully language-siloed and depend only on Phase 6+7 seams; DE first due to highest error-density
+- Phase 11 gates hard on Phase 9/10 trigger infrastructure — forced gate check before entry
+- Phase 13 after Phases 8–12 because the seam shape matures through those phases before it becomes code; highest-risk phase benefits from maximum infrastructure stability
+- Phase 15 after Phase 6.2; Phase 16 conditional on Phase 13 seam
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 3 (code-switching detection):** Accuracy for Norwegian vs. close Germanic neighbors is unknown. Plan empirical test with sample sentences before committing to a specific heuristic threshold.
-- **Phase 2 (papertek-vocabulary schema coordination):** Schema review with sibling apps before adding new typo-bank fields. Additive changes are safe; confirm scope before starting.
+Phases requiring dedicated pre-phase research or design spikes:
+- **Phase 7:** High-FP-risk NB V2 rule + document-state seam spike. Recommend pre-phase research step.
+- **Phase 8:** Shared-primitive API shape design. Short research step needed.
+- **Phase 13:** Mandatory pre-phase research on document-state invalidation protocol. Highest-risk phase.
 
-Phases with standard patterns (skip research):
-- **Phase 1 (vocab layer extraction):** Well-documented refactor pattern; LanguageTool and Harper are direct references.
-- **Phase 4 (explanations + UX):** Editorial copy and DOM changes; no novel technical ground.
-- **Phase 5 (hardening):** Standard pre-release audit process, not research.
+Phases with standard patterns (skip dedicated research):
+- **Phase 6:** Design spikes at phase start, not discovery research.
+- **Phase 9, 10:** Standard lookup patterns after Phase 8 primitive known.
+- **Phase 11:** Gate check (not research) before entry.
+- **Phase 12, 14, 15:** Standard lookup or data patterns; no research needed.
+- **Phase 16:** No planning until post-Phase-13 evaluation.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Zero-new-dependency recommendation is unusually clear; all candidates evaluated and rejected with specific technical reasons; NB N-gram 2021 CC-0 status verified; existing code inspected at line-number precision |
-| Features | MEDIUM-HIGH | Competitor analysis solid (Lingdys, IntoWords, LanguageTool verified); dyslexia UX research is multi-source; Norwegian-specific learner error distribution data is not available in published research |
-| Architecture | HIGH | Grounded directly in repo code at concrete line numbers; patterns verified against Harper, LanguageTool, Voikko; build order argued from explicit dependency analysis |
-| Pitfalls | MEDIUM-HIGH | Critical pitfalls multi-source verified; code-switching accuracy thresholds and density cap numbers are product-testing questions without published answers for this specific domain |
+| Stack | HIGH | Constraints are binding; `Intl.Segmenter` verified Baseline 2024-04; all alternatives reviewed and rejected with specific reasons; no dependency uncertainty |
+| Features | HIGH | P1/P2/P3 grounded in hand-authored benchmark corpus, competitor analysis, and v1.0 complexity analogues; MEDIUM on Phase 11 trigger-set completeness and FR BAGS adj count |
+| Architecture | HIGH | Direct code read of `spell-check.js`, `spell-check-core.js`, `vocab-seam.js`, `vocab-seam-core.js`; seam boundaries verified against existing runner |
+| Pitfalls | HIGH | All 12 pitfalls map to specific project evidence (v1.0 audit bugs, benchmark construction, codebase patterns); no speculative entries |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Norwegian-learner error distribution data:** No published research quantifies error rates by class for Norwegian students specifically. Fixture design should prioritize sourcing real anonymized student sentences over dev-authored test cases.
-- **Code-switching accuracy thresholds:** The 40% unknown-token density kill-switch and per-span language detection heuristics need empirical calibration before committing to specific values.
-- **Dyslexia-specific density cap:** Research confirms large option lists cause abandonment but does not specify a "max dots per viewport" number. Start at 5, test with real users, adjust.
-- **NN infinitive drift:** User memory (`project_nn_infinitive_fix.md`) flags that NN data mixes -a/-e infinitives. This directly impacts NN spell-check recall. Schedule fix in Phase 2 alongside other vocab data work.
-- **Bigram coverage ceiling:** Current `bigrams-nb.json` is 2.6 KB. Expansion to 50-200 KB stays in plain-object format; verify byte-cap enforcement is in the build script before generating a large corpus.
+- **Phase 11 trigger-set completeness:** Open as data-track ticket early; needs a `papertek-vocabulary` audit during Phase 11 planning. Do not assume roadmap canonical list is complete.
+- **FR BAGS adjective list size:** "~40" is a roadmap estimate; actual closed-set size needs audit at authoring time.
+- **`papertek-vocabulary` schema shape per field:** Cross-app coordination with `papertek-webapps` and `papertek-nativeapps` required before any data PR. SCHEMA.md ownership record (Phase 6) is the coordination artifact.
+- **Phase 13 invalidation protocol:** Never built in this codebase. Mandatory research step; do not treat as known-cost item.
+- **Phase 15.3 idiomatic literalism scope:** Explicit kill/curated-only decision required in Phase 15 plan.
+- **Phase 16 feasibility:** Evaluate post-Phase-13 only.
+- **80%-flip-rate must be weighted by priority:** Bare 80% target in seed roadmap is insufficient. Every phase plan must specify P1 (100% required), P2 (80%), P3 (50%); unflipped P1 blocks closure without written exception.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- NB N-gram 2021 — Nasjonalbiblioteket Språkbanken (CC-0) — frequency and bigram data source; 580k books + 3.4M newspapers
-- SymSpell — wolfgarbe/SymSpell GitHub — deletion-index algorithm; 1870x vs BK-tree benchmark (SeekStorm)
-- LanguageTool development overview and rule source — rule-pack architecture patterns; rule-per-file, language-tagged
-- Harper (Automattic/harper) — per-language module structure and stats signal module
-- Lingit / Lingdys Pluss product page — dyslexia-tuned spell-check, word prediction, TTS feature set
-- IntoWords Cloud Chrome Web Store listing — NB/NN coverage, og/å toggle, context-based prediction
-- International Dyslexia Association 2025 Definition — dyslexia UX framing authority
-- Dark Reading / Bleeping Computer — spelljacking 2022 disclosure — privacy pitfall grounding
-- Existing codebase: `spell-check.js` (898 LOC), `word-prediction.js` (1845 LOC), `vocab-store.js` (557 LOC), `.planning/PROJECT.md`, `.planning/codebase/` docs — direct inspection
+- `.planning/research/STACK.md` — technology decisions, dependency rationale, "what NOT to use"
+- `.planning/research/FEATURES.md` — feature landscape, P1/P2/P3 matrix, dependency graph, benchmark-line anchors
+- `.planning/research/ARCHITECTURE.md` — seam design, data-flow changes, build-order plan, scalability considerations
+- `.planning/research/PITFALLS.md` — 12 pitfalls with phase-to-prevention mapping and recovery strategies
+- `.planning/PROJECT.md` — binding constraints, Out-of-Scope list, v1.0 shipped requirements, Key Decisions table
+- `.planning/v2.0-benchmark-driven-roadmap.md` — 11-phase groupings, benchmark-line anchors, validation protocol, non-goals
+- `extension/content/spell-check.js`, `spell-check-core.js`, `vocab-seam.js`, `vocab-seam-core.js` — direct code read (via ARCHITECTURE.md research)
+- `CLAUDE.md` — 8 release gates, data-logic separation principle, release workflow
 
 ### Secondary (MEDIUM confidence)
-- wordfreq (rspeer) — Zipf scheme reference; NB supported, NN not
-- Korrekturavdelingen — særskriving as the #1 Norwegian writing-advice topic
-- Dysleksi Norge skrivehjelpemidler — canonical Norwegian dyslexia tool inventory
-- Ghotit Dyslexia — phonetic + contextual spell-check; reference for heuristic ceiling
-- Springer: Spelling errors made by people with dyslexia — 39% of errors differ by >1 letter
-- UX research on dyslexia UI — Taylor & Francis follow-up (2022), UX Collective, Smart Interface Design Patterns
-- Voikko general architecture — comparable Nordic spell-checker for architecture pattern reference
-- Apertium regression test framework — closest NLP analogue for ground-truth fixture structure
+- `benchmark-texts/*.txt` — 6 hand-authored student-error corpora; high confidence on error patterns, MEDIUM on whether the benchmark fully represents real student writing variance
+- Competitor analysis (LanguageTool, Grammarly free tier) — feature comparison; training-data based, not current product audit
 
 ### Tertiary (LOW confidence)
-- Trie vs hash table benchmark (Loup Vaillant) — bigram storage decision support
-- Signal Scoring Pipeline post (Blake Crosley) — weighted composite score rationale
+- Phase 11 trigger-set completeness — no `papertek-vocabulary` data audit yet; needs validation during Phase 11 planning
+- FR BAGS adjective count — "~40" is a roadmap estimate; actual closed-set size unverified
 
 ---
-*Research completed: 2026-04-17*
+*Research completed: 2026-04-24*
 *Ready for roadmap: yes*
