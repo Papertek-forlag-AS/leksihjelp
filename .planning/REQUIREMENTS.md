@@ -128,54 +128,54 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-05 | TBD | Pending |
-| INFRA-06 | TBD | Pending |
-| INFRA-07 | TBD | Pending |
-| INFRA-08 | TBD | Pending |
-| INFRA-09 | TBD | Pending |
-| INFRA-10 | TBD | Pending |
-| INFRA-11 | TBD | Pending |
-| INFRA-12 | TBD | Pending |
-| REG-01 | TBD | Pending |
-| REG-02 | TBD | Pending |
-| REG-03 | TBD | Pending |
-| WO-01 | TBD | Pending |
-| WO-02 | TBD | Pending |
-| WO-03 | TBD | Pending |
-| WO-04 | TBD | Pending |
-| DE-01 | TBD | Pending |
-| DE-02 | TBD | Pending |
-| DE-03 | TBD | Pending |
-| DE-04 | TBD | Pending |
-| ES-01 | TBD | Pending |
-| ES-02 | TBD | Pending |
-| ES-03 | TBD | Pending |
-| FR-01 | TBD | Pending |
-| FR-02 | TBD | Pending |
-| FR-03 | TBD | Pending |
-| MOOD-01 | TBD | Pending |
-| MOOD-02 | TBD | Pending |
-| MOOD-03 | TBD | Pending |
-| PRON-01 | TBD | Pending |
-| PRON-02 | TBD | Pending |
-| PRON-03 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
-| MORPH-01 | TBD | Pending |
-| MORPH-02 | TBD | Pending |
-| MORPH-03 | TBD | Pending |
-| COLL-01 | TBD | Pending |
-| COLL-02 | TBD | Pending |
-| COLL-03 | TBD | Pending |
-| COLL-04 | TBD | Pending |
+| INFRA-05 | Phase 6 | Pending |
+| INFRA-06 | Phase 7 | Pending |
+| INFRA-07 | Phase 13 | Pending |
+| INFRA-08 | Phase 6 | Pending |
+| INFRA-09 | Phase 6 | Pending |
+| INFRA-10 | Phase 13 | Pending |
+| INFRA-11 | Phase 6 | Pending |
+| INFRA-12 | Phase 6 | Pending |
+| REG-01 | Phase 6 | Pending |
+| REG-02 | Phase 6 | Pending |
+| REG-03 | Phase 6 | Pending |
+| WO-01 | Phase 7 | Pending |
+| WO-02 | Phase 7 | Pending |
+| WO-03 | Phase 7 | Pending |
+| WO-04 | Phase 7 | Pending |
+| DE-01 | Phase 8 | Pending |
+| DE-02 | Phase 8 | Pending |
+| DE-03 | Phase 8 | Pending |
+| DE-04 | Phase 8 | Pending |
+| ES-01 | Phase 9 | Pending |
+| ES-02 | Phase 9 | Pending |
+| ES-03 | Phase 9 | Pending |
+| FR-01 | Phase 10 | Pending |
+| FR-02 | Phase 10 | Pending |
+| FR-03 | Phase 10 | Pending |
+| MOOD-01 | Phase 11 | Pending |
+| MOOD-02 | Phase 11 | Pending |
+| MOOD-03 | Phase 11 | Pending |
+| PRON-01 | Phase 12 | Pending |
+| PRON-02 | Phase 12 | Pending |
+| PRON-03 | Phase 12 | Pending |
+| DOC-01 | Phase 13 | Pending |
+| DOC-02 | Phase 13 | Pending |
+| DOC-03 | Phase 13 | Pending |
+| DOC-04 | Phase 13 | Pending |
+| MORPH-01 | Phase 14 | Pending |
+| MORPH-02 | Phase 14 | Pending |
+| MORPH-03 | Phase 14 | Pending |
+| COLL-01 | Phase 15 | Pending |
+| COLL-02 | Phase 15 | Pending |
+| COLL-03 | Phase 15 | Pending |
+| COLL-04 | Phase 15 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 42 total
-- Mapped to phases: 0 (filled by roadmapper)
-- Unmapped: 42 ⚠️ (expected pre-roadmap)
+- Mapped to phases: 42
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-24*
-*Last updated: 2026-04-24 after initial definition*
+*Last updated: 2026-04-24 — traceability populated by gsd-roadmapper (42/42 mapped across Phases 6–15)*

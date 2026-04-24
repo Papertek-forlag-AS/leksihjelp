@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: "Depth of Coverage — Grammar Governance Beyond Tokens"
-status: defining_requirements
+status: roadmap_ready
 last_updated: "2026-04-24T00:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 10
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens. Defining requirements from `.planning/v2.0-benchmark-driven-roadmap.md` draft + `benchmark-texts/` corpus.
+**Current focus:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens. ROADMAP.md complete (Phases 6–15, 42/42 requirements mapped). Ready for `/gsd:plan-phase 6`.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 — Structural Infrastructure + Register & Stylistic Polish (not yet planned)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-24 — Milestone v2.0 started.
+Status: Roadmap ready, awaiting phase planning
+Last activity: 2026-04-24 — v2.0 ROADMAP.md written (10 phases, 42 requirements, 100% coverage).
 
 Progress: [░░░░░░░░░░] 0%
 
