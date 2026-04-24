@@ -52,6 +52,9 @@
         "content/spell-rules/nb-homophones.js",
         "content/spell-rules/en-homophones.js",
         "content/spell-rules/universal-context-typo.js",
+        "content/spell-rules/register.js",
+        "content/spell-rules/collocation.js",
+        "content/spell-rules/redundancy.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",

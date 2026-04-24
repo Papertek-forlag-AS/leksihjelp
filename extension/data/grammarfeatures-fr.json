@@ -238,6 +238,18 @@
       ],
       "dataPath": "agreement",
       "future": true
+    },
+    {
+      "id": "grammar_register",
+      "name": "Register / formality",
+      "nameEn": "Register / formality",
+      "description": "Flag informal words and expressions in text",
+      "descriptionEn": "Flag informal words and expressions in text",
+      "category": "style",
+      "appliesTo": [
+        "all"
+      ],
+      "dataPath": "register"
     }
   ],
   "categories": [

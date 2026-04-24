@@ -236,6 +236,11 @@
       pitfalls:         VOCAB.getPitfalls(),
       freq:             VOCAB.getFreq(),  // Phase 03.1 / SC-01: Zipf tiebreaker Map (nb/nn populated, empty for others)
       sisterValidWords: VOCAB.getSisterValidWords(),  // Phase 4 / SC-03: cross-dialect tolerance
+      // Phase 6: governance bank data for register/collocation/redundancy rules.
+      registerWords:      VOCAB.getRegisterWords(),
+      collocations:       VOCAB.getCollocations(),
+      redundancyPhrases:  VOCAB.getRedundancyPhrases(),
+      isFeatureEnabled:   VOCAB.isFeatureEnabled || (() => true),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

@@ -856,6 +856,34 @@
       }
     }
 
+    // ── Governance bank extraction (Phase 6) ──
+    // These banks feed spell-check rules only, NOT word-prediction.
+    const registerWords = new Map();  // word → { formal, severity }
+    if (raw && raw.registerbank) {
+      for (const [id, entry] of Object.entries(raw.registerbank)) {
+        if (entry.word) registerWords.set(entry.word.toLowerCase(), entry);
+      }
+    }
+
+    const collocations = [];  // [{ trigger, triggerWords, fix, severity }]
+    if (raw && raw.collocationbank) {
+      for (const [id, entry] of Object.entries(raw.collocationbank)) {
+        if (entry.trigger && entry.fix) {
+          collocations.push({
+            ...entry,
+            triggerWords: entry.trigger.toLowerCase().split(/\s+/),
+          });
+        }
+      }
+    }
+
+    const redundancyPhrases = [];  // [{ trigger, suggestion }]
+    if (raw && raw.phrasebank) {
+      for (const [id, entry] of Object.entries(raw.phrasebank)) {
+        if (entry.trigger) redundancyPhrases.push(entry);
+      }
+    }
+
     return {
       wordList,
       nounGenus,
@@ -877,6 +905,12 @@
       // typoBank is an alias (same Map reference) of typoFix — the data-
       // oriented name used by consumers doing lookup/autocorrect work.
       typoBank: typoFix,
+      // Phase 6: governance bank indexes for register/collocation/redundancy rules.
+      // Empty when the underlying banks don't exist in the bundled vocab yet —
+      // rules check for presence/size before iterating.
+      registerWords,
+      collocations,
+      redundancyPhrases,
     };
   }
 

@@ -291,6 +291,15 @@
     // getValidWords / getNounGenus / getVerbInfinitive / getCompoundNouns
     // pattern — consumers skip null-guards with `.has()` returning false.
     getSisterValidWords: () => (state && state.sisterValidWords instanceof Set) ? state.sisterValidWords : new Set(),
+    // Phase 6: governance bank getters for register/collocation/redundancy rules.
+    getRegisterWords: () => (state && state.registerWords) ? state.registerWords : new Map(),
+    getCollocations: () => (state && state.collocations) ? state.collocations : [],
+    getRedundancyPhrases: () => (state && state.redundancyPhrases) ? state.redundancyPhrases : [],
+    // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
+    isFeatureEnabled: (featureId) => {
+      if (enabledFeatures.size === 0) return true;
+      return enabledFeatures.has(featureId);
+    },
   };
 
   // Kick off loading. Content scripts run at document_idle which is late
