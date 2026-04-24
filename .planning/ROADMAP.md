@@ -64,11 +64,12 @@ Plans:
   3. `benchmark-texts/de.txt` lines `"Letzte montag ich bin gegangen zu der supermarkt"`, `"Dann ich aufstehe"`, and `"dass er ist nett"` flip from unflagged → flagged by the DE V2 + verb-final rule.
   4. `benchmark-texts/fr.txt` BAGS acceptance fixture `"une belle femme"` does NOT flag, and a post-nominal BAGS counter-example flips from unflagged → flagged by the FR BAGS rule.
   5. The Phase 13 document-state seam shape (`kind: 'document'`, `checkDocument(ctx, findings)` signature, priority 200+) is documented in `spell-rules/README.md` with no code change; ≥2× acceptance-vs-positive fixture ratio is enforced for every word-order rule by the fixture runner.
-**Plans**: 3 plans
+**Plans**: 4 plans
 Plans:
-- [ ] 07-01-PLAN.md — Tagged-token view (INFRA-06), POS helpers, fixture ratio enforcement, Phase 13 seam docs
-- [ ] 07-02-PLAN.md — NB V2 (WO-01) + DE V2 (WO-02) rules with fixtures and benchmark expectations
-- [ ] 07-03-PLAN.md — DE verb-final (WO-03) + FR BAGS (WO-04) rules with fixtures and benchmark expectations
+- [x] 07-01-PLAN.md — Tagged-token view (INFRA-06), POS helpers, fixture ratio enforcement, Phase 13 seam docs
+- [x] 07-02-PLAN.md — NB V2 (WO-01) + DE V2 (WO-02) rules with fixtures and benchmark expectations
+- [x] 07-03-PLAN.md — DE verb-final (WO-03) + FR BAGS (WO-04) rules with fixtures and benchmark expectations
+- [ ] 07-04-PLAN.md — Gap closure: fix nb-v2 false positives, update fixture co-fire expected arrays, add "une belle femme" acceptance
 
 ### Phase 8: DE Case & Agreement Governance
 **Goal**: Ship DE's four highest-impact structural rules (preposition case, separable-verb split, perfekt auxiliary, compound-noun gender), and deliver the shared `grammar-tables.js` primitive that Phases 9/10/11 will consume.
