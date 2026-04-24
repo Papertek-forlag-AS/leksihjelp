@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 6 — Structural Infrastructure + Register & Stylistic Polish
-Plan: 2 of 3 complete
+Plan: 2 of 3 complete (06-01 + 06-02 done, 06-03 remaining)
 Status: Executing phase 06
-Last activity: 2026-04-24 — Completed 06-02-PLAN.md (release gates: benchmark-coverage + governance-data)
+Last activity: 2026-04-24 — Completed 06-01-PLAN.md (sentence segmenter, quotation suppression, severity tiers, extended gates)
 
 Progress: [██░░░░░░░░] 7%
 
@@ -81,6 +81,7 @@ Progress: [██░░░░░░░░] 7%
 | Phase 05.1 P01 | 19m52s | 3 tasks | 7 files |
 | Phase 05.1 P05 | ~90min (incl. ~15min inline bug-fix loop during human-verify) | 4 tasks (2 auto + 1 checkpoint:human-verify + 1 auto close) | 16 files |
 | Phase 06 P02 | 4min | 2 tasks | 7 files |
+| Phase 06 P01 | 8min | 2 tasks | 35 files |
 
 ## Accumulated Context
 
