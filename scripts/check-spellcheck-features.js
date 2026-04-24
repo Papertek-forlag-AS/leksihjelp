@@ -276,6 +276,20 @@ function main() {
     );
   }
 
+  // Phase 6: governance index presence — registerWords, collocations,
+  // redundancyPhrases must exist on the indexes object (values may be empty
+  // when no governance bank data has been synced yet, but the keys must be
+  // present so downstream rules don't crash).
+  if (!(state.registerWords instanceof Map)) {
+    fail('state.registerWords is not a Map — vocab-seam-core.buildIndexes Phase 6 governance extraction missing.');
+  }
+  if (!Array.isArray(state.collocations)) {
+    fail('state.collocations is not an Array — vocab-seam-core.buildIndexes Phase 6 governance extraction missing.');
+  }
+  if (!Array.isArray(state.redundancyPhrases)) {
+    fail('state.redundancyPhrases is not an Array — vocab-seam-core.buildIndexes Phase 6 governance extraction missing.');
+  }
+
   // Extend the same invariant to every non-NB target language. Each config
   // simulates a minimal preset (a disabled-features set) and reasserts that
   // past-tense / plural / noun-gender lookup keys survive in the spell-check

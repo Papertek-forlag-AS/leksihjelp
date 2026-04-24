@@ -1,0 +1,41 @@
+# ─── BENCHMARK: EN (Norwegian student writing English) ─────
+# CURRENTLY COVERED (rules that should flag these):
+#   - homophone: their/there/they're, its/it's, your/you're, then/than, to/too
+#   - sv (subject–verb agreement): she work, he dont, i still makes
+#   - en-grammar: a island, more easier, gonna
+#   - typo: actualy, allready, libary, togheter, alot, sayed
+#   - false-friends (popup render): actual, eventual, sympathetic, fabric,
+#     bare, frisk — surfaced when user looks up the NB cognate
+#
+#   - register (REG-01, opt-in): "gonna", "wanna" flagged as informal
+#   - collocation (REG-02): "make a photo" → "take a photo"
+#   - redundancy (REG-03): "free gift" → "gift", "return back" → "return"
+#
+# FUTURE / UNPLANNED (no rule today, not on roadmap):
+#   - Norwenglish loanword leakage: "download-e", "booket", "chille"
+#   - Article logic for abstract nouns: "the life is hard" (NB overgen)
+#   - Morphological overgeneration: "goed", "runned", "childs", "mouses"
+#   - Tense harmony across sentences: unmotivated past→present switches
+#   - Long-distance SV agreement across embedded clauses
+#   - Word-family confusion: "creative" vs "creativity" vs "creation"
+# ────────────────────────────────────────────────────────────
+
+Last monday i was gonna go to the store for buy some food for my familie.
+The weather was actualy very nice, and i was in a eventual good mood
+because i had just finished my homework. My mother is very sympathetic
+person and she always make dinner for us. She work in a fabric where
+they produce clothe for childrens. When i came home, my brother was
+allready their watching television. He dont like to help in the house,
+and i think its very unfair. I told him that he should help more, but
+he just laugh at me. Then i went to my room for to read a book i have
+borrow from the libary. The book is about a man who lives alone on a
+island and must survive with bare his hands. I have red almost hundred
+pages yesterday, and it was more exciting then i thought. In the evening
+we eated pizza and watched a movie togheter. Their was too much cheese
+on the pizza but it tasted good anyway. I think english is more easier
+than norwegian, but i still makes many mistakes when i writes. Your
+supposed to use "a" before consonant and "an" before vocal, but i forget
+this sometimes. The life is hard for students. My teacher sayed that
+i have improve alot this year, which made me very frisk. I wanted to
+make a photo of the sunset but my phone was dead. My friend gave me a
+free gift and we made future plans for the summer.

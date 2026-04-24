@@ -100,11 +100,12 @@ const FIXTURE_DIR = path.join(__dirname, '..', 'fixtures');
 // ── Argv parsing (no commander/yargs) ──
 
 function parseArgs(argv) {
-  const out = { lang: null, rule: null, verbose: false, json: false };
+  const out = { lang: null, rule: null, verbose: false, json: false, pending: false };
   for (const arg of argv) {
     if (arg.startsWith('--rule=')) out.rule = arg.slice('--rule='.length);
     else if (arg === '--verbose') out.verbose = true;
     else if (arg === '--json') out.json = true;
+    else if (arg === '--pending') out.pending = true;
     else if (!arg.startsWith('--') && !out.lang) out.lang = arg;
   }
   return out;
@@ -235,7 +236,7 @@ function summarize(tp, fp, fn) {
 // ── Main loop ──
 
 function main() {
-  const { lang, rule, verbose, json } = parseArgs(process.argv.slice(2));
+  const { lang, rule, verbose, json, pending: pendingOnly } = parseArgs(process.argv.slice(2));
 
   // ── Phase 03.1 / SC-01 adapter-contract guard ──
   //
@@ -269,6 +270,29 @@ function main() {
   if (!/sisterValidWords:\s*VOCAB\.getSisterValidWords\(\)/.test(adapterSrc)) {
     throw new Error(
       '[check-fixtures] spell-check.js:runCheck vocab object missing `sisterValidWords: VOCAB.getSisterValidWords()` — SC-03 browser-wiring regression. See .planning/phases/04-false-positive-reduction-nb-nn/.'
+    );
+  }
+
+  // ── Phase 06 / REG adapter-contract guards ──
+  //
+  // Plans 06-03 wired registerWords, collocations, redundancyPhrases from
+  // VOCAB getters into the spell-check.js:runCheck vocab object. A regression
+  // that drops any of these fields silently disables the governance rules
+  // in the browser while the fixture suite stays green (fixtures bypass
+  // spell-check.js entirely).
+  if (!/registerWords/.test(adapterSrc)) {
+    throw new Error(
+      '[check-fixtures] spell-check.js:runCheck vocab object missing registerWords — Phase 6 browser-wiring regression.'
+    );
+  }
+  if (!/collocations/.test(adapterSrc)) {
+    throw new Error(
+      '[check-fixtures] spell-check.js:runCheck vocab object missing collocations — Phase 6 browser-wiring regression.'
+    );
+  }
+  if (!/redundancyPhrases/.test(adapterSrc)) {
+    throw new Error(
+      '[check-fixtures] spell-check.js:runCheck vocab object missing redundancyPhrases — Phase 6 browser-wiring regression.'
     );
   }
 
@@ -339,7 +363,18 @@ function main() {
         }
       }
 
-      if (!json) {
+      if (pendingOnly && !json) {
+        for (const r of pendingResults) {
+          const tag = r.ok ? 'NOW-PASSING — remove `pending` flag' : 'still failing';
+          console.log('[' + l + '/' + ruleId + '] ' + r.id + ' (' + tag + ') — ' + JSON.stringify(r.text));
+          if (!r.ok) {
+            if (r.missing.length) console.log('    missing: ' + JSON.stringify(r.missing));
+            if (r.extra.length)   console.log('    extra:   ' + JSON.stringify(r.extra));
+          }
+        }
+      }
+
+      if (!json && !pendingOnly) {
         const pendingNote = pending.length
           ? '  (' + pending.length + ' pending, skipped' +
               (pendingNowPassing ? '; ' + pendingNowPassing + ' now passing — remove `pending` flag' : '') + ')'

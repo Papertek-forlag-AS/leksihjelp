@@ -70,6 +70,9 @@ const TARGETS = [
   'extension/content/spell-rules/nb-typo-fuzzy.js',
   'extension/content/spell-rules/nb-homophones.js',
   'extension/content/spell-rules/universal-context-typo.js',
+  'extension/content/spell-rules/register.js',
+  'extension/content/spell-rules/collocation.js',
+  'extension/content/spell-rules/redundancy.js',
   'extension/content/spell-rules/quotation-suppression.js',
 ];
 
