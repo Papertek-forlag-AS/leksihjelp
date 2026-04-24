@@ -51,6 +51,74 @@
     return out;
   }
 
+  // ── Word-order infrastructure (INFRA-06, Phase 7) ──
+
+  const SUBORDINATORS = {
+    nb: new Set(['fordi', 'at', 'som', 'når', 'hvis', 'selv', 'om', 'da', 'mens', 'etter', 'før', 'siden', 'dersom', 'enda', 'skjønt', 'ettersom']),
+    nn: new Set(['fordi', 'at', 'som', 'når', 'viss', 'sjølv', 'om', 'då', 'mens', 'etter', 'før', 'sidan', 'dersom', 'endå', 'trass']),
+    de: new Set(['dass', 'weil', 'wenn', 'ob', 'obwohl', 'als', 'bevor', 'nachdem', 'damit', 'sodass', 'solange', 'sobald', 'seit', 'seitdem', 'während', 'indem', 'falls']),
+    fr: new Set(['que', 'quand', 'si', 'parce', 'lorsque', 'puisque', 'comme', 'pendant', 'avant', 'après', 'bien', 'pour', 'afin', 'tandis', 'dès']),
+  };
+
+  const SUBJECT_PRONOUNS = {
+    nb: new Set(['jeg', 'du', 'han', 'hun', 'den', 'det', 'vi', 'dere', 'de', 'man', 'en']),
+    nn: new Set(['eg', 'du', 'han', 'ho', 'den', 'det', 'vi', 'dykk', 'dei', 'ein']),
+    de: new Set(['ich', 'du', 'er', 'sie', 'es', 'wir', 'ihr', 'man']),
+    fr: new Set(['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles']),
+  };
+
+  function buildFiniteStems(vocab) {
+    const stems = new Set();
+    for (const form of (vocab.knownPresens || new Set())) {
+      if (form.includes(' ')) stems.add(form.split(' ')[0]);
+    }
+    for (const form of (vocab.knownPreteritum || new Set())) {
+      if (form.includes(' ')) stems.add(form.split(' ')[0]);
+    }
+    return stems;
+  }
+
+  // classifyPOS: word parameter is already lowercased by the caller
+  function classifyPOS(word, vocab, lang) {
+    if (SUBORDINATORS[lang] && SUBORDINATORS[lang].has(word)) return 'sub';
+    if (SUBJECT_PRONOUNS[lang] && SUBJECT_PRONOUNS[lang].has(word)) return 'pron';
+    if (vocab.knownPresens && vocab.knownPresens.has(word)) return 'verb';
+    if (vocab.knownPreteritum && vocab.knownPreteritum.has(word)) return 'verb';
+    if (vocab.verbInfinitive && vocab.verbInfinitive.has(word)) return 'verb';
+    if (vocab.isAdjective && vocab.isAdjective.has(word)) return 'adj';
+    if (vocab.nounGenus && vocab.nounGenus.has(word)) return 'noun';
+    return 'other';
+  }
+
+  function findFiniteVerb(ctx, start, end) {
+    for (let i = start; i < end; i++) {
+      if (ctx.getTagged(i).isFinite) return i;
+    }
+    return -1;
+  }
+
+  function findSubordinator(ctx, start, end) {
+    for (let i = start; i < end; i++) {
+      if (ctx.getTagged(i).isSubordinator) return i;
+    }
+    return -1;
+  }
+
+  function isMainClause(ctx, start, end) {
+    const sub = findSubordinator(ctx, start, end);
+    const verb = findFiniteVerb(ctx, start, end);
+    // If subordinator found before the finite verb, this is a subordinate clause
+    return sub === -1 || (verb !== -1 && sub > verb);
+  }
+
+  function tokensInSentence(ctx, sentence) {
+    const first = ctx.tokens.findIndex(t => t.start >= sentence.start);
+    if (first === -1) return { start: 0, end: 0 };
+    let last = first;
+    while (last < ctx.tokens.length && ctx.tokens[last].end <= sentence.end) last++;
+    return { start: first, end: last };
+  }
+
   // ── Generic rule runner ──
   //
   // Iterates self.__lexiSpellRules filtered by language and sorted by
@@ -100,6 +168,29 @@
       suppressed: new Set(),
       suppressedFor: { structural: new Set() },
       sentences,
+    };
+
+    // Phase 7 / INFRA-06: tagged-token view. ctx.getTagged(i) returns a
+    // cached POS-tagged token with isFinite, isSubordinator, isSubject fields.
+    // Word-order rules (priority 70+) consume this instead of raw ctx.tokens.
+    const _tagCache = new Map();
+    const _finiteStems = buildFiniteStems(vocabRef);
+    ctx.getTagged = function(i) {
+      if (_tagCache.has(i)) return _tagCache.get(i);
+      const tok = ctx.tokens[i];
+      if (!tok) return null;
+      const w = tok.word.toLowerCase();
+      const tag = {
+        ...tok,
+        pos: classifyPOS(w, vocabRef, lang),
+        isFinite: !!(vocabRef.knownPresens && vocabRef.knownPresens.has(w)) ||
+                  !!(vocabRef.knownPreteritum && vocabRef.knownPreteritum.has(w)) ||
+                  _finiteStems.has(w),
+        isSubordinator: !!(SUBORDINATORS[lang] && SUBORDINATORS[lang].has(w)),
+        isSubject: !!(SUBJECT_PRONOUNS[lang] && SUBJECT_PRONOUNS[lang].has(w)),
+      };
+      _tagCache.set(i, tag);
+      return tag;
     };
 
     const host = typeof self !== 'undefined' ? self : globalThis;
@@ -349,6 +440,10 @@
     isLikelyProperNoun,
     scoreCandidate,
     findFuzzyNeighbor,
+    findFiniteVerb,
+    findSubordinator,
+    isMainClause,
+    tokensInSentence,
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   const host = typeof self !== 'undefined' ? self : globalThis;
