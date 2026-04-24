@@ -1,0 +1,101 @@
+# FR BAGS adjective placement rule fixtures (WO-04, Phase 7)
+# Positive cases: BAGS adjective incorrectly placed after noun (32)
+{"id":"fr-bags-1","text":"un homme grand","expected":[{"rule_id":"fr-bags","start":9,"end":14,"suggestion":"grand (flytt foran substantivet)"}]}
+{"id":"fr-bags-2","text":"un film bon","expected":[{"rule_id":"fr-bags","start":8,"end":11,"suggestion":"bon (flytt foran substantivet)"}]}
+{"id":"fr-bags-3","text":"une maison petit","expected":[{"rule_id":"fr-bags","start":11,"end":16,"suggestion":"petit (flytt foran substantivet)"}]}
+{"id":"fr-bags-4","text":"un chat joli","expected":[{"rule_id":"fr-bags","start":8,"end":12,"suggestion":"joli (flytt foran substantivet)"}]}
+{"id":"fr-bags-5","text":"les livres vieux","expected":[{"rule_id":"fr-bags","start":11,"end":16,"suggestion":"vieux (flytt foran substantivet)"}]}
+{"id":"fr-bags-6","text":"un chien gentil","expected":[{"rule_id":"fr-bags","start":9,"end":15,"suggestion":"gentil (flytt foran substantivet)"}]}
+{"id":"fr-bags-7","text":"un film long","expected":[{"rule_id":"fr-bags","start":8,"end":12,"suggestion":"long (flytt foran substantivet)"}]}
+{"id":"fr-bags-8","text":"une voiture large","expected":[{"rule_id":"fr-bags","start":12,"end":17,"suggestion":"large (flytt foran substantivet)"}]}
+{"id":"fr-bags-9","text":"un garçon jeune","expected":[{"rule_id":"fr-bags","start":10,"end":15,"suggestion":"jeune (flytt foran substantivet)"}]}
+{"id":"fr-bags-10","text":"un ami ancien","expected":[{"rule_id":"fr-bags","start":7,"end":13,"suggestion":"ancien (flytt foran substantivet)"}]}
+{"id":"fr-bags-11","text":"un film nouveau","expected":[{"rule_id":"fr-bags","start":8,"end":15,"suggestion":"nouveau (flytt foran substantivet)"}]}
+{"id":"fr-bags-12","text":"un film mauvais","expected":[{"rule_id":"fr-bags","start":8,"end":15,"suggestion":"mauvais (flytt foran substantivet)"}]}
+{"id":"fr-bags-13","text":"un film court","expected":[{"rule_id":"fr-bags","start":8,"end":13,"suggestion":"court (flytt foran substantivet)"}]}
+{"id":"fr-bags-14","text":"un homme haut","expected":[{"rule_id":"fr-bags","start":9,"end":13,"suggestion":"haut (flytt foran substantivet)"}]}
+{"id":"fr-bags-15","text":"un film gros","expected":[{"rule_id":"fr-bags","start":8,"end":12,"suggestion":"gros (flytt foran substantivet)"}]}
+{"id":"fr-bags-16","text":"une fille joli","expected":[{"rule_id":"fr-bags","start":10,"end":14,"suggestion":"joli (flytt foran substantivet)"}]}
+{"id":"fr-bags-17","text":"un livre nouveau","expected":[{"rule_id":"fr-bags","start":9,"end":16,"suggestion":"nouveau (flytt foran substantivet)"}]}
+{"id":"fr-bags-18","text":"le chat petit","expected":[{"rule_id":"fr-bags","start":8,"end":13,"suggestion":"petit (flytt foran substantivet)"}]}
+{"id":"fr-bags-19","text":"la maison grand","expected":[{"rule_id":"fr-bags","start":10,"end":15,"suggestion":"grand (flytt foran substantivet)"}]}
+{"id":"fr-bags-20","text":"le garçon bon","expected":[{"rule_id":"fr-bags","start":10,"end":13,"suggestion":"bon (flytt foran substantivet)"}]}
+{"id":"fr-bags-21","text":"un ami jeune","expected":[{"rule_id":"fr-bags","start":7,"end":12,"suggestion":"jeune (flytt foran substantivet)"}]}
+{"id":"fr-bags-22","text":"le film long","expected":[{"rule_id":"fr-bags","start":8,"end":12,"suggestion":"long (flytt foran substantivet)"}]}
+{"id":"fr-bags-23","text":"un chien gros","expected":[{"rule_id":"fr-bags","start":9,"end":13,"suggestion":"gros (flytt foran substantivet)"}]}
+{"id":"fr-bags-24","text":"le livre ancien","expected":[{"rule_id":"fr-bags","start":9,"end":15,"suggestion":"ancien (flytt foran substantivet)"}]}
+{"id":"fr-bags-25","text":"une voiture nouveau","expected":[{"rule_id":"fr-bags","start":12,"end":19,"suggestion":"nouveau (flytt foran substantivet)"}]}
+{"id":"fr-bags-26","text":"un homme bon","expected":[{"rule_id":"fr-bags","start":9,"end":12,"suggestion":"bon (flytt foran substantivet)"}]}
+{"id":"fr-bags-27","text":"la fille petit","expected":[{"rule_id":"fr-bags","start":9,"end":14,"suggestion":"petit (flytt foran substantivet)"}]}
+{"id":"fr-bags-28","text":"le chien vieux","expected":[{"rule_id":"fr-bags","start":9,"end":14,"suggestion":"vieux (flytt foran substantivet)"}]}
+{"id":"fr-bags-29","text":"un livre bon","expected":[{"rule_id":"fr-bags","start":9,"end":12,"suggestion":"bon (flytt foran substantivet)"}]}
+{"id":"fr-bags-30","text":"une maison nouveau","expected":[{"rule_id":"fr-bags","start":11,"end":18,"suggestion":"nouveau (flytt foran substantivet)"}]}
+{"id":"fr-bags-31","text":"le chat gentil","expected":[{"rule_id":"fr-bags","start":8,"end":14,"suggestion":"gentil (flytt foran substantivet)"}]}
+{"id":"fr-bags-32","text":"un homme mauvais","expected":[{"rule_id":"fr-bags","start":9,"end":16,"suggestion":"mauvais (flytt foran substantivet)"}]}
+
+# Acceptance cases: correct pre-nominal BAGS, predicate adjectives, non-BAGS post-nominal, general sentences (65)
+{"id":"fr-bags-acc-1","text":"un grand homme","expected":[]}
+{"id":"fr-bags-acc-2","text":"un bon film","expected":[]}
+{"id":"fr-bags-acc-3","text":"un petit chat","expected":[]}
+{"id":"fr-bags-acc-4","text":"un joli chien","expected":[]}
+{"id":"fr-bags-acc-5","text":"un nouveau film","expected":[]}
+{"id":"fr-bags-acc-6","text":"un ancien ami","expected":[]}
+{"id":"fr-bags-acc-7","text":"un long film","expected":[]}
+{"id":"fr-bags-acc-8","text":"un gros chat","expected":[]}
+{"id":"fr-bags-acc-9","text":"un haut mur","expected":[]}
+{"id":"fr-bags-acc-10","text":"un court film","expected":[]}
+{"id":"fr-bags-acc-11","text":"un beau jardin","expected":[]}
+{"id":"fr-bags-acc-12","text":"un vieux livre","expected":[]}
+{"id":"fr-bags-acc-13","text":"un jeune homme","expected":[]}
+{"id":"fr-bags-acc-14","text":"un mauvais film","expected":[]}
+{"id":"fr-bags-acc-15","text":"un gentil garçon","expected":[]}
+{"id":"fr-bags-acc-16","text":"une grande maison","expected":[]}
+{"id":"fr-bags-acc-17","text":"une petite fille","expected":[]}
+{"id":"fr-bags-acc-18","text":"elle est grande","expected":[]}
+{"id":"fr-bags-acc-19","text":"il est grand","expected":[]}
+{"id":"fr-bags-acc-20","text":"il est bon","expected":[]}
+{"id":"fr-bags-acc-21","text":"elle est jolie","expected":[]}
+{"id":"fr-bags-acc-22","text":"il est vieux","expected":[]}
+{"id":"fr-bags-acc-23","text":"il est nouveau","expected":[]}
+{"id":"fr-bags-acc-24","text":"il est gentil","expected":[]}
+{"id":"fr-bags-acc-25","text":"il est mauvais","expected":[]}
+{"id":"fr-bags-acc-26","text":"il est jeune","expected":[]}
+{"id":"fr-bags-acc-27","text":"il est ancien","expected":[]}
+{"id":"fr-bags-acc-28","text":"il est long","expected":[]}
+{"id":"fr-bags-acc-29","text":"il est gros","expected":[]}
+{"id":"fr-bags-acc-30","text":"il est haut","expected":[]}
+{"id":"fr-bags-acc-31","text":"il est court","expected":[]}
+{"id":"fr-bags-acc-32","text":"il est large","expected":[]}
+{"id":"fr-bags-acc-33","text":"Le film est bon","expected":[]}
+{"id":"fr-bags-acc-34","text":"La maison est grande","expected":[]}
+{"id":"fr-bags-acc-35","text":"Le chat est petit","expected":[]}
+{"id":"fr-bags-acc-36","text":"La voiture est grande","expected":[]}
+{"id":"fr-bags-acc-37","text":"Il fait beau","expected":[]}
+{"id":"fr-bags-acc-38","text":"Il fait bon","expected":[]}
+{"id":"fr-bags-acc-39","text":"Je mange du pain","expected":[]}
+{"id":"fr-bags-acc-40","text":"Elle lit un livre","expected":[]}
+{"id":"fr-bags-acc-41","text":"Nous allons au cinéma","expected":[]}
+{"id":"fr-bags-acc-42","text":"Ils jouent dans le jardin","expected":[]}
+{"id":"fr-bags-acc-43","text":"Tu as un chien","expected":[]}
+{"id":"fr-bags-acc-44","text":"Vous avez une maison","expected":[]}
+{"id":"fr-bags-acc-45","text":"Je suis content","expected":[]}
+{"id":"fr-bags-acc-46","text":"Elle est contente","expected":[]}
+{"id":"fr-bags-acc-47","text":"Le professeur est intelligent","expected":[]}
+{"id":"fr-bags-acc-48","text":"La classe est difficile","expected":[]}
+{"id":"fr-bags-acc-49","text":"Le repas est délicieux","expected":[]}
+{"id":"fr-bags-acc-50","text":"Le problème est compliqué","expected":[]}
+{"id":"fr-bags-acc-51","text":"La question est importante","expected":[]}
+{"id":"fr-bags-acc-52","text":"Le travail est intéressant","expected":[]}
+{"id":"fr-bags-acc-53","text":"Cette ville est moderne","expected":[]}
+{"id":"fr-bags-acc-54","text":"Cette chanson est populaire","expected":[]}
+{"id":"fr-bags-acc-55","text":"Ce film est romantique","expected":[]}
+{"id":"fr-bags-acc-56","text":"Cette histoire est fascinante","expected":[]}
+{"id":"fr-bags-acc-57","text":"Mon ami est sympathique","expected":[]}
+{"id":"fr-bags-acc-58","text":"Ma soeur est généreuse","expected":[]}
+{"id":"fr-bags-acc-59","text":"Son père est sérieux","expected":[]}
+{"id":"fr-bags-acc-60","text":"Sa mère est patiente","expected":[]}
+{"id":"fr-bags-acc-61","text":"Notre professeur est strict","expected":[]}
+{"id":"fr-bags-acc-62","text":"Leur maison est confortable","expected":[]}
+{"id":"fr-bags-acc-63","text":"La musique est forte","expected":[]}
+{"id":"fr-bags-acc-64","text":"Le temps est agréable","expected":[]}
+{"id":"fr-bags-acc-65","text":"Cette idée est originale","expected":[]}

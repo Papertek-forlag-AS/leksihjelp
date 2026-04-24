@@ -1,0 +1,101 @@
+# DE verb-final rule fixtures (WO-03, Phase 7)
+# Positive cases: verb NOT at clause end in subordinate clauses (32)
+{"id":"de-vf-1","text":"dass er ist nett","expected":[{"rule_id":"de-verb-final","start":8,"end":11,"suggestion":"ist (flytt til slutten)"}]}
+{"id":"de-vf-2","text":"weil ich habe Hunger","expected":[{"rule_id":"de-verb-final","start":9,"end":13,"suggestion":"habe (flytt til slutten)"}]}
+{"id":"de-vf-3","text":"wenn du gehst zur Schule","expected":[{"rule_id":"de-verb-final","start":8,"end":13,"suggestion":"gehst (flytt til slutten)"}]}
+{"id":"de-vf-4","text":"ob er kann schwimmen","expected":[{"rule_id":"de-verb-final","start":6,"end":10,"suggestion":"kann (flytt til slutten)"}]}
+{"id":"de-vf-5","text":"obwohl sie ist müde","expected":[{"rule_id":"de-verb-final","start":11,"end":14,"suggestion":"ist (flytt til slutten)"}]}
+{"id":"de-vf-6","text":"Ich denke dass er ist nett","expected":[{"rule_id":"de-verb-final","start":18,"end":21,"suggestion":"ist (flytt til slutten)"}]}
+{"id":"de-vf-7","text":"dass deutsch ist schwieriger","expected":[{"rule_id":"de-verb-final","start":13,"end":16,"suggestion":"ist (flytt til slutten)"}]}
+{"id":"de-vf-8","text":"dass ich bin besser","expected":[{"rule_id":"de-verb-final","start":9,"end":12,"suggestion":"bin (flytt til slutten)"}]}
+{"id":"de-vf-9","text":"weil er hat keine Zeit","expected":[{"rule_id":"de-verb-final","start":8,"end":11,"suggestion":"hat (flytt til slutten)"}]}
+{"id":"de-vf-10","text":"dass sie macht die Hausaufgaben","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"macht (flytt til slutten)"}]}
+{"id":"de-vf-11","text":"wenn wir haben Ferien","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"haben (flytt til slutten)"}]}
+{"id":"de-vf-12","text":"ob du kannst kommen","expected":[{"rule_id":"de-verb-final","start":6,"end":12,"suggestion":"kannst (flytt til slutten)"}]}
+{"id":"de-vf-13","text":"damit er lernt schnell","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"lernt (flytt til slutten)"}]}
+{"id":"de-vf-14","text":"bevor ich esse Frühstück","expected":[{"rule_id":"de-verb-final","start":10,"end":14,"suggestion":"esse (flytt til slutten)"}]}
+{"id":"de-vf-15","text":"nachdem sie hat geschlafen","expected":[{"rule_id":"de-verb-final","start":12,"end":15,"suggestion":"hat (flytt til slutten)"}]}
+{"id":"de-vf-16","text":"obwohl wir sind müde","expected":[{"rule_id":"de-verb-final","start":11,"end":15,"suggestion":"sind (flytt til slutten)"}]}
+{"id":"de-vf-17","text":"seit er wohnt hier","expected":[{"rule_id":"de-verb-final","start":8,"end":13,"suggestion":"wohnt (flytt til slutten)"}]}
+{"id":"de-vf-18","text":"solange du bist gesund","expected":[{"rule_id":"de-verb-final","start":11,"end":15,"suggestion":"bist (flytt til slutten)"}]}
+{"id":"de-vf-19","text":"sobald ich habe Zeit","expected":[{"rule_id":"de-verb-final","start":11,"end":15,"suggestion":"habe (flytt til slutten)"}]}
+{"id":"de-vf-20","text":"während sie arbeitet fleißig","expected":[{"rule_id":"de-verb-final","start":12,"end":20,"suggestion":"arbeitet (flytt til slutten)"}]}
+{"id":"de-vf-21","text":"indem er lernt jeden Tag","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"lernt (flytt til slutten)"}]}
+{"id":"de-vf-22","text":"dass er spielt Fußball","expected":[{"rule_id":"de-verb-final","start":8,"end":14,"suggestion":"spielt (flytt til slutten)"}]}
+{"id":"de-vf-23","text":"weil sie kauft ein Buch","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"kauft (flytt til slutten)"}]}
+{"id":"de-vf-24","text":"wenn ich trinke Kaffee","expected":[{"rule_id":"de-verb-final","start":9,"end":15,"suggestion":"trinke (flytt til slutten)"}]}
+{"id":"de-vf-25","text":"ob sie liest gerne","expected":[{"rule_id":"de-verb-final","start":7,"end":12,"suggestion":"liest (flytt til slutten)"}]}
+{"id":"de-vf-26","text":"dass wir gehen nach Hause","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"gehen (flytt til slutten)"}]}
+{"id":"de-vf-27","text":"weil du brauchst Hilfe","expected":[{"rule_id":"de-verb-final","start":8,"end":16,"suggestion":"brauchst (flytt til slutten)"}]}
+{"id":"de-vf-28","text":"damit sie findet den Weg","expected":[{"rule_id":"de-verb-final","start":10,"end":16,"suggestion":"findet (flytt til slutten)"}]}
+{"id":"de-vf-29","text":"bevor er macht die Arbeit","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"macht (flytt til slutten)"}]}
+{"id":"de-vf-30","text":"falls ich bin krank","expected":[{"rule_id":"de-verb-final","start":10,"end":13,"suggestion":"bin (flytt til slutten)"}]}
+{"id":"de-vf-31","text":"seit wir haben einen Hund","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"haben (flytt til slutten)"}]}
+{"id":"de-vf-32","text":"dass er soll mehr helfen","expected":[{"rule_id":"de-verb-final","start":8,"end":12,"suggestion":"soll (flytt til slutten)"}]}
+
+# Acceptance cases: correct verb-final, main clauses, questions (65)
+{"id":"de-vf-acc-1","text":"dass er nett ist","expected":[]}
+{"id":"de-vf-acc-2","text":"weil ich Hunger habe","expected":[]}
+{"id":"de-vf-acc-3","text":"wenn du zur Schule gehst","expected":[]}
+{"id":"de-vf-acc-4","text":"ob er schwimmen kann","expected":[]}
+{"id":"de-vf-acc-5","text":"Er ist nett","expected":[]}
+{"id":"de-vf-acc-6","text":"Ich denke, dass er nett ist","expected":[]}
+{"id":"de-vf-acc-7","text":"Ich habe Hunger","expected":[]}
+{"id":"de-vf-acc-8","text":"Sie macht die Hausaufgaben","expected":[]}
+{"id":"de-vf-acc-9","text":"Wir haben Ferien","expected":[]}
+{"id":"de-vf-acc-10","text":"Du kannst kommen","expected":[]}
+{"id":"de-vf-acc-11","text":"Er lernt schnell","expected":[]}
+{"id":"de-vf-acc-12","text":"Ich esse Frühstück","expected":[]}
+{"id":"de-vf-acc-13","text":"Sie hat geschlafen","expected":[]}
+{"id":"de-vf-acc-14","text":"Wir sind müde","expected":[]}
+{"id":"de-vf-acc-15","text":"Du hast Fragen","expected":[]}
+{"id":"de-vf-acc-16","text":"Er wohnt hier","expected":[]}
+{"id":"de-vf-acc-17","text":"Du bist gesund","expected":[]}
+{"id":"de-vf-acc-18","text":"Ich habe Zeit","expected":[]}
+{"id":"de-vf-acc-19","text":"Sie arbeitet fleißig","expected":[]}
+{"id":"de-vf-acc-20","text":"Er lernt jeden Tag","expected":[]}
+{"id":"de-vf-acc-21","text":"Er spielt Fußball","expected":[]}
+{"id":"de-vf-acc-22","text":"Sie kauft ein Buch","expected":[]}
+{"id":"de-vf-acc-23","text":"Ich trinke Kaffee","expected":[]}
+{"id":"de-vf-acc-24","text":"Sie liest gerne","expected":[]}
+{"id":"de-vf-acc-25","text":"Wir gehen nach Hause","expected":[]}
+{"id":"de-vf-acc-26","text":"Du brauchst Hilfe","expected":[]}
+{"id":"de-vf-acc-27","text":"Sie findet den Weg","expected":[]}
+{"id":"de-vf-acc-28","text":"Er macht die Arbeit","expected":[]}
+{"id":"de-vf-acc-29","text":"Ich bin krank","expected":[]}
+{"id":"de-vf-acc-30","text":"Wir haben einen Hund","expected":[]}
+{"id":"de-vf-acc-31","text":"obwohl ich sehr müde bin","expected":[]}
+{"id":"de-vf-acc-32","text":"dass die Kinder draußen spielen","expected":[]}
+{"id":"de-vf-acc-33","text":"weil das Wetter heute schön ist","expected":[]}
+{"id":"de-vf-acc-34","text":"wenn ich morgen Zeit habe","expected":[]}
+{"id":"de-vf-acc-35","text":"ob sie das Buch gelesen hat","expected":[]}
+{"id":"de-vf-acc-36","text":"damit wir pünktlich ankommen","expected":[]}
+{"id":"de-vf-acc-37","text":"bevor die Schule anfängt","expected":[]}
+{"id":"de-vf-acc-38","text":"nachdem er seine Arbeit gemacht hat","expected":[]}
+{"id":"de-vf-acc-39","text":"solange du hier bist","expected":[]}
+{"id":"de-vf-acc-40","text":"sobald der Regen aufhört","expected":[]}
+{"id":"de-vf-acc-41","text":"seit sie in Berlin wohnt","expected":[]}
+{"id":"de-vf-acc-42","text":"indem er viel liest","expected":[]}
+{"id":"de-vf-acc-43","text":"Kannst du mir helfen?","expected":[]}
+{"id":"de-vf-acc-44","text":"Hast du das Buch?","expected":[]}
+{"id":"de-vf-acc-45","text":"Ist er zu Hause?","expected":[]}
+{"id":"de-vf-acc-46","text":"Was machst du?","expected":[]}
+{"id":"de-vf-acc-47","text":"Wohin gehst du?","expected":[]}
+{"id":"de-vf-acc-48","text":"Ich denke, dass sie recht hat","expected":[]}
+{"id":"de-vf-acc-49","text":"Er sagte, dass er kommen kann","expected":[]}
+{"id":"de-vf-acc-50","text":"Sie weiß, dass ich hier bin","expected":[]}
+{"id":"de-vf-acc-51","text":"Mein Bruder ist groß","expected":[]}
+{"id":"de-vf-acc-52","text":"Das Wetter ist kalt","expected":[]}
+{"id":"de-vf-acc-53","text":"Berlin ist eine schöne Stadt","expected":[]}
+{"id":"de-vf-acc-54","text":"Das Kind spielt im Garten","expected":[]}
+{"id":"de-vf-acc-55","text":"Die Frau kauft Brot","expected":[]}
+{"id":"de-vf-acc-56","text":"Der Mann liest eine Zeitung","expected":[]}
+{"id":"de-vf-acc-57","text":"Wir essen zusammen","expected":[]}
+{"id":"de-vf-acc-58","text":"Sie trinken Wasser","expected":[]}
+{"id":"de-vf-acc-59","text":"Ich schlafe gut","expected":[]}
+{"id":"de-vf-acc-60","text":"Du schreibst einen Brief","expected":[]}
+{"id":"de-vf-acc-61","text":"Er tanzt sehr gut","expected":[]}
+{"id":"de-vf-acc-62","text":"Wir singen ein Lied","expected":[]}
+{"id":"de-vf-acc-63","text":"Ich lerne Deutsch","expected":[]}
+{"id":"de-vf-acc-64","text":"Sie studiert Medizin","expected":[]}
+{"id":"de-vf-acc-65","text":"Das Haus ist groß und schön","expected":[]}
