@@ -1,0 +1,4 @@
+{
+  "_doc": "Machine-checkable benchmark expectations. Key = lang.line_number (1-based). Value = { rule_id, severity, priority_band }. check-benchmark-coverage validates each.",
+  "entries": {}
+}
