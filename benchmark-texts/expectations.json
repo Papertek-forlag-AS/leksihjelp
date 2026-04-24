@@ -2,6 +2,8 @@
   "_doc": "Machine-checkable benchmark expectations. Key = lang.line_number (1-based). Value = { rule_id, severity, priority_band }. check-benchmark-coverage validates each.",
   "entries": {
     "en.40": { "rule_id": "collocation", "severity": "warning", "priority_band": "P2" },
-    "en.41": { "rule_id": "redundancy", "severity": "hint", "priority_band": "P3" }
+    "en.41": { "rule_id": "redundancy", "severity": "hint", "priority_band": "P3" },
+    "de.44": { "rule_id": "de-verb-final", "severity": "warning", "priority_band": "P2" },
+    "fr.53": { "rule_id": "fr-bags", "severity": "hint", "priority_band": "P3" }
   }
 }

@@ -1,0 +1,46 @@
+# ─── BENCHMARK: DE (NB student writing German) ─────────────
+# CURRENTLY COVERED:
+#   - de-grammar: wrong verb position, article-case mismatch
+#   - de-capitalization: lowercase nouns ("das haus", "mein bruder")
+#   - agreement: adjective-noun gender/case agreement
+#   - typo: hand-picked German typos
+#
+# FUTURE / UNPLANNED:
+#   - Preposition-case governance: "mit der Schule" (dat, correct) vs
+#     "mit den Schule" (wrong). Two-way preps (in/an/auf + acc vs dat
+#     depending on motion) are especially error-rich.
+#   - Verb-second (V2) position in main clauses, verb-final in
+#     subordinate clauses: "Ich denke, dass er ist nett" (should be
+#     "… dass er nett ist")
+#   - Trennbare Verben (separable prefixes): "ich aufstehe" vs
+#     correct "ich stehe auf"
+#   - Perfekt auxiliary choice: "ich habe gegangen" vs "ich bin gegangen"
+#   - Genitive vs dative after prepositions: "wegen dem" (colloquial) vs
+#     "wegen des" (standard)
+#   - Du/Sie register consistency within a single text
+#   - Modal verb + infinitive word order: "ich muss das Buch lesen",
+#     not "ich muss lesen das Buch"
+#   - Plural-form overgeneralization: "die Frauen" vs "die Fraus"
+#   - Noun-compound gender: compounds take the gender of the LAST
+#     component — NB students often take the first ("das Schultasche"
+#     instead of "die Schultasche")
+#   - Reflexive pronouns: "ich wasche mir die Hände" (dat) vs "ich
+#     wasche mich" (acc) depending on object
+#   - Relativpronomen: der/die/das vs welcher case-matching
+# ────────────────────────────────────────────────────────────
+
+Letzte montag ich bin gegangen zu der supermarkt für kaufen etwas essen
+für mein familie. Das wetter war sehr schön, und ich war in einem guten
+stimmung weil ich hatte gerade mein hausaufgaben fertig gemacht. Meine
+mutter ist ein sehr sympathische person und sie macht immer das essen
+für uns. Sie arbeitet in eine fabrik wo sie kleidung produzieren. Als
+ich nach hause kam, mein bruder war schon dort fernsehen. Er nicht mag
+helfen in das haus, und ich finde es ist sehr unfair. Ich sagte ihn
+dass er soll mehr helfen, aber er hat nur gelacht. Dann ich aufstehe
+früh um ein buch zu lesen das ich hatte aus der bibliothek ausgeliehen.
+Das buch ist über einen mann der lebt allein auf einem insel. Ich habe
+gelesen fast hundert seiten gestern. Am abend wir haben gegessen pizza
+und haben geguckt einen film zusammen. Es war zu viel käse auf der
+pizza. Ich denke dass deutsch ist schwieriger als norwegisch. Meine
+lehrerin hat gesagt dass ich bin besser geworden. Wegen dem wetter
+sind wir drinnen geblieben. Ich wasche mich die hände vor dem essen.

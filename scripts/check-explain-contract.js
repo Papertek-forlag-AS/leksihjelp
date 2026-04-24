@@ -73,6 +73,8 @@ const TARGETS = [
   'extension/content/spell-rules/register.js',
   'extension/content/spell-rules/collocation.js',
   'extension/content/spell-rules/redundancy.js',
+  'extension/content/spell-rules/de-verb-final.js',
+  'extension/content/spell-rules/fr-bags.js',
   'extension/content/spell-rules/quotation-suppression.js',
 ];
 

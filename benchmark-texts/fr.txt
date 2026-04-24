@@ -1,0 +1,53 @@
+# ─── BENCHMARK: FR (NB student writing French) ─────────────
+# CURRENTLY COVERED:
+#   - fr-grammar: verb/article slips
+#   - fr-contraction: de le → du, à le → au, de les → des
+#   - fr-preposition: basic preposition choice
+#   - typo
+#
+# FUTURE / UNPLANNED:
+#   - Élision before vowel: "le ami" → "l'ami", "que il" → "qu'il",
+#     "si il" → "s'il"; "la histoire" → "l'histoire"
+#   - Passé composé auxiliary: être vs avoir — 14 verbs take être
+#     (DR MRS VANDERTRAMP); NB students default to avoir everywhere
+#   - Participe passé agreement with preceding direct object:
+#     "la pomme que j'ai mangée" (agrees) vs "j'ai mangé la pomme"
+#     (does not) — notoriously difficult
+#   - Subjonctif triggers: after "il faut que", "bien que", "avant que"
+#   - Negation ne…pas drop in speech vs writing: "je sais pas" (oral)
+#     vs "je ne sais pas" (écrit)
+#   - TU vs VOUS register consistency within a single text
+#   - Gender of opaque nouns: le/la problème, le/la fromage,
+#     le/la voiture; especially hard for -e ending nouns
+#   - Position of adjectives: pre-noun BAGS set (Beauty, Age,
+#     Goodness, Size) vs post-noun for most others;
+#     "une belle femme" vs "une femme intelligente"
+#   - Double pronoun order: "je le lui donne" vs "je lui le donne"
+#   - Adverb formation: adj→adv via -ment, irregulars like
+#     "vraiment" from "vrai"
+#   - Interrogative register: "tu as quoi?" (colloq) vs
+#     "qu'est-ce que tu as?" vs "qu'as-tu?" (formal)
+#   - Relative pronouns qui/que/dont/où choice
+#   - Liaison errors in written form mimicking speech:
+#     "les z-amis" written out
+# ────────────────────────────────────────────────────────────
+
+Lundi dernier je suis allé à le magasin pour acheter de la nourriture
+pour ma famille. Le temps était très beau, et j'étais dans un bon
+humeur parce que je avais juste fini mes devoirs. Ma mère est une
+personne très sympathique et elle fait toujours le dîner pour nous.
+Elle travaille dans une fabrique où ils produisent des vêtement. Quand
+je suis arrivé à la maison, mon frère était déjà la à regarder le
+télévision. Il n'aime pas aider dans la maison, et je pense que c'est
+très injuste. Je lui ai dit qu'il doit aider plus, mais il a juste
+rit. Après je suis allé à mon chambre pour lire un livre que j'ai
+emprunté de le bibliothèque. Le livre est sur un homme qui vit seul
+sur un île et doit survivre avec ses mains. J'ai lu presque cent
+pages hier, et c'était plus excitant que je pensais. Le soir nous
+avons mangé de la pizza et avons regardé un film ensemble. Il y avait
+trop de fromage sur la pizza. Je pense que français est plus facile
+que norvégien, mais je fais encore beaucoup de erreurs. Il faut que
+je parle mieux. Si il pleut demain, je reste à la maison. Je sais pas
+pourquoi c'est si difficile. La problème est que j'oublie les règles.
+Mon professeur a dit que je ai amélioré beaucoup cette année.
+C'est un homme grand et intelligent.

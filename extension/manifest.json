@@ -55,6 +55,10 @@
         "content/spell-rules/register.js",
         "content/spell-rules/collocation.js",
         "content/spell-rules/redundancy.js",
+        "content/spell-rules/de-v2.js",
+        "content/spell-rules/de-verb-final.js",
+        "content/spell-rules/fr-bags.js",
+        "content/spell-rules/nb-v2.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",
