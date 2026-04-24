@@ -1,0 +1,95 @@
+{"id":"nb-v2-pos-001","text":"Hvorfor du tror at norsk er lett?","expected":[{"rule_id":"nb-v2","start":8,"end":10,"suggestion":"tror du"}],"status":"ok"}
+{"id":"nb-v2-pos-002","text":"I går jeg gikk på kino.","expected":[{"rule_id":"nb-v2","start":6,"end":9,"suggestion":"gikk jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-003","text":"Nå jeg spiser middag.","expected":[{"rule_id":"nb-v2","start":3,"end":6,"suggestion":"spiser jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-004","text":"Kanskje vi kan gå hjem.","expected":[{"rule_id":"nb-v2","start":8,"end":10,"suggestion":"kan vi"}],"status":"ok"}
+{"id":"nb-v2-pos-005","text":"Deretter han gikk til butikken.","expected":[{"rule_id":"nb-v2","start":9,"end":12,"suggestion":"gikk han"}],"status":"ok"}
+{"id":"nb-v2-pos-006","text":"I helgen vi var på hytta.","expected":[{"rule_id":"nb-v2","start":9,"end":11,"suggestion":"var vi"}],"status":"ok"}
+{"id":"nb-v2-pos-007","text":"Først jeg leste boken.","expected":[{"rule_id":"nb-v2","start":6,"end":9,"suggestion":"leste jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-008","text":"Egentlig jeg liker ost.","expected":[{"rule_id":"nb-v2","start":9,"end":12,"suggestion":"liker jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-009","text":"Hvordan du gjør det?","expected":[{"rule_id":"nb-v2","start":8,"end":10,"suggestion":"gjør du"}],"status":"ok"}
+{"id":"nb-v2-pos-010","text":"Hvem du ser?","expected":[{"rule_id":"nb-v2","start":5,"end":7,"suggestion":"ser du"}],"status":"ok"}
+{"id":"nb-v2-pos-011","text":"Ofte jeg leser bøker.","expected":[{"rule_id":"nb-v2","start":5,"end":8,"suggestion":"leser jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-012","text":"Dessuten vi spiser fisk.","expected":[{"rule_id":"nb-v2","start":9,"end":11,"suggestion":"spiser vi"}],"status":"ok"}
+{"id":"nb-v2-pos-013","text":"Etterpå han lekte ute.","expected":[{"rule_id":"nb-v2","start":8,"end":11,"suggestion":"lekte han"}],"status":"ok"}
+{"id":"nb-v2-pos-014","text":"Plutselig vi hørte et smell.","expected":[{"rule_id":"nb-v2","start":10,"end":12,"suggestion":"hørte vi"}],"status":"ok"}
+{"id":"nb-v2-pos-015","text":"Heldigvis du fant nøkkelen.","expected":[{"rule_id":"nb-v2","start":10,"end":12,"suggestion":"fant du"}],"status":"ok"}
+{"id":"nb-v2-pos-016","text":"Alltid jeg glemmer leksene.","expected":[{"rule_id":"nb-v2","start":7,"end":10,"suggestion":"glemmer jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-017","text":"Iblant vi går på kino.","expected":[{"rule_id":"nb-v2","start":7,"end":9,"suggestion":"går vi"}],"status":"ok"}
+{"id":"nb-v2-pos-018","text":"Sjelden han spiser kjøtt.","expected":[{"rule_id":"nb-v2","start":8,"end":11,"suggestion":"spiser han"}],"status":"ok"}
+{"id":"nb-v2-pos-019","text":"Vanligvis jeg står opp tidlig.","expected":[{"rule_id":"nb-v2","start":10,"end":13,"suggestion":"står jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-020","text":"Endelig vi kom hjem.","expected":[{"rule_id":"nb-v2","start":8,"end":10,"suggestion":"kom vi"}],"status":"ok"}
+{"id":"nb-v2-pos-021","text":"Allerede jeg har gjort leksene.","expected":[{"rule_id":"nb-v2","start":9,"end":12,"suggestion":"har jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-022","text":"Sikkert du vet svaret.","expected":[{"rule_id":"nb-v2","start":8,"end":10,"suggestion":"vet du"}],"status":"ok"}
+{"id":"nb-v2-pos-023","text":"Likevel han gikk ut.","expected":[{"rule_id":"nb-v2","start":8,"end":11,"suggestion":"gikk han"}],"status":"ok"}
+{"id":"nb-v2-pos-024","text":"Naturligvis vi hjelper deg.","expected":[{"rule_id":"nb-v2","start":12,"end":14,"suggestion":"hjelper vi"}],"status":"ok"}
+{"id":"nb-v2-pos-025","text":"Igjen du glemte boken.","expected":[{"rule_id":"nb-v2","start":6,"end":8,"suggestion":"glemte du"}],"status":"ok"}
+{"id":"nb-v2-pos-026","text":"Tidligere vi bodde i Oslo.","expected":[{"rule_id":"nb-v2","start":10,"end":12,"suggestion":"bodde vi"}],"status":"ok"}
+{"id":"nb-v2-pos-027","text":"Snart vi reiser til Bergen.","expected":[{"rule_id":"nb-v2","start":6,"end":8,"suggestion":"reiser vi"}],"status":"ok"}
+{"id":"nb-v2-pos-028","text":"Nettopp jeg så filmen.","expected":[{"rule_id":"nb-v2","start":8,"end":11,"suggestion":"så jeg"}],"status":"ok"}
+{"id":"nb-v2-pos-029","text":"Så vi gikk hjem.","expected":[{"rule_id":"nb-v2","start":3,"end":5,"suggestion":"gikk vi"}],"status":"ok"}
+{"id":"nb-v2-pos-030","text":"Hvor du bor?","expected":[{"rule_id":"nb-v2","start":5,"end":7,"suggestion":"bor du"}],"status":"ok"}
+{"id":"nb-v2-pos-031","text":"Når du kommer hjem?","expected":[{"rule_id":"nb-v2","start":4,"end":6,"suggestion":"kommer du"}],"status":"ok"}
+{"id":"nb-v2-acc-001","text":"I går gikk jeg på kino.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-002","text":"Jeg gikk på kino i går.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-003","text":"Gikk du på kino?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-004","text":"fordi jeg gikk til butikken.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-005","text":"Jeg vet ikke hvorfor du tror det.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-006","text":"Han liker å spise is.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-007","text":"Nå spiser jeg middag.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-008","text":"Det er fint vær i dag.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-009","text":"Vi skal reise til Oslo neste uke.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-010","text":"Boken ligger på bordet.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-011","text":"Kan du hjelpe meg?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-012","text":"Har du lest den boken?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-013","text":"Skal vi gå på kino?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-014","text":"Hun spiste middag i går.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-015","text":"De kommer hjem snart.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-016","text":"Jeg tror at norsk er lett.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-017","text":"Han sa at han gikk.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-018","text":"Vi vet ikke om han kommer.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-019","text":"Kanskje gikk han hjem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-020","text":"Ofte leser jeg bøker.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-021","text":"Sjelden spiser han kjøtt.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-022","text":"Endelig kom vi hjem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-023","text":"I dag er det fint vær.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-024","text":"Om sommeren reiser vi til hytta.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-025","text":"Heldigvis fant du nøkkelen.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-026","text":"Dessverre gikk det dårlig.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-027","text":"Sannsynligvis kommer han snart.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-028","text":"Alltid glemmer jeg leksene.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-029","text":"Snart reiser vi til Bergen.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-030","text":"Igjen glemte du boken.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-031","text":"Likevel gikk han ut.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-032","text":"Naturligvis hjelper vi deg.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-033","text":"Da jeg var liten, bodde vi i Oslo.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-034","text":"Hvis du kommer, tar vi buss.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-035","text":"Etter at han gikk, spiste vi.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-036","text":"Fordi vi var trøtte, gikk vi hjem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-037","text":"Om kvelden leste jeg en bok.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-038","text":"I morgen skal vi handle.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-039","text":"Til vanlig spiser vi middag klokken fem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-040","text":"Etterpå lekte han ute.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-041","text":"Plutselig hørte vi et smell.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-042","text":"Iblant går vi på kino.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-043","text":"Dessuten spiser vi fisk.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-044","text":"Vanligvis står jeg opp tidlig.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-045","text":"Allerede har jeg gjort leksene.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-046","text":"Sikkert vet du svaret.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-047","text":"Nettopp så jeg filmen.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-048","text":"Så gikk vi hjem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-049","text":"Etter skolen gikk hun hjem.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-050","text":"Før middag leste han avisen.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-051","text":"Siden i går har det regnet.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-052","text":"Mens du sov, lagde jeg frokost.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-053","text":"Om vinteren er det kaldt.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-054","text":"Hver dag spiser vi frokost.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-055","text":"Noen ganger reiser vi med tog.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-056","text":"Klokken tre startet filmen.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-057","text":"Når kommer du hjem?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-058","text":"Hvor bor du?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-059","text":"Hva gjør du?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-060","text":"Hvorfor tror du det?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-061","text":"Hvordan gjør du det?","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-062","text":"Tidligere bodde vi i Oslo.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-063","text":"Jeg liker norsk og matematikk.","expected":[],"status":"ok"}
+{"id":"nb-v2-acc-064","text":"Hunden spiser maten sin.","expected":[],"status":"ok"}

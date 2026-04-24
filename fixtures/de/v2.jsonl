@@ -1,0 +1,94 @@
+{"id":"de-v2-pos-001","text":"Letzte montag ich bin gegangen zu der supermarkt.","expected":[{"rule_id":"de-v2","start":14,"end":17,"suggestion":"bin ich"}],"status":"ok"}
+{"id":"de-v2-pos-002","text":"Dann ich aufstehe.","expected":[{"rule_id":"de-v2","start":5,"end":8,"suggestion":"aufstehe ich"}],"status":"ok"}
+{"id":"de-v2-pos-003","text":"Gestern ich habe Fußball gespielt.","expected":[{"rule_id":"de-v2","start":8,"end":11,"suggestion":"habe ich"}],"status":"ok"}
+{"id":"de-v2-pos-004","text":"Normalerweise ich esse Brot.","expected":[{"rule_id":"de-v2","start":14,"end":17,"suggestion":"esse ich"}],"status":"ok"}
+{"id":"de-v2-pos-005","text":"Warum du gehst zur Schule?","expected":[{"rule_id":"de-v2","start":6,"end":8,"suggestion":"gehst du"}],"status":"ok"}
+{"id":"de-v2-pos-006","text":"Heute ich habe viel gelernt.","expected":[{"rule_id":"de-v2","start":6,"end":9,"suggestion":"habe ich"}],"status":"ok"}
+{"id":"de-v2-pos-007","text":"Danach ich bin nach Hause gegangen.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"bin ich"}],"status":"ok"}
+{"id":"de-v2-pos-008","text":"Leider ich habe keine Zeit.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"habe ich"}],"status":"ok"}
+{"id":"de-v2-pos-009","text":"Meistens ich trinke Kaffee.","expected":[{"rule_id":"de-v2","start":9,"end":12,"suggestion":"trinke ich"}],"status":"ok"}
+{"id":"de-v2-pos-010","text":"Morgen ich gehe zur Schule.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"gehe ich"}],"status":"ok"}
+{"id":"de-v2-pos-011","text":"Trotzdem ich bin glücklich.","expected":[{"rule_id":"de-v2","start":9,"end":12,"suggestion":"bin ich"}],"status":"ok"}
+{"id":"de-v2-pos-012","text":"Manchmal ich spiele Klavier.","expected":[{"rule_id":"de-v2","start":9,"end":12,"suggestion":"spiele ich"}],"status":"ok"}
+{"id":"de-v2-pos-013","text":"Zuerst ich mache Hausaufgaben.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"mache ich"}],"status":"ok"}
+{"id":"de-v2-pos-014","text":"Plötzlich ich sehe einen Hund.","expected":[{"rule_id":"de-v2","start":10,"end":13,"suggestion":"sehe ich"}],"status":"ok"}
+{"id":"de-v2-pos-015","text":"Außerdem ich lese gern Bücher.","expected":[{"rule_id":"de-v2","start":9,"end":12,"suggestion":"lese ich"}],"status":"ok"}
+{"id":"de-v2-pos-016","text":"Wie du heißt?","expected":[{"rule_id":"de-v2","start":4,"end":6,"suggestion":"heißt du"}],"status":"ok"}
+{"id":"de-v2-pos-017","text":"Was du machst?","expected":[{"rule_id":"de-v2","start":4,"end":6,"suggestion":"machst du"}],"status":"ok"}
+{"id":"de-v2-pos-018","text":"Wo du wohnst?","expected":[{"rule_id":"de-v2","start":3,"end":5,"suggestion":"wohnst du"}],"status":"ok"}
+{"id":"de-v2-pos-019","text":"Wann du kommst?","expected":[{"rule_id":"de-v2","start":5,"end":7,"suggestion":"kommst du"}],"status":"ok"}
+{"id":"de-v2-pos-020","text":"Deshalb ich bin müde.","expected":[{"rule_id":"de-v2","start":8,"end":11,"suggestion":"bin ich"}],"status":"ok"}
+{"id":"de-v2-pos-021","text":"Vielleicht ich komme morgen.","expected":[{"rule_id":"de-v2","start":11,"end":14,"suggestion":"komme ich"}],"status":"ok"}
+{"id":"de-v2-pos-022","text":"Abends ich sehe fern.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"sehe ich"}],"status":"ok"}
+{"id":"de-v2-pos-023","text":"Am Wochenende ich spiele Fußball.","expected":[{"rule_id":"de-v2","start":14,"end":17,"suggestion":"spiele ich"}],"status":"ok"}
+{"id":"de-v2-pos-024","text":"Vorher ich esse Frühstück.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"esse ich"}],"status":"ok"}
+{"id":"de-v2-pos-025","text":"Danach er geht in die Schule.","expected":[{"rule_id":"de-v2","start":7,"end":9,"suggestion":"geht er"}],"status":"ok"}
+{"id":"de-v2-pos-026","text":"Eigentlich ich mag Schokolade.","expected":[{"rule_id":"de-v2","start":11,"end":14,"suggestion":"mag ich"}],"status":"ok"}
+{"id":"de-v2-pos-027","text":"Glücklicherweise ich habe bestanden.","expected":[{"rule_id":"de-v2","start":17,"end":20,"suggestion":"habe ich"}],"status":"ok"}
+{"id":"de-v2-pos-028","text":"Natürlich ich helfe dir.","expected":[{"rule_id":"de-v2","start":10,"end":13,"suggestion":"helfe ich"}],"status":"ok"}
+{"id":"de-v2-pos-029","text":"Immer ich vergesse die Hausaufgaben.","expected":[{"rule_id":"de-v2","start":6,"end":9,"suggestion":"vergesse ich"}],"status":"ok"}
+{"id":"de-v2-pos-030","text":"Oft ich lese Bücher.","expected":[{"rule_id":"de-v2","start":4,"end":7,"suggestion":"lese ich"}],"status":"ok"}
+{"id":"de-v2-pos-031","text":"Sofort ich rufe dich an.","expected":[{"rule_id":"de-v2","start":7,"end":10,"suggestion":"rufe ich"}],"status":"ok"}
+{"id":"de-v2-acc-001","text":"Gestern habe ich Fußball gespielt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-002","text":"Ich habe Fußball gespielt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-003","text":"Hast du Fußball gespielt?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-004","text":"weil ich Fußball gespielt habe.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-005","text":"Er geht zur Schule.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-006","text":"Ich trinke Kaffee.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-007","text":"Heute gehe ich zur Schule.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-008","text":"Morgen komme ich nicht.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-009","text":"Danach bin ich nach Hause gegangen.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-010","text":"Meistens trinke ich Kaffee.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-011","text":"Normalerweise esse ich Brot.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-012","text":"Zuerst mache ich Hausaufgaben.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-013","text":"Manchmal spiele ich Klavier.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-014","text":"Plötzlich sehe ich einen Hund.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-015","text":"Außerdem lese ich gern Bücher.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-016","text":"Deshalb bin ich müde.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-017","text":"Trotzdem bin ich glücklich.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-018","text":"Leider habe ich keine Zeit.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-019","text":"Vielleicht komme ich morgen.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-020","text":"Abends sehe ich fern.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-021","text":"Eigentlich mag ich Schokolade.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-022","text":"Natürlich helfe ich dir.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-023","text":"Immer vergesse ich die Hausaufgaben.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-024","text":"Oft lese ich Bücher.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-025","text":"Wir gehen ins Kino.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-026","text":"Sie spielt Tennis.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-027","text":"Am Wochenende spiele ich Fußball.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-028","text":"Vorher esse ich Frühstück.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-029","text":"Er mag Schokolade.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-030","text":"Wir trinken Tee.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-031","text":"Sie kommen morgen.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-032","text":"Kannst du mir helfen?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-033","text":"Hast du das Buch gelesen?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-034","text":"Soll ich dir helfen?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-035","text":"weil er Fußball spielt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-036","text":"dass sie Tennis spielt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-037","text":"wenn ich nach Hause komme.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-038","text":"obwohl er müde ist.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-039","text":"als ich jung war.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-040","text":"bevor ich zur Schule gehe.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-041","text":"nachdem wir gegessen haben.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-042","text":"Warum gehst du zur Schule?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-043","text":"Wie heißt du?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-044","text":"Was machst du?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-045","text":"Wo wohnst du?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-046","text":"Wann kommst du?","expected":[],"status":"ok"}
+{"id":"de-v2-acc-047","text":"Ich denke, dass er nett ist.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-048","text":"Er sagte, dass er kommt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-049","text":"Das Buch liegt auf dem Tisch.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-050","text":"Die Kinder spielen im Garten.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-051","text":"Mein Bruder ist zehn Jahre alt.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-052","text":"Wir fahren nach Berlin.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-053","text":"Im Sommer reisen wir nach Spanien.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-054","text":"Jeden Tag esse ich Frühstück.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-055","text":"Sofort rufe ich dich an.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-056","text":"Glücklicherweise habe ich bestanden.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-057","text":"Danach geht er in die Schule.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-058","text":"Am Abend haben wir Pizza gegessen.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-059","text":"In der Schule lernen wir Deutsch.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-060","text":"Nach dem Essen machen wir Hausaufgaben.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-061","text":"Vor dem Schlafen lese ich ein Buch.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-062","text":"Seit gestern regnet es.","expected":[],"status":"ok"}
+{"id":"de-v2-acc-063","text":"Während des Unterrichts schlafe ich.","expected":[],"status":"ok"}
