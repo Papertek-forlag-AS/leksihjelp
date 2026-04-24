@@ -50,7 +50,29 @@ const rule = {
   id: 'scratch',
   languages: ['nb', 'nn'],
   priority: 99,
+  severity: 'error',
   explain: 'broken string — must be a callable returning {nb, nn}',
+  check() { return []; },
+};
+const host = typeof self !== 'undefined' ? self : globalThis;
+host.__lexiSpellRules = host.__lexiSpellRules || [];
+host.__lexiSpellRules.push(rule);
+if (typeof module !== 'undefined' && module.exports) module.exports = rule;
+`;
+
+// Phase 6: scratch rule with valid explain but MISSING severity field —
+// asserts the gate fires with SEVERITY_MISSING.
+const SCRATCH_BODY_NO_SEVERITY = `'use strict';
+// Test scratch — DO NOT SHIP. Used by check-explain-contract.test.js to
+// confirm the gate flags a rule missing severity.
+const rule = {
+  id: 'scratch',
+  languages: ['nb', 'nn'],
+  priority: 99,
+  explain: (f) => ({
+    nb: 'NB test copy for ' + (f && f.original || 'x'),
+    nn: 'NN test copy for ' + (f && f.original || 'x'),
+  }),
   check() { return []; },
 };
 const host = typeof self !== 'undefined' ? self : globalThis;
@@ -113,6 +135,22 @@ function runGateWithScratchFixed() {
   return { status: res.status, stderr: res.stderr, stdout: res.stdout };
 }
 
+// Phase 6: run gate with a scratch that has valid explain but NO severity.
+function runGateWithScratchNoSeverity() {
+  const gateSrc = fs.readFileSync(GATE, 'utf8');
+  const scratchRel = path.relative(ROOT, SCRATCH);
+  let injected = gateSrc.replace(
+    /const TARGETS = \[[\s\S]*?\];/,
+    "const TARGETS = ['" + scratchRel + "'];"
+  );
+  const pinned = injected.replace(
+    /const ROOT = path\.join\(__dirname, '\.\.'\);/,
+    "const ROOT = " + JSON.stringify(ROOT) + ";"
+  );
+  const res = spawnSync(process.execPath, ['-e', pinned], { cwd: ROOT, encoding: 'utf8' });
+  return { status: res.status, stderr: res.stderr, stdout: res.stdout };
+}
+
 function runGateBaseline() {
   const res = spawnSync(process.execPath, [GATE], { cwd: ROOT, encoding: 'utf8' });
   return { status: res.status, stderr: res.stderr, stdout: res.stdout };
@@ -141,11 +179,12 @@ if (!fs.existsSync(SPELL_RULES_DIR)) {
 // gate isn't stuck permanently failing regardless of shape).
 const SCRATCH_BODY_FIXED = `'use strict';
 // Test scratch — DO NOT SHIP. Used by check-explain-contract.test.js to
-// confirm the gate accepts a shape-correct {nb, nn} callable.
+// confirm the gate accepts a shape-correct {nb, nn} callable with severity.
 const rule = {
   id: 'scratch',
   languages: ['nb', 'nn'],
   priority: 99,
+  severity: 'error',
   explain: (f) => ({
     nb: 'NB test copy for ' + (f && f.original || 'x'),
     nn: 'NN test copy for ' + (f && f.original || 'x'),
@@ -183,25 +222,45 @@ if (!brokenDetected) {
   process.exit(1);
 }
 
-// Step 2: Plant a WELL-FORMED scratch ({ nb, nn } callable). Gate MUST pass.
+// Step 2: Plant a WELL-FORMED scratch ({ nb, nn } callable + severity). Gate MUST pass.
 if (fs.existsSync(SCRATCH)) fs.unlinkSync(SCRATCH);
 fs.writeFileSync(SCRATCH, SCRATCH_BODY_FIXED, 'utf8');
 const fixedRun = runGateWithScratchFixed();
-cleanup(); // Always clean up before the final assertion.
 
 if (fixedRun.status !== 0) {
   console.error('FAIL: gate flagged a shape-correct scratch rule as broken — gate is too strict.');
   console.error('  exit status:', fixedRun.status);
   console.error('  stderr:', fixedRun.stderr.slice(0, 500));
   console.error('  stdout:', fixedRun.stdout.slice(0, 500));
+  cleanup();
   process.exit(1);
 }
 
-// Step 3: Confirm scratch is gone on disk.
+// Step 3 (Phase 6): Plant a scratch with valid explain but NO severity. Gate MUST fire SEVERITY_MISSING.
+if (fs.existsSync(SCRATCH)) fs.unlinkSync(SCRATCH);
+fs.writeFileSync(SCRATCH, SCRATCH_BODY_NO_SEVERITY, 'utf8');
+const noSeverityRun = runGateWithScratchNoSeverity();
+const severityDetected = (noSeverityRun.status === 1) && (
+  noSeverityRun.stderr.includes('SEVERITY_MISSING') &&
+  noSeverityRun.stderr.includes('scratch')
+);
+if (!severityDetected) {
+  console.error('FAIL: gate did not flag the planted severity-missing scratch rule.');
+  console.error('  exit status:', noSeverityRun.status);
+  console.error('  stderr:', noSeverityRun.stderr.slice(0, 500));
+  console.error('  stdout:', noSeverityRun.stdout.slice(0, 500));
+  console.error('  Gate may be missing severity validation.');
+  cleanup();
+  process.exit(1);
+}
+
+cleanup(); // Always clean up before the final assertion.
+
+// Step 4: Confirm scratch is gone on disk.
 if (fs.existsSync(SCRATCH)) {
   console.error('FAIL: scratch file still on disk after cleanup');
   process.exit(1);
 }
 
-console.log('PASS: self-test confirms gate correctly distinguishes broken (exit 1, diagnostic) vs well-formed (exit 0) explain shapes.');
+console.log('PASS: self-test confirms gate correctly distinguishes broken-explain (exit 1), severity-missing (exit 1), and well-formed (exit 0) shapes.');
 process.exit(0);

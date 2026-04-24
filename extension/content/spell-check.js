@@ -306,7 +306,11 @@
         return;
       }
       const dot = document.createElement('div');
-      dot.className = `lh-spell-dot lh-spell-${finding.type}`;
+      // Phase 6: severity-aware CSS class suffix
+      const severitySuffix = finding.severity === 'warning' ? ' lh-spell-warn'
+                           : finding.severity === 'hint'    ? ' lh-spell-hint'
+                           : '';
+      dot.className = `lh-spell-dot lh-spell-${finding.type}${severitySuffix}`;
       dot.dataset.idx = String(idx);
       dot.title = finding.message;
       dot.addEventListener('mousedown', e => e.preventDefault()); // prevent blur
@@ -318,6 +322,14 @@
       overlay.appendChild(dot);
       markers.push({ el: dot, finding, rect });
       positionDot(dot, rect);
+      // Phase 6: hint markers span the full word width instead of being a small dot
+      if (finding.severity === 'hint') {
+        const wordWidth = rect.width || (rect.right - rect.left);
+        dot.style.width = wordWidth + 'px';
+        dot.style.height = '0';
+        dot.style.top = (rect.bottom || (rect.top + rect.height)) + 'px';
+        dot.style.left = rect.left + 'px';
+      }
       rendered++;
     });
     warn('markers rendered', { rendered, skipped, total: findings.length });
@@ -378,7 +390,11 @@
     hidePopover();
     activePopoverIdx = idx;
     popover = document.createElement('div');
-    popover.className = `lh-spell-popover lh-spell-popover-${finding.type}`;
+    // Phase 6: severity-aware popover class
+    const popoverSeveritySuffix = finding.severity === 'warning' ? ' lh-spell-popover-warn'
+                                : finding.severity === 'hint'    ? ' lh-spell-popover-hint'
+                                : '';
+    popover.className = `lh-spell-popover lh-spell-popover-${finding.type}${popoverSeveritySuffix}`;
     popover.addEventListener('mousedown', e => e.preventDefault());
 
     const lang = VOCAB.getLanguage();

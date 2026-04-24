@@ -71,6 +71,9 @@ const TARGETS = [
   'extension/content/spell-rules/nb-dialect-mix.js',
   'extension/content/spell-rules/nb-typo-curated.js',
   'extension/content/spell-rules/nb-typo-fuzzy.js',
+  'extension/content/spell-rules/nb-homophones.js',
+  'extension/content/spell-rules/universal-context-typo.js',
+  'extension/content/spell-rules/quotation-suppression.js',
 ];
 
 function resetGlobals() {

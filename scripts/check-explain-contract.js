@@ -68,6 +68,9 @@ const TARGETS = [
   'extension/content/spell-rules/nb-dialect-mix.js',      // Phase 05.1 Gap D
   'extension/content/spell-rules/nb-typo-curated.js',
   'extension/content/spell-rules/nb-typo-fuzzy.js',
+  'extension/content/spell-rules/nb-homophones.js',
+  'extension/content/spell-rules/universal-context-typo.js',
+  'extension/content/spell-rules/quotation-suppression.js',
 ];
 
 // Reset the shared globals the rule files register onto. Without this the
@@ -167,6 +170,17 @@ function validateRule(rule, file) {
       code: 'EXPLAIN_EMPTY_STRING',
       ruleId,
       detail: 'nb.length=' + result.nb.length + ' nn.length=' + result.nn.length + ' (both must be non-empty)',
+    };
+  }
+
+  // Phase 6: severity field is mandatory on all rules.
+  const VALID_SEVERITIES = new Set(['error', 'warning', 'hint']);
+  if (!VALID_SEVERITIES.has(rule.severity)) {
+    return {
+      ok: false,
+      code: 'SEVERITY_MISSING',
+      ruleId: rule.id || ruleId,
+      detail: 'rule.severity must be one of: error, warning, hint. Got: ' + rule.severity,
     };
   }
 

@@ -42,6 +42,7 @@ const rule = {
   id: 'css-wiring-scratch-xyz',
   languages: ['nb', 'nn'],
   priority: 99,
+  severity: 'error',
   explain: (f) => ({ nb: 'x', nn: 'x' }),
   check() { return []; },
 };
@@ -61,6 +62,7 @@ const rule = {
   id: 'sarskriving',
   languages: ['nb', 'nn'],
   priority: 99,
+  severity: 'error',
   explain: (f) => ({ nb: 'x', nn: 'x' }),
   check() { return []; },
 };
