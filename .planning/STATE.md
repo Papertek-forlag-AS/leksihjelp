@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: unknown
-last_updated: "2026-04-21T11:41:06.308Z"
+milestone: v2.0
+milestone_name: "Depth of Coverage — Grammar Governance Beyond Tokens"
+status: defining_requirements
+last_updated: "2026-04-24T00:00:00.000Z"
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 29
-  completed_plans: 29
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,15 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** v1.0 Spell-Check & Prediction Quality **SHIPPED 2026-04-21** (19/19 requirements, 8 phases, 29 plans, 11/11 Chrome smoke-test PASS, 8 release gates exit 0). Archived to `.planning/milestones/v1.0-*`. Awaiting `/gsd:new-milestone` for v2.0 cycle.
+**Current focus:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens. Defining requirements from `.planning/v2.0-benchmark-driven-roadmap.md` draft + `benchmark-texts/` corpus.
 
 ## Current Position
 
-Phase: 05.1 of 6 — Close UX-01 Gaps from Phase 5 Smoke Test — **COMPLETE 2026-04-21**.
-Current Position: Post-v2.3.1 maintenance and logic improvements.
-Last activity: 2026-04-23 — Implemented 4 key logic improvements: (1) English a/an phonetic exceptions, (2) German Dative adjective endings, (3) Norwegian særskriving adjective blocklist, (4) Word prediction ranker tuning (recency, bigrams, POS demotion). Fixed core semicolon-indexing bug. Final verification: 100% pass rate (181/181 fixtures). Documented workflow in GEMINI.md.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-24 — Milestone v2.0 started.
 
-Progress: [██████████] 100%  (Phase 05.1 — all 5 plans complete. Phase 05.1 closed. UX-01 verified end-to-end. Release 2.3.1 ready for user-owned GitHub publish.)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 

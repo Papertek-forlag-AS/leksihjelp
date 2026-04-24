@@ -43,13 +43,34 @@ they're working on.
 - ✓ **Student-friendly explain popover** — v1.0, `rule.explain: (finding) => ({nb, nn})` callable on 5 popover-surfacing rules + renderExplain 3-way lookup + NB/NN register badge; `check-explain-contract` + `check-rule-css-wiring` release gates (UX-01)
 - ✓ **Top-3 suggestions with "Vis flere" reveal** — v1.0, spell-check popover + word-prediction dropdown both honor top-3 cap with click or ArrowDown auto-reveal; user-toggleable via "Vis alternative skriveforslag" (UX-02)
 
+## Current Milestone: v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
+
+**Goal:** Extend the spell-check surface from per-token rules (v1.0) into *structural* errors — word-order violations, case/agreement governance, aspect/mood choice, register drift, collocation errors — validated against the `benchmark-texts/<lang>.txt` corpus.
+
+**Seed:** `.planning/v2.0-benchmark-driven-roadmap.md` (draft, 11 phase groupings, benchmark-anchored).
+
+**Target phase groupings (subject to scoping):**
+- **Phase 6** — Register & stylistic polish (cross-lang, S)
+- **Phase 7** — Word-order violations (NB+DE+FR, M)
+- **Phase 8** — DE case & agreement governance (M)
+- **Phase 9** — ES ser/estar, por/para, personal "a" (M)
+- **Phase 10** — FR élision, auxiliary, participe passé (M)
+- **Phase 11** — Aspect & mood (ES+FR, L)
+- **Phase 12** — Pronoun & pro-drop (ES+FR, M)
+- **Phase 13** — Register consistency within a text (cross-lang, L)
+- **Phase 14** — Morphology & agreement beyond tokens (EN+ES+FR, M)
+- **Phase 15** — Collocations & idioms at scale (cross-lang, L)
+- **Phase 16** — Tense harmony & discourse (aspirational, L)
+
+**Validation source of truth:** `benchmark-texts/<lang>.txt`. A phase ships when its promised benchmark lines flip from unflagged → flagged (target 80%) — regardless of fixture green.
+
 ### Active
 
-<!-- Next milestone. Hypotheses until planned. -->
+<!-- Current scope. Requirements derived in REQUIREMENTS.md during this milestone cycle. -->
 
-Next milestone not yet scoped. Run `/gsd:new-milestone` to begin.
+v2.0 scope pending requirement definition (Phases 6–16 candidate set above).
 
-Candidate work tracked during v1.0 (see `.planning/milestones/v1.0-MILESTONE-AUDIT.md` tech-debt section):
+**Carry-over tech-debt from v1.0** (see `.planning/milestones/v1.0-MILESTONE-AUDIT.md`):
 
 - Manual "Run spell-check" button (Phase 5 deferred feature — user memory `project_phase5_manual_spellcheck_button.md`)
 - Demonstrative-mismatch rule (`Det boka`, `Den huset`) — extends nb-gender beyond en/ei/et
@@ -125,4 +146,4 @@ Candidate work tracked during v1.0 (see `.planning/milestones/v1.0-MILESTONE-AUD
 | **`papertek-vocabulary` is single source of data truth** | Three consumers (leksihjelp, papertek-webapps, papertek-nativeapps) stay in sync; additive schema changes only | ✓ Good — Phase 2 (typo bank) + Phase 05.1 (languagesbank + nationalitiesbank + adjective-declension audit) all landed at the source; extension pulled via `npm run sync-vocab` |
 
 ---
-*Last updated: 2026-04-21 after v1.0 Spell-Check & Prediction Quality milestone*
+*Last updated: 2026-04-24 — v2.0 milestone started (Depth of Coverage — Grammar Governance Beyond Tokens)*
