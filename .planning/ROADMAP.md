@@ -48,7 +48,11 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
   3. Priority bands (P1 hard-flag / P2 warn / P3 hint) are documented in `spell-rules/README.md` with distinct dot-colour tiers in `content.css`; a hint-severity rule renders visually distinct from an error-severity rule in Chrome smoke-test.
   4. New release gates `check-benchmark-coverage` and `check-governance-data` exit 0; `check-rule-css-wiring` TARGETS list extends to cover priority-tier classes; `check-explain-contract` requires `severity` on explain output; `check-spellcheck-features` extends to any new index introduced here.
   5. Quotation-span suppression tier (`ctx.suppressedFor.structural`) is active: a benchmark line wrapping a foreign-language quotation in `"…"` or `«…»` does NOT flag under any Phase 6 rule.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 06-01-PLAN.md — Core infrastructure: sentence segmenter, quotation suppression, severity contract on all rules, priority-band CSS tiers
+- [ ] 06-02-PLAN.md — New release gates: check-benchmark-coverage + check-governance-data with paired self-tests
+- [ ] 06-03-PLAN.md — Data-driven rules: REG-01 register + REG-02 collocation + REG-03 redundancy, vocab-seam pipeline, benchmark expectations
 
 ### Phase 7: Word-Order Violations (NB + DE + FR)
 **Goal**: Ship the first structural rules and the tagged-token view that Phases 8–12/14/15 will reuse; agree (but do not yet build) the Phase 13 document-state seam shape.
@@ -164,7 +168,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 | 4. False-Positive Reduction on NB/NN | v1.0 | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | v1.0 | 5/5 | Complete | 2026-04-20 |
 | 05.1 Close UX-01 Gaps from Phase 5 Smoke Test (INSERTED) | v1.0 | 5/5 | Complete | 2026-04-21 |
-| 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/? | Not started | — |
+| 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/3 | Planning complete | — |
 | 7. Word-Order Violations (NB + DE + FR) | v2.0 | 0/? | Not started | — |
 | 8. DE Case & Agreement Governance | v2.0 | 0/? | Not started | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/? | Not started | — |
