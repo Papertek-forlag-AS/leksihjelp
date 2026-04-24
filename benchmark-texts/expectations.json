@@ -3,6 +3,10 @@
   "entries": {
     "en.40": { "rule_id": "collocation", "severity": "warning", "priority_band": "P2" },
     "en.41": { "rule_id": "redundancy", "severity": "hint", "priority_band": "P3" },
+    "nb.42": { "rule_id": "nb-v2", "severity": "warning", "priority_band": "P2" },
+    "nb.43": { "rule_id": "nb-v2", "severity": "warning", "priority_band": "P2" },
+    "de.32": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
+    "de.39": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
     "de.44": { "rule_id": "de-verb-final", "severity": "warning", "priority_band": "P2" },
     "fr.53": { "rule_id": "fr-bags", "severity": "hint", "priority_band": "P3" }
   }

@@ -1,0 +1,43 @@
+# ─── BENCHMARK: NB (bokmål student proofreading own writing) ─
+# CURRENTLY COVERED:
+#   - sarskriving: "lamme kotlett", "bil dør", "skole sekk", "mat pakke"
+#   - gender: "et bok", "en hus", "ei bord"
+#   - modal_form: "jeg kan gikk", "hun må spiste"
+#   - typo (curated + fuzzy): "skjøn" → "skjønn", "noge" → "noe"
+#   - dialect-mix: "ikkje", "eg", "kva" in otherwise-NB text
+#   - homophone (å/og): "jeg prøver og skrive", "det er lett og gjøre"
+#
+# FUTURE / UNPLANNED:
+#   - V2 word-order violations: "I går jeg gikk på kino"
+#     (correct: "I går gikk jeg …")
+#   - Consistent register/norm mixing: bokmål with sporadic riksmål
+#     ("boken" + "efter" + "sne" in same paragraph)
+#   - "Hvorfor du"-style subject-verb inversion in wh-questions
+#   - Preposition-collocation errors: "glad på", "flink i" vs "flink til"
+#   - Punctuation for leddsetninger: missing comma before "som" / "at"
+#     in restrictive-vs-non-restrictive contexts
+#   - Double definiteness errors: "den store huset" (should be "det store
+#     huset"; common dialect bleed-through)
+#   - Anglicism leakage: "downloade", "chille", "book-e timen"
+#   - Anaphora ambiguity: pronoun referent unclear ("han" when two males
+#     mentioned)
+#   - Compound overcompounding vs undercompounding (särskriving already
+#     partly handled, but "skole-sekk" hyphen-style is not)
+# ────────────────────────────────────────────────────────────
+
+I går skulle jeg lage lamme kotlett til familien min, men bil døra var
+stengt fordi jeg hadde glemt nøkkelen hjemme. Jeg prøver og handle på
+Rema 1000 hver fredag, men denne gangen måtte jeg gå en tur til butikken
+på Storsenteret fordi eg var sein. Det er ikkje enkelt å finne parkering
+der, og jeg kan gikk rundt i ti minutter før jeg fant en plass. Inne i
+butikken så jeg at det var et veldig stor kø ved kassen. En dame foran
+meg hadde et stor handlevogn full av mat pakke, frokost blanding og
+skole sekk til barna. Jeg hadde bare noge frukt og ei bok jeg skulle
+kjøpe til skolen. Da jeg endelig kom hjem, måtte jeg ut og lufte hunden
+min som er veldig flink i å gå i bånd. Den store huset vårt har en
+hage hvor hun liker å løpe. Jeg har et fin hund. Om kvelden prøvde jeg
+og skrive ferdig leksene, men jeg var så trøtt at jeg nesten sovnet.
+Jeg mener det er viktig og øve på rettskriving, for ellers blir skjøn
+tekst umulig å skrive. Det er lett og gjøre feil når man har det
+travelt. Hvorfor du tror at norsk er lett? Det er det ikke.
+I går jeg gikk på kino.

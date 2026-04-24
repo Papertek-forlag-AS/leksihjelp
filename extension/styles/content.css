@@ -880,6 +880,8 @@
 #lexi-spell-overlay .lh-spell-register { background: #f59e0b; }  /* amber — P2 warn, Phase 6 REG-01 */
 #lexi-spell-overlay .lh-spell-collocation { background: #f59e0b; }  /* amber — P2 warn, Phase 6 REG-02 */
 #lexi-spell-overlay .lh-spell-redundancy { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 6 REG-03 */
+#lexi-spell-overlay .lh-spell-nb-v2 { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-01 */
+#lexi-spell-overlay .lh-spell-de-v2 { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-02 */
 #lexi-spell-overlay .lh-spell-de-verb-final { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-03 */
 #lexi-spell-overlay .lh-spell-fr-bags { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 7 WO-04 */
 
