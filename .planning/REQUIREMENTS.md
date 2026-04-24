@@ -11,7 +11,7 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 ### Infrastructure (shared seams + release gates)
 
 - [x] **INFRA-05**: Sentence segmenter available as shared helper (`Intl.Segmenter`-backed) — consumed by every structural rule that needs clause boundaries
-- [ ] **INFRA-06**: Tagged-token view (POS-aware token stream with finite-verb / subject / adverbial / subordinator slots) available to all word-order and governance rules
+- [x] **INFRA-06**: Tagged-token view (POS-aware token stream with finite-verb / subject / adverbial / subordinator slots) available to all word-order and governance rules
 - [ ] **INFRA-07**: Document-state two-pass runner (`kind: 'document'` rule type) with explicit invalidation protocol — consumed by all DOC-* rules
 - [x] **INFRA-08**: New release gate `check-benchmark-coverage` — measures per-phase benchmark flip-rate with P1/P2/P3 priority weighting; hard gate before phase close
 - [x] **INFRA-09**: New release gate `check-governance-data` — mirrors v1.0 feature-independent-index gate; catches vocab sync dropping `aux` / `separable` / `human` / `bags` / trigger flags
@@ -129,7 +129,7 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | INFRA-05 | Phase 6 | Complete |
-| INFRA-06 | Phase 7 | Pending |
+| INFRA-06 | Phase 7 | Complete |
 | INFRA-07 | Phase 13 | Pending |
 | INFRA-08 | Phase 6 | Complete |
 | INFRA-09 | Phase 6 | Complete |

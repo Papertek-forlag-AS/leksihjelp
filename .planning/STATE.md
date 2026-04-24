@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-24T19:37:49.543Z"
+last_updated: "2026-04-24T20:06:45.172Z"
 progress:
-  total_phases: 1
+  total_phases: 2
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 6 — Structural Infrastructure + Register & Stylistic Polish
-Plan: 3 of 3 complete (06-01 + 06-02 + 06-03 done)
-Status: Phase 06 complete
-Last activity: 2026-04-24 — Completed 06-03-PLAN.md (register, collocation, redundancy rules with vocab-seam pipeline)
+Phase: 7 — Word-Order Violations (NB/DE/FR)
+Plan: 1 of 3 complete (07-01 done)
+Status: Executing Phase 07
+Last activity: 2026-04-24 — Completed 07-01-PLAN.md (tagged-token POS view + acceptance ratio enforcement)
 
-Progress: [██░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 13%
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Progress: [██░░░░░░░░] 10%
 | Phase 06 P02 | 4min | 2 tasks | 7 files |
 | Phase 06 P01 | 8min | 2 tasks | 35 files |
 | Phase 06 P03 | ~35min | 3 tasks (2 auto + 1 checkpoint) | 18 files |
+| Phase 07 P01 | 2m | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -217,6 +218,7 @@ Recent decisions affecting current work:
 - [Phase 06 P03]: Temporary seed data in rule files allows testing before papertek-vocabulary banks land; marked TEMPORARY for removal after data sync
 - [Phase 06 P03]: Governance banks (registerbank/collocationbank/phrasebank) extracted separately from word-prediction BANKS array to avoid polluting autocomplete
 - [Phase 06 P03]: REG-01 register rule defaults OFF via grammar_register toggle — opt-in to avoid false positives in informal student writing contexts
+- [Phase 07]: classifyPOS receives pre-lowercased input; acceptance ratio counted per rule-specific fixture file
 
 ### Roadmap Evolution
 
