@@ -69,7 +69,31 @@ function generateChallenge(lang, vocab) {
       const a = arts[Math.floor(Math.random() * arts.length)];
       challenges.push(`${a} ${n}.`);
     }
+  } else if (lang === 'nb' || lang === 'nn') {
+    // Pick a random noun + determiner. NB/NN share the data model but use
+    // different subject pronouns/modals, so branch on the dialect. We draw
+    // nouns from nounGenus (native bank entries with genus) and verbs from
+    // verbInfinitive.values() (registered infinitive forms).
+    const nouns = Array.from(vocab.nounGenus.keys()).slice(0, 200).map(clean);
+    const verbs = Array.from(new Set(Array.from(vocab.verbInfinitive.values()))).slice(0, 200).map(clean);
+    const subjects = lang === 'nb'
+      ? ['Jeg', 'Du', 'Han', 'Hun', 'Vi', 'De']
+      : ['Eg', 'Du', 'Han', 'Ho', 'Vi', 'Dei'];
+    const modals = lang === 'nb'
+      ? ['kan', 'vil', 'må', 'skal']
+      : ['kan', 'vil', 'må', 'skal'];
+    const subj = subjects[Math.floor(Math.random() * subjects.length)];
+    const modal = modals[Math.floor(Math.random() * modals.length)];
+    const verb = verbs[Math.floor(Math.random() * verbs.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    if (verb) challenges.push(`${subj} ${modal} ${verb} i dag.`);
+    if (noun) {
+      const article = lang === 'nb' ? 'En' : 'Ein';
+      challenges.push(`${article} ${noun} er her.`);
+    }
   }
+  // Generic fallback only when no lang-specific generator ran (shouldn't
+  // happen for the six supported dialects, but keeps challenges non-empty).
   return challenges.length > 0 ? challenges[Math.floor(Math.random() * challenges.length)] : "The cat is happy.";
 }
 

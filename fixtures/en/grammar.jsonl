@@ -15,3 +15,20 @@
 {"id":"en-a-an-abbr-sos","text":"a SOS","expected":[{"rule_id":"en-grammar","start":0,"end":1,"suggestion":"an"}],"comment":"S starts with a vowel sound (ess)"}
 {"id":"en-a-an-u-umbrella","text":"a umbrella","expected":[{"rule_id":"en-grammar","start":0,"end":1,"suggestion":"an"}],"comment":"Umbrella starts with a vowel sound"}
 {"id":"en-a-an-h-honor","text":"a honor","expected":[{"rule_id":"en-grammar","start":0,"end":1,"suggestion":"an"}],"comment":"Honor starts with a silent h"}
+{"id":"case-1777020552375","text":"Your not alone here.","expected":[{"rule_id":"homophone","start":0,"end":4,"suggestion":"You're"}],"comment":"","status":"ok"}
+{"id":"case-1777020591468","text":"Its a very nice day.","expected":[{"rule_id":"homophone","start":0,"end":3,"suggestion":"It's"}],"comment":"Maby explain more why it probably is \"It´s\"?","status":"ok"}
+{"id":"case-1777020600412","text":"He is taller then me.","expected":[{"rule_id":"homophone","start":13,"end":17,"suggestion":"than"}],"comment":"","status":"ok"}
+{"id":"case-1777020630092","text":"I should of gone home.","expected":[{"rule_id":"en-grammar","start":9,"end":11,"suggestion":"have"}],"comment":"Only thing is I dont belive students do this mistake","status":"ok"}
+{"id":"case-1777020699732","text":"She don't like coffee.","expected":[{"rule_id":"en-grammar","start":4,"end":9,"suggestion":"doesn't"}],"comment":"Explain a bit more precice. Når \"she\" er subjected i setningen, skal verbet bøyes \"x\" not \"y\".","status":"ok"}
+{"id":"case-1777020726319","text":"Me and John went out.","expected":[{"rule_id":"en-grammar","start":0,"end":2,"suggestion":"I"}],"comment":"","status":"ok"}
+{"id":"case-1777020749057","text":"She read an interesting book last night.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020759841","text":"They ate dinner at five o'clock.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020770825","text":"He had an honest face.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020778272","text":"I saw an FBI agent yesterday.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020788073","text":"She is a university student.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020825347","text":"He can runs fast.","expected":[{"rule_id":"en-grammar","start":7,"end":11,"suggestion":"run"}],"comment":"","status":"ok"}
+{"id":"case-1777020908871","text":"The dog barked at the cat.","expected":[],"comment":"In AI request 12, I used enter in stead of \"y\" so that skipped the whole thing, I belive? But it was correct handled case by the Leksihjelp-app.","status":"ok"}
+{"id":"case-1777020920647","text":"I would like a glass of water.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020929963","text":"Their house is bigger than ours.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020937988","text":"Your dog is very cute.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777020962831","text":"If I were you, I would go.","expected":[],"comment":"","status":"ok"}
