@@ -8,7 +8,7 @@ progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 7 — Word-Order Violations (NB/DE/FR)
-Plan: 1 of 3 complete (07-01 done)
+Plan: 2 of 3 complete (07-01, 07-03 done)
 Status: Executing Phase 07
-Last activity: 2026-04-24 — Completed 07-01-PLAN.md (tagged-token POS view + acceptance ratio enforcement)
+Last activity: 2026-04-24 — Completed 07-03-PLAN.md (DE verb-final + FR BAGS rules)
 
-Progress: [██░░░░░░░░] 13%
+Progress: [███░░░░░░░] 17%
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Progress: [██░░░░░░░░] 13%
 | Phase 06 P01 | 8min | 2 tasks | 35 files |
 | Phase 06 P03 | ~35min | 3 tasks (2 auto + 1 checkpoint) | 18 files |
 | Phase 07 P01 | 2m | 2 tasks | 3 files |
+| Phase 07 P03 | 16m | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,9 @@ Recent decisions affecting current work:
 - Project init: Spell-check stays free forever (landing-page promise)
 - Project init: Heuristics only, no ML, no paid APIs
 - Project init: Iterative releases — each phase independently shippable
+- Phase 07-03: Modal verbs (kann/muss/soll) treated as true finite verb in subordinate clause verb-final checking
+- Phase 07-03: Capitalized noun/verb homographs resolved via DE noun capitalization convention
+- Phase 07-03: FR verb/noun homographs only treated as noun when preceded by article
 - Project init: NB first, NN second for spell-check; all 6 languages for word-prediction
 - Project init: Regression fixture is the quality-gate tool for this milestone
 - [Phase 01]: vocab-seam surface: getBigrams() returns null (not empty object) when file missing — matches existing consumer null-handling

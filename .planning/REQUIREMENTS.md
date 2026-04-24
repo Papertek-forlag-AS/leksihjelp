@@ -29,8 +29,8 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 - [ ] **WO-01**: NB V2 violation flagged when `<fronted-adv> <subject> <finite-verb>` in main clauses (benchmark `nb.txt` "Hvorfor du tror"); acceptance fixtures for interrogatives, subordinate clauses, V2-compliant inversions
 - [ ] **WO-02**: DE main-clause V2 violation flagged (benchmark `de.txt` "Letzte montag ich bin gegangen", "Dann ich aufstehe"); shares detection code with WO-01
-- [ ] **WO-03**: DE subordinate verb-final violation flagged when subordinator (`dass/weil/wenn/ob/…`) + finite verb not at clause end (benchmark `de.txt` "dass er ist nett")
-- [ ] **WO-04**: FR BAGS adjective placement flagged when BAGS adjective (`bags: true` flag in adjbank, ~40 closed-set) appears post-nominally; acceptance fixture from `"une belle femme"`
+- [x] **WO-03**: DE subordinate verb-final violation flagged when subordinator (`dass/weil/wenn/ob/…`) + finite verb not at clause end (benchmark `de.txt` "dass er ist nett")
+- [x] **WO-04**: FR BAGS adjective placement flagged when BAGS adjective (`bags: true` flag in adjbank, ~40 closed-set) appears post-nominally; acceptance fixture from `"une belle femme"`
 
 ### DE Case & Agreement Governance (Phase 8)
 
@@ -141,8 +141,8 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | REG-03 | Phase 6 | Complete (Plan 06-03, 2026-04-24) |
 | WO-01 | Phase 7 | Pending |
 | WO-02 | Phase 7 | Pending |
-| WO-03 | Phase 7 | Pending |
-| WO-04 | Phase 7 | Pending |
+| WO-03 | Phase 7 | Complete |
+| WO-04 | Phase 7 | Complete |
 | DE-01 | Phase 8 | Pending |
 | DE-02 | Phase 8 | Pending |
 | DE-03 | Phase 8 | Pending |
