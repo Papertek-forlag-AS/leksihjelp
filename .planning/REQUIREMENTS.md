@@ -21,9 +21,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Register, Collocation, Redundancy (Phase 6)
 
-- [ ] **REG-01**: Register/formality detector flags colloquialisms in formal prose (EN `gonna`/`wanna`/`ain't`, NB anglicisms `downloade`/`booket`, FR `je sais pas`); opt-in via grammar feature toggle
-- [ ] **REG-02**: Collocation-error detector flags wrong-verb bigrams from a curated `papertek-vocabulary` collocation list (EN seed: `make a photo → take`, `big rain → heavy`); data-only rule
-- [ ] **REG-03**: Stylistic-redundancy detector flags phrase-bank literal matches (`return back`, `free gift`, `future plans`, `past history`); one phrase-bank file per language
+- [x] **REG-01**: Register/formality detector flags colloquialisms in formal prose (EN `gonna`/`wanna`/`ain't`, NB anglicisms `downloade`/`booket`, FR `je sais pas`); opt-in via grammar feature toggle *(Phase 6 Plan 03, 2026-04-24)*
+- [x] **REG-02**: Collocation-error detector flags wrong-verb bigrams from a curated `papertek-vocabulary` collocation list (EN seed: `make a photo → take`, `big rain → heavy`); data-only rule *(Phase 6 Plan 03, 2026-04-24)*
+- [x] **REG-03**: Stylistic-redundancy detector flags phrase-bank literal matches (`return back`, `free gift`, `future plans`, `past history`); one phrase-bank file per language *(Phase 6 Plan 03, 2026-04-24)*
 
 ### Word-Order Violations (Phase 7)
 
@@ -136,9 +136,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | INFRA-10 | Phase 13 | Pending |
 | INFRA-11 | Phase 6 | Complete |
 | INFRA-12 | Phase 6 | Complete |
-| REG-01 | Phase 6 | Pending |
-| REG-02 | Phase 6 | Pending |
-| REG-03 | Phase 6 | Pending |
+| REG-01 | Phase 6 | Complete (Plan 06-03, 2026-04-24) |
+| REG-02 | Phase 6 | Complete (Plan 06-03, 2026-04-24) |
+| REG-03 | Phase 6 | Complete (Plan 06-03, 2026-04-24) |
 | WO-01 | Phase 7 | Pending |
 | WO-02 | Phase 7 | Pending |
 | WO-03 | Phase 7 | Pending |

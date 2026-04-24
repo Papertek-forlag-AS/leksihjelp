@@ -50,9 +50,9 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
   5. Quotation-span suppression tier (`ctx.suppressedFor.structural`) is active: a benchmark line wrapping a foreign-language quotation in `"…"` or `«…»` does NOT flag under any Phase 6 rule.
 **Plans**: 3 plans
 Plans:
-- [ ] 06-01-PLAN.md — Core infrastructure: sentence segmenter, quotation suppression, severity contract on all rules, priority-band CSS tiers
-- [ ] 06-02-PLAN.md — New release gates: check-benchmark-coverage + check-governance-data with paired self-tests
-- [ ] 06-03-PLAN.md — Data-driven rules: REG-01 register + REG-02 collocation + REG-03 redundancy, vocab-seam pipeline, benchmark expectations
+- [x] 06-01-PLAN.md — Core infrastructure: sentence segmenter, quotation suppression, severity contract on all rules, priority-band CSS tiers
+- [x] 06-02-PLAN.md — New release gates: check-benchmark-coverage + check-governance-data with paired self-tests
+- [x] 06-03-PLAN.md — Data-driven rules: REG-01 register + REG-02 collocation + REG-03 redundancy, vocab-seam pipeline, benchmark expectations
 
 ### Phase 7: Word-Order Violations (NB + DE + FR)
 **Goal**: Ship the first structural rules and the tagged-token view that Phases 8–12/14/15 will reuse; agree (but do not yet build) the Phase 13 document-state seam shape.

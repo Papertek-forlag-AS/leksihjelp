@@ -8,7 +8,7 @@ progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 3
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 6 — Structural Infrastructure + Register & Stylistic Polish
-Plan: 2 of 3 complete (06-01 + 06-02 done, 06-03 remaining)
-Status: Executing phase 06
-Last activity: 2026-04-24 — Completed 06-01-PLAN.md (sentence segmenter, quotation suppression, severity tiers, extended gates)
+Plan: 3 of 3 complete (06-01 + 06-02 + 06-03 done)
+Status: Phase 06 complete
+Last activity: 2026-04-24 — Completed 06-03-PLAN.md (register, collocation, redundancy rules with vocab-seam pipeline)
 
-Progress: [██░░░░░░░░] 7%
+Progress: [██░░░░░░░░] 10%
 
 ## Performance Metrics
 
@@ -82,6 +82,7 @@ Progress: [██░░░░░░░░] 7%
 | Phase 05.1 P05 | ~90min (incl. ~15min inline bug-fix loop during human-verify) | 4 tasks (2 auto + 1 checkpoint:human-verify + 1 auto close) | 16 files |
 | Phase 06 P02 | 4min | 2 tasks | 7 files |
 | Phase 06 P01 | 8min | 2 tasks | 35 files |
+| Phase 06 P03 | ~35min | 3 tasks (2 auto + 1 checkpoint) | 18 files |
 
 ## Accumulated Context
 
@@ -213,6 +214,9 @@ Recent decisions affecting current work:
 - [Phase 05.1]: [Plan 05.1-05]: Phase 05.1 close-out — all four UX-01 gaps (A/B/C/D) landed + Chrome smoke test PASS 11/11 scenarios + UX-01 marked complete in REQUIREMENTS.md with dual-phase cross-link (Phase 5 + Phase 05.1). Release 2.3.1 packaged; zip + GitHub release publish owned by user. Project has no further inserted phases planned on current ROADMAP.md; natural next step is `/gsd:verify-work 05.1` then optional Phase 06 add.
 - [Phase 06]: Empty expectations.json passes benchmark gate (ship-before-populate strategy)
 - [Phase 06]: Governance gate pass-through when no banks exist (pre-data-sync tolerance)
+- [Phase 06 P03]: Temporary seed data in rule files allows testing before papertek-vocabulary banks land; marked TEMPORARY for removal after data sync
+- [Phase 06 P03]: Governance banks (registerbank/collocationbank/phrasebank) extracted separately from word-prediction BANKS array to avoid polluting autocomplete
+- [Phase 06 P03]: REG-01 register rule defaults OFF via grammar_register toggle — opt-in to avoid false positives in informal student writing contexts
 
 ### Roadmap Evolution
 
@@ -261,5 +265,7 @@ Last session: 2026-04-21 — Phase 05.1 Plan 05.1-05 (Integration close) complet
 
 Previous session: 2026-04-21 — Phase 05.1 Plan 05.1-01 (Gap A — NB blå_adj + adjective-declension audit, cross-repo) completed in 19m52s. Three atomic commits in papertek-vocabulary: 4307937c, c734f97e, dbdb8b12. See 05.1-01-SUMMARY.md for detail.
 
-Stopped at: **Completed Phase 05.1 Plan 05.1-05 (Integration close — sync-vocab pulled Plans 05.1-01 + 05.1-02 cross-repo data into extension/data/{nb,nn,en}.json; 4 registries + i18n wired for new languagesbank + nationalitiesbank; nn-clean-003 fixture reverted stort→fint after pre-revert gate PASS; version bumped 2.3.0→2.3.1; zip packaged; 4 browser-only bugs inline-fixed during Chrome smoke test; NEW check-rule-css-wiring release gate shipped to close the Node-runner-vs-browser-adapter blindspot; all 8 release gates PASS; 11/11 Chrome smoke-test scenarios PASS; UX-01 marked complete in REQUIREMENTS.md). SUMMARY at `.planning/phases/05.1-close-ux-01-gaps-from-phase-5-smoke-test/05.1-05-SUMMARY.md`.**
+Stopped at: **Completed Phase 06 Plan 06-03 (register, collocation, redundancy rules with vocab-seam pipeline). Phase 06 COMPLETE — 3 of 3 plans shipped 2026-04-24. SUMMARY at `.planning/phases/06-structural-infrastructure-register-stylistic-polish/06-03-SUMMARY.md`.**
+
+Previous stopped-at: **Completed Phase 05.1 Plan 05.1-05 (Integration close — sync-vocab pulled Plans 05.1-01 + 05.1-02 cross-repo data into extension/data/{nb,nn,en}.json; 4 registries + i18n wired for new languagesbank + nationalitiesbank; nn-clean-003 fixture reverted stort→fint after pre-revert gate PASS; version bumped 2.3.0→2.3.1; zip packaged; 4 browser-only bugs inline-fixed during Chrome smoke test; NEW check-rule-css-wiring release gate shipped to close the Node-runner-vs-browser-adapter blindspot; all 8 release gates PASS; 11/11 Chrome smoke-test scenarios PASS; UX-01 marked complete in REQUIREMENTS.md). SUMMARY at `.planning/phases/05.1-close-ux-01-gaps-from-phase-5-smoke-test/05.1-05-SUMMARY.md`.**
 Resume: **Phase 05.1 COMPLETE — 5 of 5 plans shipped 2026-04-21.** Project now has no in-progress or queued phases on current ROADMAP.md. Suggested next steps (user-owned): (1) `git push origin main` to publish the 9 leksihjelp commits + the final docs-close commit to origin; (2) optional `gh release create v2.3.1 leksihjelp-2.3.1.zip` or manual GitHub Release publish; (3) `/gsd:verify-work 04` and `/gsd:verify-work 05.1` to audit SC-02/03/04/05 + UX-01 requirement marks; (4) `/gsd:add-phase` to pick up Phase 06 candidates (demonstrative-mismatch rule, triple-letter fuzzy budget) or data-authoring follow-ups (s-passiv conjugations, setningen NB bestemt-form). Deferred items unchanged except fin_adj RESOLVED (Plan 05.1-01) and two new data follow-ups + two new Phase 06 candidates added above.
