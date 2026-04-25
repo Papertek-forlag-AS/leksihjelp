@@ -53,9 +53,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Aspect & Mood (Phase 11)
 
-- [ ] **MOOD-01**: ES subjuntivo trigger rule flags indicative-when-subjunctive-required after closed trigger set (`quiero que`, `espero que`, `dudo que`, `es importante que`, …); benchmark `es.txt` "Quiero que mi hermano viene"
-- [ ] **MOOD-02**: ES pretérito vs imperfecto (warn-only) on aspectual hints (`ayer/la semana pasada` → pretérito; `mientras/siempre/cada día` → imperfecto); hint-tier severity
-- [ ] **MOOD-03**: FR subjonctif trigger rule flags indicative-when-subjunctive-required after `il faut que / avant que / bien que / pour que`; benchmark `fr.txt` "Il faut que je parle"
+- [x] **MOOD-01**: ES subjuntivo trigger rule flags indicative-when-subjunctive-required after closed trigger set (`quiero que`, `espero que`, `dudo que`, `es importante que`, …); benchmark `es.txt` "Quiero que mi hermano viene"
+- [x] **MOOD-02**: ES pretérito vs imperfecto (warn-only) on aspectual hints (`ayer/la semana pasada` → pretérito; `mientras/siempre/cada día` → imperfecto); hint-tier severity
+- [x] **MOOD-03**: FR subjonctif trigger rule flags indicative-when-subjunctive-required after `il faut que / avant que / bien que / pour que`; benchmark `fr.txt` "Il faut que je parle"
 
 ### Pronoun & Pro-Drop (Phase 12)
 
@@ -153,9 +153,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | FR-01 | Phase 10 | Complete |
 | FR-02 | Phase 10 | Complete |
 | FR-03 | Phase 10 | Complete |
-| MOOD-01 | Phase 11 | Pending |
-| MOOD-02 | Phase 11 | Pending |
-| MOOD-03 | Phase 11 | Pending |
+| MOOD-01 | Phase 11 | Complete |
+| MOOD-02 | Phase 11 | Complete |
+| MOOD-03 | Phase 11 | Complete |
 | PRON-01 | Phase 12 | Pending |
 | PRON-02 | Phase 12 | Pending |
 | PRON-03 | Phase 12 | Pending |

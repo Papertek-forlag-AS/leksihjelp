@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T04:25:19.515Z"
+last_updated: "2026-04-25T08:50:09.477Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 19
+  completed_plans: 17
 ---
 
 # Project State
@@ -22,12 +22,12 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 10 — FR Elision, Auxiliary, PP Agreement
-Plan: 3 of 3 complete (10-01, 10-02, 10-03 done)
-Status: Complete
-Last activity: 2026-04-25 — Completed 10-02-PLAN.md (FR elision + etre/avoir rules)
+Phase: 11 — Aspect/Mood (ES/FR)
+Plan: 1 of 3 complete (11-01 done)
+Status: In Progress
+Last activity: 2026-04-25 — Completed 11-01-PLAN.md (mood/aspect infrastructure)
 
-Progress: [██████████] 100%
+Progress: [███-------] 33%
 
 ## Performance Metrics
 
@@ -95,6 +95,7 @@ Progress: [██████████] 100%
 | Phase 10 P01 | 3min | 2 tasks | 6 files |
 | Phase 10 P03 | 13min | 1 tasks | 7 files |
 | Phase 10 P02 | 17m | 2 tasks | 11 files |
+| Phase 11 P01 | 9min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -253,6 +254,8 @@ Recent decisions affecting current work:
 - [Phase 10]: vocab.isFeatureEnabled added to fixture runner for feature-gated rule testing
 - [Phase 10]: Expanded FR_ETRE_PARTICIPLES to all 18 DR MRS VANDERTRAMP verbs for complete hardcoded fallback coverage
 - [Phase 10]: Added normalizeAux() to handle accented vocab data values; changed benchmark J'ai to Il a to avoid typo-rule overlap dedup
+- [Phase 11]: ES reverse-lookup Maps use accent-stripped variants for student tolerance
+- [Phase 11]: FR homophony guard (frSubjonctifDiffers) compares subjonctif vs presens to suppress false positives
 
 ### Roadmap Evolution
 
