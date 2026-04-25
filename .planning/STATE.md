@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T02:49:38.913Z"
+last_updated: "2026-04-25T02:57:56.466Z"
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 13
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 9 — ES Ser/Estar, Por/Para, Personal A
-Plan: 1 of 3 complete (09-01 done)
+Plan: 2 of 3 complete (09-01, 09-02 done)
 Status: In Progress
-Last activity: 2026-04-25 — Completed 09-01-PLAN.md (ES shared grammar tables + benchmark expectations)
+Last activity: 2026-04-25 — Completed 09-02-PLAN.md (ES ser/estar copula-adjective mismatch rule)
 
 Progress: [████████░░] 30%
 
@@ -90,6 +90,7 @@ Progress: [████████░░] 30%
 | Phase 08-de-case-agreement-governance P01 | 4m 13s | 2 tasks | 7 files |
 | Phase 08 P03 | 14min | 2 tasks | 11 files |
 | Phase 08 P02 | 17m 34s | 2 tasks | 10 files |
+| Phase 09 P02 | 6m | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -240,6 +241,7 @@ Recent decisions affecting current work:
 - [Phase 08]: Lazy-init grammar-tables at check() time for Node/browser load-order compatibility
 - [Phase 08]: Separable-verb fixtures document typo-fuzzy dedup interaction honestly — long-prefix forms survive
 - [Phase 09]: Accent-stripped keys throughout ES tables since tokenizer lowercases and students omit tildes
+- [Phase 09]: Added plural adjective resolution (strip -s/-es) for ES copula rule to catch plural predicate contexts
 
 ### Roadmap Evolution
 
