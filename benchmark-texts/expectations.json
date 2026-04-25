@@ -22,6 +22,10 @@
     "es.27": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
     "es.34": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
     "es.42": { "rule_id": "es-personal-a", "severity": "warning", "priority_band": "P2" },
-    "es.38": { "rule_id": "es-subjuntivo", "severity": "warning", "priority_band": "P2" }
+    "es.38": { "rule_id": "es-subjuntivo", "severity": "warning", "priority_band": "P2" },
+    "es.39": { "rule_id": "es-pro-drop", "severity": "hint", "priority_band": "P3" },
+    "es.41": { "rule_id": "es-pro-drop", "severity": "hint", "priority_band": "P3" },
+    "es.32": { "rule_id": "es-gustar", "severity": "warning", "priority_band": "P2" },
+    "fr.55": { "rule_id": "fr-clitic-order", "severity": "warning", "priority_band": "P2" }
   }
 }

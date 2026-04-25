@@ -94,6 +94,9 @@ const TARGETS = [
   'extension/content/spell-rules/es-subjuntivo.js',
   'extension/content/spell-rules/es-imperfecto-hint.js',
   'extension/content/spell-rules/fr-subjonctif.js',
+  'extension/content/spell-rules/es-pro-drop.js',
+  'extension/content/spell-rules/es-gustar.js',
+  'extension/content/spell-rules/fr-clitic-order.js',
 ];
 
 function resetGlobals() {
