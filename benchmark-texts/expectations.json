@@ -5,9 +5,13 @@
     "en.41": { "rule_id": "redundancy", "severity": "hint", "priority_band": "P3" },
     "nb.42": { "rule_id": "nb-v2", "severity": "warning", "priority_band": "P2" },
     "nb.43": { "rule_id": "nb-v2", "severity": "warning", "priority_band": "P2" },
-    "de.32": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
-    "de.39": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
-    "de.44": { "rule_id": "de-verb-final", "severity": "warning", "priority_band": "P2" },
+    "de.29": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
+    "de.36": { "rule_id": "de-v2", "severity": "warning", "priority_band": "P2" },
+    "de.41": { "rule_id": "de-verb-final", "severity": "warning", "priority_band": "P2" },
+    "de.44": { "rule_id": "de-prep-case", "severity": "warning", "priority_band": "P2" },
+    "de.45": { "rule_id": "de-perfekt-aux", "severity": "warning", "priority_band": "P2" },
+    "de.46": { "rule_id": "de-compound-gender", "severity": "warning", "priority_band": "P2" },
+    "de.47": { "rule_id": "de-separable-verb", "severity": "warning", "priority_band": "P2" },
     "fr.53": { "rule_id": "fr-bags", "severity": "hint", "priority_band": "P3" }
   }
 }

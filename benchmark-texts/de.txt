@@ -5,25 +5,22 @@
 #   - agreement: adjective-noun gender/case agreement
 #   - typo: hand-picked German typos
 #
+# COVERED BY PHASE 8 (DE case/agreement governance):
+#   - Preposition-case governance (DE-01): "mit den Schule" (wrong case)
+#   - Trennbare Verben / separable prefixes (DE-02): "ich aufstehe" → "ich stehe auf"
+#   - Perfekt auxiliary choice (DE-03): "ich habe gegangen" → "ich bin gegangen"
+#   - Noun-compound gender (DE-04): "das Schultasche" → "die Schultasche"
+#
 # FUTURE / UNPLANNED:
-#   - Preposition-case governance: "mit der Schule" (dat, correct) vs
-#     "mit den Schule" (wrong). Two-way preps (in/an/auf + acc vs dat
-#     depending on motion) are especially error-rich.
 #   - Verb-second (V2) position in main clauses, verb-final in
 #     subordinate clauses: "Ich denke, dass er ist nett" (should be
 #     "… dass er nett ist")
-#   - Trennbare Verben (separable prefixes): "ich aufstehe" vs
-#     correct "ich stehe auf"
-#   - Perfekt auxiliary choice: "ich habe gegangen" vs "ich bin gegangen"
 #   - Genitive vs dative after prepositions: "wegen dem" (colloquial) vs
 #     "wegen des" (standard)
 #   - Du/Sie register consistency within a single text
 #   - Modal verb + infinitive word order: "ich muss das Buch lesen",
 #     not "ich muss lesen das Buch"
 #   - Plural-form overgeneralization: "die Frauen" vs "die Fraus"
-#   - Noun-compound gender: compounds take the gender of the LAST
-#     component — NB students often take the first ("das Schultasche"
-#     instead of "die Schultasche")
 #   - Reflexive pronouns: "ich wasche mir die Hände" (dat) vs "ich
 #     wasche mich" (acc) depending on object
 #   - Relativpronomen: der/die/das vs welcher case-matching
@@ -44,3 +41,7 @@ und haben geguckt einen film zusammen. Es war zu viel käse auf der
 pizza. Ich denke dass deutsch ist schwieriger als norwegisch. Meine
 lehrerin hat gesagt dass ich bin besser geworden. Wegen dem wetter
 sind wir drinnen geblieben. Ich wasche mich die hände vor dem essen.
+Gestern ich bin mit den Schule nach Hause gegangen.
+Ich habe gegangen zum Laden um Milch zu kaufen.
+Das Schultasche ist sehr schwer und ich brauche ein neues.
+Am Morgen ich aufstehe und ich mache Frühstück.
