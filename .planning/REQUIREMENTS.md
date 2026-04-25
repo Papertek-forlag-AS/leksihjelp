@@ -72,9 +72,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Morphology & Agreement Beyond Tokens (Phase 14)
 
-- [ ] **MORPH-01**: EN morphological overgeneration flagged when regular-pattern derivation applied to irregular-flagged verb/noun (`goed`, `runned`, `childs`, `mouses`, `womans`); benchmark `en.txt` "childs", "eated"
-- [ ] **MORPH-02**: ES/FR opaque-noun gender flagged when article-noun form mismatches `genus` field (benchmark `fr.txt` "La problème", "un bon humeur")
-- [ ] **MORPH-03**: EN word-family POS-slot confusion flagged (`creative/creativity/creation`; `succeed/success/successful`) via closed word-family list + POS-of-slot detection
+- [x] **MORPH-01**: EN morphological overgeneration flagged when regular-pattern derivation applied to irregular-flagged verb/noun (`goed`, `runned`, `childs`, `mouses`, `womans`); benchmark `en.txt` "childs", "eated"
+- [x] **MORPH-02**: ES/FR opaque-noun gender flagged when article-noun form mismatches `genus` field (benchmark `fr.txt` "La problème", "un bon humeur")
+- [x] **MORPH-03**: EN word-family POS-slot confusion flagged (`creative/creativity/creation`; `succeed/success/successful`) via closed word-family list + POS-of-slot detection
 
 ### Collocations at Scale (Phase 15)
 
@@ -163,9 +163,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | DOC-02 | Phase 13 | Complete |
 | DOC-03 | Phase 13 | Complete |
 | DOC-04 | Phase 13 | Complete |
-| MORPH-01 | Phase 14 | Pending |
-| MORPH-02 | Phase 14 | Pending |
-| MORPH-03 | Phase 14 | Pending |
+| MORPH-01 | Phase 14 | Complete |
+| MORPH-02 | Phase 14 | Complete |
+| MORPH-03 | Phase 14 | Complete |
 | COLL-01 | Phase 15 | Pending |
 | COLL-02 | Phase 15 | Pending |
 | COLL-03 | Phase 15 | Pending |

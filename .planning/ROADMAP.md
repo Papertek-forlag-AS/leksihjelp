@@ -218,7 +218,7 @@ Plans:
 | 11. Aspect & Mood (ES + FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 12. Pronoun & Pro-Drop (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
 | 13. Register Drift Within a Document | 3/3 | Complete    | 2026-04-25 | — |
-| 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 0/? | Not started | — |
+| 14. Morphology Beyond Tokens (EN + ES/FR) | 1/3 | In Progress|  | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
