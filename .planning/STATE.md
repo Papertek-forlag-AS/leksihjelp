@@ -3,11 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 12-pronoun-pro-drop-es-fr
-status: In Progress
-last_updated: "2026-04-25T10:16:27Z"
+current_plan: Not started
+status: completed
+last_updated: "2026-04-25T10:24:33.547Z"
 progress:
-  total_phases: 6
-  completed_phases: 6
+  total_phases: 7
+  completed_phases: 7
   total_plans: 22
   completed_plans: 22
 ---
@@ -22,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 12-pronoun-pro-drop-es-fr
-**Current Plan:** 3 of 3
-**Status:** In Progress
+**Current Plan:** Not started
+**Status:** Milestone complete
 
 ## Decisions
 
