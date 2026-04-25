@@ -1,0 +1,74 @@
+# FR PP agreement rule fixtures (FR-03, Phase 10 Plan 03)
+# Feature-gated: grammar_fr_pp_agreement (fixture runner uses isFeatureEnabled: () => true)
+#
+# Positive cases: la/les + avoir + PP without correct agreement (31)
+# Acceptance cases: must NOT flag FR-03 (16)
+#
+# Note: fixture runner evaluates ALL rules, so expected arrays include
+# findings from fr-elision (la/les + vowel) and typo rules where applicable.
+
+# ── Positive: la + avoir + PP missing -e (feminine singular) ──
+# la + ai triggers fr-elision (la + vowel -> l')
+{"id":"fr-pp-1","text":"je la ai mangé","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":14,"suggestion":"mangée"}]}
+{"id":"fr-pp-2","text":"je la ai pris","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":13,"suggestion":"prise"}]}
+{"id":"fr-pp-3","text":"je la ai fait","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":13,"suggestion":"faite"}]}
+{"id":"fr-pp-4","text":"je la ai mis","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":12,"suggestion":"mise"}]}
+{"id":"fr-pp-5","text":"je la ai dit","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":12,"suggestion":"dite"}]}
+{"id":"fr-pp-6","text":"il la a vu","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":10,"suggestion":"vue"}]}
+{"id":"fr-pp-7","text":"il la a lu","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":10,"suggestion":"lue"}]}
+{"id":"fr-pp-8","text":"il la a fini","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":12,"suggestion":"finie"}]}
+{"id":"fr-pp-9","text":"il la a choisi","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":14,"suggestion":"choisie"}]}
+{"id":"fr-pp-10","text":"il la a vendu","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":13,"suggestion":"vendue"}]}
+{"id":"fr-pp-11","text":"il la a perdu","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":13,"suggestion":"perdue"}]}
+{"id":"fr-pp-12","text":"il la a écrit","expected":[{"rule_id":"fr-elision","start":3,"end":7,"suggestion":"l'a"},{"rule_id":"fr-pp-agreement","start":8,"end":13,"suggestion":"écrite"}]}
+{"id":"fr-pp-13","text":"nous la avons pris","expected":[{"rule_id":"fr-elision","start":5,"end":13,"suggestion":"l'avons"},{"rule_id":"fr-pp-agreement","start":14,"end":18,"suggestion":"prise"}]}
+{"id":"fr-pp-14","text":"vous la avez mis","expected":[{"rule_id":"fr-elision","start":5,"end":12,"suggestion":"l'avez"},{"rule_id":"fr-pp-agreement","start":13,"end":16,"suggestion":"mise"}]}
+{"id":"fr-pp-15","text":"ils la ont bu","expected":[{"rule_id":"fr-elision","start":4,"end":10,"suggestion":"l'ont"},{"rule_id":"fr-pp-agreement","start":11,"end":13,"suggestion":"bue"}]}
+{"id":"fr-pp-16","text":"la pomme je la ai mangé","expected":[{"rule_id":"fr-elision","start":12,"end":17,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":18,"end":23,"suggestion":"mangée"}]}
+
+# ── Positive: les + avoir + PP missing -s (plural) ──
+# les + avoir does NOT trigger elision (les doesn't elide)
+{"id":"fr-pp-17","text":"je les ai mangé","expected":[{"rule_id":"fr-pp-agreement","start":10,"end":15,"suggestion":"mangés"}]}
+{"id":"fr-pp-18","text":"il les a fait","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":13,"suggestion":"faits"}]}
+{"id":"fr-pp-19","text":"il les a vu","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":11,"suggestion":"vus"}]}
+{"id":"fr-pp-20","text":"il les a lu","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":11,"suggestion":"lus"}]}
+{"id":"fr-pp-21","text":"il les a fini","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":13,"suggestion":"finis"}]}
+{"id":"fr-pp-22","text":"il les a choisi","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":15,"suggestion":"choisis"}]}
+{"id":"fr-pp-23","text":"il les a vendu","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":14,"suggestion":"vendus"}]}
+{"id":"fr-pp-24","text":"il les a perdu","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":14,"suggestion":"perdus"}]}
+{"id":"fr-pp-25","text":"il les a écrit","expected":[{"rule_id":"fr-pp-agreement","start":9,"end":14,"suggestion":"écrits"}]}
+{"id":"fr-pp-26","text":"nous les avons dit","expected":[{"rule_id":"fr-pp-agreement","start":15,"end":18,"suggestion":"dits"}]}
+{"id":"fr-pp-27","text":"ils les ont bu","expected":[{"rule_id":"fr-pp-agreement","start":12,"end":14,"suggestion":"bus"}]}
+{"id":"fr-pp-28","text":"ils les ont conduit","expected":[{"rule_id":"fr-pp-agreement","start":12,"end":19,"suggestion":"conduits"}]}
+{"id":"fr-pp-29","text":"les ont mangé","expected":[{"rule_id":"fr-pp-agreement","start":8,"end":13,"suggestion":"mangés"}]}
+
+# ── Positive: accent-stripped participles ──
+{"id":"fr-pp-30","text":"je la ai mange","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"l'ai"},{"rule_id":"fr-pp-agreement","start":9,"end":14,"suggestion":"mangee"}]}
+{"id":"fr-pp-31","text":"je les ai mange","expected":[{"rule_id":"fr-pp-agreement","start":10,"end":15,"suggestion":"manges"}]}
+
+# ── Acceptance: must NOT flag FR-03 ──
+# DO after PP (no preceding DO-pronoun in adjacent window)
+{"id":"fr-pp-a1","text":"il a mangé","expected":[]}
+# Etre construction (suis/est/sont are not avoir forms, no DO-pronoun pattern)
+{"id":"fr-pp-a2","text":"je suis parti","expected":[]}
+{"id":"fr-pp-a3","text":"il est venu","expected":[]}
+# No preceding DO-pronoun
+{"id":"fr-pp-a4","text":"nous avons fini","expected":[]}
+{"id":"fr-pp-a5","text":"vous avez dit","expected":[]}
+# Already correct (les + avoir + PP ending in -s)
+{"id":"fr-pp-a6","text":"il les a pris","expected":[]}
+{"id":"fr-pp-a7","text":"il les a faits","expected":[]}
+{"id":"fr-pp-a8","text":"vous les avez mis","expected":[]}
+# les as article (les + non-avoir-form next)
+{"id":"fr-pp-a9","text":"les amis ont mangé","expected":[]}
+# Plain avoir without DO pronoun
+{"id":"fr-pp-a10","text":"il a fini le travail","expected":[]}
+{"id":"fr-pp-a11","text":"nous avons choisi","expected":[]}
+{"id":"fr-pp-a12","text":"ils ont vendu","expected":[]}
+# No DO-pronoun before avoir
+{"id":"fr-pp-a13","text":"il a perdu le match","expected":[]}
+# Correct: les + avoir + PP already ends in -s
+{"id":"fr-pp-a14","text":"je les ai compris","expected":[]}
+{"id":"fr-pp-a15","text":"il les a appris","expected":[]}
+# Non-participle after avoir
+{"id":"fr-pp-a16","text":"il les a bien mangé","expected":[]}
