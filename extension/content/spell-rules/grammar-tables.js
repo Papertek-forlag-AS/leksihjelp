@@ -1,7 +1,8 @@
 /**
  * Shared grammar tables for DE case/agreement (Phase 8),
  * ES ser/estar, por/para, personal-a rules (Phase 9),
- * and FR avoir/etre auxiliary selection (Phase 10).
+ * FR avoir/etre auxiliary selection (Phase 10),
+ * and Phase 13 document-drift helpers (detectDrift, BOKMAL_RIKSMAL_MAP).
  *
  * Exports onto self.__lexiGrammarTables as an IIFE so all rule files
  * loaded after this script can read the tables without duplication.
@@ -12,6 +13,7 @@
  *            ES_POR_PARA_TRIGGERS, ES_HUMAN_NOUNS, ES_COPULA_VERBS.
  * FR tables: FR_AVOIR_FORMS, FR_ETRE_FORMS, FR_ETRE_VERBS,
  *            FR_ETRE_PARTICIPLES.
+ * Phase 13: detectDrift (majority-vote helper), BOKMAL_RIKSMAL_MAP.
  */
 (function () {
   'use strict';
@@ -395,6 +397,63 @@
     'parecer', 'quedar', 'apetecer', 'costar', 'bastar',
   ]);
 
+  // ═══════════════════════════════════════════════════════════
+  // ── Phase 13: Document-drift helpers ──
+  // ═══════════════════════════════════════════════════════════
+
+  /**
+   * Majority-vote drift detector. Pure function — no mutable state.
+   *
+   * Takes an array of register markers: {register, tokenIndex, start, end, display}
+   * Returns null if:
+   *   - fewer than minCount markers (insufficient evidence)
+   *   - all markers are the same register (no drift)
+   *   - tie between top two registers (no clear dominant)
+   * Otherwise returns { dominant: string, minority: marker[] }.
+   */
+  function detectDrift(markers, minCount) {
+    if (typeof minCount === 'undefined') minCount = 3;
+    if (markers.length < minCount) return null;
+
+    // Tally per register
+    const tally = {};
+    for (const m of markers) {
+      tally[m.register] = (tally[m.register] || 0) + 1;
+    }
+
+    const sorted = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+    if (sorted.length < 2) return null; // all same register — no drift
+
+    // Tie: top two registers have equal counts — no clear dominant
+    if (sorted[0][1] === sorted[1][1]) return null;
+
+    const dominant = sorted[0][0];
+    const minority = markers.filter(m => m.register !== dominant);
+    return { dominant, minority };
+  }
+
+  /**
+   * Riksmal-form -> bokmal-form mapping for NB register-drift detection (DOC-03).
+   * High-confidence pairs where the riksmal form is unambiguously non-standard
+   * in modern bokmal. Curated from RESEARCH.md.
+   */
+  const BOKMAL_RIKSMAL_MAP = new Map([
+    // Spelling differences
+    ['efter', 'etter'],
+    ['sne', 'sno'],     // snø in modern bokmal, but "sno" is the closest ascii
+    ['nu', 'nå'],
+    // Preteritum forms
+    ['fandt', 'fant'],
+    ['sagde', 'sa'],
+    // Feminine definite -en (riksmal) vs -a (bokmal)
+    ['boken', 'boka'],
+    ['gaten', 'gata'],
+    ['jenten', 'jenta'],
+    ['klokken', 'klokka'],
+    ['solen', 'sola'],
+    ['doren', 'dora'],     // døren/døra — ascii-stripped
+  ]);
+
   const tables = {
     // DE tables
     PREP_CASE,
@@ -425,6 +484,9 @@
     FR_ETRE_PARTICIPLES,
     // Phase 11: FR mood table
     FR_SUBJONCTIF_TRIGGERS,
+    // Phase 13: Document-drift helpers
+    detectDrift,
+    BOKMAL_RIKSMAL_MAP,
   };
 
   host.__lexiGrammarTables = tables;

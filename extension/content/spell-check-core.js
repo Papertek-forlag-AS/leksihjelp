@@ -220,6 +220,30 @@
         }
       }
     }
+
+    // ── Phase 13: Document-level post-pass (INFRA-07) ──
+    // Document rules (kind: 'document', priority 200+) receive the full ctx
+    // AND the pass-1 findings array. They run AFTER all token-level rules.
+    // Their check(ctx) returns [] (harmless no-op in pass-1); the real logic
+    // lives in checkDocument(ctx, findings).
+    const docRules = rules.filter(r => r.kind === 'document');
+    for (const rule of docRules) {
+      try {
+        const out = rule.checkDocument(ctx, findings);
+        if (Array.isArray(out) && out.length) {
+          for (const f of out) {
+            if (!f.severity && rule.severity) f.severity = rule.severity;
+          }
+          findings.push(...out);
+        }
+      } catch (e) {
+        if (!rule._warned) {
+          console.warn('[lexi-spell] doc-rule', rule.id, 'threw', e);
+          rule._warned = true;
+        }
+      }
+    }
+
     return dedupeOverlapping(findings);
   }
 
