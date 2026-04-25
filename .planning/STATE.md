@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 13-register-drift-within-a-document
-current_plan: Plan 3 of 3
-status: in-progress
-last_updated: "2026-04-25T12:21:44.000Z"
+current_plan: Plan 3 of 3 (COMPLETE)
+status: phase-complete
+last_updated: "2026-04-25T12:36:37.000Z"
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 22
-  completed_plans: 23
+  total_phases: 8
+  completed_phases: 8
+  total_plans: 25
+  completed_plans: 25
 ---
 
 # Session State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 13-register-drift-within-a-document
-**Current Plan:** Plan 3 of 3
-**Status:** In progress
+**Current Plan:** Plan 3 of 3 (COMPLETE)
+**Status:** Phase complete
 
 ## Decisions
 
@@ -40,6 +40,7 @@ See: .planning/PROJECT.md
 - Phase 13 Plan 02: Lazy grammar-tables access via getDetectDrift() to handle alphabetical load order
 - Phase 13 Plan 02: DE verb -st forms counted as informal markers via knownPresens lookup
 - Phase 13 Plan 02: FR fixtures use only vous (not votre/vos) as formal marker due to vocab gaps
+- [Phase 13]: Lazy grammar-table access pattern for alphabetical load-order; nnInfinitiveClasses as proper vocab-seam-core index
 
 ## Session Log
 
@@ -49,3 +50,4 @@ See: .planning/PROJECT.md
 - 2026-04-25: Completed 12-03 (FR clitic-order rule with 96 fixtures)
 - 2026-04-25: Completed 13-01 (two-pass runner, detectDrift, INFRA-10 gate, manifest/CSS/benchmark wiring)
 - 2026-04-25: Completed 13-02 (DE du/Sie + FR tu/vous address drift rules with 100 fixtures)
+- 2026-04-25: Completed 13-03 (NB bokmal/riksmal + NN a-/e-infinitiv drift rules with 100 fixtures)
