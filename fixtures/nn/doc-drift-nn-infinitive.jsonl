@@ -1,0 +1,159 @@
+// NN a-/e-infinitiv register drift detection (DOC-04)
+//
+// Classification is DATA-DRIVEN: only tokens matching known dual-form NN
+// infinitives from the verbbank are counted. Nouns ending in -a (boka) and
+// single-form verbs (lese with no *lesa variant) are NOT classified.
+
+// ── Positive: e-inf majority, a-inf minority flagged ──
+
+// 3 e-inf (akseptere, analysere, anbefale), 1 a-inf (arbeida) -> flag arbeida
+{"id":"nn-inf-pos-001","text":"Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka. Eg vil arbeida.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":75,"end":82,"suggestion":"arbeide"}],"status":"ok"}
+
+// 3 e-inf (auke, avlyse, avtale), 1 a-inf (arbeida) -> flag arbeida
+{"id":"nn-inf-pos-002","text":"Eg vil auke det. Han vil avlyse alt. Dei vil avtale det. Eg vil arbeida.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":64,"end":71,"suggestion":"arbeide"}],"status":"ok"}
+
+// 3 e-inf (bake, banke, begynne), 1 a-inf (auka) -> flag auka
+{"id":"nn-inf-pos-003","text":"Eg vil bake det. Han vil banke det. Dei vil begynne det. Eg vil auka.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":64,"end":68,"suggestion":"auke"}],"status":"ok"}
+
+// 3 e-inf (arbeide, analysere, anbefale), 1 a-inf (akseptera) -> flag akseptera
+{"id":"nn-inf-pos-004","text":"Eg vil arbeide godt. Han vil analysere alt. Dei vil anbefale det. Eg vil akseptera.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":73,"end":82,"suggestion":"akseptere"}],"status":"ok"}
+
+// 3 e-inf (akseptere, bake, begynne), 1 a-inf (analysera) -> flag analysera
+{"id":"nn-inf-pos-005","text":"Eg vil akseptere det. Han vil bake det. Dei vil begynne det. Eg vil analysera.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":68,"end":77,"suggestion":"analysere"}],"status":"ok"}
+
+// 3 e-inf (auke, avtale, avlyse), 1 a-inf (anbefala) -> flag anbefala
+{"id":"nn-inf-pos-006","text":"Eg vil auke det. Han vil avtale det. Dei vil avlyse det. Eg vil anbefala.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":64,"end":72,"suggestion":"anbefale"}],"status":"ok"}
+
+// 3 e-inf (behandle, beklage, bevege), 1 a-inf (arbeida) -> flag arbeida
+{"id":"nn-inf-pos-007","text":"Eg vil behandle det. Han vil beklage det. Dei vil bevege det. Eg vil arbeida.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":69,"end":76,"suggestion":"arbeide"}],"status":"ok"}
+
+// 3 e-inf (bestille, betale, bevise), 1 a-inf (akseptera) -> flag akseptera
+{"id":"nn-inf-pos-008","text":"Eg vil bestille det. Han vil betale det. Dei vil bevise det. Eg vil akseptera.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":68,"end":77,"suggestion":"akseptere"}],"status":"ok"}
+
+// 3 e-inf (bestemme, beskytte, beskrive), 1 a-inf (auka) -> flag auka
+{"id":"nn-inf-pos-009","text":"Eg vil bestemme det. Han vil beskytte det. Dei vil beskrive det. Eg vil auka.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":72,"end":76,"suggestion":"auke"}],"status":"ok"}
+
+// 3 e-inf (avhenge, anskaffe, anvende), 1 a-inf (analysera) -> flag analysera
+{"id":"nn-inf-pos-010","text":"Eg vil avhenge det. Han vil anskaffe det. Dei vil anvende det. Eg vil analysera.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":70,"end":79,"suggestion":"analysere"}],"status":"ok"}
+
+// ── Positive: a-inf majority, e-inf minority flagged ──
+
+// 3 a-inf (akseptera, analysera, anbefala), 1 e-inf (arbeide) -> flag arbeide
+{"id":"nn-inf-pos-011","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefala boka. Eg vil arbeide.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":75,"end":82,"suggestion":"arbeida"}],"status":"ok"}
+
+// 3 a-inf (auka, avlysa, avtala), 1 e-inf (arbeide) -> flag arbeide
+{"id":"nn-inf-pos-012","text":"Eg vil auka det. Han vil avlysa alt. Dei vil avtala det. Eg vil arbeide.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":64,"end":71,"suggestion":"arbeida"}],"status":"ok"}
+
+// 3 a-inf (baka, banka, begynna), 1 e-inf (auke) -> flag auke
+{"id":"nn-inf-pos-013","text":"Eg vil baka det. Han vil banka det. Dei vil begynna det. Eg vil auke.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":64,"end":68,"suggestion":"auka"}],"status":"ok"}
+
+// 3 a-inf (arbeida, analysera, anbefala), 1 e-inf (akseptere) -> flag akseptere
+{"id":"nn-inf-pos-014","text":"Eg vil arbeida godt. Han vil analysera alt. Dei vil anbefala det. Eg vil akseptere.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":73,"end":82,"suggestion":"akseptera"}],"status":"ok"}
+
+// 3 a-inf (behandla, beklaga, bevega), 1 e-inf (arbeide) -> flag arbeide
+{"id":"nn-inf-pos-015","text":"Eg vil behandla det. Han vil beklaga det. Dei vil bevega det. Eg vil arbeide.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":69,"end":76,"suggestion":"arbeida"}],"status":"ok"}
+
+// 3 a-inf (bestilla, betala, bevisa), 1 e-inf (akseptere) -> flag akseptere
+{"id":"nn-inf-pos-016","text":"Eg vil bestilla det. Han vil betala det. Dei vil bevisa det. Eg vil akseptere.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":68,"end":77,"suggestion":"akseptera"}],"status":"ok"}
+
+// 3 a-inf (bestemma, beskytta, beskriva), 1 e-inf (auke) -> flag auke
+{"id":"nn-inf-pos-017","text":"Eg vil bestemma det. Han vil beskytta det. Dei vil beskriva det. Eg vil auke.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":72,"end":76,"suggestion":"auka"}],"status":"ok"}
+
+// ── Positive: at threshold (exactly 3 markers with 2:1 split) ──
+
+// 2 a-inf (akseptera, analysera) + 1 e-inf (anbefale) -> flag anbefale
+{"id":"nn-inf-pos-018","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefale.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":53,"end":61,"suggestion":"anbefala"}],"status":"ok"}
+
+// 2 e-inf (akseptere, analysere) + 1 a-inf (anbefala) -> flag anbefala
+{"id":"nn-inf-pos-019","text":"Eg vil akseptere det. Han vil analysere alt. Dei vil anbefala.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":53,"end":61,"suggestion":"anbefale"}],"status":"ok"}
+
+// ── Positive: multiple minority tokens flagged ──
+
+// 3 a-inf (akseptera, analysera, anbefala), 2 e-inf (arbeide, auke)
+{"id":"nn-inf-pos-020","text":"Han vil akseptera det. Dei vil analysera alt. Eg vil anbefala boka. Han vil arbeide. Dei vil auke det.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":76,"end":83,"suggestion":"arbeida"},{"rule_id":"doc-drift-nn-infinitive","start":93,"end":97,"suggestion":"auka"}],"status":"ok"}
+
+// 3 e-inf (akseptere, analysere, anbefale), 2 a-inf (arbeida, auka)
+{"id":"nn-inf-pos-021","text":"Han vil akseptere det. Dei vil analysere alt. Eg vil anbefale boka. Han vil arbeida. Dei vil auka det.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":76,"end":83,"suggestion":"arbeide"},{"rule_id":"doc-drift-nn-infinitive","start":93,"end":97,"suggestion":"auke"}],"status":"ok"}
+
+// 4 a-inf, 3 e-inf -> flag all 3 e-inf
+{"id":"nn-inf-pos-022","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefala boka. Han vil auka det. Eg vil arbeide. Han vil bake. Dei vil auke.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":93,"end":100,"suggestion":"arbeida"},{"rule_id":"doc-drift-nn-infinitive","start":110,"end":114,"suggestion":"baka"},{"rule_id":"doc-drift-nn-infinitive","start":124,"end":128,"suggestion":"auka"}],"status":"ok"}
+
+// ── Positive: 4:1 ratio ──
+
+// 4 e-inf, 1 a-inf
+{"id":"nn-inf-pos-023","text":"Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka. Han vil arbeide. Eg vil auka.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":92,"end":96,"suggestion":"auke"}],"status":"ok"}
+
+// 4 a-inf, 1 e-inf
+{"id":"nn-inf-pos-024","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefala boka. Han vil arbeida. Eg vil auke.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":92,"end":96,"suggestion":"auka"}],"status":"ok"}
+
+// ── Positive: 5:1 ratio ──
+
+// 5 e-inf, 1 a-inf
+{"id":"nn-inf-pos-025","text":"Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka. Han vil arbeide. Eg vil auke. Han vil baka.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":106,"end":110,"suggestion":"bake"}],"status":"ok"}
+
+// 5 a-inf, 1 e-inf
+{"id":"nn-inf-pos-026","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefala boka. Han vil arbeida. Eg vil auka. Han vil bake.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":106,"end":110,"suggestion":"baka"}],"status":"ok"}
+
+// ── Positive: different verb families ──
+
+// 3 e-inf (bade, bake, banke), 1 a-inf (begynna) -> flag begynna
+{"id":"nn-inf-pos-027","text":"Eg vil bade det. Han vil bake det. Dei vil banke det. Eg vil begynna.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":61,"end":68,"suggestion":"begynne"}],"status":"ok"}
+
+// 3 a-inf (bada, baka, banka), 1 e-inf (begynne) -> flag begynne
+{"id":"nn-inf-pos-028","text":"Eg vil bada det. Han vil baka det. Dei vil banka det. Eg vil begynne.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":61,"end":68,"suggestion":"begynna"}],"status":"ok"}
+
+// 3 e-inf (behalda reversed: behalde, bestemme, betale), 1 a-inf (bevega) -> fixme
+{"id":"nn-inf-pos-029","text":"Eg vil behalde det. Han vil bestemme det. Dei vil betale det. Eg vil bevega.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":69,"end":75,"suggestion":"bevege"}],"status":"ok"}
+
+// 3 a-inf (behalda, bestemma, betala), 1 e-inf (bevege) -> flag bevege
+{"id":"nn-inf-pos-030","text":"Eg vil behalda det. Han vil bestemma det. Dei vil betala det. Eg vil bevege.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":69,"end":75,"suggestion":"bevega"}],"status":"ok"}
+
+// ── Positive: longer text with embedded drift ──
+
+// e-inf document with one a-inf intrusion
+{"id":"nn-inf-pos-031","text":"Han vil akseptere det godt. Dei vil analysere alt saman. Eg vil anbefale boka. Han vil arbeide godt. Eg vil auka.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":108,"end":112,"suggestion":"auke"}],"status":"ok"}
+
+// a-inf document with one e-inf intrusion
+{"id":"nn-inf-pos-032","text":"Han vil akseptera det godt. Dei vil analysera alt saman. Eg vil anbefala boka. Han vil arbeida godt. Eg vil auke.","expected":[{"rule_id":"doc-drift-nn-infinitive","start":108,"end":112,"suggestion":"auka"}],"status":"ok"}
+
+// ── Acceptance: all e-infinitiv (no drift) ──
+
+{"id":"nn-inf-acc-001","text":"Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-002","text":"Eg vil arbeide godt. Han vil auke det. Dei vil avtale det.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-003","text":"Eg vil bake det. Han vil banke det. Dei vil begynne det.","expected":[],"status":"ok"}
+
+// ── Acceptance: all a-infinitiv (no drift) ──
+
+{"id":"nn-inf-acc-004","text":"Eg vil akseptera det. Han vil analysera alt. Dei vil anbefala boka.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-005","text":"Eg vil arbeida godt. Han vil auka det. Dei vil avtala det.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-006","text":"Eg vil baka det. Han vil banka det. Dei vil begynna det.","expected":[],"status":"ok"}
+
+// ── Acceptance: below threshold (< 3 markers) ──
+
+{"id":"nn-inf-acc-007","text":"Eg vil akseptera det. Han vil analysere alt.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-008","text":"Eg vil akseptere det.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-009","text":"Eg vil arbeida godt. Han vil auke.","expected":[],"status":"ok"}
+
+// ── Acceptance: non-verb words ending in -a (nouns, NOT infinitives) ──
+
+{"id":"nn-inf-acc-010","text":"Eg likar boka mi. Han liker det.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-011","text":"Boka var god. Han skriv brev.","expected":[],"status":"ok"}
+
+// ── Acceptance: single-infinitive verbs only (register-neutral) ──
+
+{"id":"nn-inf-acc-012","text":"Eg vil lese det. Han skriv brev. Dei liker det.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-013","text":"Eg vil lese boka. Han skriv brev. Dei liker det godt.","expected":[],"status":"ok"}
+
+// ── Acceptance: no markers at all ──
+
+{"id":"nn-inf-acc-014","text":"Han er ein fin gut.","expected":[],"status":"ok"}
+{"id":"nn-inf-acc-015","text":"Det var ein fin dag.","expected":[],"status":"ok"}
+
+// ── Acceptance: ties (equal counts -> no dominant) ──
+
+// 2 a-inf + 2 e-inf -> tie -> no flags
+{"id":"nn-inf-acc-016","text":"Eg vil akseptera det. Han vil analysere alt. Dei vil anbefala det. Eg vil arbeide.","expected":[],"status":"ok"}
+
+// ── Acceptance: mixed with non-dual verbs (only dual-form verbs count) ──
+
+{"id":"nn-inf-acc-017","text":"Eg vil lese boka. Han skriv brev. Dei vil akseptera det.","expected":[],"status":"ok"}

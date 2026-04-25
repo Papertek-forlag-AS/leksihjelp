@@ -937,6 +937,39 @@
              frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers };
   }
 
+  // ── Phase 13: Build NN infinitive classification map from raw verbbank ──
+  // Maps bare infinitive forms to their register class and counterpart.
+  // Only dual-form verbs (both a-infinitiv and e-infinitiv) are included;
+  // single-form verbs are register-neutral and excluded.
+  // Used by DOC-04 (doc-drift-nn-infinitive.js) for data-driven classification.
+  function buildNNInfinitiveClasses(raw, lang) {
+    const nnInfinitiveClasses = new Map();
+    if (lang !== 'nn' || !raw || !raw.verbbank) return nnInfinitiveClasses;
+
+    for (const entry of Object.values(raw.verbbank)) {
+      const conj = entry.conjugations;
+      if (!conj) continue;
+      for (const tenseVal of Object.values(conj)) {
+        const former = tenseVal.former;
+        if (!former) continue;
+        const inf = former.infinitiv;
+        if (!Array.isArray(inf) || inf.length < 2) continue;
+
+        // Strip "a " or "å " prefix from each form
+        const forms = inf.map(f => f.replace(/^[aå]\s+/, ''));
+        const aForm = forms.find(f => f.endsWith('a'));
+        const eForm = forms.find(f => f.endsWith('e'));
+
+        if (aForm && eForm) {
+          nnInfinitiveClasses.set(aForm, { register: 'a-infinitiv', counterpart: eForm });
+          nnInfinitiveClasses.set(eForm, { register: 'e-infinitiv', counterpart: aForm });
+        }
+        break; // Only process the first tense entry with infinitiv per verb
+      }
+    }
+    return nnInfinitiveClasses;
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -1021,6 +1054,11 @@
     // and FR subjonctif rules. Built from raw verbbank (not wordList).
     const moodIndexes = buildMoodIndexes(raw, lang);
 
+    // Phase 13: NN infinitive classification map for DOC-04.
+    // Maps bare infinitive forms (akseptera, akseptere) to {register, counterpart}.
+    // Empty Map for non-NN languages. Only dual-form verbs included.
+    const nnInfinitiveClasses = buildNNInfinitiveClasses(raw, lang);
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -1060,6 +1098,9 @@
       // Phase 11: mood/aspect reverse-lookup indexes for ES and FR rules.
       // Empty Maps for non-matching languages (e.g., esPresensToVerb is empty when lang !== 'es').
       ...moodIndexes,
+      // Phase 13: NN infinitive classification for DOC-04.
+      // Empty Map for non-NN languages. 341 dual-form verb entries for NN.
+      nnInfinitiveClasses,
     };
   }
 

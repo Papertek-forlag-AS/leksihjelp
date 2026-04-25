@@ -241,6 +241,8 @@
       collocations:       VOCAB.getCollocations(),
       redundancyPhrases:  VOCAB.getRedundancyPhrases(),
       isFeatureEnabled:   VOCAB.isFeatureEnabled || (() => true),
+      // Phase 13: NN infinitive classification for DOC-04 register-drift rule.
+      nnInfinitiveClasses: VOCAB.getNNInfinitiveClasses(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

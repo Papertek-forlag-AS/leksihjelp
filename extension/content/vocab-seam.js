@@ -297,6 +297,8 @@
     getRedundancyPhrases: () => (state && state.redundancyPhrases) ? state.redundancyPhrases : [],
     // Phase 8: participle → auxiliary Map for DE Perfekt auxiliary choice rule.
     getParticipleToAux: () => (state && state.participleToAux) ? state.participleToAux : new Map(),
+    // Phase 13: NN infinitive classification Map for DOC-04 register-drift rule.
+    getNNInfinitiveClasses: () => (state && state.nnInfinitiveClasses) ? state.nnInfinitiveClasses : new Map(),
     // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;
