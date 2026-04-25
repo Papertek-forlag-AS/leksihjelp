@@ -81,7 +81,11 @@ Plans:
   3. `benchmark-texts/de.txt` line `"ich habe gegangen"` (haben+sein-verb) flips from unflagged → flagged; correct `"ich bin gegangen"` does NOT flag.
   4. `benchmark-texts/de.txt` pattern `"das Schultasche"` flips from unflagged → flagged by the compound-gender rule via greedy longest-suffix split against nounbank.
   5. `grammar-tables.js` ships with a documented API (preposition-case table, trigger-phrase sets, closed-adjective lists) and is imported by ≥1 non-DE consumer stub (Phase 9/10 prototype) before phase close.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 08-01-PLAN.md — Shared grammar-tables.js primitive, participleToAux index, DE benchmark additions
+- [ ] 08-02-PLAN.md — DE-01 prep-case + DE-02 separable-verb rules with fixtures and release-gate wiring
+- [ ] 08-03-PLAN.md — DE-03 perfekt-aux + DE-04 compound-gender rules with fixtures and check-spellcheck-features update
 
 ### Phase 9: ES ser/estar, por/para, Personal "a"
 **Goal**: Ship Spanish's three closed-trigger structural rules and expose a trigger-table shape that Phase 11's subjuntivo rule will reuse without re-invention.
@@ -175,7 +179,7 @@ Plans:
 | 05.1 Close UX-01 Gaps from Phase 5 Smoke Test (INSERTED) | v1.0 | 5/5 | Complete | 2026-04-21 |
 | 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/3 | Planning complete | — |
 | 7. Word-Order Violations (NB + DE + FR) | 2/3 | In Progress|  | — |
-| 8. DE Case & Agreement Governance | v2.0 | 0/? | Not started | — |
+| 8. DE Case & Agreement Governance | v2.0 | 0/3 | Planning complete | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/? | Not started | — |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 0/? | Not started | — |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 0/? | Not started | — |
