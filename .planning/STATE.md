@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T02:02:45.003Z"
+last_updated: "2026-04-25T02:05:17.126Z"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 8 — DE Case/Agreement Governance
-Plan: 3 of 3 complete (08-01, 08-02, 08-03 done)
-Status: Complete
-Last activity: 2026-04-25 — Completed 08-03-PLAN.md (DE perfekt-aux + compound-gender rules)
+Plan: 2 of 3 complete (08-01, 08-02 done)
+Status: In Progress
+Last activity: 2026-04-25 — Completed 08-02-PLAN.md (DE prep-case + separable-verb rules)
 
-Progress: [██████████] 100%
+Progress: [██████░░░░] 27%
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Progress: [██████████] 100%
 | Phase 07 P04 | 16min | 2 tasks | 5 files |
 | Phase 08-de-case-agreement-governance P01 | 4m 13s | 2 tasks | 7 files |
 | Phase 08 P03 | 14min | 2 tasks | 11 files |
+| Phase 08 P02 | 17m 34s | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -236,6 +237,8 @@ Recent decisions affecting current work:
 - [Phase 08]: SEPARABLE_PREFIXES canonical source moved to grammar-tables.js; de-v2.js reads from shared global with local fallback
 - [Phase 08]: Lazy grammar-table init pattern for load-order independence in compound-gender rule
 - [Phase 08]: Multi-gender article Sets to handle ambiguous articles like ein (m/n nominative)
+- [Phase 08]: Lazy-init grammar-tables at check() time for Node/browser load-order compatibility
+- [Phase 08]: Separable-verb fixtures document typo-fuzzy dedup interaction honestly — long-prefix forms survive
 
 ### Roadmap Evolution
 
