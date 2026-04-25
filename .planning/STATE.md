@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 14-morphology-beyond-tokens-en-es-fr
-current_plan: Plan 3 of 3
+current_plan: Not started
 status: completed
-last_updated: "2026-04-25T14:01:26.275Z"
+last_updated: "2026-04-25T14:09:56.048Z"
 progress:
   total_phases: 9
   completed_phases: 9
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 14-morphology-beyond-tokens-en-es-fr
-**Current Plan:** Plan 3 of 3
-**Status:** Phase complete
+**Current Plan:** Not started
+**Status:** Milestone complete
 
 ## Decisions
 
