@@ -58,8 +58,13 @@ const BANKS = [
   'phrasesbank',
   'pronounsbank',
   'languagesbank',      // Phase 05.1 Gap B
-  'nationalitiesbank'   // Phase 05.1 Gap B
+  'nationalitiesbank',  // Phase 05.1 Gap B
+  'collocationbank',    // v2.0 data migration
+  'grammarbank',        // v2.0 data migration
 ];
+
+// Banks fetched via export endpoint (entries don't have searchable words)
+const GOVERNANCE_BANKS = ['collocationbank', 'grammarbank'];
 
 async function fetchJson(url) {
   const response = await fetch(url);
@@ -250,6 +255,30 @@ function buildLanguageData(langCode, entries, manifest, nbEntries = null) {
 }
 
 /**
+ * Fetch governance banks (collocationbank, grammarbank) from the export endpoint.
+ * These banks have abstract IDs not discoverable via search, so we pull them
+ * directly from the streaming export response.
+ */
+async function fetchGovernanceBanks(langCode) {
+  try {
+    const url = `${V3_API_BASE}/v3/export/${langCode}`;
+    const response = await fetch(url);
+    if (!response.ok) return {};
+    const data = await response.json();
+    const result = {};
+    for (const bank of GOVERNANCE_BANKS) {
+      if (data[bank] && Object.keys(data[bank]).length > 0) {
+        result[bank] = data[bank];
+      }
+    }
+    return result;
+  } catch (err) {
+    console.warn(`  Warning: Failed to fetch governance banks for ${langCode}: ${err.message}`);
+    return {};
+  }
+}
+
+/**
  * Sync grammar features from the v3 manifest.
  */
 function syncGrammarFeaturesFromManifest(langCode, manifest) {
@@ -376,6 +405,16 @@ async function syncLanguage(langCode, manifest, withAudio = false) {
 
   // Build extension-compatible data structure
   const data = buildLanguageData(langCode, entries, manifest, nbEntries);
+
+  // Fetch governance banks directly from export (not discoverable via search)
+  const govBanks = await fetchGovernanceBanks(langCode);
+  for (const [bankName, bankData] of Object.entries(govBanks)) {
+    const count = Object.keys(bankData).length;
+    if (count > 0) {
+      data[bankName] = bankData;
+      console.log(`  ${bankName}: ${count} entries (from export)`);
+    }
+  }
 
   // Write to file
   const outputPath = path.join(OUTPUT_DIR, `${langCode}.json`);

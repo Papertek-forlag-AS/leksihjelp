@@ -4,24 +4,23 @@
  * FR avoir/etre auxiliary selection (Phase 10),
  * and Phase 13 document-drift helpers (detectDrift, BOKMAL_RIKSMAL_MAP).
  *
+ * Prefers synced grammarbank data from papertek-vocabulary (via vocab-seam).
+ * Falls back to inline constants when the grammarbank is not yet synced.
+ *
  * Exports onto self.__lexiGrammarTables as an IIFE so all rule files
  * loaded after this script can read the tables without duplication.
- *
- * DE tables: PREP_CASE, DEF_ARTICLE_CASE, INDEF_ARTICLE_CASE,
- *            SEPARABLE_PREFIXES, SEIN_VERBS, BOTH_AUX_VERBS.
- * ES tables: ES_SER_FORMS, ES_ESTAR_FORMS, ES_COPULA_ADJ,
- *            ES_POR_PARA_TRIGGERS, ES_HUMAN_NOUNS, ES_COPULA_VERBS.
- * FR tables: FR_AVOIR_FORMS, FR_ETRE_FORMS, FR_ETRE_VERBS,
- *            FR_ETRE_PARTICIPLES.
- * Phase 13: detectDrift (majority-vote helper), BOKMAL_RIKSMAL_MAP.
  */
 (function () {
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
 
+  // Try reading synced grammar tables from vocab-seam
+  const vocab = host.__lexiVocab || {};
+  const synced = (typeof vocab.getGrammarTables === 'function') ? vocab.getGrammarTables() : {};
+  const has = (key) => synced[key] && (Array.isArray(synced[key]) ? synced[key].length > 0 : Object.keys(synced[key]).length > 0);
+
   // ── Preposition → required case ──
-  // acc = accusative, dat = dative, gen = genitive, acc/dat = two-way (Wechselpräposition)
-  const PREP_CASE = {
+  const PREP_CASE = has('prep_case') ? synced.prep_case : {
     // Accusative prepositions
     durch: 'acc',
     für: 'acc',
@@ -53,9 +52,7 @@
     während: 'gen',
   };
 
-  // ── Definite article → possible { genus, case } interpretations ──
-  // Articles are ambiguous: "der" can be masc-nom, fem-dat, or fem-gen.
-  const DEF_ARTICLE_CASE = {
+  const DEF_ARTICLE_CASE = has('def_article_case') ? synced.def_article_case : {
     der: [
       { genus: 'm', case: 'nominativ' },
       { genus: 'f', case: 'dativ' },
@@ -85,8 +82,7 @@
     ],
   };
 
-  // ── Indefinite article → possible { genus, case } interpretations ──
-  const INDEF_ARTICLE_CASE = {
+  const INDEF_ARTICLE_CASE = has('indef_article_case') ? synced.indef_article_case : {
     ein: [
       { genus: 'm', case: 'nominativ' },
       { genus: 'n', case: 'nominativ' },
@@ -113,18 +109,13 @@
     ],
   };
 
-  // ── Separable verb prefixes ──
-  // Canonical source — rule files read from here instead of maintaining local copies.
-  const SEPARABLE_PREFIXES = new Set([
+  const SEPARABLE_PREFIXES = has('separable_prefixes') ? new Set(synced.separable_prefixes) : new Set([
     'ab', 'an', 'auf', 'aus', 'bei', 'ein', 'fest', 'her', 'hin',
     'los', 'mit', 'nach', 'um', 'vor', 'weg', 'zu', 'zurück',
     'zusammen', 'weiter', 'vorbei', 'herum', 'heraus', 'hinaus',
   ]);
 
-  // ── Verbs requiring "sein" as Perfekt auxiliary ──
-  // 30+ common sein-verbs at A1–B1 level. Does NOT include verbs in
-  // BOTH_AUX_VERBS (those accept haben OR sein depending on transitivity).
-  const SEIN_VERBS = new Set([
+  const SEIN_VERBS = has('sein_verbs') ? new Set(synced.sein_verbs) : new Set([
     'gehen', 'kommen', 'fahren', 'fliegen', 'laufen', 'fallen',
     'sterben', 'werden', 'sein', 'bleiben', 'passieren', 'geschehen',
     'wachsen', 'entstehen', 'verschwinden', 'reisen', 'wandern',
@@ -135,11 +126,7 @@
     'gleiten', 'kriechen', 'rutschen', 'stolpern',
   ]);
 
-  // ── Verbs accepting BOTH haben and sein ──
-  // Transitive use → haben ("Ich habe das Auto gefahren")
-  // Intransitive use → sein ("Ich bin nach Berlin gefahren")
-  // DE-03 skips these to avoid false positives.
-  const BOTH_AUX_VERBS = new Set([
+  const BOTH_AUX_VERBS = has('both_aux_verbs') ? new Set(synced.both_aux_verbs) : new Set([
     'fahren', 'fliegen', 'laufen', 'schwimmen', 'ausziehen', 'wegfahren',
   ]);
 
@@ -147,18 +134,14 @@
   // ── ES: Ser/Estar conjugated forms ──
   // ═══════════════════════════════════════════════════════════
 
-  // All conjugated ser forms (present, imperfect, preterite, past participle).
-  // Accent-stripped variants included since students often omit tildes.
-  const ES_SER_FORMS = new Set([
+  const ES_SER_FORMS = has('ser_forms') ? new Set(synced.ser_forms) : new Set([
     'soy', 'eres', 'es', 'somos', 'sois', 'son',
     'era', 'eras', 'éramos', 'eramos', 'erais', 'eran',
     'fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron',
     'sido',
   ]);
 
-  // All conjugated estar forms (present, imperfect, preterite, past participle).
-  // Both accented and accent-stripped variants for student text robustness.
-  const ES_ESTAR_FORMS = new Set([
+  const ES_ESTAR_FORMS = has('estar_forms') ? new Set(synced.estar_forms) : new Set([
     'estoy', 'estás', 'estas', 'está', 'esta', 'estamos',
     'estáis', 'estais', 'están', 'estan',
     'estaba', 'estabas', 'estábamos', 'estabamos', 'estabais', 'estaban',
@@ -166,10 +149,7 @@
     'estado',
   ]);
 
-  // ── ES: Copula adjective → required copula ──
-  // Keys are accent-stripped lowercase (matching tokenizer output).
-  // Values: 'ser' (inherent quality), 'estar' (state/condition), 'both' (meaning changes).
-  const ES_COPULA_ADJ = {
+  const ES_COPULA_ADJ = has('copula_adj') ? synced.copula_adj : {
     // estar-only (temporary states, conditions, results)
     cansado: 'estar', enfermo: 'estar', contento: 'estar', muerto: 'estar',
     sentado: 'estar', dormido: 'estar', despierto: 'estar', preocupado: 'estar',
@@ -192,10 +172,7 @@
     orgulloso: 'both',
   };
 
-  // ── ES: Por/Para trigger patterns ──
-  // Each entry describes a high-confidence confusion pattern.
-  // Rule files implement actual detection logic using these as a lookup.
-  const ES_POR_PARA_TRIGGERS = [
+  const ES_POR_PARA_TRIGGERS = has('por_para_triggers') ? synced.por_para_triggers : [
     { id: 'por_beneficiary', wrongPrep: 'por', correctPrep: 'para',
       context: 'beneficiary', detect: 'por + human noun/pronoun (beneficiary: "por mi familia" → "para mi familia")' },
     { id: 'por_purpose_inf', wrongPrep: 'por', correctPrep: 'para',
@@ -222,9 +199,7 @@
       context: 'opinion', detect: 'por + personal opinion ("por mí, es fácil" → "para mí, es fácil")' },
   ];
 
-  // ── ES: Common human-denoting nouns (A1–B1) ──
-  // Accent-stripped lowercase for tokenizer compatibility.
-  const ES_HUMAN_NOUNS = new Set([
+  const ES_HUMAN_NOUNS = has('human_nouns') ? new Set(synced.human_nouns) : new Set([
     'madre', 'padre', 'hermano', 'hermana', 'hijo', 'hija',
     'amigo', 'amiga', 'profesor', 'profesora', 'maestro', 'maestra',
     'doctor', 'doctora', 'nino', 'nina', 'hombre', 'mujer',
@@ -232,9 +207,7 @@
     'vecino', 'vecina', 'companero', 'companera',
   ]);
 
-  // ── ES: Copula verbs that do NOT take personal "a" ──
-  // Used by ES-03 to skip copula contexts in personal-a detection.
-  const ES_COPULA_VERBS = new Set([
+  const ES_COPULA_VERBS = has('copula_verbs') ? new Set(synced.copula_verbs) : new Set([
     'ser', 'estar', 'parecer', 'resultar', 'quedarse',
   ]);
 
@@ -242,9 +215,7 @@
   // ── FR: Avoir/Etre conjugated forms (Phase 10) ──
   // ═══════════════════════════════════════════════════════════
 
-  // Conjugated avoir forms mapped to { person, tense }.
-  // Used by FR-02 (etre/avoir auxiliary selection rule).
-  const FR_AVOIR_FORMS = {
+  const FR_AVOIR_FORMS = has('avoir_forms') ? synced.avoir_forms : {
     // Present
     ai:      { person: '1s', tense: 'present' },
     as:      { person: '2s', tense: 'present' },
@@ -260,9 +231,7 @@
     avaient: { person: '3p', tense: 'imparfait' },
   };
 
-  // Conjugated etre forms mapped to { person, tense }.
-  // Both accented and accent-stripped variants included for student text robustness.
-  const FR_ETRE_FORMS = {
+  const FR_ETRE_FORMS = has('etre_forms') ? synced.etre_forms : {
     // Present
     suis:    { person: '1s', tense: 'present' },
     es:      { person: '2s', tense: 'present' },
@@ -285,18 +254,13 @@
     etaient: { person: '3p', tense: 'imparfait' },
   };
 
-  // DR MRS VANDERTRAMP infinitives — verbs conjugated with etre in passe compose.
-  // Supplement for data gaps where verb entries may lack passe_compose.auxiliary.
-  const FR_ETRE_VERBS = new Set([
+  const FR_ETRE_VERBS = has('etre_verbs') ? new Set(synced.etre_verbs) : new Set([
     'aller', 'arriver', 'descendre', 'devenir', 'entrer', 'monter',
     'mourir', 'naitre', 'naître', 'partir', 'passer', 'rentrer',
     'rester', 'retourner', 'revenir', 'sortir', 'tomber', 'venir',
   ]);
 
-  // Participle form -> infinitive for DR MRS VANDERTRAMP verbs with data gaps.
-  // Both accented and unaccented forms for student text robustness.
-  // Covers all 18 etre-verbs from FR_ETRE_VERBS (masc + fem participle forms).
-  const FR_ETRE_PARTICIPLES = {
+  const FR_ETRE_PARTICIPLES = has('etre_participles') ? synced.etre_participles : {
     // aller
     'allé': 'aller', alle: 'aller', 'allée': 'aller', allee: 'aller',
     'allés': 'aller', alles: 'aller', 'allées': 'aller', allees: 'aller',
@@ -343,9 +307,7 @@
     venu: 'venir', venue: 'venir', venus: 'venir', venues: 'venir',
   };
 
-  // ── Phase 11: ES subjuntivo trigger phrases (MOOD-01) ──
-  // Accent-stripped variants included — students often omit accents.
-  const ES_SUBJUNTIVO_TRIGGERS = new Set([
+  const ES_SUBJUNTIVO_TRIGGERS = has('subjuntivo_triggers') ? new Set(synced.subjuntivo_triggers) : new Set([
     'quiero que', 'quiere que', 'queremos que',
     'espero que', 'espera que', 'esperamos que',
     'dudo que', 'duda que', 'dudamos que',
@@ -360,24 +322,21 @@
     'sugiero que', 'sugiere que',
   ]);
 
-  // ── Phase 11: ES aspectual adverb sets (MOOD-02) ──
-  const ES_PRETERITO_ADVERBS = new Set(['ayer', 'anteayer', 'anoche']);
-  const ES_PRETERITO_PHRASES = [
+  const ES_PRETERITO_ADVERBS = has('preterito_adverbs') ? new Set(synced.preterito_adverbs) : new Set(['ayer', 'anteayer', 'anoche']);
+  const ES_PRETERITO_PHRASES = has('preterito_phrases') ? synced.preterito_phrases : [
     'la semana pasada', 'el mes pasado', 'el ano pasado', 'el año pasado',
     'el lunes pasado', 'el martes pasado',
     'una vez', 'de repente',
   ];
-  const ES_IMPERFECTO_ADVERBS = new Set([
+  const ES_IMPERFECTO_ADVERBS = has('imperfecto_adverbs') ? new Set(synced.imperfecto_adverbs) : new Set([
     'siempre', 'normalmente', 'generalmente', 'frecuentemente',
   ]);
-  const ES_IMPERFECTO_PHRASES = [
+  const ES_IMPERFECTO_PHRASES = has('imperfecto_phrases') ? synced.imperfecto_phrases : [
     'cada dia', 'cada día', 'cada semana', 'cada mes', 'cada ano', 'cada año',
     'todos los dias', 'todos los días', 'a menudo', 'a veces', 'de vez en cuando',
   ];
 
-  // ── Phase 11: FR subjonctif trigger phrases (MOOD-03) ──
-  // Accent-stripped variants included alongside accented forms.
-  const FR_SUBJONCTIF_TRIGGERS = new Set([
+  const FR_SUBJONCTIF_TRIGGERS = has('subjonctif_triggers') ? new Set(synced.subjonctif_triggers) : new Set([
     'il faut que', 'il faudrait que',
     'avant que', 'pour que', 'afin que',
     'bien que', 'quoique',
@@ -389,9 +348,7 @@
     'il est necessaire que', 'il est nécessaire que',
   ]);
 
-  // ── Phase 12: ES gustar-class verbs (PRON-02) ──
-  // Verbs that take indirect-object + 3rd-person conjugation (gustar pattern).
-  const ES_GUSTAR_CLASS_VERBS = new Set([
+  const ES_GUSTAR_CLASS_VERBS = has('gustar_class_verbs') ? new Set(synced.gustar_class_verbs) : new Set([
     'gustar', 'encantar', 'interesar', 'importar', 'molestar',
     'fascinar', 'aburrir', 'doler', 'faltar', 'sobrar',
     'parecer', 'quedar', 'apetecer', 'costar', 'bastar',
@@ -432,12 +389,7 @@
     return { dominant, minority };
   }
 
-  /**
-   * Riksmal-form -> bokmal-form mapping for NB register-drift detection (DOC-03).
-   * High-confidence pairs where the riksmal form is unambiguously non-standard
-   * in modern bokmal. Curated from RESEARCH.md.
-   */
-  const BOKMAL_RIKSMAL_MAP = new Map([
+  const BOKMAL_RIKSMAL_MAP = has('bokmal_riksmal_map') ? new Map(Object.entries(synced.bokmal_riksmal_map)) : new Map([
     // Spelling differences
     ['efter', 'etter'],
     ['sne', 'sno'],     // snø in modern bokmal, but "sno" is the closest ascii
