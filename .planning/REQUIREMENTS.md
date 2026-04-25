@@ -78,10 +78,10 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Collocations at Scale (Phase 15)
 
-- [ ] **COLL-01**: NB preposition collocations flagged (`flink i → til`, `glad på → i`, `bra i → med`); benchmark `nb.txt` "flink i å gå i bånd"
-- [ ] **COLL-02**: DE preposition collocations flagged (parallel to COLL-01, data-driven)
-- [ ] **COLL-03**: FR preposition collocations flagged (parallel to COLL-01)
-- [ ] **COLL-04**: ES preposition collocations flagged (parallel to COLL-01)
+- [x] **COLL-01**: NB preposition collocations flagged (`flink i → til`, `glad på → i`, `bra i → med`); benchmark `nb.txt` "flink i å gå i bånd"
+- [x] **COLL-02**: DE preposition collocations flagged (parallel to COLL-01, data-driven)
+- [x] **COLL-03**: FR preposition collocations flagged (parallel to COLL-01)
+- [x] **COLL-04**: ES preposition collocations flagged (parallel to COLL-01)
 
 ## v3.0 Requirements (Deferred)
 
@@ -166,10 +166,10 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | MORPH-01 | Phase 14 | Complete |
 | MORPH-02 | Phase 14 | Complete |
 | MORPH-03 | Phase 14 | Complete |
-| COLL-01 | Phase 15 | Pending |
-| COLL-02 | Phase 15 | Pending |
-| COLL-03 | Phase 15 | Pending |
-| COLL-04 | Phase 15 | Pending |
+| COLL-01 | Phase 15 | Complete |
+| COLL-02 | Phase 15 | Complete |
+| COLL-03 | Phase 15 | Complete |
+| COLL-04 | Phase 15 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 42 total
