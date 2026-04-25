@@ -1,11 +1,14 @@
 /**
- * Shared grammar tables for German case/agreement rules (Phase 8).
+ * Shared grammar tables for DE case/agreement (Phase 8) and
+ * ES ser/estar, por/para, personal-a rules (Phase 9).
  *
  * Exports onto self.__lexiGrammarTables as an IIFE so all rule files
  * loaded after this script can read the tables without duplication.
  *
- * Tables: PREP_CASE, DEF_ARTICLE_CASE, INDEF_ARTICLE_CASE,
- *         SEPARABLE_PREFIXES, SEIN_VERBS, BOTH_AUX_VERBS.
+ * DE tables: PREP_CASE, DEF_ARTICLE_CASE, INDEF_ARTICLE_CASE,
+ *            SEPARABLE_PREFIXES, SEIN_VERBS, BOTH_AUX_VERBS.
+ * ES tables: ES_SER_FORMS, ES_ESTAR_FORMS, ES_COPULA_ADJ,
+ *            ES_POR_PARA_TRIGGERS, ES_HUMAN_NOUNS, ES_COPULA_VERBS.
  */
 (function () {
   'use strict';
@@ -135,24 +138,124 @@
     'fahren', 'fliegen', 'laufen', 'schwimmen', 'ausziehen', 'wegfahren',
   ]);
 
+  // ═══════════════════════════════════════════════════════════
+  // ── ES: Ser/Estar conjugated forms ──
+  // ═══════════════════════════════════════════════════════════
+
+  // All conjugated ser forms (present, imperfect, preterite, past participle).
+  // Accent-stripped variants included since students often omit tildes.
+  const ES_SER_FORMS = new Set([
+    'soy', 'eres', 'es', 'somos', 'sois', 'son',
+    'era', 'eras', 'éramos', 'eramos', 'erais', 'eran',
+    'fui', 'fuiste', 'fue', 'fuimos', 'fuisteis', 'fueron',
+    'sido',
+  ]);
+
+  // All conjugated estar forms (present, imperfect, preterite, past participle).
+  // Both accented and accent-stripped variants for student text robustness.
+  const ES_ESTAR_FORMS = new Set([
+    'estoy', 'estás', 'estas', 'está', 'esta', 'estamos',
+    'estáis', 'estais', 'están', 'estan',
+    'estaba', 'estabas', 'estábamos', 'estabamos', 'estabais', 'estaban',
+    'estuve', 'estuviste', 'estuvo', 'estuvimos', 'estuvisteis', 'estuvieron',
+    'estado',
+  ]);
+
+  // ── ES: Copula adjective → required copula ──
+  // Keys are accent-stripped lowercase (matching tokenizer output).
+  // Values: 'ser' (inherent quality), 'estar' (state/condition), 'both' (meaning changes).
+  const ES_COPULA_ADJ = {
+    // estar-only (temporary states, conditions, results)
+    cansado: 'estar', enfermo: 'estar', contento: 'estar', muerto: 'estar',
+    sentado: 'estar', dormido: 'estar', despierto: 'estar', preocupado: 'estar',
+    enamorado: 'estar', embarazada: 'estar', harto: 'estar', enojado: 'estar',
+    asustado: 'estar', sorprendido: 'estar', ocupado: 'estar', roto: 'estar',
+    abierto: 'estar', cerrado: 'estar', encendido: 'estar', apagado: 'estar',
+    mojado: 'estar', seco: 'estar', lleno: 'estar', vacio: 'estar',
+    limpio: 'estar', sucio: 'estar',
+    // ser-only (inherent qualities)
+    alto: 'ser', bajo: 'ser', grande: 'ser', pequeno: 'ser',
+    inteligente: 'ser', tonto: 'ser', rico: 'ser', pobre: 'ser',
+    joven: 'ser', viejo: 'ser', guapo: 'ser', feo: 'ser',
+    delgado: 'ser', gordo: 'ser', fuerte: 'ser', debil: 'ser',
+    importante: 'ser', necesario: 'ser', posible: 'ser', imposible: 'ser',
+    dificil: 'ser', facil: 'ser', obvio: 'ser', claro: 'ser',
+    cierto: 'ser', falso: 'ser', justo: 'ser', injusto: 'ser',
+    // both (meaning changes with copula)
+    aburrido: 'both', listo: 'both', malo: 'both', bueno: 'both',
+    verde: 'both', vivo: 'both', seguro: 'both', atento: 'both',
+    orgulloso: 'both',
+  };
+
+  // ── ES: Por/Para trigger patterns ──
+  // Each entry describes a high-confidence confusion pattern.
+  // Rule files implement actual detection logic using these as a lookup.
+  const ES_POR_PARA_TRIGGERS = [
+    { id: 'por_beneficiary', wrongPrep: 'por', correctPrep: 'para',
+      context: 'beneficiary', detect: 'por + human noun/pronoun (beneficiary: "por mi familia" → "para mi familia")' },
+    { id: 'por_purpose_inf', wrongPrep: 'por', correctPrep: 'para',
+      context: 'purpose', detect: 'por + infinitive verb (purpose: "por leer" → "para leer")' },
+    { id: 'para_duration', wrongPrep: 'para', correctPrep: 'por',
+      context: 'duration', detect: 'para + duration expression (duration: "para dos horas" → "por dos horas")' },
+    { id: 'para_cause', wrongPrep: 'para', correctPrep: 'por',
+      context: 'cause', detect: 'para + cause marker (cause: "para eso llegué tarde" → "por eso llegué tarde")' },
+    { id: 'por_deadline', wrongPrep: 'por', correctPrep: 'para',
+      context: 'deadline', detect: 'por + deadline marker (deadline: "por mañana" → "para mañana")' },
+    { id: 'por_destination', wrongPrep: 'por', correctPrep: 'para',
+      context: 'destination', detect: 'por + destination (destination: "voy por Madrid" → "voy para Madrid")' },
+    { id: 'para_exchange', wrongPrep: 'para', correctPrep: 'por',
+      context: 'exchange', detect: 'para + price/exchange ("lo compré para 10 euros" → "lo compré por 10 euros")' },
+    { id: 'por_recipient', wrongPrep: 'por', correctPrep: 'para',
+      context: 'recipient', detect: 'por + recipient ("un regalo por ti" → "un regalo para ti")' },
+    { id: 'para_reason', wrongPrep: 'para', correctPrep: 'por',
+      context: 'reason', detect: 'para + reason/emotion ("gritó para miedo" → "gritó por miedo")' },
+    { id: 'por_goal', wrongPrep: 'por', correctPrep: 'para',
+      context: 'goal', detect: 'por + goal noun ("estudio por el examen" → "estudio para el examen")' },
+    { id: 'para_means', wrongPrep: 'para', correctPrep: 'por',
+      context: 'means', detect: 'para + communication means ("hablar para teléfono" → "hablar por teléfono")' },
+    { id: 'por_opinion', wrongPrep: 'por', correctPrep: 'para',
+      context: 'opinion', detect: 'por + personal opinion ("por mí, es fácil" → "para mí, es fácil")' },
+  ];
+
+  // ── ES: Common human-denoting nouns (A1–B1) ──
+  // Accent-stripped lowercase for tokenizer compatibility.
+  const ES_HUMAN_NOUNS = new Set([
+    'madre', 'padre', 'hermano', 'hermana', 'hijo', 'hija',
+    'amigo', 'amiga', 'profesor', 'profesora', 'maestro', 'maestra',
+    'doctor', 'doctora', 'nino', 'nina', 'hombre', 'mujer',
+    'chico', 'chica', 'abuelo', 'abuela', 'primo', 'prima',
+    'vecino', 'vecina', 'companero', 'companera',
+  ]);
+
+  // ── ES: Copula verbs that do NOT take personal "a" ──
+  // Used by ES-03 to skip copula contexts in personal-a detection.
+  const ES_COPULA_VERBS = new Set([
+    'ser', 'estar', 'parecer', 'resultar', 'quedarse',
+  ]);
+
   const tables = {
+    // DE tables
     PREP_CASE,
     DEF_ARTICLE_CASE,
     INDEF_ARTICLE_CASE,
     SEPARABLE_PREFIXES,
     SEIN_VERBS,
     BOTH_AUX_VERBS,
+    // ES tables
+    ES_SER_FORMS,
+    ES_ESTAR_FORMS,
+    ES_COPULA_ADJ,
+    ES_POR_PARA_TRIGGERS,
+    ES_HUMAN_NOUNS,
+    ES_COPULA_VERBS,
   };
 
   host.__lexiGrammarTables = tables;
   if (typeof module !== 'undefined' && module.exports) module.exports = tables;
 
-  // ── Phase 9/10 consumer stub documentation ──
-  // Phase 9 (ES): will consume PREP_CASE pattern → ES preposition-case tables
-  //   (por/para, a/en distinction — Spanish prepositions don't have German-style
-  //   case government but the table-lookup pattern transfers).
+  // ── Phase 10 consumer stub documentation ──
   // Phase 10 (FR): will consume DEF_ARTICLE_CASE pattern → FR article-gender
   //   tables (le/la/les with elision/contraction rules).
-  // Both phases will add their own language-specific tables to this IIFE
-  // alongside the DE tables, accessed via host.__lexiGrammarTables.
+  // FR tables will be added to this IIFE alongside the DE and ES tables,
+  // accessed via host.__lexiGrammarTables.
 })();
