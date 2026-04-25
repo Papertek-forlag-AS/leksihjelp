@@ -275,6 +275,24 @@
         </div>
       </div>
 
+      <!-- Bug report form -->
+      <div class="settings-group glass">
+        <h3>Rapporter feil</h3>
+        <p class="settings-note">Fant du en feil i ordbok, stavekontroll eller grensesnitt? Hjelp oss å forbedre Leksihjelp!</p>
+        <div id="report-form">
+          <select id="report-type" class="report-select">
+            <option value="">Velg type...</option>
+            <option value="vocab">Ordbok (feil oversettelse, manglende ord)</option>
+            <option value="spell">Stavekontroll (feil flagging, manglende forslag)</option>
+            <option value="ui">Grensesnitt (design, knapper, visning)</option>
+            <option value="other">Annet</option>
+          </select>
+          <textarea id="report-text" class="report-textarea" rows="3" placeholder="Beskriv feilen..."></textarea>
+          <button id="report-submit" class="report-btn" disabled>Send rapport</button>
+          <p id="report-status" class="report-status"></p>
+        </div>
+      </div>
+
       <!-- Removed Feide placeholder -->
     </section>
 

@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPauseButton();
   initDarkMode();
   initAuth();
+  initReportForm();
 });
 
 /**
@@ -1209,7 +1210,8 @@ function renderResults(results, options = {}) {
           <span class="result-word">${escapeHtml(entry.word || '')}</span>
           ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="${t('widget_play')}">${getPlayIcon()}</button>` : ''}
         </div>
-        <div class="result-translation">${escapeHtml(getTranslation(entry))}</div>
+        ${renderFalseFriends(entry)}
+        ${renderSenses(entry) || `<div class="result-translation">${escapeHtml(getTranslation(entry))}</div>`}
         ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
         <div class="result-meta">
           <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
@@ -1272,6 +1274,62 @@ function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
+}
+
+// Sanitize pedagogical warning HTML — allow only <em> and <strong> tags.
+// Curator data from papertek is trusted, but belt-and-braces: escape the
+// string then re-enable just the two whitelisted tags.
+function sanitizeWarning(html) {
+  return escapeHtml(html)
+    .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>');
+}
+
+// Sense-grouped translations (Level A polysemy).
+// Schema: entry.senses = [{ trigger: "...", translations: { <lang>: { forms: [...], example: { sentence, translation } } } }]
+// Rendered in place of the flat translation when the entry has senses for
+// the current target language — student can't grab "index 0" because there
+// is no flat list. See project_preposition_polysemy_feature memory.
+function renderSenses(entry) {
+  if (!entry.senses || !entry.senses.length) return null;
+  const relevant = entry.senses.filter(s => s.translations && s.translations[currentLang]);
+  if (!relevant.length) return null;
+  const items = relevant.map(s => {
+    const tr = s.translations[currentLang];
+    const forms = Array.isArray(tr.forms) ? tr.forms : (tr.form ? [tr.form] : []);
+    const ex = tr.example || {};
+    return `
+      <div class="sense-item">
+        <div class="sense-trigger">${escapeHtml(s.trigger || '')}</div>
+        <div class="sense-forms">${forms.map(escapeHtml).join(', ')}</div>
+        ${ex.sentence ? `
+          <div class="sense-example">
+            <span class="sense-example-src">${escapeHtml(ex.sentence)}</span>
+            ${ex.translation ? `<span class="sense-example-tr"> — ${escapeHtml(ex.translation)}</span>` : ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+  return `<div class="senses-block">${items}</div>`;
+}
+
+function renderFalseFriends(entry) {
+  if (!entry.falseFriends || !entry.falseFriends.length) return '';
+  const pairs = entry.falseFriends.filter(f => f.lang === currentLang);
+  if (!pairs.length) return '';
+  const items = pairs.map(f => `
+    <div class="false-friend-item">
+      <span class="false-friend-form">${escapeHtml(f.form)}</span>
+      <span class="false-friend-meaning">${escapeHtml(f.meaning || '')}</span>
+      <p class="false-friend-warning">${sanitizeWarning(f.warning || '')}</p>
+    </div>
+  `).join('');
+  return `
+    <div class="false-friend-banner" role="note">
+      <span class="false-friend-heading">⚠ ${t('result_false_friend_heading')}</span>
+      ${items}
+    </div>
+  `;
 }
 
 // ── Audio Playback ─────────────────────────────────────────
@@ -2291,4 +2349,58 @@ async function logout() {
     loginBtn.disabled = false;
     loginBtn.textContent = t('auth_login_vipps');
   }
+}
+
+// ── Bug Report Form ──────────────────────────────────────
+function initReportForm() {
+  const typeSelect = document.getElementById('report-type');
+  const textArea = document.getElementById('report-text');
+  const submitBtn = document.getElementById('report-submit');
+  const statusEl = document.getElementById('report-status');
+  if (!typeSelect || !submitBtn) return;
+
+  function updateBtn() {
+    submitBtn.disabled = !typeSelect.value || !textArea.value.trim();
+  }
+  typeSelect.addEventListener('change', updateBtn);
+  textArea.addEventListener('input', updateBtn);
+
+  submitBtn.addEventListener('click', async () => {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sender...';
+    statusEl.textContent = '';
+
+    const stored = await new Promise(r => chrome.storage.local.get(['sessionToken', 'siteUrl', 'language'], r));
+    const base = stored.siteUrl || 'https://leksihjelp.no';
+    const headers = { 'Content-Type': 'application/json', 'X-Lexi-Client': 'lexi-extension' };
+    if (stored.sessionToken) headers['Authorization'] = 'Bearer ' + stored.sessionToken;
+
+    try {
+      const resp = await fetch(base + '/api/report', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          type: typeSelect.value,
+          description: textArea.value.trim(),
+          language: stored.language || null,
+        }),
+      });
+      if (resp.ok) {
+        statusEl.textContent = '✓ Takk for rapporten!';
+        statusEl.className = 'report-status report-ok';
+        typeSelect.value = '';
+        textArea.value = '';
+        updateBtn();
+      } else {
+        statusEl.textContent = '✗ Kunne ikke sende. Prøv igjen.';
+        statusEl.className = 'report-status report-err';
+      }
+    } catch (_) {
+      statusEl.textContent = '✗ Nettverksfeil. Prøv igjen.';
+      statusEl.className = 'report-status report-err';
+    }
+    submitBtn.textContent = 'Send rapport';
+    submitBtn.disabled = false;
+    updateBtn();
+  });
 }

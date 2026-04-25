@@ -1088,6 +1088,17 @@
   background: rgba(0, 0, 0, 0.08);
 }
 
+#lexi-spell-overlay .lh-spell-report {
+  background: rgba(59, 130, 246, 0.08);
+  color: #3b82f6;
+  font-size: 11px;
+  margin-left: auto;
+}
+
+#lexi-spell-overlay .lh-spell-report:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
 /* UX-01 (Phase 5 Plan 05): student-friendly explanation row. Larger than the
    retired .lh-spell-note (which was a 10px uppercase label) — dyslexia-aware
    body text at 13px with 1.4 line-height, wrapping naturally. Student's typed

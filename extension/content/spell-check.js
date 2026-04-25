@@ -451,6 +451,7 @@
         <div class="lh-spell-suggestions">${rowsHtml}${visFlereHtml}</div>
         <div class="lh-spell-actions">
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
+          <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
         </div>
       `;
       popover.querySelectorAll('.lh-spell-sugg-row').forEach(row => {
@@ -493,6 +494,7 @@
         <div class="lh-spell-actions">
           <button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
+          <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
         </div>
       `;
       popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
@@ -503,6 +505,28 @@
       hidePopover();
       runCheck();
     });
+    const reportBtn = popover.querySelector('.lh-spell-report');
+    if (reportBtn) {
+      reportBtn.addEventListener('click', () => {
+        reportBtn.textContent = '…';
+        reportBtn.disabled = true;
+        const surrounding = activeEl ? (activeEl.value || activeEl.textContent || '').slice(
+          Math.max(0, finding.start - 40), finding.end + 40
+        ) : '';
+        sendReport({
+          type: 'spell',
+          ruleId: finding.rule_id || finding.type,
+          original: finding.original,
+          suggestion: finding.fix || (finding.suggestions && finding.suggestions[0]) || '',
+          context: surrounding,
+          language: lang,
+          url: window.location.href,
+        }).then(ok => {
+          reportBtn.textContent = ok ? '✓ Sendt' : '✗ Feil';
+          setTimeout(() => { hidePopover(); runCheck(); }, 1200);
+        });
+      });
+    }
     overlay.appendChild(popover);
     positionPopover(markers[idx]?.rect);
   }
@@ -765,6 +789,17 @@
       width: mRect.width, height: mRect.height,
       bottom: top + mRect.height, right: left + mRect.width,
     };
+  }
+
+  async function sendReport(data) {
+    try {
+      const stored = await new Promise(r => chrome.storage.local.get(['sessionToken', 'siteUrl'], r));
+      const base = stored.siteUrl || 'https://leksihjelp.no';
+      const headers = { 'Content-Type': 'application/json', 'X-Lexi-Client': 'lexi-extension' };
+      if (stored.sessionToken) headers['Authorization'] = 'Bearer ' + stored.sessionToken;
+      const resp = await fetch(base + '/api/report', { method: 'POST', headers, body: JSON.stringify(data) });
+      return resp.ok;
+    } catch (_) { return false; }
   }
 
   function escapeHtml(s) {
