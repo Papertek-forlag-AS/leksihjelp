@@ -11,7 +11,7 @@
 {"id":"nn-saer-005","text":"Eg har ein bensin stasjon","expected":[{"rule_id":"sarskriving","start":11,"end":25,"suggestion":"bensinstasjon"}],"must_not_flag":[]}
 {"id":"nn-saer-006","text":"Eg har ein brann bil","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"brannbil"}],"must_not_flag":[]}
 {"id":"nn-saer-007","text":"Eg har ein buss tur","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"busstur"}],"must_not_flag":[]}
-{"id":"nn-saer-008","text":"Eg har ei drikke flaske","expected":[{"rule_id":"sarskriving","start":10,"end":23,"suggestion":"drikkeflaske"}],"must_not_flag":[]}
+{"id":"nn-saer-008","text":"Eg har ei vann flaske","expected":[{"rule_id":"sarskriving","start":10,"end":21,"suggestion":"vannflaske"}],"must_not_flag":[]}
 {"id":"nn-saer-009","text":"Eg har ein fotball kamp","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"fotballkamp"}],"must_not_flag":[]}
 {"id":"nn-saer-010","text":"Eg har eit fjell område","expected":[{"rule_id":"sarskriving","start":11,"end":23,"suggestion":"fjellområde"}],"must_not_flag":[]}
 {"id":"nn-saer-011","text":"Eg har ein hals kjede","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"halskjede"}],"must_not_flag":[]}

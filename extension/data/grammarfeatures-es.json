@@ -48,8 +48,7 @@
       "appliesTo": [
         "verb"
       ],
-      "dataPath": "conjugations.imperfecto",
-      "future": true
+      "dataPath": "conjugations.imperfecto"
     },
     {
       "id": "grammar_es_futuro",
@@ -87,8 +86,7 @@
       "appliesTo": [
         "verb"
       ],
-      "dataPath": "conjugations.subjuntivo",
-      "future": true
+      "dataPath": "conjugations.subjuntivo"
     },
     {
       "id": "grammar_es_gerundio",

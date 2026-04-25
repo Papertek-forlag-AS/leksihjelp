@@ -74,8 +74,7 @@
       "appliesTo": [
         "verb"
       ],
-      "dataPath": "conjugations.subjonctif",
-      "future": true
+      "dataPath": "conjugations.subjonctif"
     },
     {
       "id": "grammar_fr_conditionnel",
@@ -238,30 +237,6 @@
       ],
       "dataPath": "agreement",
       "future": true
-    },
-    {
-      "id": "grammar_fr_pp_agreement",
-      "name": "Accord du participe passé",
-      "nameEn": "Past Participle Agreement",
-      "description": "Samsvar av partisipp med foranknytt direkte objekt (la pomme que j'ai mangée)",
-      "descriptionEn": "Past participle agreement with preceding direct object",
-      "category": "verbs",
-      "appliesTo": [
-        "verb"
-      ],
-      "dataPath": "conjugations.passe_compose"
-    },
-    {
-      "id": "grammar_register",
-      "name": "Register / formality",
-      "nameEn": "Register / formality",
-      "description": "Flag informal words and expressions in text",
-      "descriptionEn": "Flag informal words and expressions in text",
-      "category": "style",
-      "appliesTo": [
-        "all"
-      ],
-      "dataPath": "register"
     }
   ],
   "categories": [

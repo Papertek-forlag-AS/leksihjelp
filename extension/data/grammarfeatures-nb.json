@@ -159,18 +159,6 @@
       ],
       "dataPath": "declension",
       "future": true
-    },
-    {
-      "id": "grammar_register",
-      "name": "Register / formalitet",
-      "nameEn": "Register / formality",
-      "description": "Merk uformelle ord og uttrykk i teksten",
-      "descriptionEn": "Flag informal words and expressions in text",
-      "category": "style",
-      "appliesTo": [
-        "all"
-      ],
-      "dataPath": "register"
     }
   ],
   "categories": [

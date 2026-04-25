@@ -1,5 +1,5 @@
 {"id":"case-1777023231522","text":"Eg kan gjekk på skulen.","expected":[{"rule_id":"modal_form","start":7,"end":12,"suggestion":"gå"}],"comment":"","status":"ok"}
-{"id":"case-1777023267674","text":"Eg vil gjerne ha eit glas vatn.","expected":[],"comment":"","status":"ok"}
-{"id":"case-1777023284712","text":"Vêret var fint i dag.","expected":[],"comment":"","status":"ok"}
-{"id":"case-1777023288899","text":"Sola skein gjennom vindauget.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777023267674","text":"Eg vil gjerne ha eit glass vatn.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777023284712","text":"Veret var fint i dag.","expected":[],"comment":"","status":"ok"}
+{"id":"case-1777023288899","text":"Sola skein gjennom vinduet.","expected":[],"comment":"","status":"ok"}
 {"id":"case-1777023310350","text":"Borna leika ute i hagen.","expected":[],"comment":"","status":"ok"}
