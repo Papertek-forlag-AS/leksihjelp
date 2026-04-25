@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T02:10:27.265Z"
+last_updated: "2026-04-25T02:49:38.913Z"
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 11
 ---
 
 # Project State
@@ -22,19 +22,19 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 8 — DE Case/Agreement Governance
-Plan: 2 of 3 complete (08-01, 08-02 done)
+Phase: 9 — ES Ser/Estar, Por/Para, Personal A
+Plan: 1 of 3 complete (09-01 done)
 Status: In Progress
-Last activity: 2026-04-25 — Completed 08-02-PLAN.md (DE prep-case + separable-verb rules)
+Last activity: 2026-04-25 — Completed 09-01-PLAN.md (ES shared grammar tables + benchmark expectations)
 
-Progress: [██████░░░░] 27%
+Progress: [████████░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 21m 22s
-- Total execution time: 2h 13m 24s
+- Total plans completed: 8
+- Average duration: 18m 57s
+- Total execution time: 2h 16m 24s
 
 **By Phase:**
 
@@ -239,6 +239,7 @@ Recent decisions affecting current work:
 - [Phase 08]: Multi-gender article Sets to handle ambiguous articles like ein (m/n nominative)
 - [Phase 08]: Lazy-init grammar-tables at check() time for Node/browser load-order compatibility
 - [Phase 08]: Separable-verb fixtures document typo-fuzzy dedup interaction honestly — long-prefix forms survive
+- [Phase 09]: Accent-stripped keys throughout ES tables since tokenizer lowercases and students omit tildes
 
 ### Roadmap Evolution
 

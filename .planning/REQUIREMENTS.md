@@ -41,9 +41,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### ES ser/estar, por/para, Personal "a" (Phase 9)
 
-- [ ] **ES-01**: ES ser vs estar flagged by predicate-adjective lookup (`copula: "ser"|"estar"|"both"`); benchmark `es.txt` "Soy cansado"
-- [ ] **ES-02**: ES por vs para flagged via ~15 trigger-pattern decision tree (duration, deadline, cause, purpose); warn rather than hard-flag; benchmark `es.txt` "para comprar comida por mi familia"
-- [ ] **ES-03**: ES personal "a" flagged when transitive verb + bare human direct object (`human: true` on pronouns/proper nouns); benchmark `es.txt` "Veo Juan"
+- [x] **ES-01**: ES ser vs estar flagged by predicate-adjective lookup (`copula: "ser"|"estar"|"both"`); benchmark `es.txt` "Soy cansado"
+- [x] **ES-02**: ES por vs para flagged via ~15 trigger-pattern decision tree (duration, deadline, cause, purpose); warn rather than hard-flag; benchmark `es.txt` "para comprar comida por mi familia"
+- [x] **ES-03**: ES personal "a" flagged when transitive verb + bare human direct object (`human: true` on pronouns/proper nouns); benchmark `es.txt` "Veo Juan"
 
 ### FR Élision, Auxiliary, Participe Passé (Phase 10)
 
@@ -147,9 +147,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | DE-02 | Phase 8 | Complete |
 | DE-03 | Phase 8 | Complete |
 | DE-04 | Phase 8 | Complete |
-| ES-01 | Phase 9 | Pending |
-| ES-02 | Phase 9 | Pending |
-| ES-03 | Phase 9 | Pending |
+| ES-01 | Phase 9 | Complete |
+| ES-02 | Phase 9 | Complete |
+| ES-03 | Phase 9 | Complete |
 | FR-01 | Phase 10 | Pending |
 | FR-02 | Phase 10 | Pending |
 | FR-03 | Phase 10 | Pending |
