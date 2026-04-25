@@ -59,9 +59,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Pronoun & Pro-Drop (Phase 12)
 
-- [ ] **PRON-01**: ES pro-drop-overuse warn when subject pronoun appears with unambiguous verb agreement; benchmark `es.txt` "yo voy a la playa", "Yo pienso"; hint-tier severity
-- [ ] **PRON-02**: ES gustar-class syntax flagged when `sujeto + gustar-class-verb + objeto` pattern; suggest dative restructuring; `gustar_class: true` flag; benchmark `es.txt` "Él no gusta ayudar"
-- [ ] **PRON-03**: FR double-pronoun clitic order flagged when clitic cluster violates `me/te/se/nous/vous < le/la/les < lui/leur < y < en` order
+- [x] **PRON-01**: ES pro-drop-overuse warn when subject pronoun appears with unambiguous verb agreement; benchmark `es.txt` "yo voy a la playa", "Yo pienso"; hint-tier severity
+- [x] **PRON-02**: ES gustar-class syntax flagged when `sujeto + gustar-class-verb + objeto` pattern; suggest dative restructuring; `gustar_class: true` flag; benchmark `es.txt` "Él no gusta ayudar"
+- [x] **PRON-03**: FR double-pronoun clitic order flagged when clitic cluster violates `me/te/se/nous/vous < le/la/les < lui/leur < y < en` order
 
 ### Register Drift Within a Document (Phase 13)
 
@@ -156,9 +156,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | MOOD-01 | Phase 11 | Complete |
 | MOOD-02 | Phase 11 | Complete |
 | MOOD-03 | Phase 11 | Complete |
-| PRON-01 | Phase 12 | Pending |
-| PRON-02 | Phase 12 | Pending |
-| PRON-03 | Phase 12 | Pending |
+| PRON-01 | Phase 12 | Complete |
+| PRON-02 | Phase 12 | Complete |
+| PRON-03 | Phase 12 | Complete |
 | DOC-01 | Phase 13 | Pending |
 | DOC-02 | Phase 13 | Pending |
 | DOC-03 | Phase 13 | Pending |
