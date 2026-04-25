@@ -47,9 +47,9 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### FR Élision, Auxiliary, Participe Passé (Phase 10)
 
-- [ ] **FR-01**: FR élision flagged when closed-set clitic (`le/la/je/que/si/ne/me/te/se`) + vowel/silent-h onset without apostrophe (benchmark `fr.txt` "je ai", "si il pleut")
-- [ ] **FR-02**: FR être vs avoir auxiliary flagged using DR MRS VANDERTRAMP set + pronominal verbs (`aux: "être"` flag on verbbank); benchmark `fr.txt` "j'ai allé"
-- [ ] **FR-03**: FR participe passé agreement (10.3a scope only) flagged when `avoir` + past participle with *adjacent-window* preceding direct-object pronoun (`la/les/que`); ship behind `grammar_fr_pp_agreement` opt-in toggle; complex corner cases (10.3b) deferred to v3.0
+- [x] **FR-01**: FR élision flagged when closed-set clitic (`le/la/je/que/si/ne/me/te/se`) + vowel/silent-h onset without apostrophe (benchmark `fr.txt` "je ai", "si il pleut")
+- [x] **FR-02**: FR être vs avoir auxiliary flagged using DR MRS VANDERTRAMP set + pronominal verbs (`aux: "être"` flag on verbbank); benchmark `fr.txt` "j'ai allé"
+- [x] **FR-03**: FR participe passé agreement (10.3a scope only) flagged when `avoir` + past participle with *adjacent-window* preceding direct-object pronoun (`la/les/que`); ship behind `grammar_fr_pp_agreement` opt-in toggle; complex corner cases (10.3b) deferred to v3.0
 
 ### Aspect & Mood (Phase 11)
 
@@ -150,9 +150,9 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | ES-01 | Phase 9 | Complete |
 | ES-02 | Phase 9 | Complete |
 | ES-03 | Phase 9 | Complete |
-| FR-01 | Phase 10 | Pending |
-| FR-02 | Phase 10 | Pending |
-| FR-03 | Phase 10 | Pending |
+| FR-01 | Phase 10 | Complete |
+| FR-02 | Phase 10 | Complete |
+| FR-03 | Phase 10 | Complete |
 | MOOD-01 | Phase 11 | Pending |
 | MOOD-02 | Phase 11 | Pending |
 | MOOD-03 | Phase 11 | Pending |
