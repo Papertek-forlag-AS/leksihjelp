@@ -1,0 +1,47 @@
+{"id":"de-coll-angst-von-1","text":"Ich habe Angst von der Prüfung.","expected":[{"rule_id":"collocation","start":9,"end":18,"suggestion":"Angst vor"}]}
+{"id":"de-coll-angst-von-2","text":"Sie hat Angst von dem Hund.","expected":[{"rule_id":"collocation","start":8,"end":17,"suggestion":"Angst vor"}]}
+{"id":"de-coll-angst-von-3","text":"Wir haben Angst von dem Wasser.","expected":[{"rule_id":"collocation","start":10,"end":19,"suggestion":"Angst vor"}]}
+{"id":"de-coll-warten-fuer-1","text":"Wir müssen warten für den Bus.","expected":[{"rule_id":"collocation","start":11,"end":21,"suggestion":"warten auf"}]}
+{"id":"de-coll-warte-fuer-1","text":"Ich warte für den Bus.","expected":[{"rule_id":"collocation","start":4,"end":13,"suggestion":"warten auf"}]}
+{"id":"de-coll-wartest-fuer-1","text":"Du wartest für mich.","expected":[{"rule_id":"collocation","start":3,"end":14,"suggestion":"warten auf"}]}
+{"id":"de-coll-wartet-fuer-1","text":"Er wartet für das Essen.","expected":[{"rule_id":"collocation","start":3,"end":13,"suggestion":"warten auf"}]}
+{"id":"de-coll-stolz-von-1","text":"Ich bin stolz von dir.","expected":[{"rule_id":"collocation","start":8,"end":17,"suggestion":"stolz auf"}]}
+{"id":"de-coll-stolz-von-2","text":"Die Eltern sind stolz von den Kindern.","expected":[{"rule_id":"collocation","start":16,"end":25,"suggestion":"stolz auf"}]}
+{"id":"de-coll-interessieren-in-1","text":"Ich will mich interessieren in Musik.","expected":[{"rule_id":"collocation","start":14,"end":30,"suggestion":"interessieren für"}]}
+{"id":"de-coll-interessiere-in-1","text":"Ich interessiere in Sport.","expected":[{"rule_id":"collocation","start":4,"end":19,"suggestion":"interessieren für"}]}
+{"id":"de-coll-denken-ueber-1","text":"Wir sollen denken über das Problem.","expected":[{"rule_id":"collocation","start":11,"end":22,"suggestion":"denken an"}]}
+{"id":"de-coll-denke-ueber-1","text":"Ich denke über meine Familie.","expected":[{"rule_id":"collocation","start":4,"end":14,"suggestion":"denken an"}]}
+{"id":"de-coll-denkst-ueber-1","text":"Du denkst über die Zukunft.","expected":[{"rule_id":"collocation","start":3,"end":14,"suggestion":"denken an"}]}
+{"id":"de-coll-traeumen-ueber-1","text":"Kinder träumen über Tiere.","expected":[{"rule_id":"collocation","start":7,"end":19,"suggestion":"träumen von"}]}
+{"id":"de-coll-traeume-ueber-1","text":"Ich träume über die Ferien.","expected":[{"rule_id":"collocation","start":4,"end":15,"suggestion":"träumen von"}]}
+{"id":"de-coll-bitten-fuer-1","text":"Er will bitten für Hilfe.","expected":[{"rule_id":"collocation","start":8,"end":18,"suggestion":"bitten um"}]}
+{"id":"de-coll-bitte-fuer-1","text":"Ich bitte für Hilfe.","expected":[{"rule_id":"collocation","start":4,"end":13,"suggestion":"bitten um"}]}
+{"id":"de-coll-suchen-fuer-1","text":"Wir suchen für die Tasche.","expected":[{"rule_id":"collocation","start":4,"end":14,"suggestion":"suchen nach"}]}
+{"id":"de-coll-suche-fuer-1","text":"Ich suche für mein Buch.","expected":[{"rule_id":"collocation","start":4,"end":13,"suggestion":"suchen nach"}]}
+{"id":"de-coll-suchst-fuer-1","text":"Du suchst für den Ball.","expected":[{"rule_id":"collocation","start":3,"end":13,"suggestion":"suchen nach"}]}
+{"id":"de-coll-lust-fuer-1","text":"Ich habe Lust für Pizza.","expected":[{"rule_id":"collocation","start":9,"end":17,"suggestion":"Lust auf"}]}
+{"id":"de-coll-lust-fuer-2","text":"Hast du Lust für Kino?","expected":[{"rule_id":"collocation","start":8,"end":16,"suggestion":"Lust auf"}]}
+{"id":"de-coll-teilnehmen-in-1","text":"Ich will teilnehmen in dem Kurs.","expected":[{"rule_id":"collocation","start":9,"end":22,"suggestion":"teilnehmen an"}]}
+{"id":"de-coll-zufrieden-von-1","text":"Ich bin zufrieden von dem Buch.","expected":[{"rule_id":"collocation","start":8,"end":21,"suggestion":"zufrieden mit"}]}
+{"id":"de-coll-zufrieden-von-2","text":"Sie ist zufrieden von der Arbeit.","expected":[{"rule_id":"collocation","start":8,"end":21,"suggestion":"zufrieden mit"}]}
+{"id":"de-coll-angst-von-mid","text":"Heute habe ich Angst von dem Test.","expected":[{"rule_id":"collocation","start":15,"end":24,"suggestion":"Angst vor"}]}
+{"id":"de-coll-stolz-von-end","text":"Mein Vater ist sehr stolz von mir.","expected":[{"rule_id":"collocation","start":20,"end":29,"suggestion":"stolz auf"}]}
+{"id":"de-coll-warte-fuer-end","text":"Am Morgen warte für den Zug.","expected":[{"rule_id":"collocation","start":10,"end":19,"suggestion":"warten auf"}]}
+{"id":"de-coll-suche-fuer-2","text":"Heute suche für ein Buch.","expected":[{"rule_id":"collocation","start":6,"end":15,"suggestion":"suchen nach"}]}
+{"id":"de-coll-lust-fuer-3","text":"Wir haben Lust für Sport.","expected":[{"rule_id":"collocation","start":10,"end":18,"suggestion":"Lust auf"}]}
+{"id":"de-coll-bitte-fuer-2","text":"Er bitte für Geld.","expected":[{"rule_id":"collocation","start":3,"end":12,"suggestion":"bitten um"}]}
+{"id":"de-coll-accept-angst-vor","text":"Ich habe Angst vor der Prüfung.","expected":[]}
+{"id":"de-coll-accept-warten-auf","text":"Wir warten auf den Bus.","expected":[]}
+{"id":"de-coll-accept-stolz-auf","text":"Ich bin stolz auf dich.","expected":[]}
+{"id":"de-coll-accept-interessieren-fuer","text":"Ich interessiere mich für Kunst.","expected":[]}
+{"id":"de-coll-accept-denken-an","text":"Ich denke an meine Familie.","expected":[]}
+{"id":"de-coll-accept-traeumen-von","text":"Ich träume von dem Meer.","expected":[]}
+{"id":"de-coll-accept-bitten-um","text":"Ich bitte um Hilfe.","expected":[]}
+{"id":"de-coll-accept-suchen-nach","text":"Ich suche nach dem Buch.","expected":[]}
+{"id":"de-coll-accept-lust-auf","text":"Ich habe Lust auf Pizza.","expected":[]}
+{"id":"de-coll-accept-zufrieden-mit","text":"Ich bin zufrieden mit dem Buch.","expected":[]}
+{"id":"de-coll-accept-stolz-word","text":"Er ist sehr stolz.","expected":[]}
+{"id":"de-coll-accept-angst-word","text":"Ich habe Angst.","expected":[]}
+{"id":"de-coll-accept-warten-word","text":"Wir warten hier.","expected":[]}
+{"id":"de-coll-accept-denke-word","text":"Ich denke oft.","expected":[]}
+{"id":"de-coll-accept-suche-word","text":"Ich suche den Hund.","expected":[]}

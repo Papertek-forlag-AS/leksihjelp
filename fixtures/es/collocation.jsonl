@@ -1,0 +1,46 @@
+{"id":"es-coll-sueno-de-1","text":"Sueño de ser grande.","expected":[{"rule_id":"collocation","start":0,"end":8,"suggestion":"soñar con"}]}
+{"id":"es-coll-sueno-de-2","text":"Sueño de mi casa.","expected":[{"rule_id":"collocation","start":0,"end":8,"suggestion":"soñar con"}]}
+{"id":"es-coll-sueno-de-3","text":"Sueño de mi perro.","expected":[{"rule_id":"collocation","start":0,"end":8,"suggestion":"soñar con"}]}
+{"id":"es-coll-sonar-de-1","text":"Quiero soñar de mi vida.","expected":[{"rule_id":"collocation","start":7,"end":15,"suggestion":"soñar con"}]}
+{"id":"es-coll-sonar-de-2","text":"Vamos a soñar de un mundo mejor.","expected":[{"rule_id":"collocation","start":8,"end":16,"suggestion":"soñar con"}]}
+{"id":"es-coll-pienso-sobre-1","text":"Pienso sobre mi familia.","expected":[{"rule_id":"collocation","start":0,"end":12,"suggestion":"pensar en"}]}
+{"id":"es-coll-piensas-sobre-1","text":"Piensas sobre el futuro.","expected":[{"rule_id":"collocation","start":0,"end":13,"suggestion":"pensar en"}]}
+{"id":"es-coll-piensa-sobre-1","text":"Piensa sobre su vida.","expected":[{"rule_id":"collocation","start":0,"end":12,"suggestion":"pensar en"}]}
+{"id":"es-coll-pensamos-sobre-1","text":"Pensamos sobre el mundo.","expected":[{"rule_id":"collocation","start":0,"end":14,"suggestion":"pensar en"}]}
+{"id":"es-coll-pensar-sobre-1","text":"Quiero pensar sobre el problema.","expected":[{"rule_id":"collocation","start":7,"end":19,"suggestion":"pensar en"}]}
+{"id":"es-coll-pensar-sobre-2","text":"Vamos a pensar sobre el libro.","expected":[{"rule_id":"collocation","start":8,"end":20,"suggestion":"pensar en"}]}
+{"id":"es-coll-depender-en-1","text":"Va a depender en el precio.","expected":[{"rule_id":"collocation","start":5,"end":16,"suggestion":"depender de"}]}
+{"id":"es-coll-depender-en-2","text":"No puede depender en su amigo.","expected":[{"rule_id":"collocation","start":9,"end":20,"suggestion":"depender de"}]}
+{"id":"es-coll-depender-en-3","text":"Quiero depender en mi familia.","expected":[{"rule_id":"collocation","start":7,"end":18,"suggestion":"depender de"}]}
+{"id":"es-coll-casarse-a-1","text":"Casarse a un amigo es bueno.","expected":[{"rule_id":"collocation","start":0,"end":9,"suggestion":"casarse con"}]}
+{"id":"es-coll-casarse-a-2","text":"Quiero casarse a ella.","expected":[{"rule_id":"collocation","start":7,"end":16,"suggestion":"casarse con"}]}
+{"id":"es-coll-insistir-sobre-1","text":"Quiero insistir sobre el tema.","expected":[{"rule_id":"collocation","start":7,"end":21,"suggestion":"insistir en"}]}
+{"id":"es-coll-insistir-sobre-2","text":"Vamos a insistir sobre el plan.","expected":[{"rule_id":"collocation","start":8,"end":22,"suggestion":"insistir en"}]}
+{"id":"es-coll-tratar-sobre-1","text":"Quiero tratar sobre el problema.","expected":[{"rule_id":"collocation","start":7,"end":19,"suggestion":"tratar de"}]}
+{"id":"es-coll-tratar-sobre-2","text":"Vamos a tratar sobre el libro.","expected":[{"rule_id":"collocation","start":8,"end":20,"suggestion":"tratar de"}]}
+{"id":"es-coll-contar-sobre-1","text":"Puedo contar sobre mi hermano.","expected":[{"rule_id":"collocation","start":6,"end":18,"suggestion":"contar con"}]}
+{"id":"es-coll-contar-sobre-2","text":"Quiero contar sobre mi padre.","expected":[{"rule_id":"collocation","start":7,"end":19,"suggestion":"contar con"}]}
+{"id":"es-coll-cuento-sobre-1","text":"Cuento sobre mi amigo.","expected":[{"rule_id":"collocation","start":0,"end":12,"suggestion":"contar con"}]}
+{"id":"es-coll-cuento-sobre-2","text":"Siempre cuento sobre mi gato.","expected":[{"rule_id":"collocation","start":8,"end":20,"suggestion":"contar con"}]}
+{"id":"es-coll-sueno-de-mid","text":"Siempre sueño de un mundo mejor.","expected":[{"rule_id":"collocation","start":8,"end":16,"suggestion":"soñar con"}]}
+{"id":"es-coll-pienso-sobre-mid","text":"Siempre pienso sobre mi vida.","expected":[{"rule_id":"collocation","start":8,"end":20,"suggestion":"pensar en"}]}
+{"id":"es-coll-piensa-sobre-2","text":"Mi madre piensa sobre el dinero.","expected":[{"rule_id":"collocation","start":9,"end":21,"suggestion":"pensar en"}]}
+{"id":"es-coll-sonar-de-3","text":"Me gusta soñar de mi gato.","expected":[{"rule_id":"collocation","start":9,"end":17,"suggestion":"soñar con"}]}
+{"id":"es-coll-depender-en-4","text":"Todo va a depender en el libro.","expected":[{"rule_id":"collocation","start":10,"end":21,"suggestion":"depender de"}]}
+{"id":"es-coll-pensar-sobre-3","text":"No quiero pensar sobre el examen.","expected":[{"rule_id":"collocation","start":10,"end":22,"suggestion":"pensar en"}]}
+{"id":"es-coll-insistir-sobre-3","text":"No quiero insistir sobre la verdad.","expected":[{"rule_id":"collocation","start":10,"end":24,"suggestion":"insistir en"}]}
+{"id":"es-coll-accept-sonar-con","text":"Sueño con mi casa.","expected":[]}
+{"id":"es-coll-accept-pensar-en","text":"Pienso en mi familia.","expected":[]}
+{"id":"es-coll-accept-depender-de","text":"Va a depender de el precio.","expected":[]}
+{"id":"es-coll-accept-casarse-con","text":"Quiero casarse con ella.","expected":[]}
+{"id":"es-coll-accept-insistir-en","text":"Quiero insistir en el tema.","expected":[]}
+{"id":"es-coll-accept-tratar-de","text":"Quiero tratar de ser mejor.","expected":[]}
+{"id":"es-coll-accept-contar-con","text":"Cuento con mi amigo.","expected":[]}
+{"id":"es-coll-accept-pensar-word","text":"Pienso mucho.","expected":[]}
+{"id":"es-coll-accept-sonar-word","text":"Sueño bien.","expected":[]}
+{"id":"es-coll-accept-contar-word","text":"Cuento hasta diez.","expected":[]}
+{"id":"es-coll-accept-depender-word","text":"Todo va a depender.","expected":[]}
+{"id":"es-coll-accept-casarse-word","text":"Quiero casarse bien.","expected":[]}
+{"id":"es-coll-accept-insistir-word","text":"No quiero insistir.","expected":[]}
+{"id":"es-coll-accept-tratar-word","text":"Vamos a tratar bien.","expected":[]}
+{"id":"es-coll-accept-piensa-word","text":"Mi madre piensa mucho.","expected":[]}

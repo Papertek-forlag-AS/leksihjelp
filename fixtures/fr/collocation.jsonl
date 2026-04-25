@@ -1,0 +1,50 @@
+{"id":"fr-coll-penser-de-1","text":"Il va penser de son avenir.","expected":[{"rule_id":"collocation","start":6,"end":15,"suggestion":"penser à"}]}
+{"id":"fr-coll-pense-de-1","text":"Je pense de mon ami.","expected":[{"rule_id":"collocation","start":3,"end":11,"suggestion":"penser à"}]}
+{"id":"fr-coll-pense-de-2","text":"Il pense de son chien.","expected":[{"rule_id":"collocation","start":3,"end":11,"suggestion":"penser à"}]}
+{"id":"fr-coll-penses-de-1","text":"Tu penses de ton ami.","expected":[{"rule_id":"collocation","start":3,"end":12,"suggestion":"penser à"}]}
+{"id":"fr-coll-pensons-de-1","text":"Nous pensons de notre maison.","expected":[{"rule_id":"collocation","start":5,"end":15,"suggestion":"penser à"}]}
+{"id":"fr-coll-pensez-de-1","text":"Vous pensez de son travail.","expected":[{"rule_id":"collocation","start":5,"end":14,"suggestion":"penser à"}]}
+{"id":"fr-coll-pensent-de-1","text":"Ils pensent de leur chat.","expected":[{"rule_id":"collocation","start":4,"end":14,"suggestion":"penser à"}]}
+{"id":"fr-coll-jouer-le-piano-1","text":"Je vais jouer le piano.","expected":[{"rule_id":"collocation","start":8,"end":22,"suggestion":"jouer du piano"}]}
+{"id":"fr-coll-joue-le-piano-1","text":"Elle joue le piano.","expected":[{"rule_id":"collocation","start":5,"end":18,"suggestion":"jouer du piano"}]}
+{"id":"fr-coll-joue-le-piano-2","text":"Il joue le piano bien.","expected":[{"rule_id":"collocation","start":3,"end":16,"suggestion":"jouer du piano"}]}
+{"id":"fr-coll-jouer-le-foot-1","text":"On va jouer le football.","expected":[{"rule_id":"collocation","start":6,"end":23,"suggestion":"jouer au football"}]}
+{"id":"fr-coll-joue-le-foot-1","text":"Il joue le football.","expected":[{"rule_id":"collocation","start":3,"end":19,"suggestion":"jouer au football"}]}
+{"id":"fr-coll-rever-sur-1","text":"Je vais rêver sur le soleil.","expected":[{"rule_id":"collocation","start":8,"end":17,"suggestion":"rêver de"}]}
+{"id":"fr-coll-reve-sur-1","text":"Il rêve sur le film.","expected":[{"rule_id":"collocation","start":3,"end":11,"suggestion":"rêver de"}]}
+{"id":"fr-coll-reve-sur-2","text":"Elle rêve sur le chat.","expected":[{"rule_id":"collocation","start":5,"end":13,"suggestion":"rêver de"}]}
+{"id":"fr-coll-dependre-sur-1","text":"Il va dépendre sur le prix.","expected":[{"rule_id":"collocation","start":6,"end":18,"suggestion":"dépendre de"}]}
+{"id":"fr-coll-dependre-sur-2","text":"On ne peut pas dépendre sur lui.","expected":[{"rule_id":"collocation","start":15,"end":27,"suggestion":"dépendre de"}]}
+{"id":"fr-coll-cherche-pour-1","text":"Je cherche pour mon chat.","expected":[{"rule_id":"collocation","start":3,"end":15,"suggestion":"chercher"}]}
+{"id":"fr-coll-cherches-pour-1","text":"Tu cherches pour le sac.","expected":[{"rule_id":"collocation","start":3,"end":16,"suggestion":"chercher"}]}
+{"id":"fr-coll-cherchons-pour-1","text":"Nous cherchons pour la gare.","expected":[{"rule_id":"collocation","start":5,"end":19,"suggestion":"chercher"}]}
+{"id":"fr-coll-cherchent-pour-1","text":"Ils cherchent pour le bus.","expected":[{"rule_id":"collocation","start":4,"end":18,"suggestion":"chercher"}]}
+{"id":"fr-coll-cherche-pour-2","text":"Elle cherche pour le livre.","expected":[{"rule_id":"collocation","start":5,"end":17,"suggestion":"chercher"}]}
+{"id":"fr-coll-regarde-a-1","text":"Je regarde à la mer.","expected":[{"rule_id":"collocation","start":3,"end":12,"suggestion":"regarder"}]}
+{"id":"fr-coll-regarde-a-2","text":"Il regarde à son chat.","expected":[{"rule_id":"collocation","start":3,"end":12,"suggestion":"regarder"}]}
+{"id":"fr-coll-ecoute-a-1","text":"Tu écoute à la radio.","expected":[{"rule_id":"collocation","start":3,"end":11,"suggestion":"écouter"}]}
+{"id":"fr-coll-ecoute-a-2","text":"Il écoute à la musique.","expected":[{"rule_id":"collocation","start":3,"end":11,"suggestion":"écouter"}]}
+{"id":"fr-coll-demande-pour-1","text":"Je demande pour du pain.","expected":[{"rule_id":"collocation","start":3,"end":15,"suggestion":"demander"}]}
+{"id":"fr-coll-demande-pour-2","text":"Il demande pour le livre.","expected":[{"rule_id":"collocation","start":3,"end":15,"suggestion":"demander"}]}
+{"id":"fr-coll-attends-pour-1","text":"Tu attends pour le train.","expected":[{"rule_id":"collocation","start":3,"end":15,"suggestion":"attendre"}]}
+{"id":"fr-coll-attend-pour-1","text":"Il attend pour son ami.","expected":[{"rule_id":"collocation","start":3,"end":14,"suggestion":"attendre"}]}
+{"id":"fr-coll-attend-pour-2","text":"Elle attend pour le bus.","expected":[{"rule_id":"collocation","start":5,"end":16,"suggestion":"attendre"}]}
+{"id":"fr-coll-habite-dans-paris-1","text":"Il habite dans Paris.","expected":[{"rule_id":"collocation","start":3,"end":20,"suggestion":"habiter à Paris"}]}
+{"id":"fr-coll-habite-dans-paris-2","text":"Elle habite dans Paris.","expected":[{"rule_id":"collocation","start":5,"end":22,"suggestion":"habiter à Paris"}]}
+{"id":"fr-coll-souvenir-sur-1","text":"On va se souvenir sur le film.","expected":[{"rule_id":"collocation","start":6,"end":21,"suggestion":"se souvenir de"}]}
+{"id":"fr-coll-souvenir-sur-2","text":"Il va se souvenir sur le chien.","expected":[{"rule_id":"collocation","start":6,"end":21,"suggestion":"se souvenir de"}]}
+{"id":"fr-coll-accept-penser-a","text":"Je pense à mon ami.","expected":[]}
+{"id":"fr-coll-accept-jouer-du","text":"Elle joue du piano.","expected":[]}
+{"id":"fr-coll-accept-jouer-au","text":"Il joue au football.","expected":[]}
+{"id":"fr-coll-accept-rever-de","text":"Je rêve de vacances.","expected":[]}
+{"id":"fr-coll-accept-chercher","text":"Je cherche mon chat.","expected":[]}
+{"id":"fr-coll-accept-regarder","text":"Je regarde la mer.","expected":[]}
+{"id":"fr-coll-accept-ecouter","text":"Tu écoute la musique.","expected":[]}
+{"id":"fr-coll-accept-demander","text":"Je demande du pain.","expected":[]}
+{"id":"fr-coll-accept-attendre","text":"Il attend le bus.","expected":[]}
+{"id":"fr-coll-accept-habiter-a","text":"Il habite en France.","expected":[]}
+{"id":"fr-coll-accept-penser-word","text":"Je pense souvent.","expected":[]}
+{"id":"fr-coll-accept-chercher-word","text":"Nous cherchons partout.","expected":[]}
+{"id":"fr-coll-accept-attendre-word","text":"Nous attendons ici.","expected":[]}
+{"id":"fr-coll-accept-jouer-word","text":"Il joue bien.","expected":[]}
+{"id":"fr-coll-accept-regarder-word","text":"Elle regarde le film.","expected":[]}

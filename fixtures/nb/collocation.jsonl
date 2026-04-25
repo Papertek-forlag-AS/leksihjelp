@@ -1,0 +1,48 @@
+{"id":"nb-coll-flink-i-1","text":"Hun er flink i å synge.","expected":[{"rule_id":"collocation","start":7,"end":14,"suggestion":"flink til"}]}
+{"id":"nb-coll-flink-i-2","text":"Katten min er flink i å fange mus.","expected":[{"rule_id":"collocation","start":14,"end":21,"suggestion":"flink til"}]}
+{"id":"nb-coll-flink-i-3","text":"De er så flink i matte.","expected":[{"rule_id":"collocation","start":9,"end":16,"suggestion":"flink til"}]}
+{"id":"nb-coll-glad-pa-1","text":"Jeg er glad på deg.","expected":[{"rule_id":"collocation","start":7,"end":14,"suggestion":"glad i"}]}
+{"id":"nb-coll-glad-pa-2","text":"Hun er glad på katten sin.","expected":[{"rule_id":"collocation","start":7,"end":14,"suggestion":"glad i"}]}
+{"id":"nb-coll-glad-pa-3","text":"Vi er glad på hverandre.","expected":[{"rule_id":"collocation","start":6,"end":13,"suggestion":"glad i"}]}
+{"id":"nb-coll-redd-av-1","text":"Han er redd av hunder.","expected":[{"rule_id":"collocation","start":7,"end":14,"suggestion":"redd for"}]}
+{"id":"nb-coll-redd-av-2","text":"Barna er redd av katten.","expected":[{"rule_id":"collocation","start":9,"end":16,"suggestion":"redd for"}]}
+{"id":"nb-coll-interessert-av-1","text":"Hun er interessert av musikk.","expected":[{"rule_id":"collocation","start":7,"end":21,"suggestion":"interessert i"}]}
+{"id":"nb-coll-interessert-av-2","text":"Vi er interessert av historie.","expected":[{"rule_id":"collocation","start":6,"end":20,"suggestion":"interessert i"}]}
+{"id":"nb-coll-stolt-av-1","text":"Jeg er stolt av deg.","expected":[{"rule_id":"collocation","start":7,"end":15,"suggestion":"stolt over"}]}
+{"id":"nb-coll-stolt-av-2","text":"Foreldrene er stolt av barna.","expected":[{"rule_id":"collocation","start":14,"end":22,"suggestion":"stolt over"}]}
+{"id":"nb-coll-lei-for-1","text":"Han er lei for jobben.","expected":[{"rule_id":"collocation","start":7,"end":14,"suggestion":"lei av"}]}
+{"id":"nb-coll-lei-for-2","text":"Vi er lei for regnet.","expected":[{"rule_id":"collocation","start":6,"end":13,"suggestion":"lei av"}]}
+{"id":"nb-coll-sint-over-1","text":"Mor er sint over meg.","expected":[{"rule_id":"collocation","start":7,"end":16,"suggestion":"sint på"}]}
+{"id":"nb-coll-sint-over-2","text":"Læreren er sint over elevene.","expected":[{"rule_id":"collocation","start":11,"end":20,"suggestion":"sint på"}]}
+{"id":"nb-coll-fornoyd-av-1","text":"Hun er fornøyd av resultatet.","expected":[{"rule_id":"collocation","start":7,"end":17,"suggestion":"fornøyd med"}]}
+{"id":"nb-coll-fornoyd-av-2","text":"Vi er fornøyd av maten.","expected":[{"rule_id":"collocation","start":6,"end":16,"suggestion":"fornøyd med"}]}
+{"id":"nb-coll-vant-med-1","text":"Jeg er vant med kulde.","expected":[{"rule_id":"collocation","start":7,"end":15,"suggestion":"vant til"}]}
+{"id":"nb-coll-vant-med-2","text":"Han er vant med å stå opp tidlig.","expected":[{"rule_id":"collocation","start":7,"end":15,"suggestion":"vant til"}]}
+{"id":"nb-coll-ferdig-av-1","text":"Hun er ferdig av leksene.","expected":[{"rule_id":"collocation","start":7,"end":16,"suggestion":"ferdig med"}]}
+{"id":"nb-coll-ferdig-av-2","text":"Vi er ferdig av prosjektet.","expected":[{"rule_id":"collocation","start":6,"end":15,"suggestion":"ferdig med"}]}
+{"id":"nb-coll-gift-i-1","text":"Han er gift i Maria.","expected":[{"rule_id":"collocation","start":7,"end":13,"suggestion":"gift med"}]}
+{"id":"nb-coll-gift-i-2","text":"De er gift i hverandre.","expected":[{"rule_id":"collocation","start":6,"end":12,"suggestion":"gift med"}]}
+{"id":"nb-coll-enig-over-1","text":"Vi er enig over det.","expected":[{"rule_id":"collocation","start":6,"end":15,"suggestion":"enig i"}]}
+{"id":"nb-coll-enig-over-2","text":"De er enig over planen.","expected":[{"rule_id":"collocation","start":6,"end":15,"suggestion":"enig i"}]}
+{"id":"nb-coll-skuffet-av-1","text":"Jeg er skuffet av resultatet.","expected":[{"rule_id":"collocation","start":7,"end":17,"suggestion":"skuffet over"}]}
+{"id":"nb-coll-skuffet-av-2","text":"Hun er skuffet av karakteren.","expected":[{"rule_id":"collocation","start":7,"end":17,"suggestion":"skuffet over"}]}
+{"id":"nb-coll-flink-i-start","text":"Flink i å lage mat er hun.","expected":[{"rule_id":"collocation","start":0,"end":7,"suggestion":"flink til"}]}
+{"id":"nb-coll-sint-over-3","text":"Han ble sint over broren sin i går.","expected":[{"rule_id":"collocation","start":8,"end":17,"suggestion":"sint på"}]}
+{"id":"nb-coll-redd-av-3","text":"Er du redd av edderkopper?","expected":[{"rule_id":"collocation","start":6,"end":13,"suggestion":"redd for"}]}
+{"id":"nb-coll-glad-pa-4","text":"Bestemor er veldig glad på oss.","expected":[{"rule_id":"collocation","start":19,"end":26,"suggestion":"glad i"}]}
+{"id":"nb-coll-accept-glad-i","text":"Jeg er glad i deg.","expected":[]}
+{"id":"nb-coll-accept-flink-til","text":"Hun er flink til å synge.","expected":[]}
+{"id":"nb-coll-accept-redd-for","text":"Han er redd for hunder.","expected":[]}
+{"id":"nb-coll-accept-interessert-i","text":"Vi er interessert i kunst.","expected":[]}
+{"id":"nb-coll-accept-stolt-over","text":"Jeg er stolt over deg.","expected":[]}
+{"id":"nb-coll-accept-lei-av","text":"Hun er lei av regnet.","expected":[]}
+{"id":"nb-coll-accept-sint-pa","text":"Mor er sint på meg.","expected":[]}
+{"id":"nb-coll-accept-fornoyd-med","text":"Vi er fornøyd med maten.","expected":[]}
+{"id":"nb-coll-accept-vant-til","text":"Han er vant til kulde.","expected":[]}
+{"id":"nb-coll-accept-ferdig-med","text":"Hun er ferdig med leksene.","expected":[]}
+{"id":"nb-coll-accept-gift-med","text":"De er gift med hverandre.","expected":[]}
+{"id":"nb-coll-accept-enig-i","text":"Vi er enig i det.","expected":[]}
+{"id":"nb-coll-accept-skuffet-over","text":"Jeg er skuffet over resultatet.","expected":[]}
+{"id":"nb-coll-accept-flink-word","text":"Eleven er flink.","expected":[]}
+{"id":"nb-coll-accept-glad-word","text":"Vi er glade og fornøyde.","expected":[]}
+{"id":"nb-coll-accept-sint-word","text":"Han er veldig sint nå.","expected":[]}
