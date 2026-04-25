@@ -6,6 +6,49 @@
   outline-offset: 2px;
 }
 
+/* ── PDF text layer (selectable text overlay on canvas, pdf.js v4) ──
+   Used by host apps that render PDFs (e.g. Papertek lockdown's oppgave
+   viewer). Harmless in the Chrome extension context — the rules only
+   match if a `.pdf-text-layer` element is present. */
+.pdf-text-layer {
+  position: absolute;
+  text-align: initial;
+  inset: 0;
+  overflow: clip;
+  opacity: 1;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  caret-color: CanvasText;
+  z-index: 10;
+  /* Default: non-interactive. Parent toggles `.pdf-text-selectable` to
+     enable selection — host decides when (e.g. only in split/full PDF
+     modes where the page is large enough for precise drag-select). */
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pdf-text-selectable .pdf-text-layer {
+  pointer-events: auto;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.pdf-text-layer :is(span, br) {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+.pdf-text-layer span.markedContent {
+  top: 0 !important;
+  height: 0 !important;
+}
+.pdf-text-layer ::selection {
+  background: rgba(17, 180, 154, 0.3);
+}
+
 /* ── TTS Floating Widget ── */
 #lexi-tts-widget {
   position: fixed;
@@ -215,6 +258,12 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+#lexi-tts-widget .lh-lookup-btn {
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 #lexi-tts-widget .lh-play-btn {
@@ -246,7 +295,8 @@
 }
 
 #lexi-tts-widget .lh-slider-group {
-  flex: 1;
+  flex: 1 1 180px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -256,6 +306,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 #lexi-tts-widget .lh-slider-label {
@@ -266,7 +317,8 @@
 }
 
 #lexi-tts-widget .lh-slider {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
   -webkit-appearance: none;
   appearance: none;
   height: 4px;

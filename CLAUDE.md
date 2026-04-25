@@ -397,3 +397,35 @@ The vocabulary API (`papertek-vocabulary.vercel.app`) is a sibling project we co
 - Grammar features are language-specific and loaded dynamically
 - Legacy access code auth coexists with Vipps token auth — both paths work in `tts.js`
 - Firebase service account key is in `.gitignore` — never commit to repo
+
+## Downstream consumer: Papertek Lockdown webapp
+
+The Papertek lockdown webapp (`/Users/geirforbord/Papertek/lockdown`, deployed to `stb-lockdown.app` and `papertek.app`) re-uses this extension's content scripts, styles, i18n, and data files in a non-extension context (plain web page, no Chrome API). Concretely:
+
+- `extension/content/*.js` → `lockdown/public/leksihjelp/*.js`
+- `extension/styles/content.css` → `lockdown/public/leksihjelp/styles/leksihjelp.css` (renamed)
+- `extension/data/*` → `lockdown/public/leksihjelp/data/`
+- `extension/i18n/*` → `lockdown/public/leksihjelp/i18n/`
+
+Lockdown copies these via `node scripts/sync-leksihjelp.js` (postinstall hook). The dependency is currently `file:../leksihjelp`; once published to GitHub Packages it'll be a versioned `npm install`.
+
+### Implications for changes here
+
+- **CSS in `extension/styles/content.css`** also ships to lockdown. Don't assume "extension only" — selectors that don't match in the extension context (e.g. `.pdf-text-layer`, used by lockdown's PDF viewer) belong here too if lockdown needs them, since the file is sync'd whole.
+- **Content scripts** (`floating-widget.js`, `word-prediction.js`, `spell-check.js`, etc.) run in lockdown via a Chrome-API shim (`lockdown/public/js/leksihjelp-loader.js`). Avoid hard dependencies on extension-only APIs (e.g. `chrome.tabs`) — keep `chrome.runtime`/`chrome.storage` usage inside what the shim provides (`onMessage`, `sendMessage`, `storage.local.get/set`, `runtime.getURL`).
+- **Bumping `package.json` version** signals a downstream sync is needed. After a change that affects shared files, bump the version (matches the rule for `manifest.json` in the Release Workflow above) so lockdown can pin and audit it.
+- **Lockdown-only quick fixes** to `public/leksihjelp/**` over there are fine for testing, but the canonical change still belongs *here*. The lockdown CLAUDE.md documents the agreement: lockdown ports fixes upstream before merging to its `main` branch.
+
+### When a fix arrives via lockdown's PR
+
+If somebody on the lockdown side modified `public/leksihjelp/**` directly to fix something they noticed, mirror that change here, bump version, and have them re-sync. Don't leave the divergence — the next `npm install` over there will silently revert their fix.
+
+## graphify
+
+This project has a graphify knowledge graph at graphify-out/.
+
+Rules:
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
+- For cross-module "how does X relate to Y" questions, prefer `graphify query "<question>"`, `graphify path "<A>" "<B>"`, or `graphify explain "<concept>"` over grep — these traverse the graph's EXTRACTED + INFERRED edges instead of scanning files
+- After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
