@@ -209,7 +209,10 @@ Plans:
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
 **Plans**: 1 plan
 Plans:
-- [ ] 14.1-01-PLAN.md — Wire 8 missing vocab indexes into spell-check.js, restore doc-drift-de-address.js, verify all release gates
+- [ ] 15-01-PLAN.md — Extend collocation.js with NB/DE/FR/ES seed data, benchmark lines, and fixture files for all 4 languages
+
+
+
 
 ## Progress
 
@@ -233,7 +236,7 @@ Plans:
 | 13. Register Drift Within a Document | 3/3 | Complete    | 2026-04-25 | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
-| 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
+| 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/1 | Not started | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
 
