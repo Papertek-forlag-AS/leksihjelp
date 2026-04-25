@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T02:57:56.466Z"
+last_updated: "2026-04-25T03:04:49.765Z"
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 13
-  completed_plans: 12
+  completed_plans: 13
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 9 — ES Ser/Estar, Por/Para, Personal A
-Plan: 2 of 3 complete (09-01, 09-02 done)
-Status: In Progress
-Last activity: 2026-04-25 — Completed 09-02-PLAN.md (ES ser/estar copula-adjective mismatch rule)
+Plan: 3 of 3 complete (09-01, 09-02, 09-03 done)
+Status: Phase Complete
+Last activity: 2026-04-25 — Completed 09-03-PLAN.md (ES por/para + personal-a rules)
 
-Progress: [████████░░] 30%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -91,6 +91,7 @@ Progress: [████████░░] 30%
 | Phase 08 P03 | 14min | 2 tasks | 11 files |
 | Phase 08 P02 | 17m 34s | 2 tasks | 10 files |
 | Phase 09 P02 | 6m | 1 tasks | 6 files |
+| Phase 09 P03 | 12min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -242,6 +243,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Separable-verb fixtures document typo-fuzzy dedup interaction honestly — long-prefix forms survive
 - [Phase 09]: Accent-stripped keys throughout ES tables since tokenizer lowercases and students omit tildes
 - [Phase 09]: Added plural adjective resolution (strip -s/-es) for ES copula rule to catch plural predicate contexts
+- [Phase 09]: ES por/para rule uses FAMILY_COLLECTIVE and GOAL_NOUNS beyond grammar-tables data for common student errors
+- [Phase 09]: Personal-a rule filters prepositions tagged as finite verbs by stem-based tagger to prevent false positives
 
 ### Roadmap Evolution
 
