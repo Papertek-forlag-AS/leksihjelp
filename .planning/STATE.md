@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T08:50:09.477Z"
+last_updated: "2026-04-25T09:03:45.866Z"
 progress:
   total_phases: 6
   completed_phases: 5
   total_plans: 19
-  completed_plans: 17
+  completed_plans: 18
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 11 — Aspect/Mood (ES/FR)
-Plan: 1 of 3 complete (11-01 done)
+Plan: 2 of 3 complete (11-01, 11-03 done)
 Status: In Progress
-Last activity: 2026-04-25 — Completed 11-01-PLAN.md (mood/aspect infrastructure)
+Last activity: 2026-04-25 — Completed 11-03-PLAN.md (FR subjonctif trigger rule)
 
-Progress: [███-------] 33%
+Progress: [██████----] 67%
 
 ## Performance Metrics
 
@@ -96,6 +96,7 @@ Progress: [███-------] 33%
 | Phase 10 P03 | 13min | 1 tasks | 7 files |
 | Phase 10 P02 | 17m | 2 tasks | 11 files |
 | Phase 11 P01 | 9min | 2 tasks | 7 files |
+| Phase 11-aspect-mood-es-fr P03 | 8min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -256,6 +257,7 @@ Recent decisions affecting current work:
 - [Phase 10]: Added normalizeAux() to handle accented vocab data values; changed benchmark J'ai to Il a to avoid typo-rule overlap dedup
 - [Phase 11]: ES reverse-lookup Maps use accent-stripped variants for student tolerance
 - [Phase 11]: FR homophony guard (frSubjonctifDiffers) compares subjonctif vs presens to suppress false positives
+- [Phase 11-aspect-mood-es-fr]: Person disambiguation via preceding subject pronoun for shared verb forms (fais=je/tu)
 
 ### Roadmap Evolution
 
