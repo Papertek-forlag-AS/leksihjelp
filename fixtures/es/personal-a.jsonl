@@ -1,0 +1,53 @@
+# ES personal "a" missing-marker rule fixtures (ES-03, Phase 9)
+# Positive cases: missing personal "a" before human DO (30)
+{"id":"es-pa-1","text":"Veo Juan todos los dias","expected":[{"rule_id":"es-personal-a","start":4,"end":8,"suggestion":"a Juan"},{"rule_id":"typo","start":19,"end":23,"suggestion":"dais"}],"comment":"proper noun human DO after finite verb"}
+{"id":"es-pa-2","text":"Conozco Maria","expected":[{"rule_id":"es-personal-a","start":8,"end":13,"suggestion":"a Maria"}],"comment":"proper noun human DO"}
+{"id":"es-pa-3","text":"Busco Pedro","expected":[{"rule_id":"es-personal-a","start":6,"end":11,"suggestion":"a Pedro"}],"comment":"proper noun human DO"}
+{"id":"es-pa-4","text":"Llamo Carlos","expected":[{"rule_id":"es-personal-a","start":6,"end":12,"suggestion":"a Carlos"}],"comment":"proper noun human DO"}
+{"id":"es-pa-5","text":"Llevo Ana","expected":[{"rule_id":"es-personal-a","start":6,"end":9,"suggestion":"a Ana"}],"comment":"proper noun human DO"}
+{"id":"es-pa-6","text":"Quiero Elena","expected":[{"rule_id":"es-personal-a","start":7,"end":12,"suggestion":"a Elena"}],"comment":"proper noun human DO"}
+{"id":"es-pa-7","text":"Escucho Miguel","expected":[{"rule_id":"es-personal-a","start":8,"end":14,"suggestion":"a Miguel"}],"comment":"proper noun human DO"}
+{"id":"es-pa-8","text":"Espero Luis","expected":[{"rule_id":"es-personal-a","start":7,"end":11,"suggestion":"a Luis"}],"comment":"proper noun human DO"}
+{"id":"es-pa-9","text":"Necesito Carmen","expected":[{"rule_id":"es-personal-a","start":9,"end":15,"suggestion":"a Carmen"}],"comment":"proper noun human DO"}
+{"id":"es-pa-10","text":"Miro Rosa","expected":[{"rule_id":"es-personal-a","start":5,"end":9,"suggestion":"a Rosa"}],"comment":"proper noun human DO"}
+{"id":"es-pa-11","text":"Ayudo mi madre","expected":[{"rule_id":"es-personal-a","start":6,"end":14,"suggestion":"a mi madre"}],"comment":"possessive + human noun"}
+{"id":"es-pa-12","text":"Busco mi hermano","expected":[{"rule_id":"es-personal-a","start":6,"end":16,"suggestion":"a mi hermano"}],"comment":"possessive + human noun"}
+{"id":"es-pa-13","text":"Llamo mi profesor","expected":[{"rule_id":"es-personal-a","start":6,"end":17,"suggestion":"a mi profesor"}],"comment":"possessive + human noun"}
+{"id":"es-pa-14","text":"Veo mi amigo","expected":[{"rule_id":"es-personal-a","start":4,"end":12,"suggestion":"a mi amigo"}],"comment":"possessive + human noun"}
+{"id":"es-pa-15","text":"Conozco su hermana","expected":[{"rule_id":"es-personal-a","start":8,"end":18,"suggestion":"a su hermana"}],"comment":"possessive + human noun"}
+{"id":"es-pa-16","text":"Escucho mi abuela","expected":[{"rule_id":"es-personal-a","start":8,"end":17,"suggestion":"a mi abuela"}],"comment":"possessive + human noun"}
+{"id":"es-pa-17","text":"Ayudo tu padre","expected":[{"rule_id":"es-personal-a","start":6,"end":14,"suggestion":"a tu padre"}],"comment":"possessive + human noun"}
+{"id":"es-pa-18","text":"Llamo mi doctora","expected":[{"rule_id":"es-personal-a","start":6,"end":16,"suggestion":"a mi doctora"}],"comment":"possessive + human noun"}
+{"id":"es-pa-19","text":"Busco su hijo","expected":[{"rule_id":"es-personal-a","start":6,"end":13,"suggestion":"a su hijo"}],"comment":"possessive + human noun"}
+{"id":"es-pa-20","text":"Llevo mi vecino","expected":[{"rule_id":"es-personal-a","start":6,"end":15,"suggestion":"a mi vecino"}],"comment":"possessive + human noun"}
+{"id":"es-pa-21","text":"Necesito mi companero","expected":[{"rule_id":"es-personal-a","start":9,"end":21,"suggestion":"a mi companero"}],"comment":"possessive + human noun"}
+{"id":"es-pa-22","text":"Quiero mi hija","expected":[{"rule_id":"es-personal-a","start":7,"end":14,"suggestion":"a mi hija"}],"comment":"possessive + human noun"}
+{"id":"es-pa-23","text":"Llevo mi primo","expected":[{"rule_id":"es-personal-a","start":6,"end":14,"suggestion":"a mi primo"}],"comment":"possessive + human noun"}
+{"id":"es-pa-24","text":"Espero mi amiga","expected":[{"rule_id":"es-personal-a","start":7,"end":15,"suggestion":"a mi amiga"}],"comment":"possessive + human noun"}
+{"id":"es-pa-25","text":"Visito mi abuelo","expected":[{"rule_id":"es-personal-a","start":7,"end":16,"suggestion":"a mi abuelo"}],"comment":"possessive + human noun"}
+{"id":"es-pa-26","text":"Ayudo mi chico","expected":[{"rule_id":"es-personal-a","start":6,"end":14,"suggestion":"a mi chico"}],"comment":"possessive + human noun"}
+{"id":"es-pa-27","text":"Necesito tu maestro","expected":[{"rule_id":"es-personal-a","start":9,"end":19,"suggestion":"a tu maestro"}],"comment":"possessive + human noun"}
+{"id":"es-pa-28","text":"Llamo mi vecina","expected":[{"rule_id":"es-personal-a","start":6,"end":15,"suggestion":"a mi vecina"}],"comment":"possessive + human noun"}
+{"id":"es-pa-29","text":"Conozco tu prima","expected":[{"rule_id":"es-personal-a","start":8,"end":16,"suggestion":"a tu prima"}],"comment":"possessive + human noun"}
+{"id":"es-pa-30","text":"Veo su companera","expected":[{"rule_id":"es-personal-a","start":4,"end":16,"suggestion":"a su companera"}],"comment":"possessive + human noun"}
+# Acceptance cases: correct usage NOT flagged (20)
+{"id":"es-pa-a1","text":"Veo a Juan","expected":[],"comment":"personal a already present"}
+{"id":"es-pa-a2","text":"Veo la casa","expected":[],"comment":"non-human object"}
+{"id":"es-pa-a3","text":"Compro comida","expected":[],"comment":"non-human object"}
+{"id":"es-pa-a4","text":"Soy profesor","expected":[],"comment":"copula verb, not transitive"}
+{"id":"es-pa-a5","text":"Visito Madrid","expected":[],"comment":"place name, not human"}
+{"id":"es-pa-a6","text":"Es mi madre","expected":[],"comment":"copula, not direct object"}
+{"id":"es-pa-a7","text":"Hablo con Juan","expected":[],"comment":"preposition present, not bare DO"}
+{"id":"es-pa-a8","text":"Juan viene","expected":[{"rule_id":"typo","start":0,"end":4,"suggestion":"Guante"}],"comment":"Juan is subject, not object (typo rule fires on Juan)"}
+{"id":"es-pa-a9","text":"Estoy contento","expected":[],"comment":"copula verb"}
+{"id":"es-pa-a10","text":"Somos amigos","expected":[],"comment":"copula verb"}
+{"id":"es-pa-a11","text":"Leo un libro","expected":[],"comment":"non-human object with article"}
+{"id":"es-pa-a12","text":"Conozco a Maria","expected":[],"comment":"personal a already present"}
+{"id":"es-pa-a13","text":"Visito Barcelona","expected":[],"comment":"place name, not human"}
+{"id":"es-pa-a14","text":"Estudio en Mexico","expected":[],"comment":"place after preposition"}
+{"id":"es-pa-a15","text":"Vivo en Noruega","expected":[],"comment":"place after preposition"}
+{"id":"es-pa-a16","text":"Parece mi madre","expected":[],"comment":"parecer is copula verb"}
+{"id":"es-pa-a17","text":"Busco trabajo","expected":[],"comment":"non-human noun"}
+{"id":"es-pa-a18","text":"Hago la tarea","expected":[],"comment":"non-human object with article"}
+{"id":"es-pa-a19","text":"Miro la television","expected":[],"comment":"non-human object with article"}
+{"id":"es-pa-a20","text":"Visito Espana","expected":[],"comment":"place name, not human"}

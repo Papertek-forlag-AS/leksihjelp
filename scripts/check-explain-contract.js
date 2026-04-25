@@ -75,6 +75,7 @@ const TARGETS = [
   'extension/content/spell-rules/redundancy.js',
   'extension/content/spell-rules/es-ser-estar.js',
   'extension/content/spell-rules/es-por-para.js',
+  'extension/content/spell-rules/es-personal-a.js',
   'extension/content/spell-rules/de-prep-case.js',
   'extension/content/spell-rules/de-separable-verb.js',
   'extension/content/spell-rules/de-v2.js',
