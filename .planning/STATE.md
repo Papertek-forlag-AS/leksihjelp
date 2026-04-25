@@ -4,13 +4,13 @@ milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 14-morphology-beyond-tokens-en-es-fr
 current_plan: Plan 3 of 3
-status: in-progress
-last_updated: "2026-04-25T13:59:25.000Z"
+status: completed
+last_updated: "2026-04-25T14:01:26.275Z"
 progress:
   total_phases: 9
   completed_phases: 9
   total_plans: 28
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 # Session State
@@ -47,6 +47,7 @@ See: .planning/PROJECT.md
 
 - Phase 14 Plan 03: Inline FR_ADJ_FEM_IRREGULARS map (17 entries) per data-logic-separation philosophy
 - Phase 14 Plan 03: Fixed benchmark fr.51 from fr-adj-gender to gender rule (article-noun mismatch, not adjective-noun)
+- [Phase 14]: Added DOUBLE_PLURALS inline map for common double-plural errors (childrens, mens, womens)
 
 ## Session Log
 
@@ -58,4 +59,5 @@ See: .planning/PROJECT.md
 - 2026-04-25: Completed 13-02 (DE du/Sie + FR tu/vous address drift rules with 100 fixtures)
 - 2026-04-25: Completed 13-03 (NB bokmal/riksmal + NN a-/e-infinitiv drift rules with 100 fixtures)
 - 2026-04-25: Completed 14-01 (irregularForms index, manifest/CSS/gate/benchmark wiring for 3 new rules)
+- 2026-04-25: Completed 14-02 (EN irregular overgeneration + word-family POS-slot rules with 98 fixtures)
 - 2026-04-25: Completed 14-03 (FR adjective-noun gender agreement rule with 55 fixtures)
