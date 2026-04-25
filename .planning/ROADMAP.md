@@ -159,9 +159,14 @@ Plans:
   5. A NN text mixing `-a` and `-e` infinitives within a single register-text flips from unflagged → flagged by DOC-04; a consistent-register NN fixture does NOT flag.
 **Plans**: 3 plans
 Plans:
-- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
-- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
-- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
+- [ ] 13-01-PLAN.md — Infrastructure: two-pass runner, detectDrift helper, BOKMAL_RIKSMAL_MAP, release gate, manifest/CSS/gates wiring, benchmark lines
+- [ ] 13-02-PLAN.md — DOC-01 DE du/Sie address drift + DOC-02 FR tu/vous address drift rules with fixtures
+- [ ] 13-03-PLAN.md — DOC-03 NB bokmal/riksmal mixing + DOC-04 NN a-/e-infinitiv mixing rules with fixtures
+
+
+
+
+
 
 ### Phase 14: Morphology Beyond Tokens (EN + ES/FR)
 **Goal**: Ship three morphology-governance rules that catch errors token-local v1.0 rules can't: EN overgeneration of regular patterns, ES/FR article-noun gender mismatch on opaque nouns, and EN word-family POS confusion.
