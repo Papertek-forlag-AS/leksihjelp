@@ -21,6 +21,7 @@
     "es.43": { "rule_id": "es-ser-estar", "severity": "warning", "priority_band": "P2" },
     "es.27": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
     "es.34": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
-    "es.42": { "rule_id": "es-personal-a", "severity": "warning", "priority_band": "P2" }
+    "es.42": { "rule_id": "es-personal-a", "severity": "warning", "priority_band": "P2" },
+    "es.38": { "rule_id": "es-subjuntivo", "severity": "warning", "priority_band": "P2" }
   }
 }

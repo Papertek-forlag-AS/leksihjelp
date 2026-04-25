@@ -324,6 +324,36 @@ function main() {
   // indexes while the wordList filter actually fires.
   const perLangStats = NON_NB_LANG_CONFIGS.map(cfg => ({ lang: cfg.lang, ...checkLanguage(cfg) }));
 
+  // ── Phase 11: mood/aspect reverse-lookup indexes must be populated ──
+  // These indexes are built from raw verbbank data (not feature-gated wordList),
+  // so they MUST be populated regardless of which features are enabled.
+  const esRaw = require(path.join(__dirname, '..', 'extension', 'data', 'es.json'));
+  const esState = core.buildIndexes({ raw: esRaw, lang: 'es', isFeatureEnabled: buildDisabledPredicate(['grammar_es_subjuntivo', 'grammar_es_imperfecto']) });
+  if (!(esState.esPresensToVerb instanceof Map) || esState.esPresensToVerb.size === 0) {
+    fail('[es] esPresensToVerb must be a populated Map — buildMoodIndexes regression.');
+  }
+  if (!(esState.esSubjuntivoForms instanceof Map) || esState.esSubjuntivoForms.size === 0) {
+    fail('[es] esSubjuntivoForms must be a populated Map — buildMoodIndexes regression.');
+  }
+  if (!(esState.esImperfectoForms instanceof Map) || esState.esImperfectoForms.size === 0) {
+    fail('[es] esImperfectoForms must be a populated Map — buildMoodIndexes regression.');
+  }
+  if (!(esState.esPreteritumToVerb instanceof Map) || esState.esPreteritumToVerb.size === 0) {
+    fail('[es] esPreteritumToVerb must be a populated Map — buildMoodIndexes regression.');
+  }
+
+  const frRaw = require(path.join(__dirname, '..', 'extension', 'data', 'fr.json'));
+  const frState = core.buildIndexes({ raw: frRaw, lang: 'fr', isFeatureEnabled: buildDisabledPredicate(['grammar_fr_subjonctif']) });
+  if (!(frState.frPresensToVerb instanceof Map) || frState.frPresensToVerb.size === 0) {
+    fail('[fr] frPresensToVerb must be a populated Map — buildMoodIndexes regression.');
+  }
+  if (!(frState.frSubjonctifForms instanceof Map) || frState.frSubjonctifForms.size === 0) {
+    fail('[fr] frSubjonctifForms must be a populated Map — buildMoodIndexes regression.');
+  }
+  if (!(frState.frSubjonctifDiffers instanceof Map) || frState.frSubjonctifDiffers.size === 0) {
+    fail('[fr] frSubjonctifDiffers must be a populated Map — buildMoodIndexes regression.');
+  }
+
   console.log('[check-spellcheck-features] PASS — spell-check lookup indexes are feature-independent.');
   console.log('  [nb] verbInfinitive:', verbForms.length, ' nounGenus:', nounChecks.length, ' validWords:', validChecks.length, ' wordList-filter: yes');
   for (const s of perLangStats) {

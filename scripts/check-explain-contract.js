@@ -88,6 +88,9 @@ const TARGETS = [
   'extension/content/spell-rules/fr-elision.js',
   'extension/content/spell-rules/fr-etre-avoir.js',
   'extension/content/spell-rules/fr-pp-agreement.js',
+  'extension/content/spell-rules/es-subjuntivo.js',
+  'extension/content/spell-rules/es-imperfecto-hint.js',
+  'extension/content/spell-rules/fr-subjonctif.js',
 ];
 
 // Reset the shared globals the rule files register onto. Without this the

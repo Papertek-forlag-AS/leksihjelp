@@ -341,6 +341,52 @@
     venu: 'venir', venue: 'venir', venus: 'venir', venues: 'venir',
   };
 
+  // ── Phase 11: ES subjuntivo trigger phrases (MOOD-01) ──
+  // Accent-stripped variants included — students often omit accents.
+  const ES_SUBJUNTIVO_TRIGGERS = new Set([
+    'quiero que', 'quiere que', 'queremos que',
+    'espero que', 'espera que', 'esperamos que',
+    'dudo que', 'duda que', 'dudamos que',
+    'es importante que', 'es necesario que', 'es posible que',
+    'es imposible que', 'es mejor que', 'es probable que',
+    'me alegra que', 'me sorprende que', 'me molesta que',
+    'no creo que', 'no pienso que',
+    'ojala que', 'ojalá que',
+    'pido que', 'pide que',
+    'prefiero que', 'prefiere que',
+    'recomiendo que', 'recomienda que',
+    'sugiero que', 'sugiere que',
+  ]);
+
+  // ── Phase 11: ES aspectual adverb sets (MOOD-02) ──
+  const ES_PRETERITO_ADVERBS = new Set(['ayer', 'anteayer', 'anoche']);
+  const ES_PRETERITO_PHRASES = [
+    'la semana pasada', 'el mes pasado', 'el ano pasado', 'el año pasado',
+    'el lunes pasado', 'el martes pasado',
+    'una vez', 'de repente',
+  ];
+  const ES_IMPERFECTO_ADVERBS = new Set([
+    'siempre', 'normalmente', 'generalmente', 'frecuentemente',
+  ]);
+  const ES_IMPERFECTO_PHRASES = [
+    'cada dia', 'cada día', 'cada semana', 'cada mes', 'cada ano', 'cada año',
+    'todos los dias', 'todos los días', 'a menudo', 'a veces', 'de vez en cuando',
+  ];
+
+  // ── Phase 11: FR subjonctif trigger phrases (MOOD-03) ──
+  // Accent-stripped variants included alongside accented forms.
+  const FR_SUBJONCTIF_TRIGGERS = new Set([
+    'il faut que', 'il faudrait que',
+    'avant que', 'pour que', 'afin que',
+    'bien que', 'quoique',
+    'sans que', 'a moins que', 'à moins que',
+    'je veux que', 'il veut que', 'elle veut que',
+    'je souhaite que', 'il souhaite que',
+    'je doute que', 'il doute que',
+    'il est important que', 'il est possible que',
+    'il est necessaire que', 'il est nécessaire que',
+  ]);
+
   const tables = {
     // DE tables
     PREP_CASE,
@@ -356,11 +402,19 @@
     ES_POR_PARA_TRIGGERS,
     ES_HUMAN_NOUNS,
     ES_COPULA_VERBS,
+    // Phase 11: ES mood/aspect tables
+    ES_SUBJUNTIVO_TRIGGERS,
+    ES_PRETERITO_ADVERBS,
+    ES_PRETERITO_PHRASES,
+    ES_IMPERFECTO_ADVERBS,
+    ES_IMPERFECTO_PHRASES,
     // FR tables
     FR_AVOIR_FORMS,
     FR_ETRE_FORMS,
     FR_ETRE_VERBS,
     FR_ETRE_PARTICIPLES,
+    // Phase 11: FR mood table
+    FR_SUBJONCTIF_TRIGGERS,
   };
 
   host.__lexiGrammarTables = tables;
