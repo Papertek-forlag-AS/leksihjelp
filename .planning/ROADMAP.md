@@ -25,10 +25,10 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 
 ### 🚧 v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 
-- [ ] **Phase 6: Structural Infrastructure + Register & Stylistic Polish** — Land the sentence segmenter, priority bands, severity contract, new release gates, and quotation-span suppression; ship register / collocation / redundancy rules as infra validators
-- [ ] **Phase 7: Word-Order Violations (NB + DE + FR)** — Land tagged-token view + syntax-lite helpers; flag V2 violations (NB wh-inversion, DE main-clause / subordinate verb-final) and FR BAGS adjective placement; spike Phase 13 document-state seam shape
-- [ ] **Phase 8: DE Case & Agreement Governance** — Flag preposition-case mismatches (adjacent window), unsplit separable verbs, wrong perfekt auxiliary, and compound-noun gender; deliver shared `grammar-tables.js` primitive
-- [ ] **Phase 9: ES ser/estar, por/para, Personal "a"** — Flag ser/estar misuse via copula tag, por/para via trigger-pattern tree, and missing personal "a" on human direct objects; expose reusable trigger-table shape
+- [x] **Phase 6: Structural Infrastructure + Register & Stylistic Polish** — Land the sentence segmenter, priority bands, severity contract, new release gates, and quotation-span suppression; ship register / collocation / redundancy rules as infra validators (completed 2026-04-24)
+- [x] **Phase 7: Word-Order Violations (NB + DE + FR)** — Land tagged-token view + syntax-lite helpers; flag V2 violations (NB wh-inversion, DE main-clause / subordinate verb-final) and FR BAGS adjective placement; spike Phase 13 document-state seam shape (completed 2026-04-24)
+- [x] **Phase 8: DE Case & Agreement Governance** — Flag preposition-case mismatches (adjacent window), unsplit separable verbs, wrong perfekt auxiliary, and compound-noun gender; deliver shared `grammar-tables.js` primitive (completed 2026-04-24)
+- [x] **Phase 9: ES ser/estar, por/para, Personal "a"** — Flag ser/estar misuse via copula tag, por/para via trigger-pattern tree, and missing personal "a" on human direct objects; expose reusable trigger-table shape (completed 2026-04-25)
 - [x] **Phase 10: FR Élision, Auxiliary, Participe Passé (10.3a)** — Flag missing élision, wrong être/avoir auxiliary, and PP agreement in adjacent-DO-pronoun window (opt-in toggle, default off); 10.3b deferred to v3.0 (completed 2026-04-25)
 - [x] **Phase 11: Aspect & Mood (ES + FR)** — Flag indicative-where-subjunctive-required after closed trigger sets in ES and FR; warn on ES pretérito/imperfecto aspectual hints at hint severity (completed 2026-04-25)
 - [ ] **Phase 12: Pronoun & Pro-Drop (ES + FR)** — Warn on ES subject-pronoun overuse, flag ES gustar-class syntax errors, flag FR clitic-cluster ordering; all at hint or warn severity
@@ -128,9 +128,9 @@ Plans:
   4. All three MOOD rules read from `grammar-tables.js` trigger-table primitive; no rule re-implements the closed-set matcher.
 **Plans**: 3 plans
 Plans:
-- [ ] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
-- [ ] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
-- [ ] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
+- [x] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
+- [x] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
+- [x] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
 
 ### Phase 12: Pronoun & Pro-Drop (ES + FR)
 **Goal**: Ship ES pro-drop-overuse hint, ES gustar-class syntax flagger, and FR double-pronoun clitic-order rule; all must use hint or warn severity (none at error).
@@ -141,11 +141,7 @@ Plans:
   2. `benchmark-texts/es.txt` line `"Él no gusta ayudar"` flips from unflagged → flagged by the gustar-class rule, with suggestion copy proposing dative restructuring (`"A él no le gusta ayudar"`).
   3. A FR acceptance fixture `"je le lui donne"` does NOT flag, while `"je lui le donne"` flips from unflagged → flagged by the FR clitic-order rule using the documented cluster order (`me/te/se/nous/vous < le/la/les < lui/leur < y < en`).
   4. No Phase 12 rule renders with error-tier CSS (visually verified in Chrome smoke-test and asserted by `check-rule-css-wiring` severity check).
-**Plans**: 3 plans
-Plans:
-- [ ] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
-- [ ] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
-- [ ] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
+**Plans**: Not yet planned
 
 ### Phase 13: Register Drift Within a Document
 **Goal**: Highest-risk phase in v2.0. Land the document-state two-pass runner with a mandatory pre-phase invalidation-protocol research step, ship the four register-drift rules, and enforce the stateful-rule-invalidation release gate.
@@ -157,11 +153,7 @@ Plans:
   3. A DE document mixing `du`- and `Sie`-address forms flips from unflagged → flagged (warn) by DOC-01; a FR document mixing `tu`- and `vous`-address flips by DOC-02; a consistent-register counter-example does NOT flag.
   4. `benchmark-texts/nb.txt` paragraph with `boken`/`efter`/`sne` alongside bokmål forms flips from unflagged → flagged by DOC-03 (bokmål/riksmål mixing), extending v1.0's `CROSS_DIALECT_MAP` into a `BOKMAL_RIKSMAL_MAP` sibling.
   5. A NN text mixing `-a` and `-e` infinitives within a single register-text flips from unflagged → flagged by DOC-04; a consistent-register NN fixture does NOT flag.
-**Plans**: 3 plans
-Plans:
-- [ ] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
-- [ ] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
-- [ ] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
+**Plans**: Not yet planned
 
 ### Phase 14: Morphology Beyond Tokens (EN + ES/FR)
 **Goal**: Ship three morphology-governance rules that catch errors token-local v1.0 rules can't: EN overgeneration of regular patterns, ES/FR article-noun gender mismatch on opaque nouns, and EN word-family POS confusion.
@@ -172,11 +164,7 @@ Plans:
   2. `benchmark-texts/fr.txt` lines `"La problème"` and `"un bon humeur"` flip from unflagged → flagged by the opaque-noun gender rule; correct `"le problème"`, `"une bonne humeur"` acceptance fixtures do NOT flag.
   3. EN word-family rule flags `"i have improve"` (noun-in-verb-slot) via closed word-family list and tagged-token POS-slot detection; rule acceptance fixtures covering all four family slots (noun / verb / adj / adv) stay green.
   4. All new vocab indexes (`getIrregularForms`, `getWordFamily`) are registered with `check-spellcheck-features` and `check-governance-data`, which exit 0 under minimal-preset simulation.
-**Plans**: 3 plans
-Plans:
-- [ ] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
-- [ ] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
-- [ ] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
+**Plans**: Not yet planned
 
 ### Phase 15: Collocations at Scale (NB + DE + FR + ES)
 **Goal**: Scale the Phase 6 EN-collocation-seed pattern into full preposition-collocation coverage across NB, DE, FR, ES; data-heavy, reuses existing rule shape.
@@ -187,11 +175,7 @@ Plans:
   2. DE, FR, ES preposition-collocation rules each ship with ≥30 positive + ≥15 acceptance fixtures per language, all consuming the same `collocationbank` data shape introduced in Phase 6.
   3. No Phase 15 rule introduces a new trigger-list shape; code review confirms all four rules are ≤50 LOC wrappers over the shared data shape.
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
-**Plans**: 3 plans
-Plans:
-- [ ] 11-01-PLAN.md — Vocab-seam indexes (subjuntivo/imperfecto/subjonctif), grammar-tables trigger sets, CSS bindings, release gate updates
-- [ ] 11-02-PLAN.md — MOOD-01 ES subjuntivo + MOOD-02 ES imperfecto-hint rules with fixtures
-- [ ] 11-03-PLAN.md — MOOD-03 FR subjonctif rule with homophony guard and fixtures
+**Plans**: Not yet planned
 
 ## Progress
 
@@ -205,12 +189,12 @@ Plans:
 | 4. False-Positive Reduction on NB/NN | v1.0 | 3/3 | Complete | 2026-04-20 |
 | 5. Student Experience Polish | v1.0 | 5/5 | Complete | 2026-04-20 |
 | 05.1 Close UX-01 Gaps from Phase 5 Smoke Test (INSERTED) | v1.0 | 5/5 | Complete | 2026-04-21 |
-| 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/3 | Planning complete | — |
-| 7. Word-Order Violations (NB + DE + FR) | v2.0 | 2/3 | In Progress | — |
-| 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
-| 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
-| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | 3/3 | Complete    | 2026-04-25 | — |
-| 11. Aspect & Mood (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
+| 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 3/3 | Complete | 2026-04-24 |
+| 7. Word-Order Violations (NB + DE + FR) | v2.0 | 4/4 | Complete | 2026-04-24 |
+| 8. DE Case & Agreement Governance | v2.0 | 3/3 | Complete | 2026-04-24 |
+| 9. ES ser/estar, por/para, Personal "a" | v2.0 | 3/3 | Complete | 2026-04-25 |
+| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 3/3 | Complete | 2026-04-25 |
+| 11. Aspect & Mood (ES + FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 0/? | Not started | — |
@@ -229,4 +213,4 @@ Every v2.0 phase must satisfy, on every release:
 - **Benchmark-driven closure** — phase closes when `check-benchmark-coverage` reports 100% P1 flip, ≥80% P2 flip, ≥50% P3 flip on the relevant `benchmark-texts/<lang>.txt` lines; bare percentages are not sufficient.
 
 ---
-*Roadmap updated: 2026-04-25 — Phase 11 plans created (3 plans, 2 waves).*
+*Roadmap updated: 2026-04-25 — Health repair: marked phases 6–9 complete, fixed progress table, removed stale plan listings from phases 12–15.*
