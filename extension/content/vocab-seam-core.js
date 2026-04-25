@@ -808,8 +808,8 @@
     const participleToAux = new Map();
     if (!raw || !raw.verbbank) return participleToAux;
     for (const entry of Object.values(raw.verbbank)) {
-      if (!entry.conjugations || !entry.conjugations.perfektum) continue;
-      const perf = entry.conjugations.perfektum;
+      const perf = entry.conjugations?.perfektum || entry.conjugations?.passe_compose;
+      if (!perf) continue;
       if (!perf.participle || !perf.auxiliary) continue;
       const participle = perf.participle.toLowerCase();
       if (!participleToAux.has(participle)) {

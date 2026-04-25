@@ -1,6 +1,7 @@
 /**
- * Shared grammar tables for DE case/agreement (Phase 8) and
- * ES ser/estar, por/para, personal-a rules (Phase 9).
+ * Shared grammar tables for DE case/agreement (Phase 8),
+ * ES ser/estar, por/para, personal-a rules (Phase 9),
+ * and FR avoir/etre auxiliary selection (Phase 10).
  *
  * Exports onto self.__lexiGrammarTables as an IIFE so all rule files
  * loaded after this script can read the tables without duplication.
@@ -9,6 +10,8 @@
  *            SEPARABLE_PREFIXES, SEIN_VERBS, BOTH_AUX_VERBS.
  * ES tables: ES_SER_FORMS, ES_ESTAR_FORMS, ES_COPULA_ADJ,
  *            ES_POR_PARA_TRIGGERS, ES_HUMAN_NOUNS, ES_COPULA_VERBS.
+ * FR tables: FR_AVOIR_FORMS, FR_ETRE_FORMS, FR_ETRE_VERBS,
+ *            FR_ETRE_PARTICIPLES.
  */
 (function () {
   'use strict';
@@ -233,6 +236,80 @@
     'ser', 'estar', 'parecer', 'resultar', 'quedarse',
   ]);
 
+  // ═══════════════════════════════════════════════════════════
+  // ── FR: Avoir/Etre conjugated forms (Phase 10) ──
+  // ═══════════════════════════════════════════════════════════
+
+  // Conjugated avoir forms mapped to { person, tense }.
+  // Used by FR-02 (etre/avoir auxiliary selection rule).
+  const FR_AVOIR_FORMS = {
+    // Present
+    ai:      { person: '1s', tense: 'present' },
+    as:      { person: '2s', tense: 'present' },
+    a:       { person: '3s', tense: 'present' },
+    avons:   { person: '1p', tense: 'present' },
+    avez:    { person: '2p', tense: 'present' },
+    ont:     { person: '3p', tense: 'present' },
+    // Imparfait
+    avais:   { person: '1s/2s', tense: 'imparfait' },
+    avait:   { person: '3s', tense: 'imparfait' },
+    avions:  { person: '1p', tense: 'imparfait' },
+    aviez:   { person: '2p', tense: 'imparfait' },
+    avaient: { person: '3p', tense: 'imparfait' },
+  };
+
+  // Conjugated etre forms mapped to { person, tense }.
+  // Both accented and accent-stripped variants included for student text robustness.
+  const FR_ETRE_FORMS = {
+    // Present
+    suis:    { person: '1s', tense: 'present' },
+    es:      { person: '2s', tense: 'present' },
+    est:     { person: '3s', tense: 'present' },
+    sommes:  { person: '1p', tense: 'present' },
+    etes:    { person: '2p', tense: 'present' },
+    êtes:    { person: '2p', tense: 'present' },
+    sont:    { person: '3p', tense: 'present' },
+    // Imparfait (accented)
+    étais:   { person: '1s/2s', tense: 'imparfait' },
+    était:   { person: '3s', tense: 'imparfait' },
+    étions:  { person: '1p', tense: 'imparfait' },
+    étiez:   { person: '2p', tense: 'imparfait' },
+    étaient: { person: '3p', tense: 'imparfait' },
+    // Imparfait (accent-stripped)
+    etais:   { person: '1s/2s', tense: 'imparfait' },
+    etait:   { person: '3s', tense: 'imparfait' },
+    etions:  { person: '1p', tense: 'imparfait' },
+    etiez:   { person: '2p', tense: 'imparfait' },
+    etaient: { person: '3p', tense: 'imparfait' },
+  };
+
+  // DR MRS VANDERTRAMP infinitives — verbs conjugated with etre in passe compose.
+  // Supplement for data gaps where verb entries may lack passe_compose.auxiliary.
+  const FR_ETRE_VERBS = new Set([
+    'aller', 'arriver', 'descendre', 'devenir', 'entrer', 'monter',
+    'mourir', 'naitre', 'naître', 'partir', 'passer', 'rentrer',
+    'rester', 'retourner', 'revenir', 'sortir', 'tomber', 'venir',
+  ]);
+
+  // Participle form -> infinitive for DR MRS VANDERTRAMP verbs with data gaps.
+  // Both accented and unaccented forms for student text robustness.
+  const FR_ETRE_PARTICIPLES = {
+    devenu: 'devenir',
+    devenue: 'devenir',
+    'né': 'naitre',
+    ne: 'naitre',
+    'née': 'naitre',
+    nee: 'naitre',
+    'rentré': 'rentrer',
+    rentre: 'rentrer',
+    'rentrée': 'rentrer',
+    rentree: 'rentrer',
+    'retourné': 'retourner',
+    retourne: 'retourner',
+    'retournée': 'retourner',
+    retournee: 'retourner',
+  };
+
   const tables = {
     // DE tables
     PREP_CASE,
@@ -248,14 +325,18 @@
     ES_POR_PARA_TRIGGERS,
     ES_HUMAN_NOUNS,
     ES_COPULA_VERBS,
+    // FR tables
+    FR_AVOIR_FORMS,
+    FR_ETRE_FORMS,
+    FR_ETRE_VERBS,
+    FR_ETRE_PARTICIPLES,
   };
 
   host.__lexiGrammarTables = tables;
   if (typeof module !== 'undefined' && module.exports) module.exports = tables;
 
-  // ── Phase 10 consumer stub documentation ──
-  // Phase 10 (FR): will consume DEF_ARTICLE_CASE pattern → FR article-gender
-  //   tables (le/la/les with elision/contraction rules).
-  // FR tables will be added to this IIFE alongside the DE and ES tables,
-  // accessed via host.__lexiGrammarTables.
+  // ── Phase 10 consumer documentation ──
+  // FR_AVOIR_FORMS, FR_ETRE_FORMS: consumed by fr-etre-avoir.js (Plan 02)
+  // FR_ETRE_VERBS, FR_ETRE_PARTICIPLES: fallback data for verbs missing
+  //   passe_compose.auxiliary in fr.json vocab data.
 })();
