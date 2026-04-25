@@ -1,0 +1,99 @@
+# FR clitic-order rule fixtures (PRON-03, Phase 12)
+# Positive cases: wrong clitic rank ordering (32)
+{"id":"fr-clitic-1","text":"je lui le donne","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-2","text":"elle leur les montre","expected":[{"rule_id":"fr-clitic-order","start":5,"end":13,"suggestion":"les leur"}]}
+{"id":"fr-clitic-3","text":"tu lui le dis","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-4","text":"il lui la donne","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"la lui"}]}
+{"id":"fr-clitic-5","text":"on lui le fait","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-6","text":"nous leur les montrons","expected":[{"rule_id":"fr-clitic-order","start":5,"end":13,"suggestion":"les leur"}]}
+{"id":"fr-clitic-7","text":"vous lui le donnez","expected":[{"rule_id":"fr-clitic-order","start":5,"end":11,"suggestion":"le lui"}]}
+{"id":"fr-clitic-8","text":"ils lui le prennent","expected":[{"rule_id":"fr-clitic-order","start":4,"end":10,"suggestion":"le lui"}]}
+{"id":"fr-clitic-9","text":"elles leur les montrent","expected":[{"rule_id":"fr-clitic-order","start":6,"end":14,"suggestion":"les leur"}]}
+{"id":"fr-clitic-10","text":"il en y va","expected":[{"rule_id":"fr-clitic-order","start":3,"end":7,"suggestion":"y en"}]}
+{"id":"fr-clitic-11","text":"tu lui les donnes","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"les lui"}]}
+{"id":"fr-clitic-12","text":"elle leur le dit","expected":[{"rule_id":"fr-clitic-order","start":5,"end":12,"suggestion":"le leur"}]}
+{"id":"fr-clitic-13","text":"on lui les montre","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"les lui"}]}
+{"id":"fr-clitic-14","text":"il lui le fait aussi","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-15","text":"tu leur les donnes bien","expected":[{"rule_id":"fr-clitic-order","start":3,"end":11,"suggestion":"les leur"}]}
+{"id":"fr-clitic-16","text":"elle lui le raconte","expected":[{"rule_id":"fr-clitic-order","start":5,"end":11,"suggestion":"le lui"}]}
+{"id":"fr-clitic-17","text":"nous lui le disons","expected":[{"rule_id":"fr-clitic-order","start":5,"end":11,"suggestion":"le lui"}]}
+{"id":"fr-clitic-18","text":"vous leur les mangez","expected":[{"rule_id":"fr-clitic-order","start":5,"end":13,"suggestion":"les leur"}]}
+{"id":"fr-clitic-19","text":"je lui la montre","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"la lui"}]}
+{"id":"fr-clitic-20","text":"tu lui les prends","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"les lui"}]}
+{"id":"fr-clitic-21","text":"il leur le raconte","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"le leur"}]}
+{"id":"fr-clitic-22","text":"on leur la donne","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"la leur"}]}
+{"id":"fr-clitic-23","text":"ils lui le demandent","expected":[{"rule_id":"fr-clitic-order","start":4,"end":10,"suggestion":"le lui"}]}
+{"id":"fr-clitic-24","text":"elles lui la montrent","expected":[{"rule_id":"fr-clitic-order","start":6,"end":12,"suggestion":"la lui"}]}
+{"id":"fr-clitic-25","text":"je lui le donne bien","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-26","text":"tu leur les expliquent","expected":[{"rule_id":"fr-clitic-order","start":3,"end":11,"suggestion":"les leur"}]}
+{"id":"fr-clitic-27","text":"il lui le mange","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-28","text":"je lui les prends","expected":[{"rule_id":"fr-clitic-order","start":3,"end":10,"suggestion":"les lui"}]}
+{"id":"fr-clitic-29","text":"nous leur le disons","expected":[{"rule_id":"fr-clitic-order","start":5,"end":12,"suggestion":"le leur"}]}
+{"id":"fr-clitic-30","text":"on lui le voit","expected":[{"rule_id":"fr-clitic-order","start":3,"end":9,"suggestion":"le lui"}]}
+{"id":"fr-clitic-31","text":"vous lui la donnez","expected":[{"rule_id":"fr-clitic-order","start":5,"end":11,"suggestion":"la lui"}]}
+{"id":"fr-clitic-32","text":"il leur les prennent","expected":[{"rule_id":"fr-clitic-order","start":3,"end":11,"suggestion":"les leur"}]}
+# Acceptance cases: correct order, single clitics, articles, etc. (64)
+{"id":"fr-clitic-acc-1","text":"je le lui donne","expected":[]}
+{"id":"fr-clitic-acc-2","text":"elle les leur montre","expected":[]}
+{"id":"fr-clitic-acc-3","text":"tu le lui dis","expected":[]}
+{"id":"fr-clitic-acc-4","text":"il la lui donne","expected":[]}
+{"id":"fr-clitic-acc-5","text":"on le lui fait","expected":[]}
+{"id":"fr-clitic-acc-6","text":"nous les leur montrons","expected":[]}
+{"id":"fr-clitic-acc-7","text":"vous le lui donnez","expected":[]}
+{"id":"fr-clitic-acc-8","text":"ils le lui prennent","expected":[]}
+{"id":"fr-clitic-acc-9","text":"elles les leur montrent","expected":[]}
+{"id":"fr-clitic-acc-10","text":"il me le dit","expected":[]}
+{"id":"fr-clitic-acc-11","text":"elle te la donne","expected":[]}
+{"id":"fr-clitic-acc-12","text":"on se le dit","expected":[]}
+{"id":"fr-clitic-acc-13","text":"je le vois","expected":[]}
+{"id":"fr-clitic-acc-14","text":"tu la prends","expected":[]}
+{"id":"fr-clitic-acc-15","text":"il les mange","expected":[]}
+{"id":"fr-clitic-acc-16","text":"elle lui parle","expected":[]}
+{"id":"fr-clitic-acc-17","text":"nous leur donnons","expected":[]}
+{"id":"fr-clitic-acc-18","text":"vous me voyez","expected":[]}
+{"id":"fr-clitic-acc-19","text":"ils en parlent","expected":[]}
+{"id":"fr-clitic-acc-20","text":"elles y vont","expected":[]}
+{"id":"fr-clitic-acc-21","text":"le chat dort","expected":[]}
+{"id":"fr-clitic-acc-22","text":"la maison dort","expected":[]}
+{"id":"fr-clitic-acc-23","text":"les amis jouent","expected":[]}
+{"id":"fr-clitic-acc-24","text":"le livre est sur la table","expected":[]}
+{"id":"fr-clitic-acc-25","text":"la fille mange le chocolat","expected":[]}
+{"id":"fr-clitic-acc-26","text":"les filles travaillent","expected":[]}
+{"id":"fr-clitic-acc-27","text":"le petit chat dort","expected":[]}
+{"id":"fr-clitic-acc-28","text":"nous vous donnons le livre","expected":[]}
+{"id":"fr-clitic-acc-29","text":"vous nous aidez","expected":[]}
+{"id":"fr-clitic-acc-30","text":"donne-le-moi","expected":[]}
+{"id":"fr-clitic-acc-31","text":"donne-les-lui","expected":[]}
+{"id":"fr-clitic-acc-32","text":"montre-la-lui","expected":[]}
+{"id":"fr-clitic-acc-33","text":"dites-le-nous","expected":[]}
+{"id":"fr-clitic-acc-34","text":"je mange une pomme","expected":[]}
+{"id":"fr-clitic-acc-35","text":"il travaille dur","expected":[]}
+{"id":"fr-clitic-acc-36","text":"elle aime la musique","expected":[]}
+{"id":"fr-clitic-acc-37","text":"nous parlons bien","expected":[]}
+{"id":"fr-clitic-acc-38","text":"vous aimez le chocolat","expected":[]}
+{"id":"fr-clitic-acc-39","text":"ils jouent au football","expected":[]}
+{"id":"fr-clitic-acc-40","text":"elles lisent le journal","expected":[]}
+{"id":"fr-clitic-acc-41","text":"je ne le lui donne pas","expected":[]}
+{"id":"fr-clitic-acc-42","text":"il ne les leur montre pas","expected":[]}
+{"id":"fr-clitic-acc-43","text":"elle ne me le dit pas","expected":[]}
+{"id":"fr-clitic-acc-44","text":"on ne le lui donne pas","expected":[]}
+{"id":"fr-clitic-acc-45","text":"je le fais","expected":[]}
+{"id":"fr-clitic-acc-46","text":"tu les prends","expected":[]}
+{"id":"fr-clitic-acc-47","text":"il la voit","expected":[]}
+{"id":"fr-clitic-acc-48","text":"elle lui donne le cadeau","expected":[]}
+{"id":"fr-clitic-acc-49","text":"nous en parlons","expected":[]}
+{"id":"fr-clitic-acc-50","text":"vous y allez","expected":[]}
+{"id":"fr-clitic-acc-51","text":"ils se parlent","expected":[]}
+{"id":"fr-clitic-acc-52","text":"elles se voient","expected":[]}
+{"id":"fr-clitic-acc-53","text":"le garcon aime le chocolat","expected":[]}
+{"id":"fr-clitic-acc-54","text":"la fille regarde les amis","expected":[]}
+{"id":"fr-clitic-acc-55","text":"je vais au marche","expected":[]}
+{"id":"fr-clitic-acc-56","text":"tu fais le devoir","expected":[]}
+{"id":"fr-clitic-acc-57","text":"il part demain","expected":[]}
+{"id":"fr-clitic-acc-58","text":"elle arrive bien","expected":[]}
+{"id":"fr-clitic-acc-59","text":"nous le lui disons aussi","expected":[]}
+{"id":"fr-clitic-acc-60","text":"vous les leur montrez bien","expected":[]}
+{"id":"fr-clitic-acc-61","text":"ils me la donnent","expected":[]}
+{"id":"fr-clitic-acc-62","text":"elles te les donnent","expected":[]}
+{"id":"fr-clitic-acc-63","text":"il y va","expected":[]}
+{"id":"fr-clitic-acc-64","text":"elle en parle","expected":[]}
