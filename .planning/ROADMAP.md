@@ -250,7 +250,7 @@ Plans:
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | 1/1 | Complete    | 2026-04-25 | — |
-| 15.1 Fixture Gate Triage (GAP CLOSURE) | 1/1 | Complete   | 2026-04-25 | — |
+| 15.1 Fixture Gate Triage (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
 

@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 15.1-fixture-gate-triage
-current_plan: Completed
+current_plan: Not started
 status: completed
-last_updated: "2026-04-25T16:53:35.508Z"
+last_updated: "2026-04-25T16:56:50.255Z"
 progress:
   total_phases: 12
   completed_phases: 12
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 15.1-fixture-gate-triage
-**Current Plan:** Completed
+**Current Plan:** Not started
 **Status:** Milestone complete
 
 ## Decisions
