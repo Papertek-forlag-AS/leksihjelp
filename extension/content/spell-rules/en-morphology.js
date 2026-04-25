@@ -1,0 +1,78 @@
+/**
+ * Spell-check rule: English Morphology — Irregular Overgeneration (priority 17).
+ *
+ * Flags tokens where a Norwegian student has applied a regular inflection
+ * pattern (e.g. -ed, -s) to an irregular English verb or noun:
+ *   childs -> children, eated -> ate, goed -> went
+ *
+ * Depends on the irregularForms Map built by vocab-seam-core.js (Phase 14).
+ * Each Map key is a wrong regular form (lowercase); value is
+ * { correct: string, type: 'past'|'plural', base: string }.
+ *
+ * Rule ID: 'en-morphology'
+ */
+(function () {
+  'use strict';
+  const host = typeof self !== 'undefined' ? self : globalThis;
+  host.__lexiSpellRules = host.__lexiSpellRules || [];
+  const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
+
+  const rule = {
+    id: 'en-morphology',
+    languages: ['en'],
+    priority: 17,
+    severity: 'warning',
+    explain: (finding) => {
+      const fix = escapeHtml(finding.fix);
+      const orig = escapeHtml(finding.original);
+      if (finding.morphType === 'plural') {
+        return {
+          nb: `Uregelrett flertall — bruk <em>${fix}</em> i stedet for <em>${orig}</em>.`,
+          nn: `Uregelrett fleirtal — bruk <em>${fix}</em> i staden for <em>${orig}</em>.`,
+          en: `Irregular plural — use <em>${fix}</em> instead of <em>${orig}</em>.`,
+        };
+      }
+      return {
+        nb: `Uregelrett fortidsform — bruk <em>${fix}</em> i stedet for <em>${orig}</em>.`,
+        nn: `Uregelrett fortidsform — bruk <em>${fix}</em> i staden for <em>${orig}</em>.`,
+        en: `Irregular past tense — use <em>${fix}</em> instead of <em>${orig}</em>.`,
+      };
+    },
+    check(ctx) {
+      const { tokens, vocab, cursorPos } = ctx;
+      const irregularForms = vocab.irregularForms;
+      if (!irregularForms || irregularForms.size === 0) return [];
+
+      const out = [];
+
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i];
+        if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
+
+        const lower = t.word;
+        const entry = irregularForms.get(lower);
+        if (!entry) continue;
+
+        const fix = matchCase ? matchCase(t.display, entry.correct) : entry.correct;
+
+        out.push({
+          rule_id: 'en-morphology',
+          morphType: entry.type,
+          priority: rule.priority,
+          start: t.start,
+          end: t.end,
+          original: t.display,
+          fix: fix,
+          suggestion: fix,
+          message: entry.type === 'plural'
+            ? `Uregelrett flertall: «${t.display}» skal være «${fix}».`
+            : `Uregelrett fortid: «${t.display}» skal være «${fix}».`,
+        });
+      }
+      return out;
+    },
+  };
+
+  host.__lexiSpellRules.push(rule);
+  if (typeof module !== 'undefined' && module.exports) module.exports = rule;
+})();

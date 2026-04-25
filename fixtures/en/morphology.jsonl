@@ -1,0 +1,49 @@
+{"id": "en-morph-001", "text": "the childs were playing outside", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "children"}]}
+{"id": "en-morph-002", "text": "we saw three mouses in the house", "expected": [{"rule_id": "en-morphology", "start": 13, "end": 19, "suggestion": "mice"}]}
+{"id": "en-morph-003", "text": "two womans walked past me", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "women"}]}
+{"id": "en-morph-004", "text": "the mans were working hard", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 8, "suggestion": "men"}]}
+{"id": "en-morph-005", "text": "my tooths are white", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 9, "suggestion": "teeth"}]}
+{"id": "en-morph-006", "text": "my foots are cold today", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 8, "suggestion": "feet"}]}
+{"id": "en-morph-007", "text": "we eated pizza yesterday", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 8, "suggestion": "ate"}]}
+{"id": "en-morph-008", "text": "she goed to the store", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 8, "suggestion": "went"}]}
+{"id": "en-morph-009", "text": "he runned very fast", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 9, "suggestion": "ran"}]}
+{"id": "en-morph-010", "text": "they comed home late", "expected": [{"rule_id": "en-morphology", "start": 5, "end": 10, "suggestion": "came"}]}
+{"id": "en-morph-011", "text": "she writed a long letter", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "wrote"}]}
+{"id": "en-morph-012", "text": "he taked my pencil", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 8, "suggestion": "took"}]}
+{"id": "en-morph-013", "text": "she maked a cake for us", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 9, "suggestion": "made"}]}
+{"id": "en-morph-014", "text": "the teacher sayed that we were good", "expected": [{"rule_id": "en-morphology", "start": 12, "end": 17, "suggestion": "said"}]}
+{"id": "en-morph-015", "text": "he doed his homework", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 7, "suggestion": "did"}]}
+{"id": "en-morph-016", "text": "she haved a dog before", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 9, "suggestion": "had"}]}
+{"id": "en-morph-017", "text": "she gived me a present", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 9, "suggestion": "gave"}]}
+{"id": "en-morph-018", "text": "she thinked about it", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 11, "suggestion": "thought"}]}
+{"id": "en-morph-019", "text": "we finded the answer", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 9, "suggestion": "found"}]}
+{"id": "en-morph-020", "text": "she bringed her bag", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 11, "suggestion": "brought"}]}
+{"id": "en-morph-021", "text": "they catched the ball", "expected": [{"rule_id": "en-morphology", "start": 5, "end": 12, "suggestion": "caught"}]}
+{"id": "en-morph-022", "text": "she drawed a nice picture", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "drew"}]}
+{"id": "en-morph-023", "text": "she feeled sick all day", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "felt"}]}
+{"id": "en-morph-024", "text": "they meeted at the park", "expected": [{"rule_id": "en-morphology", "start": 5, "end": 11, "suggestion": "met"}]}
+{"id": "en-morph-025", "text": "the childs eated cake at the party", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "children"}, {"rule_id": "en-morphology", "start": 11, "end": 16, "suggestion": "ate"}]}
+{"id": "en-morph-026", "text": "he teached us math", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 10, "suggestion": "taught"}]}
+{"id": "en-morph-027", "text": "we builded a house", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 10, "suggestion": "built"}]}
+{"id": "en-morph-028", "text": "she knowed the answer", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 10, "suggestion": "knew"}]}
+{"id": "en-morph-029", "text": "they standed up quickly", "expected": [{"rule_id": "en-morphology", "start": 5, "end": 12, "suggestion": "stood"}]}
+{"id": "en-morph-030", "text": "he breaked the window", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 10, "suggestion": "broke"}]}
+{"id": "en-morph-031", "text": "she becomed a doctor", "expected": [{"rule_id": "en-morphology", "start": 4, "end": 11, "suggestion": "became"}]}
+{"id": "en-morph-032", "text": "we begined the project", "expected": [{"rule_id": "en-morphology", "start": 3, "end": 10, "suggestion": "began"}]}
+{"id": "en-morph-acc-001", "text": "the children were playing outside", "expected": []}
+{"id": "en-morph-acc-002", "text": "we saw three mice in the house", "expected": []}
+{"id": "en-morph-acc-003", "text": "we ate pizza yesterday", "expected": []}
+{"id": "en-morph-acc-004", "text": "she went to the store", "expected": []}
+{"id": "en-morph-acc-005", "text": "he ran very fast", "expected": []}
+{"id": "en-morph-acc-006", "text": "they came home late", "expected": []}
+{"id": "en-morph-acc-007", "text": "we played football after school", "expected": []}
+{"id": "en-morph-acc-008", "text": "we walked to school today", "expected": []}
+{"id": "en-morph-acc-009", "text": "he talked to his friend", "expected": []}
+{"id": "en-morph-acc-010", "text": "she worked hard all day", "expected": []}
+{"id": "en-morph-acc-011", "text": "the dogs ran in the park", "expected": []}
+{"id": "en-morph-acc-012", "text": "we have three cats at home", "expected": []}
+{"id": "en-morph-acc-013", "text": "she met her friends at school", "expected": []}
+{"id": "en-morph-acc-014", "text": "she wrote a long letter to me", "expected": []}
+{"id": "en-morph-acc-015", "text": "the women sat down together", "expected": []}
+{"id": "en-morph-acc-016", "text": "he took the bus this morning", "expected": []}
+{"id": "en-morph-acc-017", "text": "they brought food to the party", "expected": []}
