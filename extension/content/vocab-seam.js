@@ -295,6 +295,8 @@
     getRegisterWords: () => (state && state.registerWords) ? state.registerWords : new Map(),
     getCollocations: () => (state && state.collocations) ? state.collocations : [],
     getRedundancyPhrases: () => (state && state.redundancyPhrases) ? state.redundancyPhrases : [],
+    // Phase 8: participle → auxiliary Map for DE Perfekt auxiliary choice rule.
+    getParticipleToAux: () => (state && state.participleToAux) ? state.participleToAux : new Map(),
     // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;

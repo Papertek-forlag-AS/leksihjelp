@@ -800,6 +800,25 @@
     return { nounGenus, verbInfinitive, validWords, isAdjective, knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns };
   }
 
+  // ── Phase 8: Build participle → auxiliary Map from raw verbbank ──
+  // Maps past-participle forms (lowercase) to their required auxiliary
+  // ('haben', 'sein', or 'both'). Built from raw data rather than wordList
+  // because wordList entries don't carry conjugation details.
+  function buildParticipleToAux(raw) {
+    const participleToAux = new Map();
+    if (!raw || !raw.verbbank) return participleToAux;
+    for (const entry of Object.values(raw.verbbank)) {
+      if (!entry.conjugations || !entry.conjugations.perfektum) continue;
+      const perf = entry.conjugations.perfektum;
+      if (!perf.participle || !perf.auxiliary) continue;
+      const participle = perf.participle.toLowerCase();
+      if (!participleToAux.has(participle)) {
+        participleToAux.set(participle, perf.auxiliary);
+      }
+    }
+    return participleToAux;
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -877,6 +896,9 @@
       }
     }
 
+    // Phase 8: participle → auxiliary Map for DE Perfekt auxiliary rule (DE-03).
+    const participleToAux = buildParticipleToAux(raw);
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -911,6 +933,8 @@
       registerWords,
       collocations,
       redundancyPhrases,
+      // Phase 8: participle → auxiliary for DE Perfekt auxiliary choice rule.
+      participleToAux,
     };
   }
 

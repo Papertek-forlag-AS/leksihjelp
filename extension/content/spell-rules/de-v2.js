@@ -32,15 +32,14 @@
     'während', 'indem', 'falls',
   ]);
 
-  // Common separable prefixes in German. Students often write the
-  // unseparated form ("aufstehe") instead of the correct separated
-  // form ("stehe auf"). We strip these prefixes to check if the
-  // remaining stem is a known finite verb.
-  const SEPARABLE_PREFIXES = [
+  // Separable prefixes: read from shared grammar-tables.js (canonical source).
+  // Fallback to a local Set if grammar-tables hasn't loaded (backward compat).
+  const grammarTables = host.__lexiGrammarTables || {};
+  const SEPARABLE_PREFIXES = grammarTables.SEPARABLE_PREFIXES || new Set([
     'ab', 'an', 'auf', 'aus', 'bei', 'ein', 'fest', 'her', 'hin',
     'los', 'mit', 'nach', 'um', 'vor', 'weg', 'zu', 'zurück',
     'zusammen', 'weiter', 'vorbei', 'herum', 'heraus', 'hinaus',
-  ];
+  ]);
 
   // Check if a word is a finite verb, including unseparated separable verbs.
   function isFiniteOrUnseparated(word, ctx) {
