@@ -1,7 +1,11 @@
 /**
- * Spell-check rule: French contraction (priority 15).
+ * Spell-check rule: French prepositional contraction (priority 15).
  *
- * French articles 'le' and 'la' contract to 'l\'' before a vowel or silent 'h'.
+ * Flags missing mandatory contractions of prepositions with articles:
+ *   de le  -> du       a le  -> au
+ *   de les -> des      a les -> aux
+ *
+ * NOTE: le/la + vowel elision (l') is handled by fr-elision.js (Plan 02).
  *
  * Rule ID: 'fr-contraction'
  */
@@ -11,7 +15,16 @@
   host.__lexiSpellRules = host.__lexiSpellRules || [];
   const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
-  const VOWELS = new Set(['a', 'e', 'i', 'o', 'u', 'y']);
+  // Preposition + article -> contracted form
+  const CONTRACTIONS = {
+    'de le': 'du',
+    'a le': 'au',
+    'de les': 'des',
+    'a les': 'aux',
+  };
+
+  const PREPOSITIONS = new Set(['de', 'a']);
+  const ARTICLES = new Set(['le', 'les']);
 
   const rule = {
     id: 'fr-contraction',
@@ -19,36 +32,37 @@
     priority: 15,
     severity: 'error',
     explain: (finding) => ({
-      nb: `Bruk <em>l'</em> foran ord som starter med vokal eller h — prøv <em>${escapeHtml(finding.fix)}</em>.`,
-      nn: `Bruk <em>l'</em> føre ord som startar med vokal eller h — prøv <em>${escapeHtml(finding.fix)}</em>.`,
-      en: `Use <em>l'</em> before words starting with a vowel or h — try <em>${escapeHtml(finding.fix)}</em>.`,
+      nb: `Bruk samantrekning <em>${escapeHtml(finding.fix)}</em> i staden for <em>${escapeHtml(finding.original)}</em>.`,
+      nn: `Bruk samantrekking <em>${escapeHtml(finding.fix)}</em> i staden for <em>${escapeHtml(finding.original)}</em>.`,
+      en: `Use the contraction <em>${escapeHtml(finding.fix)}</em> instead of <em>${escapeHtml(finding.original)}</em>.`,
     }),
     check(ctx) {
       const { tokens, cursorPos } = ctx;
       const out = [];
 
-      for (let i = 0; i < tokens.length; i++) {
+      for (let i = 0; i < tokens.length - 1; i++) {
         const t = tokens[i];
         const next = tokens[i + 1];
-        if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
+        if (cursorPos != null && cursorPos >= t.start && cursorPos <= next.end + 1) continue;
 
-        if ((t.word === 'le' || t.word === 'la') && next) {
-          const nextWord = next.word;
-          // Most words starting with 'h' in French are silent (h muet) and require contraction.
-          const startsWithVowelOrH = VOWELS.has(nextWord[0]) || nextWord[0] === 'h';
-          
-          if (startsWithVowelOrH) {
-            out.push({
-              rule_id: 'fr-contraction',
-              priority: rule.priority,
-              start: t.start,
-              end: next.end,
-              original: `${t.display} ${next.display}`,
-              fix: `l'${next.display}`,
-              message: `Kontraksjon: "l'${next.display}"`,
-            });
-          }
-        }
+        const prep = t.word;
+        const art = next.word;
+
+        if (!PREPOSITIONS.has(prep) || !ARTICLES.has(art)) continue;
+
+        const key = prep + ' ' + art;
+        const contracted = CONTRACTIONS[key];
+        if (!contracted) continue;
+
+        out.push({
+          rule_id: 'fr-contraction',
+          priority: rule.priority,
+          start: t.start,
+          end: next.end,
+          original: `${t.display} ${next.display}`,
+          fix: contracted,
+          message: `Samantrekning: "${contracted}"`,
+        });
       }
       return out;
     },

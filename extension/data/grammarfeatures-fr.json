@@ -240,6 +240,18 @@
       "future": true
     },
     {
+      "id": "grammar_fr_pp_agreement",
+      "name": "Accord du participe passé",
+      "nameEn": "Past Participle Agreement",
+      "description": "Samsvar av partisipp med foranknytt direkte objekt (la pomme que j'ai mangée)",
+      "descriptionEn": "Past participle agreement with preceding direct object",
+      "category": "verbs",
+      "appliesTo": [
+        "verb"
+      ],
+      "dataPath": "conjugations.passe_compose"
+    },
+    {
       "id": "grammar_register",
       "name": "Register / formality",
       "nameEn": "Register / formality",
