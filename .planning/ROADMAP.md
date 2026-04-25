@@ -36,7 +36,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 14: Morphology Beyond Tokens (EN + ES/FR)** — Flag EN morphological overgeneration (`childs`, `eated`), ES/FR opaque-noun gender mismatch, and EN word-family POS confusion (completed 2026-04-25)
 - [x] **Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)** — Wire 8 missing vocab indexes into spell-check.js browser runtime; restore deleted doc-drift-de-address.js; close integration blocker affecting 9 rules (completed 2026-04-25)
 - [x] **Phase 15: Collocations at Scale (NB + DE + FR + ES)** — Flag preposition collocation errors in NB, DE, FR, ES via shared collocation-bank shape proven in Phase 6 (completed 2026-04-25)
-- [ ] **Phase 15.1: Fixture Gate Triage (GAP CLOSURE)** — Fix nn/clean Phase 15 regression, resolve fr/grammar rule-id aliases, triage 22 pre-existing false positives across DE/ES/FR suites; close check-fixtures exit 1 blocker
+- [x] **Phase 15.1: Fixture Gate Triage (GAP CLOSURE)** — Fix nn/clean Phase 15 regression, resolve fr/grammar rule-id aliases, triage 22 pre-existing false positives across DE/ES/FR suites; close check-fixtures exit 1 blocker (completed 2026-04-25)
 
 ## Phase Details
 
@@ -222,7 +222,7 @@ Plans:
   2. nn/clean suite passes: collocation rule no longer fires false positive on legitimate NN clean text.
   3. fr/grammar suite passes: fixture rule-id values match what the rules actually emit.
   4. All other release gates remain green (no regressions from fixture triage changes).
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 15.1-01-PLAN.md — Fix nn/clean regression, fr rule-id aliases, and 20 co-fire expectations across DE/ES fixture suites
 
@@ -250,7 +250,7 @@ Plans:
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | 1/1 | Complete    | 2026-04-25 | — |
-| 15.1 Fixture Gate Triage (GAP CLOSURE) | v2.0 | 0/1 | Pending | — |
+| 15.1 Fixture Gate Triage (GAP CLOSURE) | 1/1 | Complete   | 2026-04-25 | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
 

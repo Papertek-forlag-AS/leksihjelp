@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 15.1-fixture-gate-triage
-current_plan: Not started
-status: phase_ready
-last_updated: "2026-04-25T18:30:00.000Z"
+current_plan: Completed
+status: completed
+last_updated: "2026-04-25T16:53:35.508Z"
 progress:
   total_phases: 12
-  completed_phases: 11
-  total_plans: 30
-  completed_plans: 30
+  completed_phases: 12
+  total_plans: 31
+  completed_plans: 31
 ---
 
 # Session State
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
-**Current phase:** 15-collocations-at-scale-nb-de-fr-es
-**Current Plan:** Not started
+**Current phase:** 15.1-fixture-gate-triage
+**Current Plan:** Completed
 **Status:** Milestone complete
 
 ## Decisions
@@ -51,6 +51,7 @@ See: .planning/PROJECT.md
 
 - Phase 15 Plan 01: Added conjugated verb forms as separate seed entries for substring matching (infinitives don't appear in student text)
 - Phase 15 Plan 01: NN collocations fall back to NB seeds (same collocations across written standards)
+- [Phase 15.1]: No rule code changes — all 26 fixture failures were data issues (stale rule-ids, missing co-fires, FP text)
 
 ## Session Log
 
@@ -68,3 +69,4 @@ See: .planning/PROJECT.md
 - 2026-04-25: Gap closure phases created: 14.1 (vocab-seam wiring), Phase 15 (collocations) already in roadmap
 - 2026-04-25: Completed 14.1-01 (vocab-seam browser wiring: 7 new getters, 9 wiring lines, doc-drift-de-address restored)
 - 2026-04-25: Completed 15-01 (multi-language collocation detection: NB/DE/FR/ES seeds + 191 fixtures)
+- 2026-04-25: Completed 15.1-01 (fixture gate triage: 26 failing cases fixed across 8 suites, all 53 at F1=1.000)
