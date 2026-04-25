@@ -211,7 +211,7 @@ Plans:
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
-| 12. Pronoun & Pro-Drop (ES + FR) | 1/3 | In Progress|  | — |
+| 12. Pronoun & Pro-Drop (ES + FR) | 2/3 | In Progress|  | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 0/? | Not started | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
