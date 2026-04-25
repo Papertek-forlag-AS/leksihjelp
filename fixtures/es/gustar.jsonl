@@ -1,0 +1,98 @@
+# ES gustar-class syntax flagger fixtures (PRON-02, Phase 12)
+# Available gustar-class verb forms in vocab presens: gustar, encantar, interesar, parecer
+# Positive cases: gustar-class verb without dative clitic -> warn (32)
+{"id":"es-gust-1","text":"El no gusta ayudar.","expected":[{"rule_id":"es-gustar","start":6,"end":11,"suggestion":"le gusta"}],"comment":"el + no + gusta without dative -> warn"}
+{"id":"es-gust-2","text":"Ella gusta la comida.","expected":[{"rule_id":"es-gustar","start":5,"end":10,"suggestion":"le gusta"}],"comment":"ella + gusta without dative -> warn"}
+{"id":"es-gust-3","text":"El gusta el cine.","expected":[{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"le gusta"}],"comment":"el + gusta without dative -> warn"}
+{"id":"es-gust-4","text":"Ella no gusta nadar.","expected":[{"rule_id":"es-gustar","start":8,"end":13,"suggestion":"le gusta"}],"comment":"ella + no + gusta without dative -> warn"}
+{"id":"es-gust-5","text":"El encanta la musica.","expected":[{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"le encanta"}],"comment":"el + encanta without dative -> warn"}
+{"id":"es-gust-6","text":"Ella interesa el arte.","expected":[{"rule_id":"es-gustar","start":5,"end":13,"suggestion":"le interesa"}],"comment":"ella + interesa without dative -> warn"}
+{"id":"es-gust-7","text":"El encanta el libro.","expected":[{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"le encanta"}],"comment":"el + encanta without dative -> warn"}
+{"id":"es-gust-8","text":"Ella no encanta la comida.","expected":[{"rule_id":"es-gustar","start":8,"end":15,"suggestion":"le encanta"}],"comment":"ella + no + encanta without dative -> warn"}
+{"id":"es-gust-9","text":"El no interesa la clase.","expected":[{"rule_id":"es-gustar","start":6,"end":14,"suggestion":"le interesa"}],"comment":"el + no + interesa without dative -> warn"}
+{"id":"es-gust-10","text":"El gustan los perros.","expected":[{"rule_id":"es-gustar","start":3,"end":9,"suggestion":"le gustan"}],"comment":"el + gustan (3pl) without dative -> warn"}
+{"id":"es-gust-11","text":"Ella encantan los gatos.","expected":[{"rule_id":"es-gustar","start":5,"end":13,"suggestion":"le encantan"}],"comment":"ella + encantan without dative -> warn"}
+{"id":"es-gust-12","text":"El interesan los libros.","expected":[{"rule_id":"es-gustar","start":3,"end":12,"suggestion":"le interesan"}],"comment":"el + interesan without dative -> warn"}
+{"id":"es-gust-13","text":"Ellos gustan el cine.","expected":[{"rule_id":"es-gustar","start":6,"end":12,"suggestion":"les gustan"}],"comment":"ellos + gustan without dative -> warn"}
+{"id":"es-gust-14","text":"Ellas encantan la musica.","expected":[{"rule_id":"es-gustar","start":6,"end":14,"suggestion":"les encantan"}],"comment":"ellas + encantan without dative -> warn"}
+{"id":"es-gust-15","text":"Nosotros gusta el cine.","expected":[{"rule_id":"es-gustar","start":9,"end":14,"suggestion":"nos gusta"}],"comment":"nosotros + gusta without dative -> warn"}
+{"id":"es-gust-16","text":"Yo gusto de la comida.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"me gusto"}],"comment":"yo + gusto without dative -> warn (also pro-drop hint)"}
+{"id":"es-gust-17","text":"Tu gustas la comida.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":9,"suggestion":"te gustas"}],"comment":"tu + gustas without dative -> warn (also pro-drop hint)"}
+{"id":"es-gust-18","text":"El parece bien.","expected":[{"rule_id":"es-gustar","start":3,"end":9,"suggestion":"le parece"}],"comment":"el + parece without dative -> warn"}
+{"id":"es-gust-19","text":"Ella parecen bien.","expected":[{"rule_id":"es-gustar","start":5,"end":12,"suggestion":"le parecen"}],"comment":"ella + parecen without dative -> warn"}
+{"id":"es-gust-20","text":"El no gusta la comida.","expected":[{"rule_id":"es-gustar","start":6,"end":11,"suggestion":"le gusta"}],"comment":"el + no + gusta without dative -> warn"}
+{"id":"es-gust-21","text":"Ella gusta nadar.","expected":[{"rule_id":"es-gustar","start":5,"end":10,"suggestion":"le gusta"}],"comment":"ella + gusta without dative -> warn"}
+{"id":"es-gust-22","text":"El gusta mucho.","expected":[{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"le gusta"}],"comment":"el + gusta without dative -> warn"}
+{"id":"es-gust-23","text":"Ella encanta la ciencia.","expected":[{"rule_id":"es-gustar","start":5,"end":12,"suggestion":"le encanta"}],"comment":"ella + encanta without dative -> warn"}
+{"id":"es-gust-24","text":"El interesa el deporte.","expected":[{"rule_id":"es-gustar","start":3,"end":11,"suggestion":"le interesa"}],"comment":"el + interesa without dative -> warn"}
+{"id":"es-gust-25","text":"Ella no interesa nada.","expected":[{"rule_id":"es-gustar","start":8,"end":16,"suggestion":"le interesa"}],"comment":"ella + no + interesa without dative -> warn"}
+{"id":"es-gust-26","text":"Ellos encantan la comida.","expected":[{"rule_id":"es-gustar","start":6,"end":14,"suggestion":"les encantan"}],"comment":"ellos + encantan without dative -> warn"}
+{"id":"es-gust-27","text":"Ellas gustan mucho.","expected":[{"rule_id":"es-gustar","start":6,"end":12,"suggestion":"les gustan"}],"comment":"ellas + gustan without dative -> warn"}
+{"id":"es-gust-28","text":"El no encanta la historia.","expected":[{"rule_id":"es-gustar","start":6,"end":13,"suggestion":"le encanta"}],"comment":"el + no + encanta without dative -> warn"}
+{"id":"es-gust-29","text":"Nosotros encanta la musica.","expected":[{"rule_id":"es-gustar","start":9,"end":16,"suggestion":"nos encanta"}],"comment":"nosotros + encanta without dative -> warn"}
+{"id":"es-gust-30","text":"Yo encanto mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"me encanto"}],"comment":"yo + encanto without dative -> warn (also pro-drop hint)"}
+{"id":"es-gust-31","text":"El gusta la clase.","expected":[{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"le gusta"}],"comment":"el + gusta without dative -> warn"}
+{"id":"es-gust-32","text":"Ella no parece correcto.","expected":[{"rule_id":"es-gustar","start":8,"end":14,"suggestion":"le parece"}],"comment":"ella + no + parece without dative -> warn"}
+# Acceptance cases: no flag expected (62)
+{"id":"es-gust-a1","text":"Me gusta la musica.","expected":[],"comment":"me (dative clitic) + gusta -> no flag"}
+{"id":"es-gust-a2","text":"Le gusta leer.","expected":[],"comment":"le (dative clitic) + gusta -> no flag"}
+{"id":"es-gust-a3","text":"Nos encanta el cine.","expected":[],"comment":"nos (dative clitic) + encanta -> no flag"}
+{"id":"es-gust-a4","text":"Les interesa la historia.","expected":[],"comment":"les (dative clitic) + interesa -> no flag"}
+{"id":"es-gust-a5","text":"Te gusta el cafe.","expected":[],"comment":"te (dative clitic) + gusta -> no flag"}
+{"id":"es-gust-a6","text":"Os gusta la comida.","expected":[],"comment":"os (dative clitic) + gusta -> no flag"}
+{"id":"es-gust-a7","text":"A ella le gusta.","expected":[],"comment":"a ella le + gusta (has dative clitic) -> no flag"}
+{"id":"es-gust-a8","text":"No me gusta nada.","expected":[],"comment":"no + me (dative) + gusta -> no flag"}
+{"id":"es-gust-a9","text":"No le gusta mucho.","expected":[],"comment":"no + le (dative) + gusta -> no flag"}
+{"id":"es-gust-a10","text":"Me encanta la musica.","expected":[],"comment":"me (dative) + encanta -> no flag"}
+{"id":"es-gust-a11","text":"Le interesa mucho.","expected":[],"comment":"le (dative) + interesa -> no flag"}
+{"id":"es-gust-a12","text":"Nos gusta la verdad.","expected":[],"comment":"nos (dative) + gusta -> no flag"}
+{"id":"es-gust-a13","text":"Les encanta el viaje.","expected":[],"comment":"les (dative) + encanta -> no flag"}
+{"id":"es-gust-a14","text":"Te interesa la ciencia.","expected":[],"comment":"te (dative) + interesa -> no flag"}
+{"id":"es-gust-a15","text":"Me parece bien.","expected":[],"comment":"me (dative) + parece -> no flag"}
+{"id":"es-gust-a16","text":"Le parece correcto.","expected":[],"comment":"le (dative) + parece -> no flag"}
+{"id":"es-gust-a17","text":"El no quiere ayudar.","expected":[],"comment":"querer is NOT gustar-class -> no flag"}
+{"id":"es-gust-a18","text":"Ella come mucho.","expected":[],"comment":"comer is NOT gustar-class -> no flag"}
+{"id":"es-gust-a19","text":"El habla bien.","expected":[],"comment":"hablar is NOT gustar-class -> no flag"}
+{"id":"es-gust-a20","text":"Ella va al cine.","expected":[],"comment":"ir is NOT gustar-class -> no flag"}
+{"id":"es-gust-a21","text":"El tiene un perro.","expected":[],"comment":"tener is NOT gustar-class -> no flag"}
+{"id":"es-gust-a22","text":"Ella necesita ayuda.","expected":[],"comment":"necesitar is NOT gustar-class -> no flag"}
+{"id":"es-gust-a23","text":"El estudia mucho.","expected":[],"comment":"estudiar is NOT gustar-class -> no flag"}
+{"id":"es-gust-a24","text":"Ella trabaja aqui.","expected":[],"comment":"trabajar is NOT gustar-class -> no flag"}
+{"id":"es-gust-a25","text":"No le gusta nada.","expected":[],"comment":"no + le (dative) + gusta -> no flag"}
+{"id":"es-gust-a26","text":"A mi me gusta mucho.","expected":[],"comment":"a mi + me (dative) + gusta -> no flag"}
+{"id":"es-gust-a27","text":"A nosotros nos gusta.","expected":[],"comment":"a nosotros + nos (dative) + gusta -> no flag"}
+{"id":"es-gust-a28","text":"A ellos les gusta el cine.","expected":[],"comment":"a ellos + les (dative) + gusta -> no flag"}
+{"id":"es-gust-a29","text":"Me gustan los libros.","expected":[],"comment":"me (dative) + gustan -> no flag"}
+{"id":"es-gust-a30","text":"Le gustan los gatos.","expected":[],"comment":"le (dative) + gustan -> no flag"}
+{"id":"es-gust-a31","text":"Nos encantan las vacaciones.","expected":[],"comment":"nos (dative) + encantan -> no flag"}
+{"id":"es-gust-a32","text":"Les interesan los deportes.","expected":[],"comment":"les (dative) + interesan -> no flag"}
+{"id":"es-gust-a33","text":"voy al mercado.","expected":[],"comment":"no gustar-class verb -> no flag"}
+{"id":"es-gust-a34","text":"hablo bien.","expected":[],"comment":"no gustar-class verb -> no flag"}
+{"id":"es-gust-a35","text":"comemos a las dos.","expected":[],"comment":"no gustar-class verb -> no flag"}
+{"id":"es-gust-a36","text":"vivimos en Madrid.","expected":[],"comment":"no gustar-class verb -> no flag"}
+{"id":"es-gust-a37","text":"No me gustan las ratas.","expected":[],"comment":"no + me (dative) + gustan -> no flag"}
+{"id":"es-gust-a38","text":"A mi no me gusta nada.","expected":[],"comment":"a mi + no + me (dative) + gusta -> no flag"}
+{"id":"es-gust-a39","text":"Le encanta la comida.","expected":[],"comment":"le (dative) + encanta -> no flag"}
+{"id":"es-gust-a40","text":"Nos interesa la ciencia.","expected":[],"comment":"nos (dative) + interesa -> no flag"}
+{"id":"es-gust-a41","text":"Les gusta la musica.","expected":[],"comment":"les (dative) + gusta -> no flag"}
+{"id":"es-gust-a42","text":"Te encantan los libros.","expected":[],"comment":"te (dative) + encantan -> no flag"}
+{"id":"es-gust-a43","text":"Le parecen bien.","expected":[],"comment":"le (dative) + parecen -> no flag"}
+{"id":"es-gust-a44","text":"Me encanta viajar.","expected":[],"comment":"me (dative) + encanta -> no flag"}
+{"id":"es-gust-a45","text":"Nos encantan los deportes.","expected":[],"comment":"nos (dative) + encantan -> no flag"}
+{"id":"es-gust-a46","text":"Les interesa el arte.","expected":[],"comment":"les (dative) + interesa -> no flag"}
+{"id":"es-gust-a47","text":"A mi madre le gusta cocinar.","expected":[],"comment":"a mi madre + le (dative) + gusta -> no flag"}
+{"id":"es-gust-a48","text":"A los estudiantes les interesa.","expected":[],"comment":"a los estudiantes + les (dative) + interesa -> no flag"}
+{"id":"es-gust-a49","text":"Le gusta mucho el cine.","expected":[],"comment":"le (dative) + gusta -> no flag"}
+{"id":"es-gust-a50","text":"Nos encanta viajar.","expected":[],"comment":"nos (dative) + encanta -> no flag"}
+{"id":"es-gust-a51","text":"Te interesan los deportes.","expected":[],"comment":"te (dative) + interesan -> no flag"}
+{"id":"es-gust-a52","text":"Me parece que si.","expected":[],"comment":"me (dative) + parece -> no flag"}
+{"id":"es-gust-a53","text":"Os encanta el cine.","expected":[],"comment":"os (dative) + encanta -> no flag"}
+{"id":"es-gust-a54","text":"Te parece bien.","expected":[],"comment":"te (dative) + parece -> no flag"}
+{"id":"es-gust-a55","text":"Os interesa la historia.","expected":[],"comment":"os (dative) + interesa -> no flag"}
+{"id":"es-gust-a56","text":"Me gustan mucho los perros.","expected":[],"comment":"me (dative) + gustan -> no flag"}
+{"id":"es-gust-a57","text":"Les encantan las vacaciones.","expected":[],"comment":"les (dative) + encantan -> no flag"}
+{"id":"es-gust-a58","text":"Nos parecen bien.","expected":[],"comment":"nos (dative) + parecen -> no flag"}
+{"id":"es-gust-a59","text":"Le interesan los libros.","expected":[],"comment":"le (dative) + interesan -> no flag"}
+{"id":"es-gust-a60","text":"Te gustan los gatos.","expected":[],"comment":"te (dative) + gustan -> no flag"}
+{"id":"es-gust-a61","text":"Me interesa la clase.","expected":[],"comment":"me (dative) + interesa -> no flag"}
+{"id":"es-gust-a62","text":"Le encanta la clase.","expected":[],"comment":"le (dative) + encanta -> no flag"}
