@@ -2,14 +2,22 @@
  * Leksihjelp — TTS Proxy (Vercel Serverless Function)
  *
  * Proxies text-to-speech requests to ElevenLabs API.
- * Supports dual authentication:
- *   1. Bearer token (Vipps login + subscription) — tracks character quota
- *   2. Legacy access code — for backward compatibility during transition
+ * Supports three authentication paths:
+ *   1. Bearer token (Vipps login + subscription)         — tracks character quota
+ *   2. Legacy access code (`code` body field)            — backward compatibility
+ *   3. Lockdown shared secret (`X-Lockdown-Secret` hdr)  — server-to-server, used
+ *      by the Papertek lockdown webapp's Cloud Function proxy when a teacher has
+ *      granted ElevenLabs access to a student with dyslexia. Lockdown's CF gates
+ *      this on participant.elevenlabsAllowed === true; this endpoint trusts the
+ *      shared secret and skips quota tracking (free promo).
  *
  * Environment variables required:
- *   ELEVENLABS_API_KEY  — Your ElevenLabs API key
- *   ACCESS_CODE         — Legacy access code
- *   SESSION_JWT_SECRET  — For verifying Bearer tokens
+ *   ELEVENLABS_API_KEY    — Your ElevenLabs API key
+ *   ACCESS_CODE           — Legacy access code
+ *   SESSION_JWT_SECRET    — For verifying Bearer tokens
+ *   LOCKDOWN_TTS_SECRET   — Shared secret for the Papertek lockdown CF proxy.
+ *                           Must match the same value held in lockdown's
+ *                           Google Cloud Secret Manager (LOCKDOWN_TTS_SECRET).
  */
 
 import { setCorsHeaders, rateLimit, getClientIp } from './_utils.js';
@@ -36,20 +44,22 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'For mange forespørsler. Vent litt.' });
   }
 
-  // Require custom header as lightweight client validation
+  // Require custom header as lightweight client validation. Accept both the
+  // extension and the Papertek lockdown CF proxy.
   const clientHeader = req.headers?.['x-lexi-client'];
-  if (clientHeader !== 'lexi-extension') {
+  if (clientHeader !== 'lexi-extension' && clientHeader !== 'papertek-lockdown') {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
   const { text, voiceId, speed, code, language } = req.body || {};
 
-  // ── Authentication: try Bearer token first, then legacy code ──
-  let authMethod = null; // 'token' or 'code'
+  // ── Authentication: try Bearer token, then lockdown shared secret, then legacy code ──
+  let authMethod = null; // 'token' | 'lockdown' | 'code'
   let userSub = null;
 
   const authHeader = req.headers?.authorization || '';
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const lockdownSecret = req.headers?.['x-lockdown-secret'];
 
   if (bearerToken) {
     // Token-based auth (Vipps login)
@@ -72,6 +82,22 @@ export default async function handler(req, res) {
       }
       return res.status(401).json({ error: 'Invalid token' });
     }
+  } else if (lockdownSecret) {
+    // Papertek lockdown server-to-server proxy. CF holds the shared secret in
+    // Google Cloud Secret Manager; we trust it and skip quota tracking (free
+    // promo for dyslexic students enabled per-test by their teacher).
+    const validSecret = process.env.LOCKDOWN_TTS_SECRET;
+    if (!validSecret) {
+      console.error('LOCKDOWN_TTS_SECRET environment variable is not set');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+    if (typeof lockdownSecret !== 'string' || lockdownSecret !== validSecret) {
+      return res.status(401).json({ error: 'Invalid lockdown secret' });
+    }
+    if (clientHeader !== 'papertek-lockdown') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    authMethod = 'lockdown';
   } else if (code) {
     // Legacy access code auth
     const validCode = process.env.ACCESS_CODE;
