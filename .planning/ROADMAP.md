@@ -100,7 +100,7 @@ Plans:
 Plans:
 - [ ] 09-01-PLAN.md — ES trigger tables in grammar-tables.js, ES subject pronouns in spell-check-core.js, benchmark expectations
 - [ ] 09-02-PLAN.md — ES-01 ser/estar copula-adjective mismatch rule with fixtures
-- [ ] 09-03-PLAN.md — ES-02 por/para + ES-03 personal "a" rules with fixtures, Phase 11 stub shape-sanity
+- [x] 09-03-PLAN.md — ES-02 por/para + ES-03 personal "a" rules with fixtures, Phase 11 stub shape-sanity (completed 2026-04-25)
 
 ### Phase 10: FR Élision, Auxiliary, Participe Passé (10.3a)
 **Goal**: Ship French's deterministic structural rules (élision, être/avoir) and a tightly-scoped adjacent-window PP agreement rule behind an opt-in toggle; explicitly defer 10.3b corner cases to v3.0.
@@ -210,7 +210,7 @@ Plans:
 | 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | 3/3 | Complete    | 2026-04-25 | — |
-| 11. Aspect & Mood (ES + FR) | 3/3 | Complete   | 2026-04-25 | — |
+| 11. Aspect & Mood (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 0/? | Not started | — |

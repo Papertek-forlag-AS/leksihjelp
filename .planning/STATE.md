@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T09:06:05.759Z"
+last_updated: "2026-04-25T09:12:13.941Z"
 progress:
   total_phases: 6
   completed_phases: 6
