@@ -58,6 +58,7 @@
         "content/spell-rules/register.js",
         "content/spell-rules/collocation.js",
         "content/spell-rules/redundancy.js",
+        "content/spell-rules/es-ser-estar.js",
         "content/spell-rules/de-prep-case.js",
         "content/spell-rules/de-separable-verb.js",
         "content/spell-rules/de-v2.js",

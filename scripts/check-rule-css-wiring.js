@@ -76,6 +76,7 @@ const TARGETS = [
   'extension/content/spell-rules/register.js',
   'extension/content/spell-rules/collocation.js',
   'extension/content/spell-rules/redundancy.js',
+  'extension/content/spell-rules/es-ser-estar.js',
   'extension/content/spell-rules/de-prep-case.js',
   'extension/content/spell-rules/de-separable-verb.js',
   'extension/content/spell-rules/de-v2.js',
