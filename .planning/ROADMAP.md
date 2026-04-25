@@ -141,7 +141,11 @@ Plans:
   2. `benchmark-texts/es.txt` line `"Él no gusta ayudar"` flips from unflagged → flagged by the gustar-class rule, with suggestion copy proposing dative restructuring (`"A él no le gusta ayudar"`).
   3. A FR acceptance fixture `"je le lui donne"` does NOT flag, while `"je lui le donne"` flips from unflagged → flagged by the FR clitic-order rule using the documented cluster order (`me/te/se/nous/vous < le/la/les < lui/leur < y < en`).
   4. No Phase 12 rule renders with error-tier CSS (visually verified in Chrome smoke-test and asserted by `check-rule-css-wiring` severity check).
-**Plans**: Not yet planned
+**Plans**: 3 plans
+Plans:
+- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
+- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
+- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
 
 ### Phase 13: Register Drift Within a Document
 **Goal**: Highest-risk phase in v2.0. Land the document-state two-pass runner with a mandatory pre-phase invalidation-protocol research step, ship the four register-drift rules, and enforce the stateful-rule-invalidation release gate.
@@ -153,7 +157,11 @@ Plans:
   3. A DE document mixing `du`- and `Sie`-address forms flips from unflagged → flagged (warn) by DOC-01; a FR document mixing `tu`- and `vous`-address flips by DOC-02; a consistent-register counter-example does NOT flag.
   4. `benchmark-texts/nb.txt` paragraph with `boken`/`efter`/`sne` alongside bokmål forms flips from unflagged → flagged by DOC-03 (bokmål/riksmål mixing), extending v1.0's `CROSS_DIALECT_MAP` into a `BOKMAL_RIKSMAL_MAP` sibling.
   5. A NN text mixing `-a` and `-e` infinitives within a single register-text flips from unflagged → flagged by DOC-04; a consistent-register NN fixture does NOT flag.
-**Plans**: Not yet planned
+**Plans**: 3 plans
+Plans:
+- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
+- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
+- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
 
 ### Phase 14: Morphology Beyond Tokens (EN + ES/FR)
 **Goal**: Ship three morphology-governance rules that catch errors token-local v1.0 rules can't: EN overgeneration of regular patterns, ES/FR article-noun gender mismatch on opaque nouns, and EN word-family POS confusion.
@@ -164,7 +172,11 @@ Plans:
   2. `benchmark-texts/fr.txt` lines `"La problème"` and `"un bon humeur"` flip from unflagged → flagged by the opaque-noun gender rule; correct `"le problème"`, `"une bonne humeur"` acceptance fixtures do NOT flag.
   3. EN word-family rule flags `"i have improve"` (noun-in-verb-slot) via closed word-family list and tagged-token POS-slot detection; rule acceptance fixtures covering all four family slots (noun / verb / adj / adv) stay green.
   4. All new vocab indexes (`getIrregularForms`, `getWordFamily`) are registered with `check-spellcheck-features` and `check-governance-data`, which exit 0 under minimal-preset simulation.
-**Plans**: Not yet planned
+**Plans**: 3 plans
+Plans:
+- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
+- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
+- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
 
 ### Phase 15: Collocations at Scale (NB + DE + FR + ES)
 **Goal**: Scale the Phase 6 EN-collocation-seed pattern into full preposition-collocation coverage across NB, DE, FR, ES; data-heavy, reuses existing rule shape.
@@ -175,7 +187,11 @@ Plans:
   2. DE, FR, ES preposition-collocation rules each ship with ≥30 positive + ≥15 acceptance fixtures per language, all consuming the same `collocationbank` data shape introduced in Phase 6.
   3. No Phase 15 rule introduces a new trigger-list shape; code review confirms all four rules are ≤50 LOC wrappers over the shared data shape.
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
-**Plans**: Not yet planned
+**Plans**: 3 plans
+Plans:
+- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
+- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
+- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
 
 ## Progress
 
