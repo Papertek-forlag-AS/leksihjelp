@@ -1,0 +1,72 @@
+// DOC-01: DE du/Sie address drift — document-level register consistency
+// Positive fixtures: documents with mixed du/Sie address forms (31)
+// Acceptance fixtures: consistent-register, below-threshold, tied, quoted (20)
+
+// ── Positive: Majority informal (du), minority formal (Sie/Ihnen/Ihr/Ihre) ──
+{"id":"doc-drift-de-addr-p01","text":"Du bist nett. Du kommst bald. Du hast Zeit. Können Sie mir helfen?","expected":[{"rule_id":"doc-drift-de-address","start":51,"end":54,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p02","text":"Du bist sehr nett. Du hast ein Buch. Dein Bruder ist hier. Haben Sie eine Frage?","expected":[{"rule_id":"doc-drift-de-address","start":65,"end":68,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p03","text":"Du bist toll. Du kommst mit. Du hast alles. Ich brauche Ihre Hilfe.","expected":[{"rule_id":"doc-drift-de-address","start":56,"end":60,"suggestion":"Deine"}]}
+{"id":"doc-drift-de-addr-p04","text":"Du bist gut. Dein Hund ist lieb. Du hast einen Hund. Ihr Haus ist gut.","expected":[{"rule_id":"doc-drift-de-address","start":53,"end":56,"suggestion":"Dein"}]}
+{"id":"doc-drift-de-addr-p05","text":"Du bist da. Du hast Geld. Dir geht es gut. Ich helfe Ihnen gern.","expected":[{"rule_id":"doc-drift-de-address","start":53,"end":58,"suggestion":"dir"}]}
+{"id":"doc-drift-de-addr-p06","text":"Du kommst mit. Du bist toll. Ich sehe dich oft. Ich bringe Ihnen Tee.","expected":[{"rule_id":"doc-drift-de-address","start":59,"end":64,"suggestion":"dir"}]}
+{"id":"doc-drift-de-addr-p07","text":"Du bist nett. Dein Freund ist hier. Du hast recht. Deine Katze ist toll. Kennen Sie den Weg?","expected":[{"rule_id":"doc-drift-de-address","start":80,"end":83,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p08","text":"Du bist klug. Du hast recht. Dein Hund ist hier. Dir geht es gut. Deine Idee ist gut. Ich brauche Ihre Hilfe.","expected":[{"rule_id":"doc-drift-de-address","start":98,"end":102,"suggestion":"Deine"}]}
+{"id":"doc-drift-de-addr-p09","text":"Du bist nett. Dein Freund ist toll. Du hast Geld. Dir geht es gut. Ich zeige Ihnen das.","expected":[{"rule_id":"doc-drift-de-address","start":77,"end":82,"suggestion":"dir"}]}
+{"id":"doc-drift-de-addr-p10","text":"Du bist hier. Du kommst bald. Deine Mutter ist nett. Dir sage ich alles. Können Sie mir helfen?","expected":[{"rule_id":"doc-drift-de-address","start":80,"end":83,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p11","text":"Du bist da. Du hast Zeit. Dir geht es gut. Dein Buch ist neu. Haben Sie Zeit?","expected":[{"rule_id":"doc-drift-de-address","start":68,"end":71,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p12","text":"Du bist klug. Du hast recht. Dein Freund ist hier. Deine Arbeit ist gut. Ich brauche Ihre Hilfe.","expected":[{"rule_id":"doc-drift-de-address","start":85,"end":89,"suggestion":"Deine"}]}
+{"id":"doc-drift-de-addr-p13","text":"Du bist da. Du hast recht. Dir geht es gut. Dein Freund ist nett. Können Sie mir helfen?","expected":[{"rule_id":"doc-drift-de-address","start":73,"end":76,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p14","text":"Du bist gut. Du hast einen Hund. Dein Auto ist rot. Deine Schwester ist nett. Helfen Sie mir?","expected":[{"rule_id":"doc-drift-de-address","start":85,"end":88,"suggestion":"du"}]}
+{"id":"doc-drift-de-addr-p15","text":"Du bist nett. Du hast Geld. Dein Freund ist hier. Dir geht es gut. Deine Idee ist toll. Können Sie das Buch finden?","expected":[{"rule_id":"doc-drift-de-address","start":95,"end":98,"suggestion":"du"}]}
+
+// ── Positive: Majority formal (Sie mid-sentence), minority informal ──
+{"id":"doc-drift-de-addr-p16","text":"Kennen Sie den Weg? Ich helfe Ihnen gern. Ihr Ticket ist hier. Du bist nett.","expected":[{"rule_id":"doc-drift-de-address","start":63,"end":65,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":66,"end":70,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p17","text":"Kennen Sie Berlin? Ihnen geht es gut. Ihr Auto ist rot. Du bist froh.","expected":[{"rule_id":"doc-drift-de-address","start":56,"end":58,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":59,"end":63,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p18","text":"Kennen Sie ihn? Ihnen danke ich. Ihr Buch ist toll. Dein Hund ist nett.","expected":[{"rule_id":"doc-drift-de-address","start":52,"end":56,"suggestion":"Ihr"}]}
+{"id":"doc-drift-de-addr-p19","text":"Kennen Sie das? Ich gebe Ihnen Hilfe. Ihr Haus ist gut. Dir geht es gut?","expected":[{"rule_id":"doc-drift-de-address","start":56,"end":59,"suggestion":"Ihnen"}]}
+{"id":"doc-drift-de-addr-p20","text":"Wo finden Sie das? Ihnen sage ich alles. Ihre Arbeit ist gut. Dich kenne ich.","expected":[{"rule_id":"doc-drift-de-address","start":62,"end":66,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p21","text":"Kennen Sie den Weg? Ihnen geht es gut. Ihr Auto ist rot. Ihre Arbeit ist toll. Du bist nett.","expected":[{"rule_id":"doc-drift-de-address","start":79,"end":81,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":82,"end":86,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p22","text":"Brauchen Sie Hilfe? Ich zeige Ihnen das. Ihr Haus ist hier. Du bist toll.","expected":[{"rule_id":"doc-drift-de-address","start":60,"end":62,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":63,"end":67,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p23","text":"Kennen Sie den Mann? Ich helfe Ihnen gern. Ihre Tasche ist da. Dein Freund ist nett.","expected":[{"rule_id":"doc-drift-de-address","start":63,"end":67,"suggestion":"Ihr"}]}
+{"id":"doc-drift-de-addr-p24","text":"Haben Sie das Buch? Ich gebe Ihnen das. Ihre Kinder sind nett. Ihr Auto ist da. Du bist gut.","expected":[{"rule_id":"doc-drift-de-address","start":80,"end":82,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":83,"end":87,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p25","text":"Brauchen Sie das? Ich zeige Ihnen alles. Ihr Plan ist gut. Ihre Arbeit ist toll. Dein Hund ist hier.","expected":[{"rule_id":"doc-drift-de-address","start":81,"end":85,"suggestion":"Ihr"}]}
+{"id":"doc-drift-de-addr-p26","text":"Kennen Sie das Haus? Ihnen geht es gut. Ihr Buch ist hier. Ihre Arbeit ist toll. Dir sage ich das.","expected":[{"rule_id":"doc-drift-de-address","start":81,"end":84,"suggestion":"Ihnen"}]}
+{"id":"doc-drift-de-addr-p27","text":"Wo sind Sie? Ich helfe Ihnen gern. Ihre Kinder spielen. Ihr Auto ist rot. Du bist stark.","expected":[{"rule_id":"doc-drift-de-address","start":74,"end":76,"suggestion":"Sie"},{"rule_id":"doc-drift-de-address","start":77,"end":81,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p28","text":"Kennen Sie mich? Ihnen sage ich das gern. Ihr Hund ist lieb. Ihre Idee ist gut. Deine Arbeit ist toll.","expected":[{"rule_id":"doc-drift-de-address","start":80,"end":85,"suggestion":"Ihre"}]}
+{"id":"doc-drift-de-addr-p29","text":"Brauchen Sie das? Ich gebe Ihnen das. Ihr Buch ist hier. Ihre Mutter ist nett. Dir geht es gut?","expected":[{"rule_id":"doc-drift-de-address","start":79,"end":82,"suggestion":"Ihnen"}]}
+{"id":"doc-drift-de-addr-p30","text":"Finden Sie den Weg? Ihnen geht es gut. Ihr Haus ist nett. Ihre Arbeit ist toll. Dich kenne ich auch.","expected":[{"rule_id":"doc-drift-de-address","start":80,"end":84,"suggestion":"Sie"}]}
+{"id":"doc-drift-de-addr-p31","text":"Du bist stark. Du hast Mut. Dir geht es gut. Dein Plan ist toll. Deine Hilfe ist wichtig. Brauchen Sie das?","expected":[{"rule_id":"doc-drift-de-address","start":99,"end":102,"suggestion":"du"}]}
+
+// ── Acceptance: All informal (no drift) ──
+{"id":"doc-drift-de-addr-a01","text":"Du bist nett. Du kommst bald. Du hast Zeit.","expected":[],"comment":"All du = no drift"}
+{"id":"doc-drift-de-addr-a02","text":"Du bist toll. Dein Hund ist hier. Dir geht es gut.","expected":[],"comment":"All informal pronouns = no drift"}
+{"id":"doc-drift-de-addr-a03","text":"Du kommst mit. Du hast dein Buch. Deine Mutter ist nett. Dir sage ich alles.","expected":[],"comment":"Mixed informal pronouns, all same register"}
+{"id":"doc-drift-de-addr-a04","text":"Du bist klug. Du hast recht. Dein Plan ist gut. Du kommst bald. Dir geht es gut.","expected":[],"comment":"All informal, many markers"}
+
+// ── Acceptance: All formal (no drift) ──
+{"id":"doc-drift-de-addr-a05","text":"Kennen Sie das? Ihnen geht es gut. Ihre Arbeit ist toll.","expected":[],"comment":"All formal = no drift"}
+{"id":"doc-drift-de-addr-a06","text":"Brauchen Sie Hilfe? Ich zeige Ihnen das. Ihr Haus ist gut. Ihre Kinder spielen.","expected":[],"comment":"All formal, many markers"}
+{"id":"doc-drift-de-addr-a07","text":"Wo finden Sie das? Ihnen sage ich alles. Ihr Buch ist hier. Ihre Tasche ist da.","expected":[],"comment":"All formal"}
+
+// ── Acceptance: Below minimum threshold (< 3 markers) ──
+{"id":"doc-drift-de-addr-a08","text":"Du bist nett.","expected":[],"comment":"Only 1 du marker, below threshold"}
+{"id":"doc-drift-de-addr-a09","text":"Du bist nett. Du hast recht.","expected":[],"comment":"2 markers, below threshold of 3"}
+{"id":"doc-drift-de-addr-a10","text":"Das ist gut. Der Hund ist hier.","expected":[],"comment":"No address markers at all"}
+{"id":"doc-drift-de-addr-a11","text":"Wir gehen in die Schule. Er hat ein Buch.","expected":[],"comment":"No 2nd-person markers"}
+
+// ── Acceptance: Sie at sentence start only (ambiguous, skipped) ──
+{"id":"doc-drift-de-addr-a12","text":"Sie kommen bald. Sie haben Zeit. Sie sind nett.","expected":[],"comment":"All Sie at sentence start = all ambiguous = 0 markers"}
+{"id":"doc-drift-de-addr-a13","text":"Du bist nett. Du hast recht. Du kommst bald. Sie kommen auch.","expected":[],"comment":"Sie at sentence start = skipped. Only informal markers."}
+{"id":"doc-drift-de-addr-a14","text":"Sie ist hier. Du bist nett. Du hast recht. Du kommst bald.","expected":[],"comment":"Sie at sentence start skipped. All informal."}
+
+// ── Acceptance: Lowercase sie (3rd person, not formal) ──
+{"id":"doc-drift-de-addr-a15","text":"Du bist nett. Du hast recht. Du kommst bald. Wo ist sie?","expected":[],"comment":"Lowercase sie = 3rd person, all informal markers only"}
+{"id":"doc-drift-de-addr-a16","text":"Du bist toll. Du hast Mut. Dir geht es gut. Er hilft ihr. Dann sieht sie ihn.","expected":[],"comment":"sie/ihr lowercase = 3rd person. Only informal markers."}
+
+// ── Acceptance: Tied registers (no dominant) ──
+{"id":"doc-drift-de-addr-a17","text":"Dein Freund ist nett. Deine Arbeit ist gut. Kennen Sie das? Ihnen geht es gut.","expected":[],"comment":"2 informal + 2 formal = tied -> no drift"}
+{"id":"doc-drift-de-addr-a18","text":"Dir sage ich das. Dich kenne ich. Kennen Sie das? Ihnen geht es gut.","expected":[],"comment":"2 informal + 2 formal = tied -> no drift"}
+
+// ── Acceptance: Short text with no address forms ──
+{"id":"doc-drift-de-addr-a19","text":"Das Wetter ist gut. Der Hund rennt im Park.","expected":[],"comment":"No du/Sie markers at all"}
+{"id":"doc-drift-de-addr-a20","text":"Er liest ein Buch. Wir gehen in den Park.","expected":[],"comment":"No 2nd-person markers"}
