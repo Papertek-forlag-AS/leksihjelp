@@ -324,6 +324,26 @@ function main() {
   // indexes while the wordList filter actually fires.
   const perLangStats = NON_NB_LANG_CONFIGS.map(cfg => ({ lang: cfg.lang, ...checkLanguage(cfg) }));
 
+  // ── Phase 14: irregularForms must be populated for EN regardless of feature gating ──
+  // Built from raw verbbank/nounbank data (not feature-gated wordList).
+  const enRawForIrregular = require(path.join(__dirname, '..', 'extension', 'data', 'en.json'));
+  const enStateIrregular = core.buildIndexes({ raw: enRawForIrregular, lang: 'en', isFeatureEnabled: buildDisabledPredicate(['grammar_en_past', 'grammar_en_plural', 'grammar_plural']) });
+  if (!(enStateIrregular.irregularForms instanceof Map) || enStateIrregular.irregularForms.size === 0) {
+    fail('[en] irregularForms must be a populated Map — buildIrregularForms regression.');
+  }
+  const irregularChecks = [
+    { form: 'childs', base: 'child', note: 'wrong plural of child' },
+    { form: 'eated', base: 'eat', note: 'wrong past of eat' },
+    { form: 'goed', base: 'go', note: 'wrong past of go' },
+    { form: 'mouses', base: 'mouse', note: 'wrong plural of mouse' },
+  ];
+  for (const { form, base, note } of irregularChecks) {
+    const got = enStateIrregular.irregularForms.get(form);
+    if (!got || got.base !== base) {
+      fail(`[en] irregularForms.get("${form}") expected base="${base}" but got ${JSON.stringify(got)} — ${note}. Built from raw data, must survive feature gating.`);
+    }
+  }
+
   // ── Phase 11: mood/aspect reverse-lookup indexes must be populated ──
   // These indexes are built from raw verbbank data (not feature-gated wordList),
   // so they MUST be populated regardless of which features are enabled.

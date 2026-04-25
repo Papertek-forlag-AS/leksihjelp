@@ -30,6 +30,12 @@
     "de.48": { "rule_id": "doc-drift-de-address", "severity": "warning", "priority_band": "P2" },
     "fr.56": { "rule_id": "doc-drift-fr-address", "severity": "warning", "priority_band": "P2" },
     "nb.44": { "rule_id": "doc-drift-nb-register", "severity": "warning", "priority_band": "P2" },
-    "nn.40": { "rule_id": "doc-drift-nn-infinitive", "severity": "warning", "priority_band": "P2" }
+    "nn.40": { "rule_id": "doc-drift-nn-infinitive", "severity": "warning", "priority_band": "P2" },
+    "en.27": { "rule_id": "en-morphology", "severity": "warning", "priority_band": "P2" },
+    "en.34": { "rule_id": "en-morphology", "severity": "warning", "priority_band": "P2" },
+    "en.38": { "rule_id": "en-morphology", "severity": "warning", "priority_band": "P2" },
+    "en.39": { "rule_id": "en-word-family", "severity": "warning", "priority_band": "P2" },
+    "fr.51": { "rule_id": "fr-adj-gender", "severity": "warning", "priority_band": "P2" },
+    "fr.57": { "rule_id": "fr-adj-gender", "severity": "warning", "priority_band": "P2" }
   }
 }
