@@ -387,6 +387,14 @@
     'il est necessaire que', 'il est nécessaire que',
   ]);
 
+  // ── Phase 12: ES gustar-class verbs (PRON-02) ──
+  // Verbs that take indirect-object + 3rd-person conjugation (gustar pattern).
+  const ES_GUSTAR_CLASS_VERBS = new Set([
+    'gustar', 'encantar', 'interesar', 'importar', 'molestar',
+    'fascinar', 'aburrir', 'doler', 'faltar', 'sobrar',
+    'parecer', 'quedar', 'apetecer', 'costar', 'bastar',
+  ]);
+
   const tables = {
     // DE tables
     PREP_CASE,
@@ -408,6 +416,8 @@
     ES_PRETERITO_PHRASES,
     ES_IMPERFECTO_ADVERBS,
     ES_IMPERFECTO_PHRASES,
+    // Phase 12: ES pronoun table
+    ES_GUSTAR_CLASS_VERBS,
     // FR tables
     FR_AVOIR_FORMS,
     FR_ETRE_FORMS,
