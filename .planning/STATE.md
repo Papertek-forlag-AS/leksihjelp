@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 13-register-drift-within-a-document
-current_plan: Plan 3 of 3 (COMPLETE)
-status: phase-complete
-last_updated: "2026-04-25T12:36:37.000Z"
+current_plan: Not started
+status: completed
+last_updated: "2026-04-25T12:55:01.229Z"
 progress:
   total_phases: 8
   completed_phases: 8
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 13-register-drift-within-a-document
-**Current Plan:** Plan 3 of 3 (COMPLETE)
-**Status:** Phase complete
+**Current Plan:** Not started
+**Status:** Milestone complete
 
 ## Decisions
 
