@@ -60,6 +60,64 @@
 
 ---
 
+## Milestone: v2.0 — Depth of Coverage: Grammar Governance Beyond Tokens
+
+**Shipped:** 2026-04-25
+**Phases:** 12 (10 planned + 2 audit-driven decimal inserts: 14.1, 15.1)
+**Plans:** 31
+**Duration:** 2 days (2026-04-24 → 2026-04-25), ~140 commits
+
+### What Was Built
+
+- **Structural infrastructure** — Sentence segmenter (`Intl.Segmenter`), tagged-token POS view, priority bands (P1/P2/P3), severity contract, quotation-span suppression, document-state two-pass runner.
+- **Word-order rules** — NB V2 inversion, DE main-clause V2 + subordinate verb-final, FR BAGS adjective placement.
+- **DE case & agreement** — Preposition-case, separable-verb split, perfekt auxiliary, compound-noun gender; shared `grammar-tables.js`.
+- **ES structural rules** — ser/estar, por/para trigger tree, personal "a", subjuntivo triggers, pretérito/imperfecto hints, pro-drop, gustar-class syntax.
+- **FR structural rules** — Élision, être/avoir auxiliary, PP agreement (10.3a), subjonctif triggers, clitic-cluster ordering.
+- **Document-level analysis** — Register drift (DE du/Sie, FR tu/vous, NB bokmål/riksmål, NN infinitive mixing).
+- **Morphology & collocations** — EN irregular overgeneration, ES/FR opaque-noun gender, EN word-family POS confusion, cross-language collocation errors (97 seed entries).
+- **9 release gates** — added `check-benchmark-coverage`, `check-governance-data`, `check-stateful-rule-invalidation` to the v1.0 base of 8.
+
+### What Worked
+
+- **Research-first phase planning** — Every phase got a dedicated research agent before planning. This caught API constraints (e.g., `Intl.Segmenter` handles all languages, no dependency needed) and surfaced the right data-vs-logic split before code was written.
+- **Shared infrastructure pays dividends** — Phase 6's segmenter + Phase 7's tagged-token view were consumed by every subsequent phase. Investment in core infrastructure early meant Phases 8–15 were mostly data-driven rule additions with minimal core changes.
+- **`grammar-tables.js` as single data primitive** — One file consumed by DE, ES, FR rules across 6 phases. No rule duplicated trigger-table data.
+- **Benchmark-driven validation** — `benchmark-texts/<lang>.txt` + `expectations.json` provided a second axis of correctness beyond fixtures. The benchmark gate caught a Phase 15 regression that fixture-only testing would have missed (the nn/clean false positive).
+- **Gap closure pattern matured** — Phase 14.1 (9 missing browser indexes) and Phase 15.1 (27 fixture failures) were both caught by milestone audit and closed cleanly. The audit → gap-plan → execute → re-audit cycle took less than 30 minutes each.
+- **Velocity from accumulated patterns** — v2.0 shipped 12 phases in 2 days vs v1.0's 8 phases in 4 days. The release gate infrastructure, fixture harness, and plugin architecture from v1.0 made v2.0 phases mostly additive.
+
+### What Was Inefficient
+
+- **Vocab-seam browser wiring gap (Phase 14.1)** — 9 rules were silently dead in the browser because `vocab-seam.js` lacked getters for indexes built by `vocab-seam-core.js`. Fixtures passed because the fixture runner calls `buildIndexes()` directly, bypassing the browser's getter layer. Root cause: same as v1.0's SC-01 — fixture and browser use different vocab-object assembly paths. **Fix forward:** a future `check-vocab-seam-parity` gate that asserts every `buildIndexes()` key has a matching `vocab-seam.js` getter.
+- **`doc-drift-de-address.js` deleted and not noticed** — An executor agent deleted the file during Phase 14 execution. It wasn't caught until Phase 14.1 audit. Root cause: agent made a destructive edit without verifying the file existed post-commit. **Fix forward:** SUMMARY.md spot-check should verify `key-files.created` exist on disk.
+- **Fixture co-fire expectations accumulate silently** — As rules from later phases (es-pro-drop, es-gustar, de-v2) started co-firing on fixture cases authored in earlier phases, the expected arrays became stale. 20 of the 27 fixture failures in Phase 15.1 were missing co-fire expectations, not actual logic bugs. **Fix forward:** when adding a new rule, run `check-fixtures --verbose` on all fixture suites for that language and update any cases that now co-fire.
+- **`one_liner` frontmatter missing from all SUMMARYs** — Same issue as v1.0. The `gsd-tools milestone complete` accomplishment extraction found 0 one-liners. Fell back to manual curation.
+
+### Patterns Established
+
+- **Phase 6 infrastructure → Phase 7+ consumers** — structural rules should land infrastructure first (segmenter, POS view, shared tables), then language-specific rules consume it. This prevents each rule from re-inventing sentence iteration.
+- **`kind: 'document'` two-pass rules** — Document-level analysis (register drift) runs as a post-pass after all token rules, with explicit invalidation protocol.
+- **Benchmark expectations as second correctness axis** — Fixtures test rule logic; benchmarks test the end-to-end pipeline on realistic student text.
+- **Co-fire awareness** — When a new rule fires on text that an existing fixture covers, update the fixture's expected array. Don't wait for the gate to catch it.
+- **FR PP 10.3b pattern: defer complexity, ship the tractable subset** — Adjacent-window PP agreement ships; full corner cases (distance, pronominal reflexive DO) wait for better infrastructure in v3.0.
+
+### Key Lessons
+
+1. **Browser wiring gaps will keep recurring until there's a parity gate.** The vocab-seam getter layer is a manual step that's easy to forget. A `check-vocab-seam-parity` gate would catch it. (Learned: Phase 14.1.)
+2. **Co-fire expectations are a maintenance burden that grows quadratically.** Every new rule can co-fire with every existing fixture. Either automate co-fire detection in `check-fixtures`, or accept periodic triage phases. (Learned: Phase 15.1.)
+3. **Structural rules are mostly data-driven.** The code for DE preposition-case, ES subjuntivo, FR élision, etc. is ~50-100 LOC wrapper over a trigger table. The hard work is authoring correct trigger data — favor `papertek-vocabulary` enrichment over clever rule logic.
+4. **Two days for 42 requirements is achievable when infrastructure exists.** v1.0's 4-day investment in plugin architecture, release gates, and fixture harness made v2.0's throughput possible. Infrastructure investment compounds.
+5. **Milestone audit → gap closure → re-audit is a tight loop.** The full cycle (audit → plan gaps → execute → re-audit) took ~1 hour for both 14.1 and 15.1. This is cheap insurance against shipping with broken gates.
+
+### Cost Observations
+
+- **Model mix:** Opus 4.6 for orchestration and execution, Sonnet 4.6 for verification and plan-checking. No Haiku usage.
+- **Sessions:** ~5 sessions across 2 days. Multiple phases executed per session.
+- **Notable:** The accumulated context from v1.0 (CLAUDE.md, release gates, fixture harness) meant v2.0 phases could be planned and executed with minimal re-orientation. Gap closure phases (14.1, 15.1) were the most efficient — clear scope from audit, no research needed, execute in <30 min each.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -67,12 +125,20 @@
 | Milestone | Phases | Decimal Inserts | Release Gates | Key Change |
 |-----------|--------|-----------------|---------------|------------|
 | v1.0 | 5 planned | 3 (02.1, 03.1, 05.1) | 8 | Established regression fixture + 8-gate release checklist + decimal-phase pattern for audit-driven inserts |
+| v2.0 | 10 planned | 2 (14.1, 15.1) | 9 | Structural grammar engine + 5-language coverage + benchmark-driven validation + document-state two-pass runner |
 
 ### Cumulative Quality
 
 | Milestone | Fixture Cases | Release Gates | Smoke-Test Scenarios | Zero-Dep Additions |
 |-----------|---------------|---------------|----------------------|--------------------|
 | v1.0 | 262 | 8 | 11/11 PASS | 1 (fixture + gates are pure Node scripts — no npm deps added) |
+| v2.0 | 3,326 | 9 | Pending (Phases 6/7 browser visuals) | 0 (all structural rules use `Intl.Segmenter` — browser built-in, no deps) |
+
+### Recurring Themes
+
+- **Fixture ≠ browser** — v1.0: SC-01 vocab shape divergence. v2.0: 9 missing vocab-seam getters. Same root cause, same fix pattern. A parity gate would prevent recurrence.
+- **Decimal phases close audit gaps cleanly** — 5 across two milestones, all < 1 hour each. The pattern is load-bearing infrastructure, not overhead.
+- **Data-logic separation compounds** — v1.0 established it for typo banks; v2.0 extended it to trigger tables, preposition-case maps, and closed-class sets. Every phase benefited.
 
 ---
-*Retrospective created: 2026-04-21 after v1.0 Spell-Check & Prediction Quality milestone*
+*Retrospective updated: 2026-04-25 after v2.0 Depth of Coverage milestone*

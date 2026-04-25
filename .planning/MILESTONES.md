@@ -1,5 +1,34 @@
 # Milestones
 
+## v2.0 Depth of Coverage — Grammar Governance Beyond Tokens (Shipped: 2026-04-25)
+
+**Phases completed:** 12 phases (6–15.1, including 2 gap-closure decimal phases), 31 plans, 42/42 requirements satisfied.
+
+**Timeline:** 2026-04-24 → 2026-04-25 (2 days, ~140 commits)
+**Code delta:** 213 files changed, +28,530 / -424 lines
+**Rule engine:** 57 rule files (9,148 LOC), core engine 2,793 LOC, 53 fixture suites (3,326 lines)
+**Bundle:** 12.47 MiB / 20 MiB cap
+
+**Delivered (one sentence):** Extended the spell-check surface from per-token rules into structural grammar governance — word-order violations, case/agreement, aspect/mood, register drift, collocations — across 5 languages with 42 requirements, 9 release gates, and 2,734 regression fixtures all green.
+
+**Key accomplishments:**
+
+1. **Structural infrastructure** (Phase 6) — Sentence segmenter (`Intl.Segmenter`), priority bands (P1 error / P2 warn / P3 hint) with distinct dot-colour CSS tiers, severity contract on explain output, quotation-span suppression, `check-benchmark-coverage` + `check-governance-data` release gates with paired self-tests. Register/collocation/redundancy rules validated the infrastructure.
+2. **Word-order rules** (Phase 7) — Tagged-token POS view (`ctx.getTagged(i)`, `findFiniteVerb`, `isMainClause`) in `spell-check-core.js`; NB V2 inversion, DE main-clause V2 + subordinate verb-final, FR BAGS adjective placement; Phase 13 document-state seam shape documented.
+3. **DE case & agreement governance** (Phase 8) — Preposition-case mismatches (adjacent window), unsplit separable verbs, wrong perfekt auxiliary, compound-noun gender; shared `grammar-tables.js` primitive consumed by Phases 9–13.
+4. **ES structural rules** (Phases 9, 11, 12) — ser/estar copula, por/para trigger tree, personal "a"; subjuntivo trigger sets (ES + FR), pretérito/imperfecto aspectual hints; pro-drop overuse, gustar-class syntax, FR clitic-cluster ordering.
+5. **FR structural rules** (Phases 10, 11, 12) — Élision detection, être/avoir auxiliary, participe passé agreement (10.3a adjacent-window scope, 10.3b deferred to v3.0); subjonctif triggers; clitic-order rule.
+6. **Document-level analysis** (Phase 13) — Two-pass runner (`kind: 'document'` rules), `detectDrift` helper, `check-stateful-rule-invalidation` gate; DE du/Sie drift, FR tu/vous drift, NB bokmål/riksmål mixing, NN a-/e-infinitiv mixing.
+7. **Morphology & collocations** (Phases 14, 15) — EN irregular overgeneration (`childs`, `eated`), ES/FR opaque-noun gender, EN word-family POS confusion; preposition-collocation errors across NB/DE/FR/ES with 97 seed entries.
+8. **Gap closure** (Phases 14.1, 15.1) — Vocab-seam browser wiring (9 missing indexes), deleted `doc-drift-de-address.js` restored, 27 fixture failures triaged (stale rule-ids, missing co-fire expectations).
+
+**See:**
+- `.planning/milestones/v2.0-ROADMAP.md` — full phase-by-phase roadmap
+- `.planning/milestones/v2.0-REQUIREMENTS.md` — final traceability (42/42)
+- `.planning/milestones/v2.0-MILESTONE-AUDIT.md` — audit report (passed, all 9 gates green)
+
+---
+
 ## v1.0 Spell-Check & Prediction Quality (Shipped: 2026-04-21)
 
 **Phases completed:** 8 phases (1, 2, 02.1, 3, 03.1, 4, 5, 05.1), 29 plans, 19/19 v1 requirements satisfied.

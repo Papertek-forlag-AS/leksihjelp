@@ -5,10 +5,12 @@
 Chrome/Edge browser extension for Norwegian students learning foreign languages
 (German, Spanish, French, English). Provides dictionary lookup, pronunciation
 (text-to-speech), context-aware word prediction in any text input, and a
-production-quality Norwegian spell-check surface (NB + NN) aimed especially at
-students with dyslexia. Distributed as a free, open-source extension (MIT) with
-an optional premium subscription that funds the ElevenLabs TTS calls. All
-non-TTS features are 100% offline and free.
+production-quality spell-check surface covering Norwegian (NB + NN) token-level
+rules and structural grammar governance across all five target languages — word-order
+violations, case/agreement, aspect/mood, register drift, and collocations.
+Aimed especially at students with dyslexia. Distributed as a free, open-source
+extension (MIT) with an optional premium subscription that funds the ElevenLabs
+TTS calls. All non-TTS features are 100% offline and free.
 
 ## Core Value
 
@@ -42,35 +44,24 @@ they're working on.
 - ✓ **Bundle-size release gate** — v1.0, `check-bundle-size` enforces 20 MiB internal engineering ceiling; current zip 10.25 MiB (DATA-03)
 - ✓ **Student-friendly explain popover** — v1.0, `rule.explain: (finding) => ({nb, nn})` callable on 5 popover-surfacing rules + renderExplain 3-way lookup + NB/NN register badge; `check-explain-contract` + `check-rule-css-wiring` release gates (UX-01)
 - ✓ **Top-3 suggestions with "Vis flere" reveal** — v1.0, spell-check popover + word-prediction dropdown both honor top-3 cap with click or ArrowDown auto-reveal; user-toggleable via "Vis alternative skriveforslag" (UX-02)
+- ✓ **Structural grammar infrastructure** — v2.0, sentence segmenter, tagged-token POS view, priority bands (P1/P2/P3), severity contract, quotation suppression, document-state two-pass runner
+- ✓ **Word-order violations** — v2.0, NB V2 inversion, DE main-clause V2 + subordinate verb-final, FR BAGS adjective placement (WO-01 through WO-04)
+- ✓ **DE case & agreement governance** — v2.0, preposition-case, separable-verb split, perfekt auxiliary, compound-noun gender (DE-01 through DE-04)
+- ✓ **ES structural rules** — v2.0, ser/estar, por/para, personal "a", subjuntivo triggers, pretérito/imperfecto hints, pro-drop overuse, gustar-class syntax (ES-01 through ES-03, MOOD-01/02, PRON-01/02)
+- ✓ **FR structural rules** — v2.0, élision, être/avoir auxiliary, PP agreement (10.3a), subjonctif triggers, clitic-cluster ordering (FR-01 through FR-03, MOOD-03, PRON-03)
+- ✓ **Register drift detection** — v2.0, DE du/Sie, FR tu/vous, NB bokmål/riksmål, NN a-/e-infinitiv mixing (DOC-01 through DOC-04)
+- ✓ **EN morphology** — v2.0, irregular overgeneration, word-family POS confusion (MORPH-01, MORPH-03)
+- ✓ **ES/FR opaque-noun gender** — v2.0, article-noun gender mismatch for opaque nouns (MORPH-02)
+- ✓ **Cross-language collocations** — v2.0, preposition-collocation errors in NB/DE/FR/ES with 97 seed entries (COLL-01 through COLL-04)
+- ✓ **9 release gates** — v2.0, check-fixtures + check-explain-contract + check-rule-css-wiring + check-network-silence + check-bundle-size + check-benchmark-coverage + check-governance-data + check-spellcheck-features + check-stateful-rule-invalidation
 
-## Current Milestone: v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
-
-**Goal:** Extend the spell-check surface from per-token rules (v1.0) into *structural* errors — word-order violations, case/agreement governance, aspect/mood choice, register drift, collocation errors — validated against the `benchmark-texts/<lang>.txt` corpus.
-
-**Seed:** `.planning/v2.0-benchmark-driven-roadmap.md` (draft, 11 phase groupings, benchmark-anchored).
-
-**Target phase groupings (subject to scoping):**
-- **Phase 6** — Register & stylistic polish (cross-lang, S)
-- **Phase 7** — Word-order violations (NB+DE+FR, M)
-- **Phase 8** — DE case & agreement governance (M)
-- **Phase 9** — ES ser/estar, por/para, personal "a" (M)
-- **Phase 10** — FR élision, auxiliary, participe passé (M)
-- **Phase 11** — Aspect & mood (ES+FR, L)
-- **Phase 12** — Pronoun & pro-drop (ES+FR, M)
-- **Phase 13** — Register consistency within a text (cross-lang, L)
-- **Phase 14** — Morphology & agreement beyond tokens (EN+ES+FR, M)
-- **Phase 15** — Collocations & idioms at scale (cross-lang, L)
-- **Phase 16** — Tense harmony & discourse (aspirational, L)
-
-**Validation source of truth:** `benchmark-texts/<lang>.txt`. A phase ships when its promised benchmark lines flip from unflagged → flagged (target 80%) — regardless of fixture green.
+## Current Milestone: (none — planning next)
 
 ### Active
 
-<!-- Current scope. Requirements derived in REQUIREMENTS.md during this milestone cycle. -->
+<!-- Carry-over tech-debt and candidate features for next milestone -->
 
-v2.0 scope pending requirement definition (Phases 6–16 candidate set above).
-
-**Carry-over tech-debt from v1.0** (see `.planning/milestones/v1.0-MILESTONE-AUDIT.md`):
+**Carry-over tech-debt from v1.0/v2.0:**
 
 - Manual "Run spell-check" button (Phase 5 deferred feature — user memory `project_phase5_manual_spellcheck_button.md`)
 - Demonstrative-mismatch rule (`Det boka`, `Den huset`) — extends nb-gender beyond en/ei/et
@@ -80,13 +71,20 @@ v2.0 scope pending requirement definition (Phases 6–16 candidate set above).
 - Leksi-in-skriv integration: embed spell-check/prediction as native feature inside `skriv.papertek.app` (memory `project_lexi_in_skriv_integration.md`)
 - `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
+- Browser visual verification for Phases 6/7 (P1/P2/P3 dots, quotation suppression, word-order dots)
+
+**v3.0 candidates (deferred from v2.0 scope):**
+
+- Tense harmony & discourse (TH-01 through TH-03) — unmotivated tense switches, anaphora ambiguity, long-distance SV agreement
+- Idiomatic-literalism curated match (IDI-01) — ~20-idiom closed list, only if FP rate stays at zero
+- FR participe passé full corner cases (FR-04) — distance > adjacent window, pronominal reflexive DO, elided DO
 
 ### Out of Scope
 
 <!-- Explicit exclusions with reasoning. Prevents re-adding later. -->
 
 - **Premium-gating for spell-check or other extension-side features** — landing page (`backend/public/index.html:681-683`) publicly commits all extension features stay free/open. Gating contradicts the promise and breaks user trust.
-- **Spell-check for non-Norwegian languages** — v1 rule set is specific to Norwegian (gender, særskriving). Each new language = its own milestone-scale effort.
+- **Spell-check for non-Norwegian languages beyond v2.0 structural rules** — v2.0 extended coverage to DE/ES/FR/EN structural grammar; further language-specific depth = its own milestone-scale effort.
 - **ML-based grammar rewrites / Grammarly parity** — forces external API costs + online connectivity + pedagogical downside (silent fixes compound errors).
 - **Bundle-size growth beyond 20 MiB** — enforced by `check-bundle-size` release gate. Growth needs justification in a new phase.
 - **Auto-correct without user confirmation** — dyslexia research: silent fixes compound errors. Show candidate, never silently rewrite.
@@ -104,21 +102,24 @@ v2.0 scope pending requirement definition (Phases 6–16 candidate set above).
 
 **Technical environment:**
 - Chrome Manifest V3 extension, vanilla JavaScript, no build step for extension code — keeps the bar low for contributors.
-- ~9.5k lines of JavaScript in `extension/`. Shipped zip 10.25 MiB (20 MiB internal cap, ~49% headroom).
+- ~12k lines of JavaScript in `extension/content/` (9,148 LOC in spell-rules alone). Shipped zip 12.47 MiB (20 MiB internal cap, ~38% headroom).
+- 57 spell-check rule files in plugin architecture (`spell-rules/*.js`); core engine 2,793 LOC (`spell-check.js` + `spell-check-core.js` + `vocab-seam*.js`).
 - Vocabulary data ships bundled per language; runtime downloads available for DE/ES/FR via IndexedDB; NB/NN/EN always bundled.
 - Vocab is authored in a separate repo (`papertek-vocabulary`) that also feeds `papertek-webapps` and `papertek-nativeapps`. Schema changes have cross-app blast radius — additive changes preferred.
 - Backend is Vercel serverless (Node.js ESM). Firebase Admin SDK for user/subscription state. All costs covered by subscription revenue.
 
 **Shipping rhythm:**
 - Release as GitHub Release tags → landing page serves latest zip via `/releases/latest/download/lexi-extension.zip`.
-- v1.0 shipped over 4 days (2026-04-18 → 2026-04-21, 133 commits) across 8 phases (3 of which were decimal-inserted gap-closure phases: 02.1, 03.1, 05.1).
-- 8 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size).
+- v1.0 shipped over 4 days (2026-04-18 → 2026-04-21, 133 commits) across 8 phases.
+- v2.0 shipped over 2 days (2026-04-24 → 2026-04-25, ~140 commits) across 12 phases.
+- 9 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation).
 
-**Current state (post-v1.0):**
-- 19/19 v1 requirements shipped and verified.
-- Chrome smoke test 11/11 PASS on `leksihjelp-2.3.1`.
-- No automated test suite — regression fixture is the first meaningful safety net. 262 hand-authored NB/NN cases, P/R/F1 gated per rule class.
-- Known v2.0+ tech debt tracked in v1.0 audit (no blockers for release).
+**Current state (post-v2.0):**
+- 42/42 v2.0 requirements shipped and verified (19/19 v1.0 prior).
+- 53 fixture suites, 3,326 fixture lines, all at F1=1.000.
+- 40/40 benchmark expectations met (P1: 5/5, P2: 31/31, P3: 4/4).
+- Browser visual verification pending for Phases 6/7 (P1/P2/P3 dot colours, quotation suppression, word-order dots).
+- No automated test suite beyond regression fixtures — `/gsd:add-tests` recommended before next release.
 
 ## Constraints
 
@@ -144,6 +145,13 @@ v2.0 scope pending requirement definition (Phases 6–16 candidate set above).
 | **Decimal phase numbering for audit-driven inserts** (Phase 02.1 / 03.1 / 05.1) | Preserves integer-phase roadmap semantics while allowing urgent gap-closure between integers | ✓ Good — 3 decimal phases closed SC-4, SC-01, and UX-01 gaps without renumbering planned work |
 | **Reverse SC-03 to flag-not-tolerate** (Phase 05.1 Gap D, user domain policy) | NB and NN are two distinct official standards; cross-standard tokens ARE student errors per user memory `project_nb_nn_no_mixing.md` | ✓ Good — dialect-mix rule + CROSS_DIALECT_MAP authoritative fire-gate; 11/11 Chrome smoke-test passed on cross-dialect sweep |
 | **`papertek-vocabulary` is single source of data truth** | Three consumers (leksihjelp, papertek-webapps, papertek-nativeapps) stay in sync; additive schema changes only | ✓ Good — Phase 2 (typo bank) + Phase 05.1 (languagesbank + nationalitiesbank + adjective-declension audit) all landed at the source; extension pulled via `npm run sync-vocab` |
+| **Sentence segmenter via `Intl.Segmenter`** (v2.0) | Zero-dependency, browser-native, handles all 5 languages | ✓ Good — consumed by every structural rule; no edge-case bugs surfaced |
+| **Tagged-token POS view in core, not per-rule** (v2.0) | Prevents re-implementation; single source of `findFiniteVerb` / `isMainClause` | ✓ Good — 6+ rules consume `ctx.getTagged(i)` without duplicating the walk |
+| **Shared `grammar-tables.js`** (v2.0) | One file for preposition-case tables, trigger sets, closed-adjective lists | ✓ Good — consumed by DE, ES, FR rules across Phases 8–13; no duplication |
+| **Document-state two-pass runner** (v2.0) | Separate `kind: 'document'` rules run after all token rules, with explicit invalidation | ✓ Good — 4 doc-drift rules use it cleanly; `check-stateful-rule-invalidation` gate catches regressions |
+| **Phase 16 deferred to v3.0** (v2.0 scope review) | Tense harmony/anaphora/long-distance SV agreement require deeper parsing; aspirational scope | ✓ Good — kept v2.0 shippable without unbounded parser work |
+| **FR PP 10.3b deferred to v3.0** (v2.0) | Full PP agreement (distance > adjacent window, pronominal reflexive DO) needs near-parser capability | ✓ Good — adjacent-window 10.3a ships correct; corner cases wait for better infrastructure |
+| **Gap closure via decimal phases** (v2.0) | 14.1 and 15.1 closed audit-found gaps without renumbering | ✓ Good — pattern established in v1.0 continues to work well |
 
 ---
-*Last updated: 2026-04-24 — v2.0 milestone started (Depth of Coverage — Grammar Governance Beyond Tokens)*
+*Last updated: 2026-04-25 after v2.0 milestone (Depth of Coverage — Grammar Governance Beyond Tokens)*
