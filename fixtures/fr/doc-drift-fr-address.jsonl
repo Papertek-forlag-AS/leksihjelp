@@ -1,0 +1,66 @@
+// DOC-02: FR tu/vous address drift — document-level register consistency
+// Positive fixtures: documents with mixed tu/vous address forms (31)
+// Acceptance fixtures: consistent-register, below-threshold, tied, no-markers (18)
+
+// ── Positive: Majority informal (tu), minority formal (vous) ──
+{"id":"doc-drift-fr-addr-p01","text":"Tu as raison. Tu es gentil. Ton ami est bon. Vous avez du temps.","expected":[{"rule_id":"doc-drift-fr-address","start":45,"end":49,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p02","text":"Tu es bon. Tu as un chat. Ton livre est bon. Vous avez un plan.","expected":[{"rule_id":"doc-drift-fr-address","start":45,"end":49,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p03","text":"Tu es gentil. Tu as un chien. Ton livre est bon. Ta mere est ici. Vous avez du temps.","expected":[{"rule_id":"doc-drift-fr-address","start":66,"end":70,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p04","text":"Tu es ici. Tu as raison. Ton ami est gentil. Vous avez un ami.","expected":[{"rule_id":"doc-drift-fr-address","start":45,"end":49,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p05","text":"Tu es bon. Tu as un livre. Ton chat est bon. Vous avez faim.","expected":[{"rule_id":"doc-drift-fr-address","start":45,"end":49,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p06","text":"Tu es bon. Tu as un plan. Ton ami est fort. Tu es gentil. Vous avez un chien.","expected":[{"rule_id":"doc-drift-fr-address","start":58,"end":62,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p07","text":"Tu es ici. Tu as raison. Ton ami est bon. Tu es fort. Vous avez du pain.","expected":[{"rule_id":"doc-drift-fr-address","start":54,"end":58,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p08","text":"Tu as un chat. Tu es bon. Ton livre est ici. Ta mere est gentil. Vous avez raison.","expected":[{"rule_id":"doc-drift-fr-address","start":65,"end":69,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p09","text":"Tu as un plan. Tu es bon. Ton chat est gentil. Tu as raison. Vous avez un ami.","expected":[{"rule_id":"doc-drift-fr-address","start":61,"end":65,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p10","text":"Tu es gentil. Tu as un chien. Ton ami est fort. Ta mere est ici. Tu es bon. Vous avez faim.","expected":[{"rule_id":"doc-drift-fr-address","start":76,"end":80,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p11","text":"Tu as du temps. Tu es fort. Ton livre est bon. Tu as raison. Tu es ici. Vous avez un plan.","expected":[{"rule_id":"doc-drift-fr-address","start":72,"end":76,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p12","text":"Tu es gentil. Tu as raison. Ton livre est ici. Ta mere est bon. Tu es fort. Vous avez du temps.","expected":[{"rule_id":"doc-drift-fr-address","start":76,"end":80,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p13","text":"Tu es gentil. Tu as un livre. Ton ami est bon. Tu as du temps. Vous avez un chat.","expected":[{"rule_id":"doc-drift-fr-address","start":63,"end":67,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p14","text":"Tu es ici. Tu as du pain. Ton chat est bon. Tu es content. Vous avez raison.","expected":[{"rule_id":"doc-drift-fr-address","start":59,"end":63,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p15","text":"Tu es bon. Tu as un ami. Ton chien est gentil. Tu as du temps. Vous avez un livre.","expected":[{"rule_id":"doc-drift-fr-address","start":63,"end":67,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p16","text":"Tu es fort. Tu as raison. Ton plan est bon. Tu es gentil. Vous avez du pain.","expected":[{"rule_id":"doc-drift-fr-address","start":58,"end":62,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p17","text":"Tu es content. Tu as un chien. Ton ami est ici. Tu es bon. Vous avez un plan.","expected":[{"rule_id":"doc-drift-fr-address","start":59,"end":63,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p18","text":"Tu as du pain. Tu es ici. Ton livre est bon. Tu as un chat. Vous avez faim.","expected":[{"rule_id":"doc-drift-fr-address","start":60,"end":64,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p19","text":"Tu es gentil. Tu as raison. Ton chien est bon. Tu as du temps. Vous avez un ami.","expected":[{"rule_id":"doc-drift-fr-address","start":63,"end":67,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p20","text":"Tu es bon. Tu as un plan. Ton ami est content. Tu es ici. Vous avez raison.","expected":[{"rule_id":"doc-drift-fr-address","start":58,"end":62,"suggestion":"tu"}]}
+{"id":"doc-drift-fr-addr-p21","text":"Tu es fort. Tu as du temps. Ton chat est gentil. Tu as un livre. Vous avez du pain.","expected":[{"rule_id":"doc-drift-fr-address","start":65,"end":69,"suggestion":"tu"}]}
+
+// ── Positive: Majority formal (vous), minority informal (tu/ton/ta) ──
+{"id":"doc-drift-fr-addr-p22","text":"Vous avez raison. Vous avez du temps. Vous avez un ami. Tu es gentil.","expected":[{"rule_id":"doc-drift-fr-address","start":56,"end":58,"suggestion":"vous"}]}
+{"id":"doc-drift-fr-addr-p23","text":"Vous avez un chat. Vous avez un plan. Vous avez faim. Tu as raison.","expected":[{"rule_id":"doc-drift-fr-address","start":54,"end":56,"suggestion":"vous"}]}
+{"id":"doc-drift-fr-addr-p24","text":"Vous avez raison. Vous avez du temps. Vous avez un livre. Ta mere est bon.","expected":[{"rule_id":"doc-drift-fr-address","start":58,"end":60,"suggestion":"votre"}]}
+{"id":"doc-drift-fr-addr-p25","text":"Vous avez du temps. Vous avez raison. Vous avez un ami. Tu es content.","expected":[{"rule_id":"doc-drift-fr-address","start":56,"end":58,"suggestion":"vous"}]}
+{"id":"doc-drift-fr-addr-p26","text":"Vous avez raison. Vous avez du temps. Vous avez un chien. Vous avez un ami. Ton chat est bon.","expected":[{"rule_id":"doc-drift-fr-address","start":76,"end":79,"suggestion":"votre"}]}
+{"id":"doc-drift-fr-addr-p27","text":"Vous avez un livre. Vous avez du pain. Vous avez raison. Vous avez faim. Ta mere est ici.","expected":[{"rule_id":"doc-drift-fr-address","start":73,"end":75,"suggestion":"votre"}]}
+{"id":"doc-drift-fr-addr-p28","text":"Vous avez un ami. Vous avez du temps. Vous avez un plan. Vous avez un chien. Ton livre est ici.","expected":[{"rule_id":"doc-drift-fr-address","start":77,"end":80,"suggestion":"votre"}]}
+{"id":"doc-drift-fr-addr-p29","text":"Vous avez un chat. Vous avez un livre. Vous avez du pain. Vous avez raison. Ton ami est bon.","expected":[{"rule_id":"doc-drift-fr-address","start":76,"end":79,"suggestion":"votre"}]}
+{"id":"doc-drift-fr-addr-p30","text":"Vous avez raison. Vous avez du temps. Vous avez un ami. Vous avez un chat. Tu es ici.","expected":[{"rule_id":"doc-drift-fr-address","start":75,"end":77,"suggestion":"vous"}]}
+{"id":"doc-drift-fr-addr-p31","text":"Vous avez raison. Vous avez un ami. Vous avez du temps. Vous avez un chat. Tu as un plan.","expected":[{"rule_id":"doc-drift-fr-address","start":75,"end":77,"suggestion":"vous"}]}
+
+// ── Acceptance: All informal (no drift) ──
+{"id":"doc-drift-fr-addr-a01","text":"Tu es gentil. Tu as raison. Ton ami est ici.","expected":[],"comment":"All tu = no drift"}
+{"id":"doc-drift-fr-addr-a02","text":"Tu es bon. Tu as un chat. Ton livre est bon.","expected":[],"comment":"All informal"}
+{"id":"doc-drift-fr-addr-a03","text":"Tu es ici. Tu as raison. Ton ami est bon. Tu es fort.","expected":[],"comment":"All informal, many markers"}
+{"id":"doc-drift-fr-addr-a04","text":"Tu es gentil. Tu as un chien. Ton livre est bon. Ta mere est ici.","expected":[],"comment":"All informal with ta"}
+{"id":"doc-drift-fr-addr-a05","text":"Tu es bon. Tu as un ami. Tu es ici.","expected":[],"comment":"All informal, shorter"}
+
+// ── Acceptance: All formal (no drift) ──
+{"id":"doc-drift-fr-addr-a06","text":"Vous avez raison. Vous avez du temps. Vous avez un ami.","expected":[],"comment":"All vous = no drift"}
+{"id":"doc-drift-fr-addr-a07","text":"Vous avez un chat. Vous avez faim. Vous avez un plan.","expected":[],"comment":"All formal"}
+{"id":"doc-drift-fr-addr-a08","text":"Vous avez raison. Vous avez un chat. Vous avez un plan. Vous avez faim.","expected":[],"comment":"All formal, many markers"}
+
+// ── Acceptance: Below minimum threshold (< 3 markers) ──
+{"id":"doc-drift-fr-addr-a09","text":"Tu es gentil.","expected":[],"comment":"Only 1 marker, below threshold"}
+{"id":"doc-drift-fr-addr-a10","text":"Tu as raison. Tu es bon.","expected":[],"comment":"2 markers, below threshold of 3"}
+{"id":"doc-drift-fr-addr-a11","text":"Il est bon. Elle est ici.","expected":[],"comment":"No address markers at all"}
+{"id":"doc-drift-fr-addr-a12","text":"Je suis content. Il a un livre.","expected":[],"comment":"No 2nd-person markers"}
+{"id":"doc-drift-fr-addr-a13","text":"Tu es gentil. Tu as raison.","expected":[],"comment":"2 markers, below threshold"}
+
+// ── Acceptance: Tied registers (no dominant) ──
+{"id":"doc-drift-fr-addr-a14","text":"Tu es gentil. Ton ami est ici. Vous avez raison. Vous avez du temps.","expected":[],"comment":"2 informal + 2 formal = tied -> no drift"}
+
+// ── Acceptance: No 2nd-person markers ──
+{"id":"doc-drift-fr-addr-a15","text":"Il est bon. Elle a un chat. Nous avons faim.","expected":[],"comment":"No tu/vous markers"}
+{"id":"doc-drift-fr-addr-a16","text":"Je suis ici. Il est bon. Elle a raison.","expected":[],"comment":"No 2nd-person markers"}
+{"id":"doc-drift-fr-addr-a17","text":"Nous avons un chat. Il est content.","expected":[],"comment":"No 2nd-person markers"}
+{"id":"doc-drift-fr-addr-a18","text":"Elle est ici. Il a un ami. Je suis content.","expected":[],"comment":"No 2nd-person markers"}
