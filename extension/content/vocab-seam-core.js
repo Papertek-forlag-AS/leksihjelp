@@ -970,6 +970,94 @@
     return nnInfinitiveClasses;
   }
 
+  // ── Phase 14: Build irregularForms Map from raw EN data ──
+  // Maps wrong regular-pattern derivation forms (childs, eated, goed) to
+  // { correct, type, base } objects so the EN morphology rule can flag
+  // overregularization errors. Built from raw data banks (not wordList)
+  // to avoid feature-gating starvation per Pitfall 3.
+  function buildIrregularForms(raw) {
+    const irregularForms = new Map();
+    if (!raw) return irregularForms;
+
+    // ── Irregular verbs: wrong regular past tense ──
+    if (raw.verbbank) {
+      for (const entry of Object.values(raw.verbbank)) {
+        if (entry.verbClass !== 'irregular') continue;
+        const word = (entry.word || '').trim();
+        if (!word || word.includes(' ') || word.includes(';')) continue;
+
+        const pastForm = entry.conjugations?.past?.former?.simple;
+        if (!pastForm) continue;
+
+        const lower = word.toLowerCase();
+        const pastLower = pastForm.toLowerCase();
+
+        // Generate wrong regular past forms
+        const wrongForms = new Set();
+        if (lower.endsWith('e')) {
+          // come -> comed (not comeed)
+          wrongForms.add(lower + 'd');
+        } else {
+          wrongForms.add(lower + 'ed');
+          // Short verbs ending in consonant: consonant doubling (run -> runned)
+          const lastChar = lower[lower.length - 1];
+          const vowels = new Set(['a', 'e', 'i', 'o', 'u']);
+          if (!vowels.has(lastChar) && lower.length <= 5) {
+            wrongForms.add(lower + lastChar + 'ed');
+          }
+        }
+
+        for (const wrongForm of wrongForms) {
+          // Skip if the wrong form IS the correct form
+          if (wrongForm === pastLower) continue;
+          // Don't overwrite existing entries (first match wins)
+          if (!irregularForms.has(wrongForm)) {
+            irregularForms.set(wrongForm, { correct: pastForm, type: 'past', base: word });
+          }
+        }
+      }
+    }
+
+    // ── Irregular nouns: wrong regular plural ──
+    if (raw.nounbank) {
+      for (const entry of Object.values(raw.nounbank)) {
+        const word = (entry.word || '').trim();
+        if (!word || word.includes(' ') || word.includes(';')) continue;
+
+        const plural = entry.plural || entry.forms?.plural;
+        if (!plural || typeof plural !== 'string') continue;
+
+        const lower = word.toLowerCase();
+        const pluralLower = plural.toLowerCase();
+
+        // Check if plural is regular — if so, skip
+        // Regular patterns: word+s, word+es, y->ies
+        const regularPlurals = new Set();
+        regularPlurals.add(lower + 's');
+        regularPlurals.add(lower + 'es');
+        if (lower.endsWith('y') && lower.length > 1) {
+          const stem = lower.slice(0, -1);
+          regularPlurals.add(stem + 'ies');
+        }
+        if (regularPlurals.has(pluralLower)) continue;
+
+        // Generate wrong regular plurals
+        const wrongForms = new Set();
+        wrongForms.add(lower + 's');
+        wrongForms.add(lower + 'es');
+
+        for (const wrongForm of wrongForms) {
+          if (wrongForm === pluralLower) continue;
+          if (!irregularForms.has(wrongForm)) {
+            irregularForms.set(wrongForm, { correct: plural, type: 'plural', base: word });
+          }
+        }
+      }
+    }
+
+    return irregularForms;
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -1059,6 +1147,11 @@
     // Empty Map for non-NN languages. Only dual-form verbs included.
     const nnInfinitiveClasses = buildNNInfinitiveClasses(raw, lang);
 
+    // Phase 14: irregularForms Map for EN morphology rule (MORPH-01).
+    // Maps wrong regular-pattern forms (childs, eated) to { correct, type, base }.
+    // Empty Map for non-EN languages. Built from raw data (not wordList).
+    const irregularForms = lang === 'en' ? buildIrregularForms(raw) : new Map();
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -1101,6 +1194,10 @@
       // Phase 13: NN infinitive classification for DOC-04.
       // Empty Map for non-NN languages. 341 dual-form verb entries for NN.
       nnInfinitiveClasses,
+      // Phase 14: irregular form overregularization index for EN morphology rule.
+      // Maps wrong regular forms (childs, eated) to { correct, type, base }.
+      // Empty Map for non-EN languages.
+      irregularForms,
     };
   }
 
