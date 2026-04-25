@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
-current_phase: 14-morphology-beyond-tokens-en-es-fr
+current_phase: 14.1-vocab-seam-browser-wiring
 current_plan: Not started
-status: completed
-last_updated: "2026-04-25T14:09:56.048Z"
+status: in_progress
+last_updated: "2026-04-25T16:30:00.000Z"
 progress:
-  total_phases: 9
+  total_phases: 11
   completed_phases: 9
   total_plans: 28
   completed_plans: 28
@@ -22,9 +22,9 @@ See: .planning/PROJECT.md
 ## Position
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
-**Current phase:** 14-morphology-beyond-tokens-en-es-fr
+**Current phase:** 14.1-vocab-seam-browser-wiring (gap closure)
 **Current Plan:** Not started
-**Status:** Milestone complete
+**Status:** Gap closure in progress
 
 ## Decisions
 
@@ -61,3 +61,5 @@ See: .planning/PROJECT.md
 - 2026-04-25: Completed 14-01 (irregularForms index, manifest/CSS/gate/benchmark wiring for 3 new rules)
 - 2026-04-25: Completed 14-02 (EN irregular overgeneration + word-family POS-slot rules with 98 fixtures)
 - 2026-04-25: Completed 14-03 (FR adjective-noun gender agreement rule with 55 fixtures)
+- 2026-04-25: Milestone audit found gaps: vocab-seam browser wiring (9 rules silent), deleted doc-drift-de-address.js, Phase 15 unexecuted
+- 2026-04-25: Gap closure phases created: 14.1 (vocab-seam wiring), Phase 15 (collocations) already in roadmap

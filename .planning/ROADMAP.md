@@ -34,6 +34,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 12: Pronoun & Pro-Drop (ES + FR)** — Warn on ES subject-pronoun overuse, flag ES gustar-class syntax errors, flag FR clitic-cluster ordering; all at hint or warn severity (completed 2026-04-25)
 - [x] **Phase 13: Register Drift Within a Document** — Land document-state two-pass runner with stateful-rule-invalidation gate; warn on DE du/Sie drift, FR tu/vous drift, NB bokmål/riksmål mixing, NN a-/e-infinitiv mixing (completed 2026-04-25)
 - [x] **Phase 14: Morphology Beyond Tokens (EN + ES/FR)** — Flag EN morphological overgeneration (`childs`, `eated`), ES/FR opaque-noun gender mismatch, and EN word-family POS confusion (completed 2026-04-25)
+- [ ] **Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)** — Wire 8 missing vocab indexes into spell-check.js browser runtime; restore deleted doc-drift-de-address.js; close integration blocker affecting 9 rules
 - [ ] **Phase 15: Collocations at Scale (NB + DE + FR + ES)** — Flag preposition collocation errors in NB, DE, FR, ES via shared collocation-bank shape proven in Phase 6
 
 ## Phase Details
@@ -183,6 +184,18 @@ Plans:
 - [ ] 14-02-PLAN.md — MORPH-01 EN irregular overgeneration + MORPH-03 EN word-family POS-slot rules with fixtures
 - [ ] 14-03-PLAN.md — MORPH-02 FR adjective-noun gender agreement rule with fixtures
 
+### Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)
+**Goal**: Close the integration blocker where 9 spell-check rules pass fixture suites but are silent in the browser because `spell-check.js` doesn't forward their vocab indexes. Restore the accidentally deleted `doc-drift-de-address.js`. All release gates must exit 0 after this phase.
+**Depends on**: Phase 14 (last phase that added missing indexes)
+**Requirements**: Gap closure — no new requirements. Fixes browser wiring for DE-03, FR-02, FR-03, MOOD-01, MOOD-02, MOOD-03, PRON-01, PRON-02, MORPH-01, DOC-01.
+**Gap Closure**: Closes VOCAB-SEAM-GAP, DOC-DRIFT-DELETED, and BROWSER-RUNTIME flow gaps from v2.0-MILESTONE-AUDIT.md
+**Success Criteria** (what must be TRUE):
+  1. `vocab-seam.js` exposes getters for all 8 missing indexes: `getParticipleToAux`, `getEsPresensToVerb`, `getEsSubjuntivoForms`, `getEsImperfectoForms`, `getEsPreteritumToVerb`, `getFrPresensToVerb`, `getFrSubjonctifForms`, `getFrSubjonctifDiffers`, `getIrregularForms`.
+  2. `spell-check.js` vocab object (lines 225-246) forwards all new getters into the vocab passed to `CORE.check()`.
+  3. `doc-drift-de-address.js` is restored on disk and all release gates exit 0: `check-explain-contract`, `check-rule-css-wiring`, `check-benchmark-coverage`, `check-fixtures`, `check-stateful-rule-invalidation`.
+  4. A new integration gate or smoke-test confirms that the browser-path vocab object contains every key that any registered rule's `check()` function reads from `ctx.vocab`.
+**Plans**: TBD
+
 ### Phase 15: Collocations at Scale (NB + DE + FR + ES)
 **Goal**: Scale the Phase 6 EN-collocation-seed pattern into full preposition-collocation coverage across NB, DE, FR, ES; data-heavy, reuses existing rule shape.
 **Depends on**: Phase 6 (`getCollocationBank` shape proven), Phase 8/9/10 (language-specific trigger-table conventions)
@@ -192,11 +205,7 @@ Plans:
   2. DE, FR, ES preposition-collocation rules each ship with ≥30 positive + ≥15 acceptance fixtures per language, all consuming the same `collocationbank` data shape introduced in Phase 6.
   3. No Phase 15 rule introduces a new trigger-list shape; code review confirms all four rules are ≤50 LOC wrappers over the shared data shape.
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
-**Plans**: 3 plans
-Plans:
-- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
-- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
-- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
+**Plans**: TBD
 
 ## Progress
 
@@ -218,7 +227,8 @@ Plans:
 | 11. Aspect & Mood (ES + FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 12. Pronoun & Pro-Drop (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
 | 13. Register Drift Within a Document | 3/3 | Complete    | 2026-04-25 | — |
-| 14. Morphology Beyond Tokens (EN + ES/FR) | 3/3 | Complete    | 2026-04-25 | — |
+| 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
+| 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | v2.0 | 0/? | Not started | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
