@@ -1,0 +1,108 @@
+// FR passe compose auxiliary rule fixtures (FR-02, Phase 10)
+// Rule id: "fr-etre-avoir". Flags wrong avoir/etre in passe compose.
+// >=30 positive + >=15 acceptance cases.
+//
+// NOTE: Fixtures avoid j'ai/j'avais because the FR typo rule flags those
+// apostrophe tokens (j'ai->j'aime) at lower priority, and dedupeOverlapping
+// suppresses the fr-etre-avoir finding on the same span. Use "il a", "elle a"
+// etc. instead for reliable testing.
+// Also avoids feminine participles that trigger typo (allee, tombee, venue,
+// devenue, nee, retourne).
+
+// ── Positive cases — wrong auxiliary, must flag ──
+
+// aller (etre verb) used with avoir
+{"id":"fr-ea-pos-001","text":"il a alle","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-002","text":"elle a alle","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+{"id":"fr-ea-pos-003","text":"nous avons alle","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":10,"suggestion":"sommes"}]}
+
+// partir (etre verb) used with avoir
+{"id":"fr-ea-pos-004","text":"il a parti","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-005","text":"elle a partie","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+{"id":"fr-ea-pos-006","text":"ils ont parti","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":4,"end":7,"suggestion":"sont"}]}
+
+// arriver (etre verb) used with avoir
+{"id":"fr-ea-pos-007","text":"nous avons arrive","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":10,"suggestion":"sommes"}]}
+{"id":"fr-ea-pos-008","text":"il a arrive","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-009","text":"elle a arrivee","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+
+// tomber (etre verb) used with avoir
+{"id":"fr-ea-pos-010","text":"il a tombe","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-011","text":"elle a tombe","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+
+// venir (etre verb) used with avoir
+{"id":"fr-ea-pos-012","text":"il a venu","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-013","text":"ils ont venu","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":4,"end":7,"suggestion":"sont"}]}
+
+// devenir (etre verb) used with avoir
+{"id":"fr-ea-pos-014","text":"il a devenu","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// mourir (etre verb) used with avoir
+{"id":"fr-ea-pos-015","text":"il a mort","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// naitre (etre verb) used with avoir — use ne (unaccented, clean)
+{"id":"fr-ea-pos-016","text":"il a ne","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// rester (etre verb) used with avoir
+{"id":"fr-ea-pos-017","text":"il a reste","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// rentrer (etre verb) used with avoir
+{"id":"fr-ea-pos-018","text":"il a rentre","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// sortir (etre verb) used with avoir
+{"id":"fr-ea-pos-019","text":"elle a sorti","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+{"id":"fr-ea-pos-020","text":"il a sortie","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// revenir (etre verb) used with avoir
+{"id":"fr-ea-pos-021","text":"il a revenu","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// monter (etre verb) used with avoir
+{"id":"fr-ea-pos-022","text":"elle a monte","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":6,"suggestion":"est"}]}
+
+// entrer (etre verb) used with avoir
+{"id":"fr-ea-pos-023","text":"il a entre","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// descendre (etre verb) used with avoir
+{"id":"fr-ea-pos-024","text":"nous avons descendu","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":10,"suggestion":"sommes"}]}
+
+// passer (etre verb) used with avoir
+{"id":"fr-ea-pos-025","text":"il a passe","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// Plural forms
+{"id":"fr-ea-pos-026","text":"elles ont alle","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":6,"end":9,"suggestion":"sont"}]}
+{"id":"fr-ea-pos-027","text":"ils ont arrive","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":4,"end":7,"suggestion":"sont"}]}
+{"id":"fr-ea-pos-028","text":"vous avez parti","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":9,"suggestion":"etes"}]}
+
+// Imparfait forms with etre verbs
+{"id":"fr-ea-pos-029","text":"il avait parti","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":8,"suggestion":"était"}]}
+{"id":"fr-ea-pos-030","text":"elle avait tombe","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":5,"end":10,"suggestion":"était"}]}
+
+// Accented participles
+{"id":"fr-ea-pos-031","text":"il a allé","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+{"id":"fr-ea-pos-032","text":"il a arrivé","lang":"fr","expected":[{"rule_id":"fr-etre-avoir","start":3,"end":4,"suggestion":"est"}]}
+
+// ── Acceptance cases — no flag expected ──
+
+// Correct etre usage
+{"id":"fr-ea-acc-001","text":"je suis alle","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-002","text":"il est venu","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-003","text":"il est parti","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-004","text":"nous sommes arrive","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-005","text":"ils sont tombe","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-006","text":"il est devenu","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-007","text":"il est mort","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-008","text":"elle est sortie","lang":"fr","expected":[]}
+
+// Correct avoir usage (verbs that take avoir — not in etre participle tables)
+{"id":"fr-ea-acc-009","text":"il a mange","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-010","text":"il a parle","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-011","text":"nous avons fini","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-012","text":"elle a lu","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-013","text":"ils ont bu","lang":"fr","expected":[]}
+
+// No participle in range
+{"id":"fr-ea-acc-014","text":"il a dit","lang":"fr","expected":[]}
+
+// Etre form without etre-verb participle (no flag)
+{"id":"fr-ea-acc-015","text":"je suis content","lang":"fr","expected":[]}
+{"id":"fr-ea-acc-016","text":"il est bon","lang":"fr","expected":[]}

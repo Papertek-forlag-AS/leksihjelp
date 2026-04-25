@@ -1,0 +1,89 @@
+// FR elision rule fixtures (FR-01, Phase 10)
+// Rule id: "fr-elision". Flags missing elision of clitics before vowel/h-muet.
+// >=30 positive + >=15 acceptance cases.
+
+// ── Positive cases — missing elision, must flag ──
+
+// je + vowel
+{"id":"fr-eli-pos-001","text":"je ai","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":5,"suggestion":"j'ai"}]}
+{"id":"fr-eli-pos-002","text":"je aime","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":7,"suggestion":"j'aime"}]}
+{"id":"fr-eli-pos-003","text":"je avais","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"j'avais"}]}
+{"id":"fr-eli-pos-004","text":"je arrive","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":9,"suggestion":"j'arrive"}]}
+{"id":"fr-eli-pos-005","text":"je habite","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":9,"suggestion":"j'habite"}]}
+
+// me + vowel
+{"id":"fr-eli-pos-006","text":"il me appelle","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":13,"suggestion":"m'appelle"}]}
+{"id":"fr-eli-pos-007","text":"il me invite","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":12,"suggestion":"m'invite"}]}
+
+// te + vowel
+{"id":"fr-eli-pos-008","text":"je te invite","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":12,"suggestion":"t'invite"}]}
+{"id":"fr-eli-pos-009","text":"je te aime","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":10,"suggestion":"t'aime"}]}
+
+// se + vowel/h-muet
+{"id":"fr-eli-pos-010","text":"il se habille","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":13,"suggestion":"s'habille"}]}
+{"id":"fr-eli-pos-011","text":"elle se appelle","lang":"fr","expected":[{"rule_id":"fr-elision","start":5,"end":15,"suggestion":"s'appelle"}]}
+
+// le + vowel
+{"id":"fr-eli-pos-012","text":"le ami","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":6,"suggestion":"l'ami"}]}
+{"id":"fr-eli-pos-013","text":"le enfant","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":9,"suggestion":"l'enfant"}]}
+{"id":"fr-eli-pos-014","text":"le homme","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"l'homme"}]}
+
+// la + vowel/h-muet
+{"id":"fr-eli-pos-015","text":"la ecole","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"l'ecole"}]}
+{"id":"fr-eli-pos-016","text":"la histoire","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":11,"suggestion":"l'histoire"}]}
+{"id":"fr-eli-pos-017","text":"la eau","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":6,"suggestion":"l'eau"}]}
+
+// de + vowel
+{"id":"fr-eli-pos-018","text":"de erreurs","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":10,"suggestion":"d'erreurs"}]}
+{"id":"fr-eli-pos-019","text":"de avoir","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"d'avoir"}]}
+{"id":"fr-eli-pos-020","text":"de autre","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"d'autre"}]}
+
+// ne + vowel
+{"id":"fr-eli-pos-021","text":"il ne est pas","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":9,"suggestion":"n'est"}]}
+{"id":"fr-eli-pos-022","text":"je ne ai pas","lang":"fr","expected":[{"rule_id":"fr-elision","start":3,"end":8,"suggestion":"n'ai"}]}
+{"id":"fr-eli-pos-023","text":"ne oublie pas","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":9,"suggestion":"n'oublie"}]}
+
+// que + vowel
+{"id":"fr-eli-pos-024","text":"que il vient","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":6,"suggestion":"qu'il"}]}
+{"id":"fr-eli-pos-025","text":"que est","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":7,"suggestion":"qu'est"}]}
+
+// si + il/ils
+{"id":"fr-eli-pos-026","text":"si il","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":5,"suggestion":"s'il"}]}
+{"id":"fr-eli-pos-027","text":"si ils","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":6,"suggestion":"s'ils"}]}
+
+// h-muet (not in h-aspire list)
+{"id":"fr-eli-pos-028","text":"le hotel","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"l'hotel"}]}
+{"id":"fr-eli-pos-029","text":"de habitude","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":11,"suggestion":"d'habitude"}]}
+{"id":"fr-eli-pos-030","text":"le hiver","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"l'hiver"}]}
+{"id":"fr-eli-pos-031","text":"la herbe","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":8,"suggestion":"l'herbe"}]}
+{"id":"fr-eli-pos-032","text":"le heritage","lang":"fr","expected":[{"rule_id":"fr-elision","start":0,"end":11,"suggestion":"l'heritage"}]}
+
+// ── Acceptance cases — no flag expected ──
+
+// Already elided (single apostrophe-token)
+{"id":"fr-eli-acc-001","text":"j'aime le chat","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-002","text":"l'homme est grand","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-003","text":"l'ami est la","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-004","text":"j'arrive","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-005","text":"d'accord","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-006","text":"qu'il vient","lang":"fr","expected":[]}
+
+// H-aspire: no elision
+{"id":"fr-eli-acc-007","text":"le heros","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-008","text":"le heros est fort","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-009","text":"le hamster est petit","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-010","text":"le hibou dort","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-011","text":"le hockey est bon","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-012","text":"le hall est grand","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-013","text":"le haricot est bon","lang":"fr","expected":[]}
+
+// Consonant-initial: no elision
+{"id":"fr-eli-acc-014","text":"le chat dort","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-015","text":"je mange bien","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-016","text":"la maison est la","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-017","text":"de la viande","lang":"fr","expected":[]}
+
+// SI + non-il: no elision
+{"id":"fr-eli-acc-018","text":"si elle dort","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-019","text":"si on dort","lang":"fr","expected":[]}
+{"id":"fr-eli-acc-020","text":"si nous dormons","lang":"fr","expected":[]}

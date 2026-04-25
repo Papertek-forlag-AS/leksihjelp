@@ -293,21 +293,52 @@
 
   // Participle form -> infinitive for DR MRS VANDERTRAMP verbs with data gaps.
   // Both accented and unaccented forms for student text robustness.
+  // Covers all 18 etre-verbs from FR_ETRE_VERBS (masc + fem participle forms).
   const FR_ETRE_PARTICIPLES = {
-    devenu: 'devenir',
-    devenue: 'devenir',
-    'né': 'naitre',
-    ne: 'naitre',
-    'née': 'naitre',
-    nee: 'naitre',
-    'rentré': 'rentrer',
-    rentre: 'rentrer',
-    'rentrée': 'rentrer',
-    rentree: 'rentrer',
-    'retourné': 'retourner',
-    retourne: 'retourner',
-    'retournée': 'retourner',
-    retournee: 'retourner',
+    // aller
+    'allé': 'aller', alle: 'aller', 'allée': 'aller', allee: 'aller',
+    'allés': 'aller', alles: 'aller', 'allées': 'aller', allees: 'aller',
+    // arriver
+    'arrivé': 'arriver', arrive: 'arriver', 'arrivée': 'arriver', arrivee: 'arriver',
+    'arrivés': 'arriver', arrives: 'arriver', 'arrivées': 'arriver', arrivees: 'arriver',
+    // descendre
+    descendu: 'descendre', descendue: 'descendre', descendus: 'descendre', descendues: 'descendre',
+    // devenir
+    devenu: 'devenir', devenue: 'devenir', devenus: 'devenir', devenues: 'devenir',
+    // entrer
+    'entré': 'entrer', entre: 'entrer', 'entrée': 'entrer', entree: 'entrer',
+    'entrés': 'entrer', entres: 'entrer', 'entrées': 'entrer', entrees: 'entrer',
+    // monter
+    'monté': 'monter', monte: 'monter', 'montée': 'monter', montee: 'monter',
+    'montés': 'monter', montes: 'monter', 'montées': 'monter', montees: 'monter',
+    // mourir
+    mort: 'mourir', morte: 'mourir', morts: 'mourir', mortes: 'mourir',
+    // naitre
+    'né': 'naitre', ne: 'naitre', 'née': 'naitre', nee: 'naitre',
+    'nés': 'naitre', nes: 'naitre', 'nées': 'naitre', nees: 'naitre',
+    // partir
+    parti: 'partir', partie: 'partir', partis: 'partir', parties: 'partir',
+    // passer
+    'passé': 'passer', passe: 'passer', 'passée': 'passer', passee: 'passer',
+    'passés': 'passer', passes: 'passer', 'passées': 'passer', passees: 'passer',
+    // rentrer
+    'rentré': 'rentrer', rentre: 'rentrer', 'rentrée': 'rentrer', rentree: 'rentrer',
+    'rentrés': 'rentrer', rentres: 'rentrer', 'rentrées': 'rentrer', rentrees: 'rentrer',
+    // rester
+    'resté': 'rester', reste: 'rester', 'restée': 'rester', restee: 'rester',
+    'restés': 'rester', restes: 'rester', 'restées': 'rester', restees: 'rester',
+    // retourner
+    'retourné': 'retourner', retourne: 'retourner', 'retournée': 'retourner', retournee: 'retourner',
+    'retournés': 'retourner', retournes: 'retourner', 'retournées': 'retourner', retournees: 'retourner',
+    // revenir
+    revenu: 'revenir', revenue: 'revenir', revenus: 'revenir', revenues: 'revenir',
+    // sortir
+    sorti: 'sortir', sortie: 'sortir', sortis: 'sortir', sorties: 'sortir',
+    // tomber
+    'tombé': 'tomber', tombe: 'tomber', 'tombée': 'tomber', tombee: 'tomber',
+    'tombés': 'tomber', tombes: 'tomber', 'tombées': 'tomber', tombees: 'tomber',
+    // venir
+    venu: 'venir', venue: 'venir', venus: 'venir', venues: 'venir',
   };
 
   const tables = {
