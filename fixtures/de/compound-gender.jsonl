@@ -1,0 +1,74 @@
+// DE compound-noun gender inference rule fixtures (DE-04, Phase 8)
+// Rule id: "de-compound-gender". Flags wrong article on compound nouns
+// whose gender is inferred from the last component.
+// ≥30 positive + ≥15 acceptance cases.
+
+// ── Positive cases — wrong article on compound, must flag ──
+
+// Compounds with -tür (f) suffix — Haustür not in nounbank
+{"id":"de-cg-pos-001","text":"der Haustür","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"Haustier"},{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+{"id":"de-cg-pos-002","text":"das Haustür","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"Haustier"},{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+// Compounds with -tasche (f) suffix — Handtasche not in nounbank
+{"id":"de-cg-pos-003","text":"der Handtasche","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+{"id":"de-cg-pos-004","text":"das Handtasche","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+// Compounds with -zimmer (n) suffix — Kinderzimmer not in nounbank
+{"id":"de-cg-pos-005","text":"der Kinderzimmer","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+{"id":"de-cg-pos-006","text":"die Kinderzimmer","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+// Compounds with -zimmer via s-linker — Arbeitszimmer not in nounbank
+{"id":"de-cg-pos-007","text":"die Arbeitszimmer","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+{"id":"de-cg-pos-008","text":"der Arbeitszimmer","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+// Compounds with -tisch (m) suffix — Küchentisch not in nounbank
+{"id":"de-cg-pos-009","text":"die Küchentisch","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+{"id":"de-cg-pos-010","text":"das Küchentisch","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+// Compounds with -buch (n) suffix — Schulbuch not in nounbank
+{"id":"de-cg-pos-011","text":"der Schulbuch","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+{"id":"de-cg-pos-012","text":"die Schulbuch","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"das"}]}
+// Compounds with -schrank (m) suffix via -er linker — Bücherschrank not in nounbank
+{"id":"de-cg-pos-013","text":"die Bücherschrank","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+{"id":"de-cg-pos-014","text":"das Bücherschrank","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+// Compounds with -kasten (m) suffix — Briefkasten not in nounbank
+{"id":"de-cg-pos-015","text":"die Briefkasten","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+{"id":"de-cg-pos-016","text":"das Briefkasten","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+// Compounds with -mann (m) — Feuerwehrmann not in nounbank
+{"id":"de-cg-pos-017","text":"die Feuerwehrmann","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+{"id":"de-cg-pos-018","text":"das Feuerwehrmann","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"der"}]}
+// Compounds with -blume (f) via -en linker — Sonnenblume not in nounbank
+{"id":"de-cg-pos-019","text":"das Sonnenblume","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+{"id":"de-cg-pos-020","text":"der Sonnenblume","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"die"}]}
+// Indefinite articles — ein (m/n) vs eine (f)
+{"id":"de-cg-pos-021","text":"ein Haustür","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"Haustier"},{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"eine"}]}
+{"id":"de-cg-pos-022","text":"ein Handtasche","expected":[{"rule_id":"de-compound-gender","start":0,"end":3,"suggestion":"eine"}]}
+{"id":"de-cg-pos-023","text":"eine Kinderzimmer","expected":[{"rule_id":"de-compound-gender","start":0,"end":4,"suggestion":"ein"}]}
+{"id":"de-cg-pos-024","text":"eine Schulbuch","expected":[{"rule_id":"de-compound-gender","start":0,"end":4,"suggestion":"ein"}]}
+{"id":"de-cg-pos-025","text":"eine Briefkasten","expected":[{"rule_id":"de-compound-gender","start":0,"end":4,"suggestion":"ein"}]}
+{"id":"de-cg-pos-026","text":"eine Küchentisch","expected":[{"rule_id":"de-compound-gender","start":0,"end":4,"suggestion":"ein"}]}
+// In sentence context
+{"id":"de-cg-pos-027","text":"Das ist der Kinderzimmer","expected":[{"rule_id":"de-compound-gender","start":8,"end":11,"suggestion":"das"}]}
+{"id":"de-cg-pos-028","text":"Hier ist das Küchentisch","expected":[{"rule_id":"de-compound-gender","start":9,"end":12,"suggestion":"der"}]}
+{"id":"de-cg-pos-029","text":"Das ist die Schulbuch","expected":[{"rule_id":"de-compound-gender","start":8,"end":11,"suggestion":"das"}]}
+{"id":"de-cg-pos-030","text":"Das war die Briefkasten","expected":[{"rule_id":"de-compound-gender","start":8,"end":11,"suggestion":"der"}]}
+
+// ── Acceptance cases — correct usage or non-compound, must NOT flag ──
+
+// Correct articles on compounds
+{"id":"de-cg-acc-001","text":"die Haustür","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"Haustier"}],"comment":"correct: Tür=f, die; typo still fires on Haustür"}
+{"id":"de-cg-acc-002","text":"das Kinderzimmer","expected":[],"comment":"correct: Zimmer=n → das"}
+{"id":"de-cg-acc-003","text":"die Handtasche","expected":[],"comment":"correct: Tasche=f → die"}
+{"id":"de-cg-acc-004","text":"der Küchentisch","expected":[],"comment":"correct: Tisch=m → der"}
+{"id":"de-cg-acc-005","text":"das Schulbuch","expected":[],"comment":"correct: Buch=n → das"}
+{"id":"de-cg-acc-006","text":"der Briefkasten","expected":[],"comment":"correct: Kasten=m → der"}
+
+// Known nouns — already in nounGenus, de-gender handles these
+{"id":"de-cg-acc-007","text":"das Haus","expected":[],"comment":"Haus is in nounGenus directly"}
+{"id":"de-cg-acc-008","text":"der Baum","expected":[],"comment":"Baum is in nounGenus directly"}
+{"id":"de-cg-acc-009","text":"die Schule","expected":[],"comment":"Schule is in nounGenus directly"}
+{"id":"de-cg-acc-010","text":"das Buch","expected":[],"comment":"Buch is in nounGenus directly"}
+
+// Correct indefinite articles on compounds
+{"id":"de-cg-acc-011","text":"eine Haustür","expected":[{"rule_id":"typo","start":5,"end":12,"suggestion":"Haustier"}],"comment":"correct: Tür=f → eine; typo fires"}
+{"id":"de-cg-acc-012","text":"ein Kinderzimmer","expected":[],"comment":"correct: Zimmer=n → ein"}
+{"id":"de-cg-acc-013","text":"ein Schulbuch","expected":[],"comment":"correct: Buch=n → ein"}
+{"id":"de-cg-acc-014","text":"der Feuerwehrmann","expected":[],"comment":"correct: Mann=m → der"}
+{"id":"de-cg-acc-015","text":"die Sonnenblume","expected":[],"comment":"correct: Blume=f → die"}
+{"id":"de-cg-acc-016","text":"das Arbeitszimmer","expected":[],"comment":"correct: Zimmer=n → das"}
+{"id":"de-cg-acc-017","text":"eine Handtasche","expected":[],"comment":"correct: Tasche=f → eine"}

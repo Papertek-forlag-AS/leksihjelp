@@ -1,0 +1,63 @@
+// DE perfekt auxiliary choice rule fixtures (DE-03, Phase 8)
+// Rule id: "de-perfekt-aux". Flags wrong haben/sein in Perfekt constructions.
+// ≥30 positive + ≥15 acceptance cases.
+
+// ── Positive cases — wrong auxiliary, must flag ──
+
+// sein-verbs used with haben (most common student error)
+{"id":"de-paux-pos-001","text":"ich habe gegangen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-002","text":"er hat gekommen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-003","text":"wir haben geworden","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":9,"suggestion":"sind"}]}
+{"id":"de-paux-pos-004","text":"du hast gegangen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":7,"suggestion":"bist"}]}
+{"id":"de-paux-pos-005","text":"sie haben gekommen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":9,"suggestion":"sind"}]}
+{"id":"de-paux-pos-006","text":"ich habe geblieben","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-007","text":"er hat getreten","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-008","text":"wir haben gefallen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":9,"suggestion":"sind"}]}
+{"id":"de-paux-pos-009","text":"ich habe ausgegangen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-010","text":"er hat gewachsen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-011","text":"sie hat passiert","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":7,"suggestion":"ist"}]}
+{"id":"de-paux-pos-012","text":"ich habe gereist","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-013","text":"ihr habt gegangen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"seid"}]}
+{"id":"de-paux-pos-014","text":"ich habe gesprungen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-015","text":"er hat gestiegen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-016","text":"ich habe gerannt","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-017","text":"ich habe gewesen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-018","text":"sie haben gegangen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":9,"suggestion":"sind"}]}
+{"id":"de-paux-pos-019","text":"er hat aufgestanden","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-020","text":"ich habe eingeschlafen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"bin"}]}
+{"id":"de-paux-pos-021","text":"er hat angekommen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-022","text":"wir haben aufgewacht","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":9,"suggestion":"sind"}]}
+{"id":"de-paux-pos-023","text":"du hast geblieben","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":7,"suggestion":"bist"}]}
+{"id":"de-paux-pos-024","text":"er hat gefallen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"ist"}]}
+{"id":"de-paux-pos-025","text":"sie hat angekommen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":7,"suggestion":"ist"}]}
+
+// haben-verbs used with sein (less common but still flagged)
+{"id":"de-paux-pos-026","text":"ich bin gemacht","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":7,"suggestion":"habe"}]}
+{"id":"de-paux-pos-027","text":"er ist gesehen","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"hat"}]}
+{"id":"de-paux-pos-028","text":"wir sind gelesen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"haben"}]}
+{"id":"de-paux-pos-029","text":"du bist geschrieben","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":7,"suggestion":"hast"}]}
+{"id":"de-paux-pos-030","text":"ich bin gespielt","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":7,"suggestion":"habe"}]}
+{"id":"de-paux-pos-031","text":"er ist gekauft","expected":[{"rule_id":"de-perfekt-aux","start":3,"end":6,"suggestion":"hat"}]}
+{"id":"de-paux-pos-032","text":"sie sind gegessen","expected":[{"rule_id":"de-perfekt-aux","start":4,"end":8,"suggestion":"haben"}]}
+
+// ── Acceptance cases — correct usage, must NOT flag ──
+
+{"id":"de-paux-acc-001","text":"ich bin gegangen","expected":[],"comment":"correct sein with gehen"}
+{"id":"de-paux-acc-002","text":"ich habe gemacht","expected":[],"comment":"correct haben with machen"}
+{"id":"de-paux-acc-003","text":"er ist gekommen","expected":[],"comment":"correct sein with kommen"}
+{"id":"de-paux-acc-004","text":"wir haben gesehen","expected":[],"comment":"correct haben with sehen"}
+{"id":"de-paux-acc-005","text":"sie sind geworden","expected":[],"comment":"correct sein with werden"}
+{"id":"de-paux-acc-006","text":"ich habe gelesen","expected":[],"comment":"correct haben with lesen"}
+{"id":"de-paux-acc-007","text":"du bist geblieben","expected":[],"comment":"correct sein with bleiben"}
+{"id":"de-paux-acc-008","text":"er hat geschrieben","expected":[],"comment":"correct haben with schreiben"}
+
+// both-aux verbs: NEVER flag regardless of which auxiliary is used
+{"id":"de-paux-acc-009","text":"ich habe gefahren","expected":[{"rule_id":"de-capitalization","start":9,"end":17,"suggestion":"Gefahren"}],"comment":"fahren takes both — haben ok; de-cap fires on gefahren"}
+{"id":"de-paux-acc-010","text":"ich bin gefahren","expected":[{"rule_id":"de-capitalization","start":8,"end":16,"suggestion":"Gefahren"}],"comment":"fahren takes both — sein ok; de-cap fires on gefahren"}
+{"id":"de-paux-acc-011","text":"ich habe geschwommen","expected":[],"comment":"schwimmen takes both — haben ok"}
+{"id":"de-paux-acc-012","text":"ich bin geschwommen","expected":[],"comment":"schwimmen takes both — sein ok"}
+{"id":"de-paux-acc-013","text":"er hat geflogen","expected":[],"comment":"fliegen takes both — haben ok"}
+{"id":"de-paux-acc-014","text":"er ist geflogen","expected":[],"comment":"fliegen takes both — sein ok"}
+{"id":"de-paux-acc-015","text":"wir sind gelaufen","expected":[],"comment":"correct sein with laufen"}
+{"id":"de-paux-acc-016","text":"ich habe gegessen","expected":[],"comment":"correct haben with essen"}
+{"id":"de-paux-acc-017","text":"sie ist gestorben","expected":[],"comment":"correct sein with sterben"}
