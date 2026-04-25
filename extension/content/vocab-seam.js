@@ -299,6 +299,17 @@
     getParticipleToAux: () => (state && state.participleToAux) ? state.participleToAux : new Map(),
     // Phase 13: NN infinitive classification Map for DOC-04 register-drift rule.
     getNNInfinitiveClasses: () => (state && state.nnInfinitiveClasses) ? state.nnInfinitiveClasses : new Map(),
+    // Phase 11: ES mood/aspect indexes
+    getEsPresensToVerb: () => (state && state.esPresensToVerb) ? state.esPresensToVerb : new Map(),
+    getEsSubjuntivoForms: () => (state && state.esSubjuntivoForms) ? state.esSubjuntivoForms : new Map(),
+    getEsImperfectoForms: () => (state && state.esImperfectoForms) ? state.esImperfectoForms : new Map(),
+    getEsPreteritumToVerb: () => (state && state.esPreteritumToVerb) ? state.esPreteritumToVerb : new Map(),
+    // Phase 11: FR mood indexes
+    getFrPresensToVerb: () => (state && state.frPresensToVerb) ? state.frPresensToVerb : new Map(),
+    getFrSubjonctifForms: () => (state && state.frSubjonctifForms) ? state.frSubjonctifForms : new Map(),
+    getFrSubjonctifDiffers: () => (state && state.frSubjonctifDiffers) ? state.frSubjonctifDiffers : new Map(),
+    // Phase 14: EN irregular form index
+    getIrregularForms: () => (state && state.irregularForms) ? state.irregularForms : new Map(),
     // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;

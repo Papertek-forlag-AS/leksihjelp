@@ -243,6 +243,19 @@
       isFeatureEnabled:   VOCAB.isFeatureEnabled || (() => true),
       // Phase 13: NN infinitive classification for DOC-04 register-drift rule.
       nnInfinitiveClasses: VOCAB.getNNInfinitiveClasses(),
+      // Phase 8: DE/FR auxiliary choice
+      participleToAux:    VOCAB.getParticipleToAux(),
+      // Phase 11: ES mood/aspect indexes
+      esPresensToVerb:    VOCAB.getEsPresensToVerb(),
+      esSubjuntivoForms:  VOCAB.getEsSubjuntivoForms(),
+      esImperfectoForms:  VOCAB.getEsImperfectoForms(),
+      esPreteritumToVerb: VOCAB.getEsPreteritumToVerb(),
+      // Phase 11: FR mood indexes
+      frPresensToVerb:    VOCAB.getFrPresensToVerb(),
+      frSubjonctifForms:  VOCAB.getFrSubjonctifForms(),
+      frSubjonctifDiffers: VOCAB.getFrSubjonctifDiffers(),
+      // Phase 14: EN irregular forms
+      irregularForms:     VOCAB.getIrregularForms(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });
