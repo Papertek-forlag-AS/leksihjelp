@@ -1,0 +1,97 @@
+# ES pro-drop-overuse hint rule fixtures (PRON-01, Phase 12)
+# Positive cases: redundant subject pronoun yo/tu before matching verb -> hint (32)
+{"id":"es-pd-1","text":"yo voy al mercado.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present voy -> hint"}
+{"id":"es-pd-2","text":"Yo pienso que si.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"Yo (capitalized) + 1sg present pienso -> hint"}
+{"id":"es-pd-3","text":"yo fui al cine.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg preteritum fui -> hint"}
+{"id":"es-pd-4","text":"tu hablas bien.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present hablas -> hint"}
+{"id":"es-pd-5","text":"yo no voy al mercado.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + no (filler) + 1sg present voy -> hint"}
+{"id":"es-pd-6","text":"Yo creo que si.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"Yo + 1sg present creo -> hint (pedagogical)"}
+{"id":"es-pd-7","text":"yo quiero un cafe.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present quiero -> hint"}
+{"id":"es-pd-8","text":"tu comes mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present comes -> hint"}
+{"id":"es-pd-9","text":"yo hablo espanol.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present hablo -> hint"}
+{"id":"es-pd-10","text":"yo comí mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg preteritum comí -> hint"}
+{"id":"es-pd-11","text":"tu vives aqui.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present vives -> hint"}
+{"id":"es-pd-12","text":"Yo estoy bien.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"Yo + 1sg present estoy -> hint"}
+{"id":"es-pd-13","text":"yo nunca voy al cine.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + nunca (filler) + voy -> hint"}
+{"id":"es-pd-14","text":"tu tampoco hablas mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + tampoco (filler) + hablas -> hint"}
+{"id":"es-pd-15","text":"yo siempre voy al mercado.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + siempre (filler) + voy -> hint"}
+{"id":"es-pd-16","text":"Pero yo voy al cine.","expected":[{"rule_id":"es-pro-drop","start":5,"end":7,"suggestion":""}],"comment":"yo mid-sentence + 1sg present voy -> hint"}
+{"id":"es-pd-17","text":"yo tengo un gato.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present tengo -> hint"}
+{"id":"es-pd-18","text":"yo estudio mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present estudio -> hint"}
+{"id":"es-pd-19","text":"tu necesitas ayuda.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present necesitas -> hint"}
+{"id":"es-pd-20","text":"yo leo un libro.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present leo -> hint"}
+{"id":"es-pd-21","text":"tu lees mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present lees -> hint"}
+{"id":"es-pd-22","text":"yo escribo una carta.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present escribo -> hint"}
+{"id":"es-pd-23","text":"tu escribes bien.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present escribes -> hint"}
+{"id":"es-pd-24","text":"yo compre un libro.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg preteritum compre -> hint"}
+{"id":"es-pd-25","text":"tu fuiste al cine.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg preteritum fuiste -> hint"}
+{"id":"es-pd-26","text":"yo también voy.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + también (filler) + voy -> hint"}
+{"id":"es-pd-27","text":"yo trabajo en una tienda.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present trabajo -> hint"}
+{"id":"es-pd-28","text":"tu trabajas mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present trabajas -> hint"}
+{"id":"es-pd-29","text":"yo viajo mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present viajo -> hint"}
+{"id":"es-pd-30","text":"yo duermo bien.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + 1sg present duermo -> hint"}
+{"id":"es-pd-31","text":"tu duermes mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"tu + 2sg present duermes -> hint"}
+{"id":"es-pd-32","text":"yo no hablo mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""}],"comment":"yo + no + hablo -> hint"}
+# Acceptance cases: no flag expected (62)
+{"id":"es-pd-a1","text":"voy al mercado.","expected":[],"comment":"no pronoun, just verb -> no flag"}
+{"id":"es-pd-a2","text":"pienso que si.","expected":[],"comment":"no pronoun, just verb -> no flag"}
+{"id":"es-pd-a3","text":"hablas bien.","expected":[],"comment":"no pronoun, just verb -> no flag"}
+{"id":"es-pd-a4","text":"ella come mucho.","expected":[],"comment":"3rd person ella -> not flagged (conservative)"}
+{"id":"es-pd-a5","text":"el habla espanol.","expected":[],"comment":"3rd person el -> not flagged (conservative)"}
+{"id":"es-pd-a6","text":"nosotros vamos al cine.","expected":[],"comment":"nosotros -> not flagged (conservative)"}
+{"id":"es-pd-a7","text":"ellos van al mercado.","expected":[],"comment":"3rd person ellos -> not flagged"}
+{"id":"es-pd-a8","text":"ellas comen mucho.","expected":[],"comment":"3rd person ellas -> not flagged"}
+{"id":"es-pd-a9","text":"usted habla bien.","expected":[],"comment":"usted -> not flagged (formal, conservative)"}
+{"id":"es-pd-a10","text":"ustedes hablan mucho.","expected":[],"comment":"ustedes -> not flagged"}
+{"id":"es-pd-a11","text":"vosotros sois muy rapido.","expected":[],"comment":"vosotros -> not flagged"}
+{"id":"es-pd-a12","text":"Mi madre cocina bien.","expected":[],"comment":"no subject pronoun -> no flag"}
+{"id":"es-pd-a13","text":"El gato come pescado.","expected":[],"comment":"el as article (before noun) -> no flag"}
+{"id":"es-pd-a14","text":"La casa es grande.","expected":[],"comment":"no pronoun -> no flag"}
+{"id":"es-pd-a15","text":"Me gusta la musica.","expected":[],"comment":"no subject pronoun -> no flag"}
+{"id":"es-pd-a16","text":"hablo bien y mucho.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a17","text":"fui al cine ayer.","expected":[],"comment":"verb alone preteritum -> no flag"}
+{"id":"es-pd-a18","text":"tengo un perro.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a19","text":"I go to school.","expected":[],"comment":"English text -> no flag (wrong lang)"}
+{"id":"es-pd-a20","text":"Hoy hace mucho calor.","expected":[],"comment":"no pronoun, weather expression -> no flag"}
+{"id":"es-pd-a21","text":"yo es una palabra.","expected":[],"comment":"yo + non-matching person verb -> no flag"}
+{"id":"es-pd-a22","text":"creo que si.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a23","text":"no voy al mercado.","expected":[],"comment":"negation without pronoun -> no flag"}
+{"id":"es-pd-a24","text":"nunca voy al cine.","expected":[],"comment":"adverb without pronoun -> no flag"}
+{"id":"es-pd-a25","text":"siempre hablo bien.","expected":[{"rule_id":"es-imperfecto-hint","start":8,"end":13,"suggestion":"hablaba"}],"comment":"siempre + hablo triggers imperfecto-hint (not pro-drop)"}
+{"id":"es-pd-a26","text":"trabajo en una oficina.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a27","text":"estudias mucho.","expected":[],"comment":"verb alone 2sg -> no flag"}
+{"id":"es-pd-a28","text":"vives aqui.","expected":[],"comment":"verb alone 2sg -> no flag"}
+{"id":"es-pd-a29","text":"Mi hermano va al cine.","expected":[],"comment":"no subject pronoun -> no flag"}
+{"id":"es-pd-a30","text":"Los estudiantes hablan espanol.","expected":[],"comment":"no subject pronoun -> no flag"}
+{"id":"es-pd-a31","text":"ella va al supermercado.","expected":[],"comment":"3rd person ella -> not flagged"}
+{"id":"es-pd-a32","text":"el viene manana.","expected":[],"comment":"3rd person el -> not flagged"}
+{"id":"es-pd-a33","text":"ellos estudian mucho.","expected":[],"comment":"3rd person ellos -> not flagged"}
+{"id":"es-pd-a34","text":"nosotros comemos juntos.","expected":[],"comment":"nosotros -> not flagged"}
+{"id":"es-pd-a35","text":"vosotros coméis mucho.","expected":[],"comment":"vosotros -> not flagged"}
+{"id":"es-pd-a36","text":"usted tiene razon.","expected":[],"comment":"usted -> not flagged"}
+{"id":"es-pd-a37","text":"Mi profesor habla rapido.","expected":[],"comment":"no pronoun -> no flag"}
+{"id":"es-pd-a38","text":"hoy como pizza.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a39","text":"La comida es importante.","expected":[],"comment":"no pronoun -> no flag"}
+{"id":"es-pd-a40","text":"El libro es interesante.","expected":[],"comment":"el as article (before noun) -> no flag"}
+{"id":"es-pd-a41","text":"necesito un cafe.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a42","text":"compre un regalo.","expected":[],"comment":"verb alone preteritum -> no flag"}
+{"id":"es-pd-a43","text":"dormimos bien.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a44","text":"viajan a Mexico.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a45","text":"cocinas muy bien.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a46","text":"leo mucho cada dia.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a47","text":"escribo una carta.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a48","text":"duermo ocho horas.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a49","text":"vamos al parque.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a50","text":"comemos a las dos.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a51","text":"vivimos en Madrid.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a52","text":"hablamos espanol en clase.","expected":[],"comment":"verb alone -> no flag"}
+{"id":"es-pd-a53","text":"ella tiene dos gatos.","expected":[],"comment":"3rd person ella -> not flagged"}
+{"id":"es-pd-a54","text":"el quiere un helado.","expected":[],"comment":"3rd person el -> not flagged"}
+{"id":"es-pd-a55","text":"ustedes necesitan estudiar.","expected":[],"comment":"ustedes -> not flagged"}
+{"id":"es-pd-a56","text":"yo y mi amigo vamos al cine.","expected":[],"comment":"yo in compound subject -> no flag (verb is 1pl not 1sg)"}
+{"id":"es-pd-a57","text":"Mi madre y yo vamos al cine.","expected":[],"comment":"yo in compound subject -> no flag (verb is 1pl not 1sg)"}
+{"id":"es-pd-a58","text":"Mi amigo habla mucho.","expected":[],"comment":"NP subject -> no flag"}
+{"id":"es-pd-a59","text":"Mi hermana estudia mucho.","expected":[],"comment":"NP subject -> no flag"}
+{"id":"es-pd-a60","text":"Los estudiantes hablan mucho.","expected":[],"comment":"no pronoun -> no flag"}
+{"id":"es-pd-a61","text":"Las amigas comen mucho.","expected":[],"comment":"no pronoun -> no flag"}
+{"id":"es-pd-a62","text":"El perro corre rapido.","expected":[],"comment":"el as article (before noun) -> no flag"}
