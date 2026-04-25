@@ -60,11 +60,12 @@
     if (_cachedParticipleSource === participleToAux) return _cachedParticipleMap;
     const lookup = new Map();
     for (const [pp, aux] of participleToAux) {
-      // Store both original and accent-stripped form
-      lookup.set(pp, aux);
+      // Store {aux, basePP} so hasAgreement can compare against the canonical base form
+      const entry = { aux, basePP: pp };
+      lookup.set(pp, entry);
       const stripped = stripAccents(pp);
       if (stripped !== pp && !lookup.has(stripped)) {
-        lookup.set(stripped, aux);
+        lookup.set(stripped, entry);
       }
     }
     _cachedParticipleMap = lookup;
@@ -73,10 +74,20 @@
   }
 
   // Check if a word already has the required agreement ending.
-  function hasAgreement(word, doInfo) {
+  // Uses the accent-stripped base form from participleToAux to detect whether
+  // the student's token has an EXTRA character beyond the base. Example:
+  //   base 'mangé' (stripped: 'mange'), student wrote 'mangée' (stripped: 'mangee')
+  //   -> mangee is longer than mange by 1 and ends in 'e' → already agreed.
+  //   base 'mangé' (stripped: 'mange'), student wrote 'mange' (stripped: 'mange')
+  //   -> same length as base → NOT agreed (student just dropped the accent).
+  function hasAgreement(word, doInfo, basePP) {
+    const strippedWord = stripAccents(word);
+    const strippedBase = stripAccents(basePP);
     if (doInfo.suffix === 'e') {
-      // Feminine: must end in -e (but not -ee which is also fine)
-      return word.endsWith('e') || word.endsWith('ée') || word.endsWith('ee');
+      // Feminine: stripped word must be longer than stripped base and end in -e
+      // (mangée -> mangee vs mangé -> mange: mangee.length > mange.length)
+      // OR the base itself has an -e suffix beyond its root (prise vs pris)
+      return strippedWord.length > strippedBase.length && strippedWord.endsWith('e');
     }
     if (doInfo.suffix === 's') {
       // Plural: must end in -s
@@ -135,14 +146,14 @@
         const ppStripped = stripAccents(ppWord);
 
         // Look up the participle (try exact, then accent-stripped)
-        const aux = ppLookup.get(ppWord) || ppLookup.get(ppStripped);
-        if (!aux) continue;
+        const entry = ppLookup.get(ppWord) || ppLookup.get(ppStripped);
+        if (!entry) continue;
 
         // Skip etre constructions — PP agreement with etre is different
-        if (aux === 'etre' || aux === 'être') continue;
+        if (entry.aux === 'etre' || entry.aux === 'être') continue;
 
         // Check if PP already has correct agreement ending
-        if (hasAgreement(ppWord, doInfo)) continue;
+        if (hasAgreement(ppWord, doInfo, entry.basePP)) continue;
 
         // Flag: PP needs agreement
         const suggestion = makeSuggestion(ppToken.display, doInfo);

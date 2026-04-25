@@ -168,6 +168,12 @@ function loadVocab(lang) {
 
   const vocab = vocabCore.buildIndexes({ raw, sisterRaw, bigrams, freq, lang, isFeatureEnabled: () => true });
   vocab.pitfalls = pitfalls;
+  // Phase 10 / FR-03: feature-gated rules (register, fr-pp-agreement) check
+  // ctx.vocab.isFeatureEnabled in their check() method. The browser runtime
+  // wires this from VOCAB.isFeatureEnabled (spell-check.js:243). The fixture
+  // runner must provide the same predicate so feature-gated rules fire during
+  // testing. Always-true matches the runner's existing "full superset" policy.
+  vocab.isFeatureEnabled = () => true;
 
   // Pitfall 2 (RESEARCH.md): fail loud if a language we expect to have Zipf
   // data somehow lost it. NB/NN shipped freq sidecars in Phase 2; if they

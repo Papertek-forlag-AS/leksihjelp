@@ -66,6 +66,7 @@
         "content/spell-rules/de-v2.js",
         "content/spell-rules/de-verb-final.js",
         "content/spell-rules/fr-bags.js",
+        "content/spell-rules/fr-pp-agreement.js",
         "content/spell-rules/nb-v2.js",
         "content/spell-check.js"
       ],

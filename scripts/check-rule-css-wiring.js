@@ -88,6 +88,7 @@ const TARGETS = [
   'extension/content/spell-rules/quotation-suppression.js',
   'extension/content/spell-rules/de-perfekt-aux.js',
   'extension/content/spell-rules/de-compound-gender.js',
+  'extension/content/spell-rules/fr-pp-agreement.js',
 ];
 
 function resetGlobals() {
