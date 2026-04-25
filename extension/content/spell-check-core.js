@@ -65,6 +65,7 @@
     nn: new Set(['eg', 'du', 'han', 'ho', 'den', 'det', 'vi', 'dykk', 'dei', 'ein']),
     de: new Set(['ich', 'du', 'er', 'sie', 'es', 'wir', 'ihr', 'man']),
     fr: new Set(['je', 'tu', 'il', 'elle', 'on', 'nous', 'vous', 'ils', 'elles']),
+    es: new Set(['yo', 'tu', 'el', 'ella', 'nosotros', 'vosotros', 'ellos', 'ellas', 'usted', 'ustedes']),
   };
 
   function buildFiniteStems(vocab) {

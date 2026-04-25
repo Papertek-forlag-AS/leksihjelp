@@ -12,6 +12,10 @@
     "de.45": { "rule_id": "de-perfekt-aux", "severity": "warning", "priority_band": "P2" },
     "de.46": { "rule_id": "de-compound-gender", "severity": "warning", "priority_band": "P2" },
     "de.47": { "rule_id": "de-separable-verb", "severity": "warning", "priority_band": "P2" },
-    "fr.53": { "rule_id": "fr-bags", "severity": "hint", "priority_band": "P3" }
+    "fr.53": { "rule_id": "fr-bags", "severity": "hint", "priority_band": "P3" },
+    "es.43": { "rule_id": "es-ser-estar", "severity": "warning", "priority_band": "P2" },
+    "es.27": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
+    "es.34": { "rule_id": "es-por-para", "severity": "warning", "priority_band": "P2" },
+    "es.42": { "rule_id": "es-personal-a", "severity": "warning", "priority_band": "P2" }
   }
 }

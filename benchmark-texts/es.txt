@@ -1,0 +1,44 @@
+# ─── BENCHMARK: ES (NB student writing Spanish) ─────────────
+# CURRENTLY COVERED:
+#   - es-grammar: wrong article/gender, verb-form slips
+#   - es-accent: missing or misplaced tildes (está vs esta)
+#   - es-coordination: y → e before i-/hi-, o → u before o-/ho-
+#   - es-ser-estar: temporary vs permanent state ("soy cansado" → "estoy cansado")
+#   - es-por-para: cause vs purpose ("por mi familia" → "para mi familia")
+#   - es-personal-a: human direct objects ("veo Juan" → "veo a Juan")
+#   - typo
+#
+# FUTURE / UNPLANNED:
+#   - Subjuntivo trigger recognition: "quiero que tú vas" (ind.) vs
+#     "quiero que tú vayas" (subj.) after verbs of desire/doubt
+#   - Preterito vs imperfecto aspect choice: backgrounded vs
+#     bounded past action
+#   - Leísmo / laísmo / loísmo: clitic pronoun misuse by region
+#   - Gustar-class verb syntax: "yo gusto la pizza" (wrong) vs
+#     "me gusta la pizza"
+#   - Pro-drop overrides: NB students keep "yo" everywhere;
+#     Spanish drops it unless contrastive
+#   - Double-negation: "no tengo nada" (correct) vs "tengo nada"
+#   - Possessive article logic: "mi madre" vs "la madre mía" emphasis
+#   - Adjective placement: descriptive (post) vs restrictive (pre)
+#   - Lexical false friends (embarazada = pregnant, not embarrassed)
+# ────────────────────────────────────────────────────────────
+
+El lunes pasado yo fui a la tienda para comprar comida por mi familia.
+El tiempo estaba muy bueno, y yo era en un humor bueno porque yo
+acababa de terminar mis tareas. Mi madre es una persona muy simpática
+y ella hace siempre la cena para nosotros. Ella trabaja en una fábrica
+e hombres y mujeres producen ropa allí. Cuando yo llegué a casa, mi
+hermano estaba ya allí viendo televisión. Él no gusta ayudar en la
+casa, y yo pienso que es muy injusto. Yo dije a él que debe ayudar
+más, pero él solo rió. Después yo fui a mi cuarto por leer un libro
+que yo había prestado de la biblioteca. El libro es sobre un hombre
+que vive solo en una isla y debe sobrevivir con sus manos. Yo he leido
+casi cien páginas ayer, y estaba mas emocionante que yo pensaba.
+Quiero que mi hermano viene conmigo la próxima vez. Si yo tengo tiempo,
+yo voy a la playa. Ella esta embarazada porque tiene mucho trabajo.
+En la tarde nosotros comimos pizza y miramos una pelicula juntos.
+Estaba mucho queso en la pizza. Yo pienso que español es más fácil
+que noruego, pero yo todavía hago muchos errores. Veo Juan todos los
+dias en la escuela. Soy cansado después de clase. Mi profesor dijo
+que yo he mejorado mucho este año.
