@@ -194,7 +194,9 @@ Plans:
   2. `spell-check.js` vocab object (lines 225-246) forwards all new getters into the vocab passed to `CORE.check()`.
   3. `doc-drift-de-address.js` is restored on disk and all release gates exit 0: `check-explain-contract`, `check-rule-css-wiring`, `check-benchmark-coverage`, `check-fixtures`, `check-stateful-rule-invalidation`.
   4. A new integration gate or smoke-test confirms that the browser-path vocab object contains every key that any registered rule's `check()` function reads from `ctx.vocab`.
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 14.1-01-PLAN.md — Wire 8 missing vocab indexes into spell-check.js, restore doc-drift-de-address.js, verify all release gates
 
 ### Phase 15: Collocations at Scale (NB + DE + FR + ES)
 **Goal**: Scale the Phase 6 EN-collocation-seed pattern into full preposition-collocation coverage across NB, DE, FR, ES; data-heavy, reuses existing rule shape.
@@ -205,7 +207,9 @@ Plans:
   2. DE, FR, ES preposition-collocation rules each ship with ≥30 positive + ≥15 acceptance fixtures per language, all consuming the same `collocationbank` data shape introduced in Phase 6.
   3. No Phase 15 rule introduces a new trigger-list shape; code review confirms all four rules are ≤50 LOC wrappers over the shared data shape.
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 14.1-01-PLAN.md — Wire 8 missing vocab indexes into spell-check.js, restore doc-drift-de-address.js, verify all release gates
 
 ## Progress
 
@@ -228,7 +232,7 @@ Plans:
 | 12. Pronoun & Pro-Drop (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
 | 13. Register Drift Within a Document | 3/3 | Complete    | 2026-04-25 | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
-| 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | v2.0 | 0/? | Not started | — |
+| 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | v2.0 | 0/1 | Not started | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
