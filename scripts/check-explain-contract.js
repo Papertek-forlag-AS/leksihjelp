@@ -78,6 +78,8 @@ const TARGETS = [
   'extension/content/spell-rules/fr-bags.js',
   'extension/content/spell-rules/nb-v2.js',
   'extension/content/spell-rules/quotation-suppression.js',
+  'extension/content/spell-rules/de-perfekt-aux.js',
+  'extension/content/spell-rules/de-compound-gender.js',
 ];
 
 // Reset the shared globals the rule files register onto. Without this the

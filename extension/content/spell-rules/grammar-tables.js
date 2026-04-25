@@ -146,4 +146,13 @@
 
   host.__lexiGrammarTables = tables;
   if (typeof module !== 'undefined' && module.exports) module.exports = tables;
+
+  // ── Phase 9/10 consumer stub documentation ──
+  // Phase 9 (ES): will consume PREP_CASE pattern → ES preposition-case tables
+  //   (por/para, a/en distinction — Spanish prepositions don't have German-style
+  //   case government but the table-lookup pattern transfers).
+  // Phase 10 (FR): will consume DEF_ARTICLE_CASE pattern → FR article-gender
+  //   tables (le/la/les with elision/contraction rules).
+  // Both phases will add their own language-specific tables to this IIFE
+  // alongside the DE tables, accessed via host.__lexiGrammarTables.
 })();

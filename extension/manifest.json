@@ -29,6 +29,8 @@
         "content/spell-rules/grammar-tables.js",
         "content/spell-rules/quotation-suppression.js",
         "content/spell-rules/de-capitalization.js",
+        "content/spell-rules/de-perfekt-aux.js",
+        "content/spell-rules/de-compound-gender.js",
         "content/spell-rules/de-gender.js",
         "content/spell-rules/de-grammar.js",
         "content/spell-rules/de-modal-verb.js",

@@ -110,6 +110,14 @@ const NON_NB_LANG_CONFIGS = [
       description: 'conjugation-type entry for "ging" (preteritum of gehen)',
       featureNote: 'grammar_preteritum / grammar_de_preteritum',
     },
+    // Phase 8 DE-03: participleToAux must be populated even under minimal preset.
+    // Past participles are derived from raw verbbank data (not wordList),
+    // so they should always be present regardless of feature gating.
+    participleToAuxChecks: [
+      { participle: 'gegangen', aux: 'sein', note: 'gehen — sein verb' },
+      { participle: 'gemacht', aux: 'haben', note: 'machen — haben verb' },
+      { participle: 'gefahren', aux: 'both', note: 'fahren — both auxiliaries' },
+    ],
   },
   {
     lang: 'es',
@@ -206,11 +214,31 @@ function checkLanguage(config) {
     }
   }
 
+  // Phase 8 DE-03: participleToAux Map must be populated under minimal preset.
+  // Built from raw verbbank data, not from feature-gated wordList.
+  let participleChecked = 0;
+  if (config.participleToAuxChecks) {
+    if (!(state.participleToAux instanceof Map)) {
+      fail(`[${config.lang}] state.participleToAux is not a Map — vocab-seam-core.buildParticipleToAux missing.`);
+    }
+    for (const { participle, aux, note } of config.participleToAuxChecks) {
+      const got = state.participleToAux.get(participle);
+      if (got !== aux) {
+        fail(
+          `[${config.lang}] participleToAux.get("${participle}") expected "${aux}" but got ${JSON.stringify(got)} — ${note}. ` +
+          `participleToAux should be built from raw verbbank data, independent of feature gating.`
+        );
+      }
+      participleChecked++;
+    }
+  }
+
   return {
     verb: config.verbForms.length,
     noun: config.nounChecks.length,
     valid: config.validChecks.length,
     filterAsserted: !!config.wordListFilter,
+    participleToAux: participleChecked,
   };
 }
 
@@ -299,8 +327,9 @@ function main() {
   console.log('[check-spellcheck-features] PASS — spell-check lookup indexes are feature-independent.');
   console.log('  [nb] verbInfinitive:', verbForms.length, ' nounGenus:', nounChecks.length, ' validWords:', validChecks.length, ' wordList-filter: yes');
   for (const s of perLangStats) {
+    const ptaStr = s.participleToAux > 0 ? `  participleToAux: ${s.participleToAux}` : '';
     console.log(
-      `  [${s.lang}] verbInfinitive: ${s.verb}  nounGenus: ${s.noun}  validWords: ${s.valid}  wordList-filter: ${s.filterAsserted ? 'yes' : 'skipped'}`
+      `  [${s.lang}] verbInfinitive: ${s.verb}  nounGenus: ${s.noun}  validWords: ${s.valid}  wordList-filter: ${s.filterAsserted ? 'yes' : 'skipped'}${ptaStr}`
     );
   }
 }
