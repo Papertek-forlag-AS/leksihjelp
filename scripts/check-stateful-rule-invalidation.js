@@ -54,8 +54,8 @@ const DOC_DRIFT_RULES = [
     file: 'extension/content/spell-rules/doc-drift-nn-infinitive.js',
     lang: 'nn',
     vocabFile: 'extension/data/nn.json',
-    driftText: 'Eg vil akseptere tilbodet. Han prover a analysera situasjonen. Ho likar a dansere.',
-    fixedText: 'Eg vil akseptere tilbodet. Han prover a analysere situasjonen. Ho likar a dansere.',
+    driftText: 'Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka. Eg vil arbeida.',
+    fixedText: 'Eg vil akseptere det. Han vil analysere alt. Dei vil anbefale boka. Eg vil arbeide.',
     ruleId: 'doc-drift-nn-infinitive',
   },
 ];
@@ -121,7 +121,31 @@ function loadVocabIndexes(vocabPath) {
     }
   }
 
-  return { validWords, verbInfinitive, nounGenus, knownPresens, knownPreteritum };
+  // Phase 13 / DOC-04: Build NN infinitive classification map for doc-drift-nn-infinitive rule.
+  // Mirrors the buildNNInfinitiveClasses logic in vocab-seam-core.js.
+  const nnInfinitiveClasses = new Map();
+  if (data.verbbank) {
+    for (const entry of Object.values(data.verbbank)) {
+      const conj = entry.conjugations;
+      if (!conj) continue;
+      for (const tenseVal of Object.values(conj)) {
+        const former = tenseVal.former;
+        if (!former) continue;
+        const inf = former.infinitiv;
+        if (!Array.isArray(inf) || inf.length < 2) continue;
+        const forms = inf.map(f => f.replace(/^[aå]\s+/, ''));
+        const aForm = forms.find(f => f.endsWith('a'));
+        const eForm = forms.find(f => f.endsWith('e'));
+        if (aForm && eForm) {
+          nnInfinitiveClasses.set(aForm, { register: 'a-infinitiv', counterpart: eForm });
+          nnInfinitiveClasses.set(eForm, { register: 'e-infinitiv', counterpart: aForm });
+        }
+        break;
+      }
+    }
+  }
+
+  return { validWords, verbInfinitive, nounGenus, knownPresens, knownPreteritum, nnInfinitiveClasses };
 }
 
 function main() {
