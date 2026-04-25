@@ -1,0 +1,162 @@
+// NB bokmal/riksmal register drift detection (DOC-03)
+//
+// IMPORTANT: Riksmal forms that are NOT valid NB words (efter, sne, nu, fandt,
+// sagde, doren) are caught by the typo rule (priority 50) which wins dedup over
+// doc-drift (priority 203). Doc-drift only surfaces for valid-NB riksmal forms
+// (boken, gaten, jenten, klokken, solen) and valid-NB bokmal forms (boka, gata,
+// jenta, klokka, sola). The rule still detects ALL markers for majority-vote
+// purposes, but only the non-typo minority tokens produce surviving findings.
+
+// ── Positive: bokmal-majority, riksmal minority (valid NB forms) flagged ──
+
+// 3 bokmal (jenta, boka, gata), 1 riksmal (boken) -> flag boken
+{"id":"nb-drift-pos-001","text":"Jenta gikk til skolen. Boka var god. Gata var tom. Han leste boken.","expected":[{"rule_id":"doc-drift-nb-register","start":61,"end":66,"suggestion":"boka"}],"status":"ok"}
+
+// 3 bokmal (klokka, gata, sola), 1 riksmal (boken) -> flag boken
+{"id":"nb-drift-pos-002","text":"Klokka var mye. Gata var lang. Sola skinte. Han leste boken hver dag.","expected":[{"rule_id":"doc-drift-nb-register","start":54,"end":59,"suggestion":"boka"}],"status":"ok"}
+
+// 3 bokmal (jenta, boka, gata), 1 riksmal (solen) -> flag solen
+{"id":"nb-drift-pos-003","text":"Jenta var glad. Boka var pen. Gata var fin. Solen skinte.","expected":[{"rule_id":"doc-drift-nb-register","start":44,"end":49,"suggestion":"sola"}],"status":"ok"}
+
+// 3 bokmal (jenta, boka, gata), 1 riksmal (gaten) -> flag gaten
+{"id":"nb-drift-pos-004","text":"Jenta var glad. Boka var pen. Gata var fin. Gaten var lang.","expected":[{"rule_id":"doc-drift-nb-register","start":44,"end":49,"suggestion":"gata"}],"status":"ok"}
+
+// 3 bokmal (jenta, boka, sola), 1 riksmal (klokken) -> flag klokken
+{"id":"nb-drift-pos-005","text":"Jenta var glad. Boka var pen. Sola skinte. Klokken ringte.","expected":[{"rule_id":"doc-drift-nb-register","start":43,"end":50,"suggestion":"klokka"}],"status":"ok"}
+
+// 3 bokmal (jenta, boka, gata), 1 riksmal (jenten) -> flag jenten
+{"id":"nb-drift-pos-006","text":"Jenta var glad. Boka var pen. Gata var fin. Jenten gikk.","expected":[{"rule_id":"doc-drift-nb-register","start":44,"end":50,"suggestion":"jenta"}],"status":"ok"}
+
+// 4 bokmal (jenta, boka, gata, sola), 1 riksmal (boken) -> flag boken
+{"id":"nb-drift-pos-007","text":"Jenta gikk hjem. Boka var god. Gata var tom. Sola skinte. Han leste boken.","expected":[{"rule_id":"doc-drift-nb-register","start":68,"end":73,"suggestion":"boka"}],"status":"ok"}
+
+// 5 bokmal (jenta, boka, gata, sola, klokka), 1 riksmal (boken) -> flag boken
+{"id":"nb-drift-pos-008","text":"Jenta gikk hjem. Boka var god. Gata var tom. Sola skinte. Klokka var mye. Han leste boken.","expected":[{"rule_id":"doc-drift-nb-register","start":84,"end":89,"suggestion":"boka"}],"status":"ok"}
+
+// ── Positive: riksmal-majority, bokmal minority (valid NB forms) flagged ──
+
+// 3 riksmal (boken, gaten, solen), 1 bokmal (jenta) -> flag jenta
+{"id":"nb-drift-pos-009","text":"Boken var god. Gaten var lang. Solen skinte. Jenta gikk hjem.","expected":[{"rule_id":"doc-drift-nb-register","start":45,"end":50,"suggestion":"jenten"}],"status":"ok"}
+
+// 3 riksmal (boken, gaten, solen), 1 bokmal (boka) -> flag boka
+{"id":"nb-drift-pos-010","text":"Boken var god. Gaten var lang. Solen skinte. Han leste boka.","expected":[{"rule_id":"doc-drift-nb-register","start":55,"end":59,"suggestion":"boken"}],"status":"ok"}
+
+// 3 riksmal (klokken, gaten, solen), 1 bokmal (boka) -> flag boka
+{"id":"nb-drift-pos-011","text":"Klokken var mye. Gaten var lang. Solen skinte. Han leste boka.","expected":[{"rule_id":"doc-drift-nb-register","start":57,"end":61,"suggestion":"boken"}],"status":"ok"}
+
+// 3 riksmal (jenten, boken, gaten), 1 bokmal (boka) -> flag boka
+{"id":"nb-drift-pos-012","text":"Jenten gikk til skolen. Boken var god. Gaten var tom. Han leste boka.","expected":[{"rule_id":"doc-drift-nb-register","start":64,"end":68,"suggestion":"boken"}],"status":"ok"}
+
+// 3 riksmal (boken, gaten, solen), 1 bokmal (gata) -> flag gata
+{"id":"nb-drift-pos-013","text":"Boken var god. Gaten var lang. Solen skinte. Han gikk gata.","expected":[{"rule_id":"doc-drift-nb-register","start":54,"end":58,"suggestion":"gaten"}],"status":"ok"}
+
+// 3 riksmal (boken, gaten, solen), 1 bokmal (klokka) -> flag klokka
+{"id":"nb-drift-pos-014","text":"Boken var god. Gaten var lang. Solen skinte. Klokka ringte.","expected":[{"rule_id":"doc-drift-nb-register","start":45,"end":51,"suggestion":"klokken"}],"status":"ok"}
+
+// 4 riksmal (jenten, boken, gaten, solen), 1 bokmal (boka) -> flag boka
+{"id":"nb-drift-pos-015","text":"Jenten var glad. Boken var pen. Gaten var lang. Solen skinte. Han leste boka.","expected":[{"rule_id":"doc-drift-nb-register","start":72,"end":76,"suggestion":"boken"}],"status":"ok"}
+
+// 5 riksmal, 1 bokmal
+{"id":"nb-drift-pos-016","text":"Jenten gikk hjem. Boken var god. Gaten var tom. Solen skinte. Klokken var mye. Han leste boka.","expected":[{"rule_id":"doc-drift-nb-register","start":89,"end":93,"suggestion":"boken"}],"status":"ok"}
+
+// ── Positive: multiple minority tokens flagged ──
+
+// 3 riksmal (boken, gaten, solen), 2 bokmal (gata, sola) -> flag both bokmal
+{"id":"nb-drift-pos-017","text":"Boken var god. Gaten var lang. Solen skinte. Han gikk gata. Sola var fin.","expected":[{"rule_id":"doc-drift-nb-register","start":54,"end":58,"suggestion":"gaten"},{"rule_id":"doc-drift-nb-register","start":60,"end":64,"suggestion":"solen"}],"status":"ok"}
+
+// 4 bokmal (jenta, boka, gata, sola), 2 riksmal (boken, solen) -> flag both riksmal
+{"id":"nb-drift-pos-018","text":"Jenta var glad. Boka var pen. Gata var fin. Sola skinte. Boken og solen.","expected":[{"rule_id":"doc-drift-nb-register","start":57,"end":62,"suggestion":"boka"},{"rule_id":"doc-drift-nb-register","start":66,"end":71,"suggestion":"sola"}],"status":"ok"}
+
+// 3 bokmal (jenta, gata, sola), 2 riksmal (boken, gaten) -> flag both riksmal
+{"id":"nb-drift-pos-019","text":"Jenta var glad. Gata var pen. Sola skinte. Boken og gaten.","expected":[{"rule_id":"doc-drift-nb-register","start":43,"end":48,"suggestion":"boka"},{"rule_id":"doc-drift-nb-register","start":52,"end":57,"suggestion":"gata"}],"status":"ok"}
+
+// 4 riksmal (jenten, boken, gaten, solen), 2 bokmal (gata, sola) -> flag both bokmal
+{"id":"nb-drift-pos-020","text":"Jenten var glad. Boken var pen. Gaten var lang. Solen skinte. Gata var tom. Sola var fin.","expected":[{"rule_id":"doc-drift-nb-register","start":62,"end":66,"suggestion":"gaten"},{"rule_id":"doc-drift-nb-register","start":76,"end":80,"suggestion":"solen"}],"status":"ok"}
+
+// ── Positive: lexical markers contribute to majority but are deduped ──
+
+// 4 markers total: 3 bokmal morphological (jenta, boka, gata) + 1 riksmal lexical (efter, caught by typo)
+// + 1 riksmal morphological (solen) -> after solen only survives doc-drift
+// Actually: jenta=bokmal, boka=bokmal, gata=bokmal, efter=riksmal(typo dedupes), solen=riksmal
+// Majority = bokmal(3), minority = riksmal(2), solen is the only doc-drift survivor
+{"id":"nb-drift-pos-021","text":"Jenta gikk hjem. Boka var god. Gata var tom. Solen skinte.","expected":[{"rule_id":"doc-drift-nb-register","start":45,"end":50,"suggestion":"sola"}],"status":"ok"}
+
+// riksmal lexical markers (efter, sne) + riksmal morphological (boken, gaten) = 4 riksmal
+// bokmal morphological (jenta) = 1 bokmal -> flag jenta
+{"id":"nb-drift-pos-022","text":"Boken var god. Gaten var lang. Jenta gikk hjem.","expected":[{"rule_id":"doc-drift-nb-register","start":31,"end":36,"suggestion":"jenten"}],"status":"ok"}
+
+// Mixed: 3 bokmal (jenta, boka, gata), riksmal "sne" (typo deduped) but count still helps
+// If only 3 bokmal and no riksmal morphological -> no drift (all markers same register)
+// Need to add riksmal morphological marker too
+{"id":"nb-drift-pos-023","text":"Jenta gikk hjem. Boka var god. Gata var tom. Boken var fin.","expected":[{"rule_id":"doc-drift-nb-register","start":45,"end":50,"suggestion":"boka"}],"status":"ok"}
+
+// ── Positive: varied marker combinations ──
+
+// 3 bokmal (jenta, sola, klokka), 1 riksmal (gaten) -> flag gaten
+{"id":"nb-drift-pos-024","text":"Jenta var glad. Sola skinte. Klokka ringte. Gaten var tom.","expected":[{"rule_id":"doc-drift-nb-register","start":44,"end":49,"suggestion":"gata"}],"status":"ok"}
+
+// 3 riksmal (jenten, solen, klokken), 1 bokmal (gata) -> flag gata
+{"id":"nb-drift-pos-025","text":"Jenten var glad. Solen skinte. Klokken ringte. Gata var tom.","expected":[{"rule_id":"doc-drift-nb-register","start":47,"end":51,"suggestion":"gaten"}],"status":"ok"}
+
+// 3 bokmal (boka, gata, sola), 1 riksmal (jenten)
+{"id":"nb-drift-pos-026","text":"Boka var god. Gata var lang. Sola skinte. Jenten gikk hjem.","expected":[{"rule_id":"doc-drift-nb-register","start":42,"end":48,"suggestion":"jenta"}],"status":"ok"}
+
+// 3 riksmal (boken, gaten, klokken), 1 bokmal (sola)
+{"id":"nb-drift-pos-027","text":"Boken var god. Gaten var lang. Klokken ringte. Sola skinte.","expected":[{"rule_id":"doc-drift-nb-register","start":47,"end":51,"suggestion":"solen"}],"status":"ok"}
+
+// 3 bokmal (jenta, boka, klokka), 1 riksmal (solen)
+{"id":"nb-drift-pos-028","text":"Jenta var glad. Boka var pen. Klokka ringte. Solen skinte.","expected":[{"rule_id":"doc-drift-nb-register","start":45,"end":50,"suggestion":"sola"}],"status":"ok"}
+
+// 3 riksmal (jenten, boken, klokken), 1 bokmal (sola)
+{"id":"nb-drift-pos-029","text":"Jenten var glad. Boken var pen. Klokken ringte. Sola skinte.","expected":[{"rule_id":"doc-drift-nb-register","start":48,"end":52,"suggestion":"solen"}],"status":"ok"}
+
+// 4 bokmal (jenta, boka, gata, sola), 3 riksmal (boken, gaten, solen) -> flag all 3 riksmal
+{"id":"nb-drift-pos-030","text":"Jenta var glad. Boka var pen. Gata var fin. Sola skinte. Boken og gaten og solen.","expected":[{"rule_id":"doc-drift-nb-register","start":57,"end":62,"suggestion":"boka"},{"rule_id":"doc-drift-nb-register","start":66,"end":71,"suggestion":"gata"},{"rule_id":"doc-drift-nb-register","start":75,"end":80,"suggestion":"sola"}],"status":"ok"}
+
+// ── Positive: longer texts with embedded drift ──
+
+// bokmal document with one riksmal intrusion
+{"id":"nb-drift-pos-031","text":"Jenta gikk til skolen om morgenen. Boka var pen. Gata var lang og fin. Sola skinte. Boken var gammel.","expected":[{"rule_id":"doc-drift-nb-register","start":84,"end":89,"suggestion":"boka"}],"status":"ok"}
+
+// riksmal document with one bokmal intrusion
+{"id":"nb-drift-pos-032","text":"Jenten gikk til skolen om morgenen. Boken var pen. Gaten var lang. Solen skinte. Boka var gammel.","expected":[{"rule_id":"doc-drift-nb-register","start":81,"end":85,"suggestion":"boken"}],"status":"ok"}
+
+// ── Acceptance: all bokmal (no drift) ──
+
+{"id":"nb-drift-acc-001","text":"Jenta gikk til skolen. Boka var god. Gata var tom.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-002","text":"Boka var fin. Gata var lang. Sola skinte. Jenta lo.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-003","text":"Klokka var mye. Gata var tom. Sola skinte.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-004","text":"Jenta leste boka. Gata var pen. Sola var varm.","expected":[],"status":"ok"}
+
+// ── Acceptance: all riksmal (no drift) ──
+
+{"id":"nb-drift-acc-005","text":"Jenten gikk til skolen. Boken var god. Gaten var tom.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-006","text":"Boken var fin. Gaten var lang. Solen skinte. Jenten lo.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-007","text":"Klokken var mye. Gaten var tom. Solen skinte.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-008","text":"Jenten leste boken. Gaten var pen. Solen var varm.","expected":[],"status":"ok"}
+
+// ── Acceptance: below threshold (< 3 markers) ──
+
+{"id":"nb-drift-acc-009","text":"Jenta leste boken.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-010","text":"Jenta leste boka.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-011","text":"Boken var god.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-012","text":"Boka var god. Det var en fin dag.","expected":[],"status":"ok"}
+
+// ── Acceptance: no register markers at all ──
+
+{"id":"nb-drift-acc-013","text":"Han spiste lunsj.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-014","text":"Han spiste lunsj og drakk vann. Det var en fin dag.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-015","text":"Gutten og jenta gikk til skolen sammen. De hadde det fint.","expected":[],"status":"ok"}
+
+// ── Acceptance: ties (equal counts = no dominant) ──
+
+// 2 bokmal (jenta, gata) + 2 riksmal (boken, solen) -> tie -> no flags
+{"id":"nb-drift-acc-016","text":"Jenta leste boken. Gata var pen. Solen skinte.","expected":[],"status":"ok"}
+
+// 3 bokmal (jenta, boka, gata) + 3 riksmal (boken, gaten, solen) -> tie -> no flags
+{"id":"nb-drift-acc-017","text":"Jenta leste boken. Boka var fin. Gata var pen. Gaten var lang. Solen skinte.","expected":[],"status":"ok"}
+
+// ── Acceptance: common words NOT in the map ──
+
+{"id":"nb-drift-acc-018","text":"Skolen var stor. Stolen var liten. Huset var gammelt.","expected":[],"status":"ok"}
+{"id":"nb-drift-acc-019","text":"De gikk til butikken og handlet mat til middagen.","expected":[],"status":"ok"}
