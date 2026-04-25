@@ -1,0 +1,51 @@
+# ES subjuntivo trigger rule fixtures (MOOD-01, Phase 11)
+# Positive cases: indicative verb after subjunctive trigger -> suggest subjunctive (31)
+{"id":"es-subj-1","text":"Quiero que mi hermano viene con nosotros.","expected":[{"rule_id":"es-subjuntivo","start":22,"end":27,"suggestion":"venga"}],"comment":"trigger 'quiero que' + NP subject + indicative viene -> venga"}
+{"id":"es-subj-2","text":"Espero que tu hablas con ella.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":20,"suggestion":"hables"}],"comment":"trigger 'espero que' + tu + hablas -> hables"}
+{"id":"es-subj-3","text":"Dudo que el tiene razon.","expected":[{"rule_id":"typo","start":0,"end":4,"suggestion":"Dudé"},{"rule_id":"es-subjuntivo","start":12,"end":17,"suggestion":"tenga"}],"comment":"trigger 'dudo que' + el + tiene -> tenga (dudo flagged as typo)"}
+{"id":"es-subj-4","text":"Es importante que nosotros comemos bien.","expected":[{"rule_id":"es-subjuntivo","start":27,"end":34,"suggestion":"comamos"}],"comment":"trigger 'es importante que' + nosotros + comemos -> comamos"}
+{"id":"es-subj-5","text":"No creo que ella sabe la respuesta.","expected":[{"rule_id":"es-subjuntivo","start":17,"end":21,"suggestion":"sepa"}],"comment":"trigger 'no creo que' + ella + sabe -> sepa"}
+{"id":"es-subj-6","text":"Prefiero que tu vienes temprano.","expected":[{"rule_id":"es-subjuntivo","start":16,"end":22,"suggestion":"vengas"}],"comment":"trigger 'prefiero que' + tu + vienes -> vengas"}
+{"id":"es-subj-7","text":"Espero que estudia mas.","expected":[{"rule_id":"es-subjuntivo","start":11,"end":18,"suggestion":"estudie"}],"comment":"trigger 'espero que' + estudia (no subject) -> estudie"}
+{"id":"es-subj-8","text":"Quiero que el profesor habla bien.","expected":[{"rule_id":"es-subjuntivo","start":23,"end":28,"suggestion":"hable"}],"comment":"trigger 'quiero que' + NP subject 'el profesor' + habla -> hable"}
+{"id":"es-subj-9","text":"Espero que tu comes mucho.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":19,"suggestion":"comas"}],"comment":"trigger 'espero que' + tu + comes -> comas"}
+{"id":"es-subj-10","text":"Quiero que el hace la tarea.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":18,"suggestion":"haga"}],"comment":"trigger 'quiero que' + el + hace -> haga"}
+{"id":"es-subj-11","text":"Es necesario que tu estudias mas.","expected":[{"rule_id":"es-subjuntivo","start":20,"end":28,"suggestion":"estudies"}],"comment":"trigger 'es necesario que' + tu + estudias -> estudies"}
+{"id":"es-subj-12","text":"Es posible que el sale temprano.","expected":[{"rule_id":"es-subjuntivo","start":18,"end":22,"suggestion":"salga"}],"comment":"trigger 'es posible que' + el + sale -> salga"}
+{"id":"es-subj-13","text":"Es mejor que tu vives aqui.","expected":[{"rule_id":"es-subjuntivo","start":16,"end":21,"suggestion":"vivas"}],"comment":"trigger 'es mejor que' + tu + vives -> vivas"}
+{"id":"es-subj-14","text":"Pido que el escribe la carta.","expected":[{"rule_id":"es-subjuntivo","start":12,"end":19,"suggestion":"escriba"}],"comment":"trigger 'pido que' + el + escribe -> escriba"}
+{"id":"es-subj-15","text":"Espero que tu duermes bien.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":21,"suggestion":"duermas"}],"comment":"trigger 'espero que' + tu + duermes -> duermas"}
+{"id":"es-subj-16","text":"Quiere que su hijo estudia mucho.","expected":[{"rule_id":"es-subjuntivo","start":19,"end":26,"suggestion":"estudie"}],"comment":"trigger 'quiere que' + NP subject 'su hijo' + estudia -> estudie"}
+{"id":"es-subj-17","text":"Esperamos que ellos vienen pronto.","expected":[{"rule_id":"es-subjuntivo","start":20,"end":26,"suggestion":"vengan"}],"comment":"trigger 'esperamos que' + ellos + vienen -> vengan"}
+{"id":"es-subj-18","text":"Dudamos que tu tienes razon.","expected":[{"rule_id":"es-subjuntivo","start":15,"end":21,"suggestion":"tengas"}],"comment":"trigger 'dudamos que' + tu + tienes -> tengas"}
+{"id":"es-subj-19","text":"Ojala que tu padre viene pronto.","expected":[{"rule_id":"es-subjuntivo","start":19,"end":24,"suggestion":"venga"}],"comment":"trigger 'ojala que' (accent-stripped) + NP subject + viene -> venga"}
+{"id":"es-subj-20","text":"Ojala que tu hablas con ella.","expected":[{"rule_id":"es-subjuntivo","start":13,"end":19,"suggestion":"hables"}],"comment":"trigger 'ojala que' + tu + hablas -> hables"}
+{"id":"es-subj-21","text":"Pide que ella hace la tarea.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":18,"suggestion":"haga"}],"comment":"trigger 'pide que' + ella + hace -> haga"}
+{"id":"es-subj-22","text":"Prefiere que nosotros comemos aqui.","expected":[{"rule_id":"es-subjuntivo","start":22,"end":29,"suggestion":"comamos"}],"comment":"trigger 'prefiere que' + nosotros + comemos -> comamos"}
+{"id":"es-subj-23","text":"Quiero que tu sales temprano.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":19,"suggestion":"salgas"}],"comment":"trigger 'quiero que' + tu + sales -> salgas"}
+{"id":"es-subj-24","text":"Espero que el pone la mesa.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":18,"suggestion":"ponga"}],"comment":"trigger 'espero que' + el + pone -> ponga"}
+{"id":"es-subj-25","text":"Es imposible que tu sabes todo.","expected":[{"rule_id":"es-subjuntivo","start":20,"end":25,"suggestion":"sepas"}],"comment":"trigger 'es imposible que' + tu + sabes -> sepas"}
+{"id":"es-subj-26","text":"Es probable que el viene manana.","expected":[{"rule_id":"es-subjuntivo","start":19,"end":24,"suggestion":"venga"}],"comment":"trigger 'es probable que' + el + viene -> venga"}
+{"id":"es-subj-27","text":"No pienso que ella tiene razon.","expected":[{"rule_id":"es-subjuntivo","start":19,"end":24,"suggestion":"tenga"}],"comment":"trigger 'no pienso que' + ella + tiene -> tenga"}
+{"id":"es-subj-28","text":"Quiero que la profesora habla despacio.","expected":[{"rule_id":"es-subjuntivo","start":24,"end":29,"suggestion":"hable"}],"comment":"trigger 'quiero que' + NP subject 'la profesora' + habla -> hable"}
+{"id":"es-subj-29","text":"Espera que tu vives en Madrid.","expected":[{"rule_id":"es-subjuntivo","start":14,"end":19,"suggestion":"vivas"}],"comment":"trigger 'espera que' + tu + vives -> vivas"}
+{"id":"es-subj-30","text":"Quiero que nosotros sabemos la verdad.","expected":[{"rule_id":"es-subjuntivo","start":20,"end":27,"suggestion":"sepamos"}],"comment":"trigger 'quiero que' + nosotros + sabemos -> sepamos"}
+{"id":"es-subj-31","text":"Es importante que el estudia cada dia.","expected":[{"rule_id":"es-subjuntivo","start":21,"end":28,"suggestion":"estudie"}],"comment":"trigger 'es importante que' + el + estudia -> estudie"}
+
+# Acceptance cases: should NOT flag (16)
+{"id":"es-subj-a1","text":"Creo que mi hermano viene manana.","expected":[],"comment":"'creo que' is NOT a subjuntivo trigger (indicative belief)"}
+{"id":"es-subj-a2","text":"Dice que habla espanol.","expected":[],"comment":"'dice que' is NOT a subjuntivo trigger (reported speech)"}
+{"id":"es-subj-a3","text":"El libro que viene de la biblioteca.","expected":[],"comment":"relative clause, 'libro que' not in trigger set"}
+{"id":"es-subj-a4","text":"La persona que tiene el libro.","expected":[],"comment":"relative clause, 'persona que' not in trigger set"}
+{"id":"es-subj-a5","text":"Quiero ir al cine.","expected":[],"comment":"no 'que' clause after trigger verb"}
+{"id":"es-subj-a6","text":"Es verdad que tiene razon.","expected":[],"comment":"'es verdad que' is NOT a subjuntivo trigger"}
+{"id":"es-subj-a7","text":"Quiero que venga pronto.","expected":[],"comment":"correct subjunctive already used"}
+{"id":"es-subj-a8","text":"Espero que tu hables con ella.","expected":[],"comment":"correct subjunctive already used"}
+{"id":"es-subj-a9","text":"Espero que tenga razon.","expected":[],"comment":"correct subjunctive already used"}
+{"id":"es-subj-a10","text":"Es importante que comamos bien.","expected":[],"comment":"correct subjunctive already used"}
+{"id":"es-subj-a11","text":"No creo que sepa la respuesta.","expected":[],"comment":"correct subjunctive already used"}
+{"id":"es-subj-a12","text":"Sabe que ella viene manana.","expected":[],"comment":"'sabe que' is NOT a subjuntivo trigger"}
+{"id":"es-subj-a13","text":"Pienso que el tiene razon.","expected":[],"comment":"'pienso que' is NOT a subjuntivo trigger (affirmative)"}
+{"id":"es-subj-a14","text":"El profesor que habla tres idiomas.","expected":[],"comment":"relative clause, not a trigger phrase"}
+{"id":"es-subj-a15","text":"Mi madre dice que viene pronto.","expected":[],"comment":"'dice que' is NOT a trigger, and indicative is correct here"}
+{"id":"es-subj-a16","text":"Es claro que tiene razon.","expected":[],"comment":"'es claro que' is NOT a subjuntivo trigger (certainty)"}
