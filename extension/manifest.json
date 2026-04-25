@@ -41,6 +41,8 @@
         "content/spell-rules/es-fr-gender.js",
         "content/spell-rules/es-fr-modal-verb.js",
         "content/spell-rules/fr-contraction.js",
+        "content/spell-rules/fr-elision.js",
+        "content/spell-rules/fr-etre-avoir.js",
         "content/spell-rules/fr-grammar.js",
         "content/spell-rules/fr-preposition.js",
         "content/spell-rules/nb-codeswitch.js",
