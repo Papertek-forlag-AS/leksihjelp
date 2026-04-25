@@ -125,7 +125,7 @@
 {"id":"fr-bags-acc-87","text":"Je mange dans un bon restaurant.","expected":[],"status":"ok"}
 {"id":"fr-bags-acc-88","text":"C'est un jeune professeur.","expected":[],"status":"ok"}
 {"id":"fr-bags-acc-89","text":"Il a un gros nez.","expected":[],"status":"ok"}
-{"id":"fr-bags-acc-90","text":"Elle a les beaux yeux.","expected":[{"rule_id":"fr-preposition","start":5,"end":10,"original":"a les","suggestion":"aux"},{"rule_id":"typo","start":11,"end":16,"original":"beaux","suggestion":"beau"}],"status":"ok"}
+{"id":"fr-bags-acc-90","text":"Elle a les beaux yeux.","expected":[{"rule_id":"fr-contraction","start":5,"end":10,"original":"a les","suggestion":"aux"},{"rule_id":"typo","start":11,"end":16,"original":"beaux","suggestion":"beau"}],"status":"ok"}
 {"id":"fr-bags-acc-91","text":"C'est un bon exercice.","expected":[],"status":"ok"}
 {"id":"fr-bags-acc-92","text":"Il fait un long discours.","expected":[],"status":"ok"}
 {"id":"fr-bags-acc-93","text":"Elle a un joli sourire.","expected":[],"status":"ok"}
