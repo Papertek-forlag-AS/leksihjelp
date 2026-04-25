@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 current_phase: 14.1-vocab-seam-browser-wiring
-current_plan: Not started
+current_plan: Completed
 status: in_progress
-last_updated: "2026-04-25T16:30:00.000Z"
+last_updated: "2026-04-25T14:48:00.000Z"
 progress:
   total_phases: 11
-  completed_phases: 9
-  total_plans: 28
-  completed_plans: 28
+  completed_phases: 10
+  total_plans: 29
+  completed_plans: 29
 ---
 
 # Session State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 14.1-vocab-seam-browser-wiring (gap closure)
-**Current Plan:** Not started
-**Status:** Gap closure in progress
+**Current Plan:** Completed (1/1)
+**Status:** Phase complete
 
 ## Decisions
 
@@ -63,3 +63,4 @@ See: .planning/PROJECT.md
 - 2026-04-25: Completed 14-03 (FR adjective-noun gender agreement rule with 55 fixtures)
 - 2026-04-25: Milestone audit found gaps: vocab-seam browser wiring (9 rules silent), deleted doc-drift-de-address.js, Phase 15 unexecuted
 - 2026-04-25: Gap closure phases created: 14.1 (vocab-seam wiring), Phase 15 (collocations) already in roadmap
+- 2026-04-25: Completed 14.1-01 (vocab-seam browser wiring: 7 new getters, 9 wiring lines, doc-drift-de-address restored)

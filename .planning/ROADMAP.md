@@ -34,7 +34,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 12: Pronoun & Pro-Drop (ES + FR)** — Warn on ES subject-pronoun overuse, flag ES gustar-class syntax errors, flag FR clitic-cluster ordering; all at hint or warn severity (completed 2026-04-25)
 - [x] **Phase 13: Register Drift Within a Document** — Land document-state two-pass runner with stateful-rule-invalidation gate; warn on DE du/Sie drift, FR tu/vous drift, NB bokmål/riksmål mixing, NN a-/e-infinitiv mixing (completed 2026-04-25)
 - [x] **Phase 14: Morphology Beyond Tokens (EN + ES/FR)** — Flag EN morphological overgeneration (`childs`, `eated`), ES/FR opaque-noun gender mismatch, and EN word-family POS confusion (completed 2026-04-25)
-- [ ] **Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)** — Wire 8 missing vocab indexes into spell-check.js browser runtime; restore deleted doc-drift-de-address.js; close integration blocker affecting 9 rules
+- [x] **Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)** — Wire 8 missing vocab indexes into spell-check.js browser runtime; restore deleted doc-drift-de-address.js; close integration blocker affecting 9 rules (completed 2026-04-25)
 - [ ] **Phase 15: Collocations at Scale (NB + DE + FR + ES)** — Flag preposition collocation errors in NB, DE, FR, ES via shared collocation-bank shape proven in Phase 6
 
 ## Phase Details
@@ -232,7 +232,7 @@ Plans:
 | 12. Pronoun & Pro-Drop (ES + FR) | 3/3 | Complete    | 2026-04-25 | — |
 | 13. Register Drift Within a Document | 3/3 | Complete    | 2026-04-25 | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
-| 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | v2.0 | 0/1 | Not started | — |
+| 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete   | 2026-04-25 | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | v2.0 | 0/? | Not started | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
