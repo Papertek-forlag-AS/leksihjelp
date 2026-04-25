@@ -189,7 +189,7 @@ Plans:
 | 7. Word-Order Violations (NB + DE + FR) | v2.0 | 2/3 | In Progress | — |
 | 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
-| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | 1/3 | In Progress|  | — |
+| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | 2/3 | In Progress|  | — |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 0/? | Not started | — |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |

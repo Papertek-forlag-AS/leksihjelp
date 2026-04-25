@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T04:00:06.150Z"
+last_updated: "2026-04-25T04:16:16.872Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 10 — FR Elision, Auxiliary, PP Agreement
-Plan: 1 of 3 complete (10-01 done)
-Status: In Progress
-Last activity: 2026-04-25 — Completed 10-01-PLAN.md (FR shared infrastructure)
+Plan: 3 of 3 complete (10-01, 10-02, 10-03 done)
+Status: Complete
+Last activity: 2026-04-25 — Completed 10-03-PLAN.md (FR PP agreement rule)
 
-Progress: [███░░░░░░░] 33%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -93,6 +93,7 @@ Progress: [███░░░░░░░] 33%
 | Phase 09 P02 | 6m | 1 tasks | 6 files |
 | Phase 09 P03 | 12min | 2 tasks | 8 files |
 | Phase 10 P01 | 3min | 2 tasks | 6 files |
+| Phase 10 P03 | 13min | 1 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -247,6 +248,8 @@ Recent decisions affecting current work:
 - [Phase 09]: ES por/para rule uses FAMILY_COLLECTIVE and GOAL_NOUNS beyond grammar-tables data for common student errors
 - [Phase 09]: Personal-a rule filters prepositions tagged as finite verbs by stem-based tagger to prevent false positives
 - [Phase 10]: FR benchmark expectation for fr-etre-avoir deferred to Plan 02 (rule does not exist yet)
+- [Phase 10]: Accent-stripped PP lookup with base-form length comparison for hasAgreement to prevent false negatives on accent-stripped student text
+- [Phase 10]: vocab.isFeatureEnabled added to fixture runner for feature-gated rule testing
 
 ### Roadmap Evolution
 
