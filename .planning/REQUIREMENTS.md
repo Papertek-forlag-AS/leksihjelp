@@ -12,10 +12,10 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 - [x] **INFRA-05**: Sentence segmenter available as shared helper (`Intl.Segmenter`-backed) — consumed by every structural rule that needs clause boundaries
 - [x] **INFRA-06**: Tagged-token view (POS-aware token stream with finite-verb / subject / adverbial / subordinator slots) available to all word-order and governance rules
-- [ ] **INFRA-07**: Document-state two-pass runner (`kind: 'document'` rule type) with explicit invalidation protocol — consumed by all DOC-* rules
+- [x] **INFRA-07**: Document-state two-pass runner (`kind: 'document'` rule type) with explicit invalidation protocol — consumed by all DOC-* rules
 - [x] **INFRA-08**: New release gate `check-benchmark-coverage` — measures per-phase benchmark flip-rate with P1/P2/P3 priority weighting; hard gate before phase close
 - [x] **INFRA-09**: New release gate `check-governance-data` — mirrors v1.0 feature-independent-index gate; catches vocab sync dropping `aux` / `separable` / `human` / `bags` / trigger flags
-- [ ] **INFRA-10**: New release gate `check-stateful-rule-invalidation` — paired self-test for Phase 13 document-state; plants a broken invalidation, gate must fire
+- [x] **INFRA-10**: New release gate `check-stateful-rule-invalidation` — paired self-test for Phase 13 document-state; plants a broken invalidation, gate must fire
 - [x] **INFRA-11**: Priority bands in rule registry (P1 hard-flag / P2 warn / P3 hint) with distinct dot-colour tiers in `content.css`; extend `check-rule-css-wiring` TARGETS list
 - [x] **INFRA-12**: `rule.severity` field in explain contract (`error` / `warning` / `hint`); extend `check-explain-contract` to require it
 
@@ -130,10 +130,10 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 |-------------|-------|--------|
 | INFRA-05 | Phase 6 | Complete |
 | INFRA-06 | Phase 7 | Complete |
-| INFRA-07 | Phase 13 | Pending |
+| INFRA-07 | Phase 13 | Complete |
 | INFRA-08 | Phase 6 | Complete |
 | INFRA-09 | Phase 6 | Complete |
-| INFRA-10 | Phase 13 | Pending |
+| INFRA-10 | Phase 13 | Complete |
 | INFRA-11 | Phase 6 | Complete |
 | INFRA-12 | Phase 6 | Complete |
 | REG-01 | Phase 6 | Complete (Plan 06-03, 2026-04-24) |
