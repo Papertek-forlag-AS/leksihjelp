@@ -14,13 +14,13 @@
 # -- Imperfecto adverb + preterito verb -> suggest imperfecto (10) --
 {"id":"es-imp-11","text":"Siempre el estudió mucho.","expected":[{"rule_id":"es-imperfecto-hint","start":11,"end":18,"suggestion":"estudiaba"}],"comment":"imperfecto adverb 'siempre' + preterito estudió -> imperfecto estudiaba"}
 {"id":"es-imp-12","text":"Siempre ella habló con su madre.","expected":[{"rule_id":"es-imperfecto-hint","start":13,"end":18,"suggestion":"hablaba"}],"comment":"imperfecto adverb 'siempre' + preterito habló -> imperfecto hablaba"}
-{"id":"es-imp-13","text":"Siempre yo caminé por el parque.","expected":[{"rule_id":"es-imperfecto-hint","start":11,"end":17,"suggestion":"caminaba"}],"comment":"imperfecto adverb 'siempre' + preterito caminé -> imperfecto caminaba"}
+{"id":"es-imp-13","text":"Siempre yo caminé por el parque.","expected":[{"rule_id":"es-imperfecto-hint","start":11,"end":17,"suggestion":"caminaba"},{"rule_id":"es-pro-drop","start":8,"end":10,"suggestion":""}],"comment":"imperfecto adverb 'siempre' + preterito caminé -> imperfecto caminaba"}
 {"id":"es-imp-14","text":"Normalmente el comió temprano.","expected":[{"rule_id":"es-imperfecto-hint","start":15,"end":20,"suggestion":"comía"}],"comment":"imperfecto adverb 'normalmente' + preterito comió"}
 {"id":"es-imp-15","text":"Normalmente ella habló con su madre.","expected":[{"rule_id":"es-imperfecto-hint","start":17,"end":22,"suggestion":"hablaba"}],"comment":"imperfecto adverb 'normalmente' + preterito habló"}
 {"id":"es-imp-16","text":"Generalmente ella habló con su madre.","expected":[{"rule_id":"es-imperfecto-hint","start":18,"end":23,"suggestion":"hablaba"}],"comment":"imperfecto adverb 'generalmente' + preterito habló"}
-{"id":"es-imp-17","text":"Generalmente yo estudié mucho.","expected":[{"rule_id":"es-imperfecto-hint","start":16,"end":23,"suggestion":"estudiaba"}],"comment":"imperfecto adverb 'generalmente' + preterito estudié"}
+{"id":"es-imp-17","text":"Generalmente yo estudié mucho.","expected":[{"rule_id":"es-imperfecto-hint","start":16,"end":23,"suggestion":"estudiaba"},{"rule_id":"es-pro-drop","start":13,"end":15,"suggestion":""}],"comment":"imperfecto adverb 'generalmente' + preterito estudié"}
 {"id":"es-imp-18","text":"Frecuentemente ella escribió cartas.","expected":[{"rule_id":"es-imperfecto-hint","start":20,"end":28,"suggestion":"escribía"}],"comment":"imperfecto adverb 'frecuentemente' + preterito escribió"}
-{"id":"es-imp-19","text":"Frecuentemente yo caminé por la calle.","expected":[{"rule_id":"es-imperfecto-hint","start":18,"end":24,"suggestion":"caminaba"}],"comment":"imperfecto adverb 'frecuentemente' + preterito caminé"}
+{"id":"es-imp-19","text":"Frecuentemente yo caminé por la calle.","expected":[{"rule_id":"es-imperfecto-hint","start":18,"end":24,"suggestion":"caminaba"},{"rule_id":"es-pro-drop","start":15,"end":17,"suggestion":""}],"comment":"imperfecto adverb 'frecuentemente' + preterito caminé"}
 {"id":"es-imp-20","text":"Siempre ella vivió en Madrid.","expected":[{"rule_id":"es-imperfecto-hint","start":13,"end":18,"suggestion":"vivía"}],"comment":"imperfecto adverb 'siempre' + preterito vivió -> imperfecto vivía"}
 # -- Multi-word preterito phrases + imperfecto verb (4) --
 {"id":"es-imp-21","text":"El lunes pasado ella caminaba por la calle.","expected":[{"rule_id":"es-imperfecto-hint","start":21,"end":29,"suggestion":"caminó"}],"comment":"multi-word preterito 'el lunes pasado' + imperfecto caminaba"}
@@ -34,11 +34,11 @@
 {"id":"es-imp-28","text":"A veces ella habló con su madre.","expected":[{"rule_id":"es-imperfecto-hint","start":13,"end":18,"suggestion":"hablaba"}],"comment":"multi-word imperfecto 'a veces' + preterito habló"}
 {"id":"es-imp-29","text":"De vez en cuando el estudió mucho.","expected":[{"rule_id":"es-imperfecto-hint","start":20,"end":27,"suggestion":"estudiaba"}],"comment":"multi-word imperfecto 'de vez en cuando' + preterito estudió"}
 # -- Mientras (bare) + preterito verb (2) --
-{"id":"es-imp-30","text":"Mientras yo estudié ella caminó.","expected":[{"rule_id":"es-imperfecto-hint","start":12,"end":19,"suggestion":"estudiaba"}],"comment":"bare 'mientras' + preterito estudié -> imperfecto estudiaba"}
+{"id":"es-imp-30","text":"Mientras yo estudié ella caminó.","expected":[{"rule_id":"es-imperfecto-hint","start":12,"end":19,"suggestion":"estudiaba"},{"rule_id":"es-pro-drop","start":9,"end":11,"suggestion":""}],"comment":"bare 'mientras' + preterito estudié -> imperfecto estudiaba"}
 {"id":"es-imp-31","text":"Todos los días ella habló con su madre.","expected":[{"rule_id":"es-imperfecto-hint","start":20,"end":25,"suggestion":"hablaba"}],"comment":"multi-word imperfecto 'todos los dias' + preterito habló"}
 
 # Acceptance cases: should NOT flag (16)
-{"id":"es-imp-a1","text":"Ayer yo caminé al parque.","expected":[],"comment":"preterito adverb + preterito verb (correct match)"}
+{"id":"es-imp-a1","text":"Ayer yo caminé al parque.","expected":[{"rule_id":"es-pro-drop","start":5,"end":7,"suggestion":""}],"comment":"preterito adverb + preterito verb (correct match); pro-drop co-fires on yo"}
 {"id":"es-imp-a2","text":"Siempre caminaba por aqui.","expected":[],"comment":"imperfecto adverb + imperfecto verb (correct match)"}
 {"id":"es-imp-a3","text":"Mientras ella hablaba yo escribía.","expected":[],"comment":"'mientras' + imperfecto verbs (correct — imperfecto with mientras)"}
 {"id":"es-imp-a4","text":"Mientras que es importante ella estudia.","expected":[],"comment":"'mientras que' = contrastive, not temporal, no flag"}
@@ -48,7 +48,7 @@
 {"id":"es-imp-a8","text":"Normalmente ella hablaba mucho.","expected":[],"comment":"imperfecto adverb + imperfecto verb (correct match)"}
 {"id":"es-imp-a9","text":"Generalmente yo estudiaba mucho.","expected":[],"comment":"imperfecto adverb + imperfecto verb (correct match)"}
 {"id":"es-imp-a10","text":"Frecuentemente ella escribía cartas.","expected":[],"comment":"imperfecto adverb + imperfecto verb (correct match)"}
-{"id":"es-imp-a11","text":"El lunes pasado yo caminé al parque.","expected":[],"comment":"preterito phrase + preterito verb (correct match)"}
+{"id":"es-imp-a11","text":"El lunes pasado yo caminé al parque.","expected":[{"rule_id":"es-pro-drop","start":16,"end":18,"suggestion":""}],"comment":"preterito phrase + preterito verb (correct match); pro-drop co-fires on yo"}
 {"id":"es-imp-a12","text":"Cada dia ella estudiaba mucho.","expected":[],"comment":"imperfecto phrase + imperfecto verb (correct match)"}
 {"id":"es-imp-a13","text":"A veces ella hablaba con su madre.","expected":[],"comment":"imperfecto phrase + imperfecto verb (correct match)"}
 {"id":"es-imp-a14","text":"Ella habla con su madre.","expected":[],"comment":"no temporal adverb, no flag"}

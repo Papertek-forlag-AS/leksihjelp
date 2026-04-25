@@ -30,7 +30,7 @@
 {"id":"de-vf-28","text":"damit sie findet den Weg","expected":[{"rule_id":"de-verb-final","start":10,"end":16,"suggestion":"findet (flytt til slutten)"}]}
 {"id":"de-vf-29","text":"bevor er macht die Arbeit","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"macht (flytt til slutten)"}]}
 {"id":"de-vf-30","text":"falls ich bin krank","expected":[{"rule_id":"de-verb-final","start":10,"end":13,"suggestion":"bin (flytt til slutten)"}]}
-{"id":"de-vf-31","text":"seit wir haben einen Hund","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"haben (flytt til slutten)"}]}
+{"id":"de-vf-31","text":"seit wir haben einen Hund","expected":[{"rule_id":"de-verb-final","start":9,"end":14,"suggestion":"haben (flytt til slutten)"},{"rule_id":"de-prep-case","start":15,"end":20,"suggestion":"einem"}]}
 {"id":"de-vf-32","text":"dass er soll mehr helfen","expected":[{"rule_id":"de-verb-final","start":8,"end":12,"suggestion":"soll (flytt til slutten)"}]}
 
 # Acceptance cases: correct verb-final, main clauses, questions (65)
@@ -90,7 +90,7 @@
 {"id":"de-vf-acc-54","text":"Das Kind spielt im Garten","expected":[]}
 {"id":"de-vf-acc-55","text":"Die Frau kauft Brot","expected":[]}
 {"id":"de-vf-acc-56","text":"Der Mann liest eine Zeitung","expected":[]}
-{"id":"de-vf-acc-57","text":"Wir essen zusammen","expected":[{"rule_id":"de-capitalization","start":4,"end":9,"original":"essen","suggestion":"Essen"}]}
+{"id":"de-vf-acc-57","text":"Wir essen zusammen","expected":[{"rule_id":"de-capitalization","start":4,"end":9,"original":"essen","suggestion":"Essen"},{"rule_id":"de-separable-verb","start":10,"end":18,"suggestion":"sammen ... zu"}]}
 {"id":"de-vf-acc-58","text":"Sie trinken Wasser","expected":[]}
 {"id":"de-vf-acc-59","text":"Ich schlafe gut","expected":[]}
 {"id":"de-vf-acc-60","text":"Du schreibst einen Brief","expected":[]}

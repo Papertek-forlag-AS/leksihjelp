@@ -46,7 +46,7 @@
 {"id":"es-pa-a13","text":"Visito Barcelona","expected":[],"comment":"place name, not human"}
 {"id":"es-pa-a14","text":"Estudio en Mexico","expected":[],"comment":"place after preposition"}
 {"id":"es-pa-a15","text":"Vivo en Noruega","expected":[],"comment":"place after preposition"}
-{"id":"es-pa-a16","text":"Parece mi madre","expected":[],"comment":"parecer is copula verb"}
+{"id":"es-pa-a16","text":"Parece mi madre","expected":[{"rule_id":"es-gustar","start":0,"end":6,"suggestion":"le parece"}],"comment":"parecer is copula verb; gustar rule co-fires requiring dative clitic"}
 {"id":"es-pa-a17","text":"Busco trabajo","expected":[],"comment":"non-human noun"}
 {"id":"es-pa-a18","text":"Hago la tarea","expected":[],"comment":"non-human object with article"}
 {"id":"es-pa-a19","text":"Miro la television","expected":[],"comment":"non-human object with article"}
