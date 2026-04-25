@@ -1,0 +1,108 @@
+// FR subjonctif trigger rule fixtures (MOOD-03, Phase 11)
+// Rule id: "fr-subjonctif". Flags indicative verb after subjunctive trigger,
+// but ONLY when subjunctive form differs from indicative (homophony guard).
+// >=30 positive + >=15 acceptance cases.
+//
+// NOTE: Fixtures use triggers other than "il faut que" and use pronouns
+// tu/je/nous/vous (not il/elle/ils/elles) to avoid triggering the fr-elision
+// rule ("que il" -> "qu'il") and the typo rule ("faut" -> "fait").
+
+// ── Positive cases — indicative verb after trigger, forms differ, must flag ──
+
+// faire (irregular, all persons differ)
+{"id":"fr-subj-pos-001","text":"Je veux que je fais le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":19,"suggestion":"fasse"}]}
+{"id":"fr-subj-pos-002","text":"Je veux que tu fais le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":19,"suggestion":"fasses"}]}
+{"id":"fr-subj-pos-003","text":"Pour que nous faisons le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":21,"suggestion":"fassions"}]}
+{"id":"fr-subj-pos-004","text":"Pour que vous faites le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":20,"suggestion":"fassiez"}]}
+{"id":"fr-subj-pos-005","text":"Avant que tu fais le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":13,"end":17,"suggestion":"fasses"}]}
+{"id":"fr-subj-pos-006","text":"Afin que tu fais le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":16,"suggestion":"fasses"}]}
+
+// avoir (irregular, all persons differ)
+{"id":"fr-subj-pos-007","text":"Pour que tu as raison","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":14,"suggestion":"aies"}]}
+{"id":"fr-subj-pos-008","text":"Pour que nous avons raison","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":19,"suggestion":"ayons"}]}
+{"id":"fr-subj-pos-009","text":"Bien que tu as raison","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":14,"suggestion":"aies"}]}
+{"id":"fr-subj-pos-010","text":"Bien que nous avons le temps","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":19,"suggestion":"ayons"}]}
+
+// aller (irregular, all persons differ)
+{"id":"fr-subj-pos-011","text":"Afin que tu vas bien","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":15,"suggestion":"ailles"}]}
+{"id":"fr-subj-pos-012","text":"Afin que vous allez bien","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":19,"suggestion":"alliez"}]}
+{"id":"fr-subj-pos-013","text":"Avant que nous allons bien","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":21,"suggestion":"allions"}]}
+{"id":"fr-subj-pos-014","text":"Je veux que tu vas bien","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":18,"suggestion":"ailles"}]}
+
+// etre (irregular, all persons differ)
+{"id":"fr-subj-pos-015","text":"Bien que tu es content","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":14,"suggestion":"sois"}]}
+{"id":"fr-subj-pos-016","text":"Pour que je suis content","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":16,"suggestion":"sois"}]}
+
+// pouvoir (irregular, all persons differ)
+{"id":"fr-subj-pos-017","text":"Je doute que tu peut venir","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":16,"end":20,"suggestion":"puisses"}]}
+{"id":"fr-subj-pos-018","text":"Avant que nous pouvons partir","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":22,"suggestion":"puissions"}]}
+
+// savoir (irregular, all persons differ)
+{"id":"fr-subj-pos-019","text":"Je doute que tu sais","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":16,"end":20,"suggestion":"saches"}]}
+{"id":"fr-subj-pos-020","text":"Je doute que nous savons","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":18,"end":24,"suggestion":"sachions"}]}
+{"id":"fr-subj-pos-021","text":"Sans que tu sais la raison","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":16,"suggestion":"saches"}]}
+
+// vouloir (irregular)
+{"id":"fr-subj-pos-022","text":"Avant que tu veux partir","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":13,"end":17,"suggestion":"veuilles"}]}
+
+// venir (irregular)
+{"id":"fr-subj-pos-023","text":"Avant que tu viens demain","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":13,"end":18,"suggestion":"viennes"}]}
+
+// devoir (irregular)
+{"id":"fr-subj-pos-024","text":"Bien que je dois partir","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":16,"suggestion":"doive"}]}
+
+// parler nous/vous (regular -er but nous/vous differ)
+{"id":"fr-subj-pos-025","text":"Avant que nous parlons","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":22,"suggestion":"parlions"}]}
+{"id":"fr-subj-pos-026","text":"Avant que vous parlez","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":21,"suggestion":"parliez"}]}
+
+// Various trigger phrases
+{"id":"fr-subj-pos-027","text":"Je doute que tu fais bien","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":16,"end":20,"suggestion":"fasses"}]}
+{"id":"fr-subj-pos-028","text":"Sans que nous avons le temps","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":19,"suggestion":"ayons"}]}
+{"id":"fr-subj-pos-029","text":"Avant que nous faisons le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":15,"end":22,"suggestion":"fassions"}]}
+{"id":"fr-subj-pos-030","text":"Afin que nous avons le temps","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":14,"end":19,"suggestion":"ayons"}]}
+
+// quoique (single-word trigger)
+{"id":"fr-subj-pos-031","text":"Quoique tu as raison","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":11,"end":13,"suggestion":"aies"}]}
+{"id":"fr-subj-pos-032","text":"Quoique nous avons le temps","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":13,"end":18,"suggestion":"ayons"}]}
+
+// finir (irregular -ir, je/tu differ)
+{"id":"fr-subj-pos-033","text":"Pour que je finis le travail","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":17,"suggestion":"finisse"}]}
+
+// prendre (irregular)
+{"id":"fr-subj-pos-034","text":"Avant que je prends le bus","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":13,"end":19,"suggestion":"prenne"}]}
+
+// boire (irregular)
+{"id":"fr-subj-pos-035","text":"Pour que tu bois du jus","lang":"fr","expected":[{"rule_id":"fr-subjonctif","start":12,"end":16,"suggestion":"boives"}]}
+
+// ── Acceptance cases — should NOT flag ──
+
+// Homophonous regular -er je/tu/il/ils (forms identical in presens and subjonctif)
+{"id":"fr-subj-acc-001","text":"Je veux que tu parles bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-002","text":"Pour que tu manges bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-003","text":"Afin que tu chantes bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-004","text":"Avant que tu danses","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-005","text":"Pour que je parle bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-006","text":"Quoique tu parles bien","lang":"fr","expected":[]}
+
+// Not a subjunctive trigger (indicative context)
+{"id":"fr-subj-acc-007","text":"Je crois que tu fais bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-008","text":"Je pense que tu vas bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-009","text":"Je dis que nous parlons bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-010","text":"Le livre que tu fais","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-011","text":"La raison que je dis","lang":"fr","expected":[]}
+
+// No "que" clause (infinitive construction)
+{"id":"fr-subj-acc-012","text":"Je veux manger","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-013","text":"Avant de partir","lang":"fr","expected":[]}
+
+// Correct subjunctive already used (not indicative to flag)
+{"id":"fr-subj-acc-014","text":"Je veux que tu fasses le travail","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-015","text":"Pour que nous ayons raison","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-016","text":"Bien que tu sois content","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-017","text":"Avant que tu ailles bien","lang":"fr","expected":[]}
+
+// Plain sentence without any trigger
+{"id":"fr-subj-acc-018","text":"Tu fais le travail","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-019","text":"Nous parlons bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-020","text":"Vous allez bien","lang":"fr","expected":[]}
+{"id":"fr-subj-acc-021","text":"Je suis content","lang":"fr","expected":[]}
