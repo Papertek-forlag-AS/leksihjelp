@@ -96,7 +96,11 @@ Plans:
   2. `benchmark-texts/es.txt` line `"para comprar comida por mi familia"` flips from unflagged → flagged by the por/para rule (warn severity); closed set of ≤15 trigger patterns is documented in the rule file header.
   3. `benchmark-texts/es.txt` line `"Veo Juan todos los dias"` flips from unflagged → flagged by the personal-"a" rule via `human: true` flag on proper-noun / pronoun entries.
   4. The rule's trigger-table data shape is consumed from `grammar-tables.js` (no local re-implementation); a Phase 11 stub rule reading the same shape passes shape-sanity unit test.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 09-01-PLAN.md — ES trigger tables in grammar-tables.js, ES subject pronouns in spell-check-core.js, benchmark expectations
+- [ ] 09-02-PLAN.md — ES-01 ser/estar copula-adjective mismatch rule with fixtures
+- [ ] 09-03-PLAN.md — ES-02 por/para + ES-03 personal "a" rules with fixtures, Phase 11 stub shape-sanity
 
 ### Phase 10: FR Élision, Auxiliary, Participe Passé (10.3a)
 **Goal**: Ship French's deterministic structural rules (élision, être/avoir) and a tightly-scoped adjacent-window PP agreement rule behind an opt-in toggle; explicitly defer 10.3b corner cases to v3.0.
@@ -178,9 +182,9 @@ Plans:
 | 5. Student Experience Polish | v1.0 | 5/5 | Complete | 2026-04-20 |
 | 05.1 Close UX-01 Gaps from Phase 5 Smoke Test (INSERTED) | v1.0 | 5/5 | Complete | 2026-04-21 |
 | 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/3 | Planning complete | — |
-| 7. Word-Order Violations (NB + DE + FR) | 2/3 | In Progress|  | — |
-| 8. DE Case & Agreement Governance | 2/3 | In Progress|  | — |
-| 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/? | Not started | — |
+| 7. Word-Order Violations (NB + DE + FR) | v2.0 | 2/3 | In Progress | — |
+| 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
+| 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 0/? | Not started | — |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 0/? | Not started | — |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
@@ -201,4 +205,4 @@ Every v2.0 phase must satisfy, on every release:
 - **Benchmark-driven closure** — phase closes when `check-benchmark-coverage` reports 100% P1 flip, ≥80% P2 flip, ≥50% P3 flip on the relevant `benchmark-texts/<lang>.txt` lines; bare percentages are not sufficient.
 
 ---
-*Roadmap updated: 2026-04-24 — v2.0 Phases 6–15 planned (42 requirements mapped, 100% coverage).*
+*Roadmap updated: 2026-04-25 — Phase 9 plans created (3 plans, 2 waves).*
