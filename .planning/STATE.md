@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
-current_phase: 14.1-vocab-seam-browser-wiring
-current_plan: Completed
-status: in_progress
-last_updated: "2026-04-25T14:48:00.000Z"
+current_phase: 14.1-vocab-seam-browser-wiring (gap closure)
+current_plan: Not started
+status: completed
+last_updated: "2026-04-25T14:55:32.202Z"
 progress:
-  total_phases: 11
+  total_phases: 10
   completed_phases: 10
   total_plans: 29
   completed_plans: 29
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md
 
 **Milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens
 **Current phase:** 14.1-vocab-seam-browser-wiring (gap closure)
-**Current Plan:** Completed (1/1)
-**Status:** Phase complete
+**Current Plan:** Not started
+**Status:** Milestone complete
 
 ## Decisions
 
