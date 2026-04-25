@@ -111,7 +111,11 @@ Plans:
   2. `benchmark-texts/fr.txt` pattern `"j'ai allé"` flips from unflagged → flagged by the être/avoir rule; DR MRS VANDERTRAMP acceptance fixtures (`"je suis allé"`, `"elle est venue"`) do NOT flag.
   3. `grammar_fr_pp_agreement` opt-in toggle defaults OFF; when enabled, an adjacent-window `[DO-pronoun][avoir-form][mis-agreed-PP]` acceptance case flips from unflagged → flagged at precision ≥0.95 on the fixture suite; 10.3b relative-clause cases (`"la pomme que j'ai mangée"`) are documented as deferred.
   4. Release gates (`check-fixtures`, `check-explain-contract`, `check-rule-css-wiring`, `check-benchmark-coverage`, `check-network-silence`) all exit 0 for the three new FR rules.
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 10-01-PLAN.md — FR grammar tables, seam fix (buildParticipleToAux for passe_compose), fr-contraction refactor, PP toggle, benchmark lines
+- [ ] 10-02-PLAN.md — FR-01 elision + FR-02 etre/avoir rules with fixtures and release gate wiring
+- [ ] 10-03-PLAN.md — FR-03 PP agreement rule (opt-in toggle, adjacent-window 10.3a scope) with fixtures
 
 ### Phase 11: Aspect & Mood (ES + FR)
 **Goal**: Ship subjunctive-trigger rules for ES and FR, and a hint-tier aspectual-adverb rule for ES, all consuming the trigger-table primitive proven in Phases 9/10.
@@ -185,7 +189,7 @@ Plans:
 | 7. Word-Order Violations (NB + DE + FR) | v2.0 | 2/3 | In Progress | — |
 | 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
-| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 0/? | Not started | — |
+| 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 0/3 | Planning complete | — |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 0/? | Not started | — |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |
@@ -205,4 +209,4 @@ Every v2.0 phase must satisfy, on every release:
 - **Benchmark-driven closure** — phase closes when `check-benchmark-coverage` reports 100% P1 flip, ≥80% P2 flip, ≥50% P3 flip on the relevant `benchmark-texts/<lang>.txt` lines; bare percentages are not sufficient.
 
 ---
-*Roadmap updated: 2026-04-25 — Phase 9 plans created (3 plans, 2 waves).*
+*Roadmap updated: 2026-04-25 — Phase 10 plans created (3 plans, 2 waves).*
