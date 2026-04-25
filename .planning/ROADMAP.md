@@ -30,7 +30,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [ ] **Phase 8: DE Case & Agreement Governance** — Flag preposition-case mismatches (adjacent window), unsplit separable verbs, wrong perfekt auxiliary, and compound-noun gender; deliver shared `grammar-tables.js` primitive
 - [ ] **Phase 9: ES ser/estar, por/para, Personal "a"** — Flag ser/estar misuse via copula tag, por/para via trigger-pattern tree, and missing personal "a" on human direct objects; expose reusable trigger-table shape
 - [x] **Phase 10: FR Élision, Auxiliary, Participe Passé (10.3a)** — Flag missing élision, wrong être/avoir auxiliary, and PP agreement in adjacent-DO-pronoun window (opt-in toggle, default off); 10.3b deferred to v3.0 (completed 2026-04-25)
-- [ ] **Phase 11: Aspect & Mood (ES + FR)** — Flag indicative-where-subjunctive-required after closed trigger sets in ES and FR; warn on ES pretérito/imperfecto aspectual hints at hint severity
+- [x] **Phase 11: Aspect & Mood (ES + FR)** — Flag indicative-where-subjunctive-required after closed trigger sets in ES and FR; warn on ES pretérito/imperfecto aspectual hints at hint severity (completed 2026-04-25)
 - [ ] **Phase 12: Pronoun & Pro-Drop (ES + FR)** — Warn on ES subject-pronoun overuse, flag ES gustar-class syntax errors, flag FR clitic-cluster ordering; all at hint or warn severity
 - [ ] **Phase 13: Register Drift Within a Document** — Land document-state two-pass runner with stateful-rule-invalidation gate; warn on DE du/Sie drift, FR tu/vous drift, NB bokmål/riksmål mixing, NN a-/e-infinitiv mixing
 - [ ] **Phase 14: Morphology Beyond Tokens (EN + ES/FR)** — Flag EN morphological overgeneration (`childs`, `eated`), ES/FR opaque-noun gender mismatch, and EN word-family POS confusion
@@ -210,7 +210,7 @@ Plans:
 | 8. DE Case & Agreement Governance | v2.0 | 2/3 | In Progress | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/3 | Planning complete | — |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | 3/3 | Complete    | 2026-04-25 | — |
-| 11. Aspect & Mood (ES + FR) | 2/3 | In Progress|  | — |
+| 11. Aspect & Mood (ES + FR) | 3/3 | Complete   | 2026-04-25 | — |
 | 12. Pronoun & Pro-Drop (ES + FR) | v2.0 | 0/? | Not started | — |
 | 13. Register Drift Within a Document | v2.0 | 0/? | Not started | — |
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 0/? | Not started | — |

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T09:03:45.866Z"
+last_updated: "2026-04-25T09:06:05.759Z"
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 19
-  completed_plans: 18
+  completed_plans: 19
 ---
 
 # Project State
@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 ## Current Position
 
 Phase: 11 — Aspect/Mood (ES/FR)
-Plan: 2 of 3 complete (11-01, 11-03 done)
-Status: In Progress
-Last activity: 2026-04-25 — Completed 11-03-PLAN.md (FR subjonctif trigger rule)
+Plan: 3 of 3 complete (11-01, 11-02, 11-03 done)
+Status: Complete
+Last activity: 2026-04-25 — Completed 11-02-PLAN.md (ES subjuntivo + imperfecto rules)
 
-Progress: [██████----] 67%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -97,6 +97,7 @@ Progress: [██████----] 67%
 | Phase 10 P02 | 17m | 2 tasks | 11 files |
 | Phase 11 P01 | 9min | 2 tasks | 7 files |
 | Phase 11-aspect-mood-es-fr P03 | 8min | 1 tasks | 2 files |
+| Phase 11 P02 | 12m | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -258,6 +259,8 @@ Recent decisions affecting current work:
 - [Phase 11]: ES reverse-lookup Maps use accent-stripped variants for student tolerance
 - [Phase 11]: FR homophony guard (frSubjonctifDiffers) compares subjonctif vs presens to suppress false positives
 - [Phase 11-aspect-mood-es-fr]: Person disambiguation via preceding subject pronoun for shared verb forms (fais=je/tu)
+- [Phase 11]: Person mapping uses indicative form's own person key rather than NP subject detection
+- [Phase 11]: Lazy reverse-map for imperfecto forms since vocab-seam only exports forward map
 
 ### Roadmap Evolution
 
