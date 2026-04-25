@@ -1,0 +1,53 @@
+# ES por/para preposition confusion rule fixtures (ES-02, Phase 9)
+# Positive cases: wrong preposition flagged with suggestion (32)
+{"id":"es-pp-1","text":"comprar comida por mi familia","expected":[{"rule_id":"es-por-para","start":15,"end":18,"suggestion":"para"}],"comment":"por + possessive + human noun = beneficiary -> para"}
+{"id":"es-pp-2","text":"por leer un libro","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-3","text":"Estudio espanol por mi trabajo","expected":[{"rule_id":"es-por-para","start":16,"end":19,"suggestion":"para"}],"comment":"por + possessive + goal = purpose -> para"}
+{"id":"es-pp-4","text":"por manana tengo que terminar","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + deadline marker -> para"}
+{"id":"es-pp-5","text":"Trabajo por ganar dinero","expected":[{"rule_id":"es-por-para","start":8,"end":11,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-6","text":"por comprar comida","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-7","text":"Ella cocina por su madre","expected":[{"rule_id":"es-por-para","start":12,"end":15,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-8","text":"Hago esto por mi hermano","expected":[{"rule_id":"es-por-para","start":10,"end":13,"suggestion":"para"},{"rule_id":"typo","start":5,"end":9,"suggestion":"estoy"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-9","text":"Compro flores por mi abuela","expected":[{"rule_id":"es-por-para","start":14,"end":17,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-10","text":"por estudiar mejor","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-11","text":"por vivir en paz","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-12","text":"Voy al gimnasio por estar en forma","expected":[{"rule_id":"es-por-para","start":16,"end":19,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-13","text":"por lunes tengo que entregar","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + deadline day -> para"}
+{"id":"es-pp-14","text":"por martes necesito terminar","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + deadline day -> para"}
+{"id":"es-pp-15","text":"Necesito el informe por viernes","expected":[{"rule_id":"es-por-para","start":20,"end":23,"suggestion":"para"}],"comment":"por + deadline day -> para"}
+{"id":"es-pp-16","text":"Ella cocina por su hija","expected":[{"rule_id":"es-por-para","start":12,"end":15,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-17","text":"por aprender espanol","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-18","text":"por escribir la carta","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-19","text":"Leo por aprender","expected":[{"rule_id":"es-por-para","start":4,"end":7,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-20","text":"Vengo por ayudar","expected":[{"rule_id":"es-por-para","start":6,"end":9,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-21","text":"por enero quiero ir","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + deadline month -> para"}
+{"id":"es-pp-22","text":"Lo necesito por proximo lunes","expected":[{"rule_id":"es-por-para","start":12,"end":15,"suggestion":"para"}],"comment":"por + deadline proximo -> para"}
+{"id":"es-pp-23","text":"Hago la tarea por mi profesor","expected":[{"rule_id":"es-por-para","start":14,"end":17,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-24","text":"Preparo comida por mi amigo","expected":[{"rule_id":"es-por-para","start":15,"end":18,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-25","text":"Compro un regalo por mi vecino","expected":[{"rule_id":"es-por-para","start":17,"end":20,"suggestion":"para"}],"comment":"por + possessive + human = beneficiary -> para"}
+{"id":"es-pp-26","text":"para dos horas","expected":[{"rule_id":"es-por-para","start":0,"end":4,"suggestion":"por"}],"comment":"para + number + time unit = duration -> por"}
+{"id":"es-pp-27","text":"para tres dias","expected":[{"rule_id":"es-por-para","start":0,"end":4,"suggestion":"por"},{"rule_id":"typo","start":10,"end":14,"suggestion":"dais"}],"comment":"para + number + time unit = duration -> por"}
+{"id":"es-pp-28","text":"Esperamos para cinco minutos","expected":[{"rule_id":"es-por-para","start":10,"end":14,"suggestion":"por"}],"comment":"para + number + time unit = duration -> por"}
+{"id":"es-pp-29","text":"Estuve en Madrid para dos semanas","expected":[{"rule_id":"es-por-para","start":17,"end":21,"suggestion":"por"}],"comment":"para + number + time unit = duration -> por"}
+{"id":"es-pp-30","text":"por comer mas rapido","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-31","text":"Hago ejercicio por estar sano","expected":[{"rule_id":"es-por-para","start":15,"end":18,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+{"id":"es-pp-32","text":"por dormir temprano","expected":[{"rule_id":"es-por-para","start":0,"end":3,"suggestion":"para"}],"comment":"por + infinitive = purpose -> para"}
+# Acceptance cases: correct usage NOT flagged (18)
+{"id":"es-pp-a1","text":"Gracias por tu ayuda","expected":[],"comment":"correct: cause/reason"}
+{"id":"es-pp-a2","text":"por la manana","expected":[],"comment":"correct: time expression"}
+{"id":"es-pp-a3","text":"por ejemplo","expected":[],"comment":"correct: fixed phrase"}
+{"id":"es-pp-a4","text":"por favor","expected":[],"comment":"correct: fixed phrase"}
+{"id":"es-pp-a5","text":"para mi madre","expected":[],"comment":"correct: beneficiary with para"}
+{"id":"es-pp-a6","text":"para comer","expected":[],"comment":"correct: purpose with para"}
+{"id":"es-pp-a7","text":"por tres horas","expected":[],"comment":"correct: duration with por"}
+{"id":"es-pp-a8","text":"Caminamos por el parque","expected":[],"comment":"correct: through/along"}
+{"id":"es-pp-a9","text":"por eso","expected":[{"rule_id":"typo","start":4,"end":7,"suggestion":"es"}],"comment":"correct: cause (typo rule fires on eso->es)"}
+{"id":"es-pp-a10","text":"por supuesto","expected":[],"comment":"correct: fixed phrase"}
+{"id":"es-pp-a11","text":"por fin","expected":[{"rule_id":"typo","start":4,"end":7,"suggestion":"fil"}],"comment":"correct: fixed phrase (typo rule fires on fin->fil)"}
+{"id":"es-pp-a12","text":"por lo menos","expected":[],"comment":"correct: fixed phrase"}
+{"id":"es-pp-a13","text":"por cierto","expected":[],"comment":"correct: fixed phrase"}
+{"id":"es-pp-a14","text":"Viajo por todo el mundo","expected":[],"comment":"correct: through/movement"}
+{"id":"es-pp-a15","text":"Lo hice por ti","expected":[],"comment":"correct: cause/motive (did it because of you)"}
+{"id":"es-pp-a16","text":"para mi es importante","expected":[],"comment":"correct: opinion marker para mi"}
+{"id":"es-pp-a17","text":"para siempre","expected":[],"comment":"correct: para + siempre fixed expression"}
+{"id":"es-pp-a18","text":"por lo tanto","expected":[],"comment":"correct: fixed phrase"}
