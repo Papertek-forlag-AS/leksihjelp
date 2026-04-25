@@ -65,8 +65,8 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### Register Drift Within a Document (Phase 13)
 
-- [ ] **DOC-01**: DE du/Sie drift warn when a single document mixes `du`-address and `Sie`-address forms
-- [ ] **DOC-02**: FR tu/vous drift warn (mirror of DOC-01)
+- [x] **DOC-01**: DE du/Sie drift warn when a single document mixes `du`-address and `Sie`-address forms
+- [x] **DOC-02**: FR tu/vous drift warn (mirror of DOC-01)
 - [ ] **DOC-03**: NB bokmål/riksmål mixing warn when paragraph contains riksmål forms (`boken`, `efter`, `sne`) alongside bokmål; `BOKMAL_RIKSMAL_MAP` extension to v1.0 cross-dialect infra
 - [ ] **DOC-04**: NN a-infinitiv / e-infinitiv mixing warn when register-text contains both inflection patterns
 
@@ -159,8 +159,8 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | PRON-01 | Phase 12 | Complete |
 | PRON-02 | Phase 12 | Complete |
 | PRON-03 | Phase 12 | Complete |
-| DOC-01 | Phase 13 | Pending |
-| DOC-02 | Phase 13 | Pending |
+| DOC-01 | Phase 13 | Complete |
+| DOC-02 | Phase 13 | Complete |
 | DOC-03 | Phase 13 | Pending |
 | DOC-04 | Phase 13 | Pending |
 | MORPH-01 | Phase 14 | Pending |
