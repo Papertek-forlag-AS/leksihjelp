@@ -56,7 +56,10 @@
     perfektum: 'perfect', perfecto: 'perfect', passe_compose: 'perfect',
     perfektum_partisipp: 'perfect',
     participle: 'perfect',
-    present_participle: 'continuous'
+    present_participle: 'continuous',
+    subjuntivo: 'subjunctive',
+    imperfecto: 'imperfect',
+    subjonctif: 'subjunctive'
   };
 
   // Tense keys to feature mapping (supports multiple languages)
@@ -70,7 +73,10 @@
     preterito: 'grammar_preterito',
     perfektum: 'grammar_perfektum',
     perfecto: 'grammar_perfecto',
-    passe_compose: 'grammar_passe_compose'
+    passe_compose: 'grammar_passe_compose',
+    subjuntivo: 'grammar_es_subjuntivo',
+    imperfecto: 'grammar_es_imperfecto',
+    subjonctif: 'grammar_fr_subjonctif'
   };
 
   // Pronoun-feature sets per language (extracted from word-prediction.js:128–157
@@ -819,6 +825,118 @@
     return participleToAux;
   }
 
+  // ── Phase 11: Build mood/aspect reverse-lookup indexes from raw verbbank ──
+  // Maps conjugated forms back to infinitive + person, and stores
+  // subjuntivo/imperfecto/subjonctif forms keyed by infinitive|person.
+  // Built from raw data (not wordList) to avoid feature-gating starvation.
+  function buildMoodIndexes(raw, lang) {
+    const esPresensToVerb = new Map();
+    const esSubjuntivoForms = new Map();
+    const esImperfectoForms = new Map();
+    const esPreteritumToVerb = new Map();
+    const frPresensToVerb = new Map();
+    const frSubjonctifForms = new Map();
+    const frSubjonctifDiffers = new Map();
+
+    if (!raw || !raw.verbbank) {
+      return { esPresensToVerb, esSubjuntivoForms, esImperfectoForms, esPreteritumToVerb,
+               frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers };
+    }
+
+    // Helper: strip accents for fuzzy matching (students often omit accents)
+    function stripAccents(s) {
+      return s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+    }
+
+    if (lang === 'es') {
+      for (const entry of Object.values(raw.verbbank)) {
+        const inf = (entry.word || '').replace(/^å\s+/i, '').trim();
+        if (!inf) continue;
+        const conj = entry.conjugations;
+        if (!conj) continue;
+
+        // Presente (presens key in ES data) → esPresensToVerb
+        const pres = conj.presens;
+        if (pres && pres.former) {
+          for (const [person, form] of Object.entries(pres.former)) {
+            if (!form) continue;
+            const lc = form.toLowerCase();
+            esPresensToVerb.set(lc, { inf, person });
+            const stripped = stripAccents(lc);
+            if (stripped !== lc) esPresensToVerb.set(stripped, { inf, person });
+          }
+        }
+
+        // Preteritum → esPreteritumToVerb
+        const pret = conj.preteritum;
+        if (pret && pret.former) {
+          for (const [person, form] of Object.entries(pret.former)) {
+            if (!form) continue;
+            const lc = form.toLowerCase();
+            esPreteritumToVerb.set(lc, { inf, person });
+            const stripped = stripAccents(lc);
+            if (stripped !== lc) esPreteritumToVerb.set(stripped, { inf, person });
+          }
+        }
+
+        // Subjuntivo → esSubjuntivoForms
+        const subj = conj.subjuntivo;
+        if (subj && subj.former) {
+          for (const [person, form] of Object.entries(subj.former)) {
+            if (!form) continue;
+            esSubjuntivoForms.set(inf + '|' + person, form.toLowerCase());
+          }
+        }
+
+        // Imperfecto → esImperfectoForms
+        const imp = conj.imperfecto;
+        if (imp && imp.former) {
+          for (const [person, form] of Object.entries(imp.former)) {
+            if (!form) continue;
+            esImperfectoForms.set(inf + '|' + person, form.toLowerCase());
+          }
+        }
+      }
+    }
+
+    if (lang === 'fr') {
+      for (const entry of Object.values(raw.verbbank)) {
+        const inf = (entry.word || '').replace(/^å\s+/i, '').trim();
+        if (!inf) continue;
+        const conj = entry.conjugations;
+        if (!conj) continue;
+
+        // Presens → frPresensToVerb
+        const pres = conj.presens;
+        const presForms = {};
+        if (pres && pres.former) {
+          for (const [person, form] of Object.entries(pres.former)) {
+            if (!form) continue;
+            const lc = form.toLowerCase();
+            frPresensToVerb.set(lc, { inf, person });
+            presForms[person] = lc;
+          }
+        }
+
+        // Subjonctif → frSubjonctifForms + frSubjonctifDiffers
+        const subj = conj.subjonctif;
+        if (subj && subj.former) {
+          for (const [person, form] of Object.entries(subj.former)) {
+            if (!form) continue;
+            const lc = form.toLowerCase();
+            frSubjonctifForms.set(inf + '|' + person, lc);
+            // Homophony guard: only flag when subjonctif differs from presens
+            const presForm = presForms[person] || '';
+            frSubjonctifDiffers.set(inf + '|' + person, lc !== presForm);
+          }
+        }
+      }
+    }
+
+    return { esPresensToVerb, esSubjuntivoForms, esImperfectoForms, esPreteritumToVerb,
+             frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers };
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -899,6 +1017,10 @@
     // Phase 8: participle → auxiliary Map for DE Perfekt auxiliary rule (DE-03).
     const participleToAux = buildParticipleToAux(raw);
 
+    // Phase 11: mood/aspect reverse-lookup indexes for ES subjuntivo/imperfecto
+    // and FR subjonctif rules. Built from raw verbbank (not wordList).
+    const moodIndexes = buildMoodIndexes(raw, lang);
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -935,6 +1057,9 @@
       redundancyPhrases,
       // Phase 8: participle → auxiliary for DE Perfekt auxiliary choice rule.
       participleToAux,
+      // Phase 11: mood/aspect reverse-lookup indexes for ES and FR rules.
+      // Empty Maps for non-matching languages (e.g., esPresensToVerb is empty when lang !== 'es').
+      ...moodIndexes,
     };
   }
 
