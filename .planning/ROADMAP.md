@@ -222,7 +222,9 @@ Plans:
   2. nn/clean suite passes: collocation rule no longer fires false positive on legitimate NN clean text.
   3. fr/grammar suite passes: fixture rule-id values match what the rules actually emit.
   4. All other release gates remain green (no regressions from fixture triage changes).
+**Plans:** 1 plan
 Plans:
+- [ ] 15.1-01-PLAN.md — Fix nn/clean regression, fr rule-id aliases, and 20 co-fire expectations across DE/ES fixture suites
 
 
 ## Progress
@@ -248,7 +250,7 @@ Plans:
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | 1/1 | Complete    | 2026-04-25 | — |
-| 15.1 Fixture Gate Triage (GAP CLOSURE) | v2.0 | 0/0 | Pending | — |
+| 15.1 Fixture Gate Triage (GAP CLOSURE) | v2.0 | 0/1 | Pending | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
 
