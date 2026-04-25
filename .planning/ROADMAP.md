@@ -179,9 +179,9 @@ Plans:
   4. All new vocab indexes (`getIrregularForms`, `getWordFamily`) are registered with `check-spellcheck-features` and `check-governance-data`, which exit 0 under minimal-preset simulation.
 **Plans**: 3 plans
 Plans:
-- [ ] 12-01-PLAN.md — Infra: ES_GUSTAR_CLASS_VERBS table, CSS bindings, manifest wiring (Phase 11+12), release gates, benchmark expectations
-- [ ] 12-02-PLAN.md — PRON-01 ES pro-drop + PRON-02 ES gustar rules with fixtures
-- [ ] 12-03-PLAN.md — PRON-03 FR clitic-order rule with fixtures
+- [ ] 14-01-PLAN.md — Infra: irregularForms index in vocab-seam-core.js, manifest/CSS/release-gate wiring, benchmark expectations
+- [ ] 14-02-PLAN.md — MORPH-01 EN irregular overgeneration + MORPH-03 EN word-family POS-slot rules with fixtures
+- [ ] 14-03-PLAN.md — MORPH-02 FR adjective-noun gender agreement rule with fixtures
 
 ### Phase 15: Collocations at Scale (NB + DE + FR + ES)
 **Goal**: Scale the Phase 6 EN-collocation-seed pattern into full preposition-collocation coverage across NB, DE, FR, ES; data-heavy, reuses existing rule shape.
