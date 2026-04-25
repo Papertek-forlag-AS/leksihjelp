@@ -1,0 +1,59 @@
+# DE separable-verb rule fixtures (DE-02, Phase 8)
+# Positive cases: unsplit separable verbs in main clauses (32)
+# Note: Many unsplit forms are also flagged by the typo-fuzzy rule (priority 50),
+# which deduplicates the separable-verb finding (priority 69). Cases with longer
+# prefixes (zurück/weiter/vorbei/heraus/los/ein[schläft]) survive dedup because
+# the typo fuzzy matcher doesn't find a close match.
+{"id":"de-sv-1","text":"ich aufstehe früh","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"aufstehen"}],"comment":"aufstehen unsplit (typo dedup)"}
+{"id":"de-sv-2","text":"er einschläft schnell","expected":[{"rule_id":"de-separable-verb","start":3,"end":13,"suggestion":"schläft ... ein"}],"comment":"einschlafen unsplit"}
+{"id":"de-sv-3","text":"sie einkauft im Laden","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"einkauf"}],"comment":"einkaufen unsplit (typo dedup)"}
+{"id":"de-sv-4","text":"wir anfangen morgen","expected":[{"rule_id":"de-capitalization","start":13,"end":19,"suggestion":"Morgen"},{"rule_id":"de-separable-verb","start":4,"end":12,"suggestion":"fangen ... an"}],"comment":"anfangen unsplit + capitalization"}
+{"id":"de-sv-5","text":"ich anrufe dich","expected":[{"rule_id":"de-capitalization","start":4,"end":10,"suggestion":"Anrufe"}],"comment":"anrufen unsplit (cap dedup on same span)"}
+{"id":"de-sv-6","text":"du aufwachst früh","expected":[{"rule_id":"typo","start":3,"end":12,"suggestion":"aufwachen"}],"comment":"aufwachen unsplit (typo dedup)"}
+{"id":"de-sv-7","text":"er abfährt um acht","expected":[{"rule_id":"typo","start":3,"end":10,"suggestion":"abfahrt"}],"comment":"abfahren unsplit (typo dedup)"}
+{"id":"de-sv-8","text":"ich aufmache die Tür","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"aufmachen"}],"comment":"aufmachen unsplit (typo dedup)"}
+{"id":"de-sv-9","text":"sie vorkommt oft","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"vorkommen"}],"comment":"vorkommen unsplit (typo dedup)"}
+{"id":"de-sv-10","text":"er zurückkommt bald","expected":[{"rule_id":"de-separable-verb","start":3,"end":14,"suggestion":"kommt ... zurück"}],"comment":"zurückkommen unsplit"}
+{"id":"de-sv-11","text":"ich ausgehe heute Abend","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"ausgehen"}],"comment":"ausgehen unsplit (typo dedup)"}
+{"id":"de-sv-12","text":"du mitkommst auch","expected":[{"rule_id":"typo","start":3,"end":12,"suggestion":"mitkommen"}],"comment":"mitkommen unsplit (typo dedup)"}
+{"id":"de-sv-13","text":"er weitermacht","expected":[{"rule_id":"de-separable-verb","start":3,"end":14,"suggestion":"macht ... weiter"}],"comment":"weitermachen unsplit"}
+{"id":"de-sv-14","text":"sie aufhört zu singen","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"aufhören"}],"comment":"aufhören unsplit (typo dedup)"}
+{"id":"de-sv-15","text":"ich einsteige in den Bus","expected":[{"rule_id":"typo","start":4,"end":13,"suggestion":"einsteigen"}],"comment":"einsteigen unsplit (typo dedup)"}
+{"id":"de-sv-16","text":"er umzieht nächste Woche","expected":[{"rule_id":"typo","start":3,"end":10,"suggestion":"umziehen"},{"rule_id":"typo","start":11,"end":18,"suggestion":"nächst-"}],"comment":"umziehen unsplit (typo dedup)"}
+{"id":"de-sv-17","text":"sie aufsteht um sechs","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"aufstehen"}],"comment":"aufstehen 3sg (typo dedup)"}
+{"id":"de-sv-18","text":"ich zumache die Tür","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"zumachen"}],"comment":"zumachen unsplit (typo dedup)"}
+{"id":"de-sv-19","text":"er vorbeifährt an der Schule","expected":[{"rule_id":"de-separable-verb","start":3,"end":14,"suggestion":"fährt ... vorbei"}],"comment":"vorbeifahren unsplit"}
+{"id":"de-sv-20","text":"ich wegfahre am Montag","expected":[{"rule_id":"typo","start":4,"end":12,"suggestion":"wegfahren"}],"comment":"wegfahren unsplit (typo dedup)"}
+{"id":"de-sv-21","text":"er einschläft im Unterricht","expected":[{"rule_id":"de-separable-verb","start":3,"end":13,"suggestion":"schläft ... ein"}],"comment":"einschlafen in context"}
+{"id":"de-sv-22","text":"wir aufstehen morgen","expected":[{"rule_id":"de-capitalization","start":14,"end":20,"suggestion":"Morgen"},{"rule_id":"de-separable-verb","start":4,"end":13,"suggestion":"stehen ... auf"}],"comment":"aufstehen 1pl + capitalization"}
+{"id":"de-sv-23","text":"du ankommst zu spät","expected":[{"rule_id":"typo","start":3,"end":11,"suggestion":"ankomst"}],"comment":"ankommen unsplit (typo dedup)"}
+{"id":"de-sv-24","text":"er einkauft am Samstag","expected":[{"rule_id":"typo","start":3,"end":11,"suggestion":"einkauf"}],"comment":"einkaufen unsplit (typo dedup)"}
+{"id":"de-sv-25","text":"sie anfängt zu lernen","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"anfangs"}],"comment":"anfangen 3sg (typo dedup)"}
+{"id":"de-sv-26","text":"ich abhole das Paket","expected":[{"rule_id":"typo","start":4,"end":10,"suggestion":"abholen"}],"comment":"abholen unsplit (typo dedup)"}
+{"id":"de-sv-27","text":"er aufgibt zu schnell","expected":[{"rule_id":"typo","start":3,"end":10,"suggestion":"aufgabe"}],"comment":"aufgeben unsplit (typo dedup)"}
+{"id":"de-sv-28","text":"ich anmache das Licht","expected":[{"rule_id":"typo","start":4,"end":11,"suggestion":"anmachen"}],"comment":"anmachen unsplit (typo dedup)"}
+{"id":"de-sv-29","text":"sie losfährt um acht","expected":[{"rule_id":"de-separable-verb","start":4,"end":12,"suggestion":"fährt ... los"}],"comment":"losfahren unsplit"}
+{"id":"de-sv-30","text":"er mitbringt ein Geschenk","expected":[{"rule_id":"typo","start":3,"end":12,"suggestion":"mitbringen"}],"comment":"mitbringen unsplit (typo dedup)"}
+{"id":"de-sv-31","text":"ich nachdenke über das Problem","expected":[{"rule_id":"typo","start":4,"end":13,"suggestion":"nachdenken"}],"comment":"nachdenken unsplit (typo dedup)"}
+{"id":"de-sv-32","text":"du herauskommst aus dem Haus","expected":[{"rule_id":"de-separable-verb","start":3,"end":15,"suggestion":"kommst ... heraus"}],"comment":"herauskommen unsplit"}
+# Acceptance cases: correct forms — no separable-verb flag (20)
+{"id":"de-sv-acc-01","text":"dass ich aufstehe","expected":[{"rule_id":"typo","start":9,"end":17,"suggestion":"aufstehen"}],"comment":"subordinate clause (typo fires on unsplit form)"}
+{"id":"de-sv-acc-02","text":"ich stehe um sieben auf","expected":[],"comment":"correctly split in main clause"}
+{"id":"de-sv-acc-03","text":"wenn er einschläft","expected":[],"comment":"subordinate clause"}
+{"id":"de-sv-acc-04","text":"weil sie einkauft","expected":[{"rule_id":"typo","start":9,"end":17,"suggestion":"einkauf"}],"comment":"subordinate clause (typo fires)"}
+{"id":"de-sv-acc-05","text":"er fährt morgen ab","expected":[{"rule_id":"de-capitalization","start":9,"end":15,"suggestion":"Morgen"}],"comment":"correctly split (capitalization fires)"}
+{"id":"de-sv-acc-06","text":"obwohl ich anrufe","expected":[{"rule_id":"de-capitalization","start":11,"end":17,"suggestion":"Anrufe"}],"comment":"subordinate clause (cap fires)"}
+{"id":"de-sv-acc-07","text":"sie kommt morgen zurück","expected":[{"rule_id":"de-capitalization","start":10,"end":16,"suggestion":"Morgen"}],"comment":"correctly split (cap fires)"}
+{"id":"de-sv-acc-08","text":"ich gehe heute Abend aus","expected":[],"comment":"correctly split"}
+{"id":"de-sv-acc-09","text":"falls er umzieht","expected":[{"rule_id":"typo","start":9,"end":16,"suggestion":"umziehen"}],"comment":"subordinate clause (typo fires)"}
+{"id":"de-sv-acc-10","text":"bevor sie aufsteht","expected":[{"rule_id":"typo","start":10,"end":18,"suggestion":"aufstehen"}],"comment":"subordinate clause (typo fires)"}
+{"id":"de-sv-acc-11","text":"er macht die Tür auf","expected":[],"comment":"correctly split"}
+{"id":"de-sv-acc-12","text":"dass wir anfangen","expected":[],"comment":"subordinate clause"}
+{"id":"de-sv-acc-13","text":"sie hört zu singen auf","expected":[],"comment":"correctly split"}
+{"id":"de-sv-acc-14","text":"er steigt in den Bus ein","expected":[],"comment":"correctly split"}
+{"id":"de-sv-acc-15","text":"damit ich aufstehe","expected":[{"rule_id":"typo","start":10,"end":18,"suggestion":"aufstehen"}],"comment":"subordinate clause (typo fires)"}
+{"id":"de-sv-acc-16","text":"solange er einschläft","expected":[],"comment":"subordinate clause"}
+{"id":"de-sv-acc-17","text":"ich rufe dich morgen an","expected":[{"rule_id":"de-capitalization","start":14,"end":20,"suggestion":"Morgen"}],"comment":"correctly split (cap fires)"}
+{"id":"de-sv-acc-18","text":"er fängt morgen an","expected":[{"rule_id":"de-capitalization","start":9,"end":15,"suggestion":"Morgen"}],"comment":"correctly split (cap fires)"}
+{"id":"de-sv-acc-19","text":"als ich aufwachte","expected":[{"rule_id":"typo","start":8,"end":17,"suggestion":"aufwachen"}],"comment":"subordinate clause past (typo fires)"}
+{"id":"de-sv-acc-20","text":"nachdem sie aufsteht","expected":[{"rule_id":"typo","start":12,"end":20,"suggestion":"aufstehen"}],"comment":"subordinate clause (typo fires)"}

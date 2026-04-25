@@ -1,0 +1,55 @@
+# DE prep-case rule fixtures (DE-01, Phase 8)
+# Positive cases: article mismatch after preposition (32)
+{"id":"de-pc-1","text":"mit den Schule","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"dative prep + m.acc article for f noun"}
+{"id":"de-pc-2","text":"mit den Hund","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"dem"}],"comment":"dative prep + m.acc article for m noun"}
+{"id":"de-pc-3","text":"für den Frau","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"die"}],"comment":"acc prep + m.acc article for f noun"}
+{"id":"de-pc-4","text":"gegen den Stadt","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-5","text":"ohne den Frau","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-6","text":"von dem Frau","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-7","text":"von dem Katze","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-8","text":"aus dem Küche","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-9","text":"bei dem Frau","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-10","text":"nach dem Schule","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-11","text":"seit dem Nacht","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-12","text":"zu dem Schule","expected":[{"rule_id":"de-prep-case","start":3,"end":6,"suggestion":"der"}],"comment":"dat prep + m/n.dat for f noun"}
+{"id":"de-pc-13","text":"in den Haus","expected":[{"rule_id":"de-prep-case","start":3,"end":6,"suggestion":"dem"}],"comment":"two-way prep, den=m.acc, Haus=n"}
+{"id":"de-pc-14","text":"Wegen dem Wetter","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"des"}],"comment":"gen prep + m/n.dat → des"}
+{"id":"de-pc-15","text":"wegen dem Kind","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"des"}],"comment":"gen prep + m/n.dat → des"}
+{"id":"de-pc-16","text":"trotz dem Regen","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"des"}],"comment":"gen prep + m/n.dat → des"}
+{"id":"de-pc-17","text":"statt dem Auto","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"des"}],"comment":"gen prep + m/n.dat → des"}
+{"id":"de-pc-18","text":"durch den Küche","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-19","text":"gegen den Schule","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-20","text":"ohne den Katze","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-21","text":"auf dem Stadt","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"der"}],"comment":"two-way + m/n.dat for f noun"}
+{"id":"de-pc-22","text":"für dem Hund","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"den"}],"comment":"acc prep + m/n.dat (wrong case)"}
+{"id":"de-pc-23","text":"durch dem Park","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"den"}],"comment":"acc prep + m/n.dat (wrong case)"}
+{"id":"de-pc-24","text":"um dem Haus","expected":[{"rule_id":"de-prep-case","start":3,"end":6,"suggestion":"das"}],"comment":"acc prep + m/n.dat (wrong case)"}
+{"id":"de-pc-25","text":"in dem Frau","expected":[{"rule_id":"de-prep-case","start":3,"end":6,"suggestion":"der"}],"comment":"two-way + m/n.dat for f noun"}
+{"id":"de-pc-26","text":"an dem Schule","expected":[{"rule_id":"de-prep-case","start":3,"end":6,"suggestion":"der"}],"comment":"two-way + m/n.dat for f noun"}
+{"id":"de-pc-27","text":"über den Frau","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"der"}],"comment":"two-way + m.acc for f noun"}
+{"id":"de-pc-28","text":"unter dem Küche","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"der"}],"comment":"two-way + m/n.dat for f noun"}
+{"id":"de-pc-29","text":"für den Katze","expected":[{"rule_id":"de-prep-case","start":4,"end":7,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-30","text":"durch den Schule","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"die"}],"comment":"acc prep + m.acc for f noun"}
+{"id":"de-pc-31","text":"ohne dem Mann","expected":[{"rule_id":"de-prep-case","start":5,"end":8,"suggestion":"den"}],"comment":"acc prep + m/n.dat (wrong case)"}
+{"id":"de-pc-32","text":"gegen dem Hund","expected":[{"rule_id":"de-prep-case","start":6,"end":9,"suggestion":"den"}],"comment":"acc prep + m/n.dat (wrong case)"}
+# Acceptance cases: correct prep+article (20)
+{"id":"de-pc-acc-01","text":"mit der Schule","expected":[],"comment":"correct dative feminine"}
+{"id":"de-pc-acc-02","text":"in dem Haus","expected":[],"comment":"correct dative neuter (two-way)"}
+{"id":"de-pc-acc-03","text":"für den Mann","expected":[],"comment":"correct accusative masculine"}
+{"id":"de-pc-acc-04","text":"in die Schule","expected":[],"comment":"correct accusative feminine (two-way, motion)"}
+{"id":"de-pc-acc-05","text":"nach der Schule","expected":[],"comment":"correct dative feminine"}
+{"id":"de-pc-acc-06","text":"seit dem Krieg","expected":[],"comment":"correct dative masculine"}
+{"id":"de-pc-acc-07","text":"ohne den Hund","expected":[],"comment":"correct accusative masculine"}
+{"id":"de-pc-acc-08","text":"für das Kind","expected":[],"comment":"correct accusative neuter"}
+{"id":"de-pc-acc-09","text":"von der Frau","expected":[],"comment":"correct dative feminine"}
+{"id":"de-pc-acc-10","text":"bei dem Hund","expected":[],"comment":"correct dative masculine"}
+{"id":"de-pc-acc-11","text":"durch den Park","expected":[],"comment":"correct accusative masculine"}
+{"id":"de-pc-acc-12","text":"um den Mann","expected":[],"comment":"correct accusative masculine"}
+{"id":"de-pc-acc-13","text":"zu der Schule","expected":[],"comment":"correct dative feminine"}
+{"id":"de-pc-acc-14","text":"auf den Tisch","expected":[],"comment":"correct accusative masculine (two-way)"}
+{"id":"de-pc-acc-15","text":"an dem Haus","expected":[],"comment":"correct dative neuter (two-way)"}
+{"id":"de-pc-acc-16","text":"über dem Haus","expected":[],"comment":"correct dative neuter"}
+{"id":"de-pc-acc-17","text":"unter dem Tisch","expected":[],"comment":"correct dative masculine"}
+{"id":"de-pc-acc-18","text":"vor dem Haus","expected":[],"comment":"correct dative neuter"}
+{"id":"de-pc-acc-19","text":"gegen den Mann","expected":[],"comment":"correct accusative masculine"}
+{"id":"de-pc-acc-20","text":"zwischen dem Haus","expected":[],"comment":"correct dative neuter"}
