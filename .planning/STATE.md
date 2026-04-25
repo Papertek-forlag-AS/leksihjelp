@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
 status: unknown
-last_updated: "2026-04-25T01:20:32.027Z"
+last_updated: "2026-04-25T01:44:44.356Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 10
+  completed_plans: 8
 ---
 
 # Project State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-04-21 after v1.0 milestone)
 
 ## Current Position
 
-Phase: 7 — Word-Order Violations (NB/DE/FR)
-Plan: 4 of 4 complete (07-01, 07-02, 07-03, 07-04 done)
-Status: Phase 07 Complete
-Last activity: 2026-04-24 — Completed 07-04-PLAN.md (Gap closure: nb-v2 false positives + fixture co-fires)
+Phase: 8 — DE Case/Agreement Governance
+Plan: 1 of 3 complete (08-01 done)
+Status: In Progress
+Last activity: 2026-04-25 — Completed 08-01-PLAN.md (Shared grammar tables + participleToAux + benchmark)
 
 Progress: [████░░░░░░] 20%
 
@@ -87,6 +87,7 @@ Progress: [████░░░░░░] 20%
 | Phase 07 P03 | 16m | 2 tasks | 11 files |
 | Phase 07 P02 | 20min | 2 tasks | 11 files |
 | Phase 07 P04 | 16min | 2 tasks | 5 files |
+| Phase 08-de-case-agreement-governance P01 | 4m 13s | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -230,6 +231,8 @@ Recent decisions affecting current work:
 - [Phase 07]: classifyPOS receives pre-lowercased input; acceptance ratio counted per rule-specific fixture file
 - [Phase 07]: Flag only subject pronoun span to avoid deduplication conflicts with other rules
 - [Phase 07]: Use direct knownPresens/knownPreteritum lookup instead of isFinite to avoid multi-word stem false positives
+- [Phase 08]: Built participleToAux from raw verbbank data (not wordList) since wordList entries lack conjugation details
+- [Phase 08]: SEPARABLE_PREFIXES canonical source moved to grammar-tables.js; de-v2.js reads from shared global with local fallback
 
 ### Roadmap Evolution
 

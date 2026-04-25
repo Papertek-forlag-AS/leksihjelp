@@ -179,7 +179,7 @@ Plans:
 | 05.1 Close UX-01 Gaps from Phase 5 Smoke Test (INSERTED) | v1.0 | 5/5 | Complete | 2026-04-21 |
 | 6. Structural Infrastructure + Register & Stylistic Polish | v2.0 | 0/3 | Planning complete | — |
 | 7. Word-Order Violations (NB + DE + FR) | 2/3 | In Progress|  | — |
-| 8. DE Case & Agreement Governance | v2.0 | 0/3 | Planning complete | — |
+| 8. DE Case & Agreement Governance | 1/3 | In Progress|  | — |
 | 9. ES ser/estar, por/para, Personal "a" | v2.0 | 0/? | Not started | — |
 | 10. FR Élision, Auxiliary, Participe Passé (10.3a) | v2.0 | 0/? | Not started | — |
 | 11. Aspect & Mood (ES + FR) | v2.0 | 0/? | Not started | — |

@@ -34,10 +34,10 @@ Grouped by capability cluster. Each REQ maps to exactly one phase in ROADMAP.md.
 
 ### DE Case & Agreement Governance (Phase 8)
 
-- [ ] **DE-01**: DE preposition-case governance flagged when next-NP article-form mismatches required case (`mit + dat`, `durch + acc`, two-way preps warn only); data in `papertek-vocabulary` prep table
-- [ ] **DE-02**: DE separable-verb split flagged when `separable: true` verb used unsplit in main clause (benchmark `de.txt` "ich aufstehe")
-- [ ] **DE-03**: DE perfekt auxiliary choice flagged when `haben` used with `aux: "sein"` verb (or vice versa)
-- [ ] **DE-04**: DE compound-noun gender inferred from final component via greedy longest-suffix split against nounbank (benchmark `de.txt` "das Schultasche" pattern)
+- [x] **DE-01**: DE preposition-case governance flagged when next-NP article-form mismatches required case (`mit + dat`, `durch + acc`, two-way preps warn only); data in `papertek-vocabulary` prep table
+- [x] **DE-02**: DE separable-verb split flagged when `separable: true` verb used unsplit in main clause (benchmark `de.txt` "ich aufstehe")
+- [x] **DE-03**: DE perfekt auxiliary choice flagged when `haben` used with `aux: "sein"` verb (or vice versa)
+- [x] **DE-04**: DE compound-noun gender inferred from final component via greedy longest-suffix split against nounbank (benchmark `de.txt` "das Schultasche" pattern)
 
 ### ES ser/estar, por/para, Personal "a" (Phase 9)
 
@@ -143,10 +143,10 @@ Phase mapping populated by `gsd-roadmapper`. Starting phase number: **Phase 6** 
 | WO-02 | Phase 7 | Complete |
 | WO-03 | Phase 7 | Complete |
 | WO-04 | Phase 7 | Complete |
-| DE-01 | Phase 8 | Pending |
-| DE-02 | Phase 8 | Pending |
-| DE-03 | Phase 8 | Pending |
-| DE-04 | Phase 8 | Pending |
+| DE-01 | Phase 8 | Complete |
+| DE-02 | Phase 8 | Complete |
+| DE-03 | Phase 8 | Complete |
+| DE-04 | Phase 8 | Complete |
 | ES-01 | Phase 9 | Pending |
 | ES-02 | Phase 9 | Pending |
 | ES-03 | Phase 9 | Pending |
