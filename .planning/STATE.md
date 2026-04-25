@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Depth of Coverage — Grammar Governance Beyond Tokens
-current_phase: 15-collocations-at-scale-nb-de-fr-es
+current_phase: 15.1-fixture-gate-triage
 current_plan: Not started
-status: completed
-last_updated: "2026-04-25T15:52:00.633Z"
+status: phase_ready
+last_updated: "2026-04-25T18:30:00.000Z"
 progress:
-  total_phases: 11
+  total_phases: 12
   completed_phases: 11
   total_plans: 30
   completed_plans: 30

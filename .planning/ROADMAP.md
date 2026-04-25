@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Spell-Check & Prediction Quality** — Phases 1-5 + 02.1/03.1/05.1 decimal inserts (shipped 2026-04-21) — [archive](milestones/v1.0-ROADMAP.md)
-- 🚧 **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15 (active; started 2026-04-24)
+- 🚧 **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15.1 (active; started 2026-04-24)
 
 ## Phases
 
@@ -36,6 +36,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 14: Morphology Beyond Tokens (EN + ES/FR)** — Flag EN morphological overgeneration (`childs`, `eated`), ES/FR opaque-noun gender mismatch, and EN word-family POS confusion (completed 2026-04-25)
 - [x] **Phase 14.1: Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE)** — Wire 8 missing vocab indexes into spell-check.js browser runtime; restore deleted doc-drift-de-address.js; close integration blocker affecting 9 rules (completed 2026-04-25)
 - [x] **Phase 15: Collocations at Scale (NB + DE + FR + ES)** — Flag preposition collocation errors in NB, DE, FR, ES via shared collocation-bank shape proven in Phase 6 (completed 2026-04-25)
+- [ ] **Phase 15.1: Fixture Gate Triage (GAP CLOSURE)** — Fix nn/clean Phase 15 regression, resolve fr/grammar rule-id aliases, triage 22 pre-existing false positives across DE/ES/FR suites; close check-fixtures exit 1 blocker
 
 ## Phase Details
 
@@ -209,9 +210,19 @@ Plans:
   4. Bundle-size gate stays green (≤20 MiB) after the four expanded collocation banks land; `check-network-silence` stays green for all new rule files.
 **Plans**: 1 plan
 Plans:
-- [ ] 15-01-PLAN.md — Extend collocation.js with NB/DE/FR/ES seed data, benchmark lines, and fixture files for all 4 languages
+- [x] 15-01-PLAN.md — Extend collocation.js with NB/DE/FR/ES seed data, benchmark lines, and fixture files for all 4 languages
 
-
+### Phase 15.1: Fixture Gate Triage (GAP CLOSURE)
+**Goal**: Close the `check-fixtures` exit 1 blocker — fix the Phase 15 nn/clean regression, resolve fr/grammar rule-id aliases, and triage 22 pre-existing false positives across DE/ES/FR suites so the release gate passes.
+**Depends on**: Phase 15 (introduced nn/clean regression), Phase 14.1 (identified pre-existing fixture failures)
+**Requirements**: None (gap closure — no new requirements; closes audit flow gap)
+**Gap Closure**: Closes gaps from v2.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `npm run check-fixtures` exits 0 — every suite at F1=1.000 or all failing cases explicitly marked `"pending": true` with documented reason.
+  2. nn/clean suite passes: collocation rule no longer fires false positive on legitimate NN clean text.
+  3. fr/grammar suite passes: fixture rule-id values match what the rules actually emit.
+  4. All other release gates remain green (no regressions from fixture triage changes).
+Plans:
 
 
 ## Progress
@@ -237,6 +248,7 @@ Plans:
 | 14. Morphology Beyond Tokens (EN + ES/FR) | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 14.1 Vocab-Seam Browser Wiring + Doc-Drift Restore (GAP CLOSURE) | 1/1 | Complete    | 2026-04-25 | — |
 | 15. Collocations at Scale (NB + DE + FR + ES) | 1/1 | Complete    | 2026-04-25 | — |
+| 15.1 Fixture Gate Triage (GAP CLOSURE) | v2.0 | 0/0 | Pending | — |
 
 ## Cross-Cutting Constraints (inherited from v1.0)
 
