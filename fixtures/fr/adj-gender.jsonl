@@ -1,0 +1,59 @@
+# FR adjective-noun gender agreement rule fixtures (MORPH-02, Phase 14)
+# Positive cases: masculine adjective before feminine noun (31)
+{"id":"fr-adj-gender-1","text":"un bon humeur","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-2","text":"un petit fille","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"petite"}]}
+{"id":"fr-adj-gender-3","text":"un grand maison","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"grande"}]}
+{"id":"fr-adj-gender-4","text":"le vieux femme","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"la"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"vieille"}]}
+{"id":"fr-adj-gender-5","text":"un beau femme","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"belle"}]}
+{"id":"fr-adj-gender-6","text":"un nouveau voiture","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":10,"suggestion":"nouvelle"}]}
+{"id":"fr-adj-gender-7","text":"un blanc chemise","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"blanche"}]}
+{"id":"fr-adj-gender-8","text":"un long histoire","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"longue"}]}
+{"id":"fr-adj-gender-9","text":"un gros erreur","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"grosse"}]}
+{"id":"fr-adj-gender-10","text":"un doux vie","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"douce"}]}
+{"id":"fr-adj-gender-11","text":"un gentil personne","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":9,"suggestion":"gentille"}]}
+{"id":"fr-adj-gender-12","text":"un bon chambre","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-13","text":"un petit chambre","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"petite"}]}
+{"id":"fr-adj-gender-14","text":"un grand famille","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"grande"}]}
+{"id":"fr-adj-gender-15","text":"le bon humeur est important","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"la"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-16","text":"dans un bon humeur","expected":[{"rule_id":"gender","start":5,"end":7,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":8,"end":11,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-17","text":"un petit table","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"petite"}]}
+{"id":"fr-adj-gender-18","text":"un grand porte","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"grande"}]}
+{"id":"fr-adj-gender-19","text":"un bon nuit","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-20","text":"un vieux église","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"vieille"}]}
+{"id":"fr-adj-gender-21","text":"un nouveau chanson","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":10,"suggestion":"nouvelle"}]}
+{"id":"fr-adj-gender-22","text":"un beau place","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"belle"}]}
+{"id":"fr-adj-gender-23","text":"un gros question","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"grosse"}]}
+{"id":"fr-adj-gender-24","text":"un bon idée","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-25","text":"un petit rue","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"petite"}]}
+{"id":"fr-adj-gender-26","text":"un long nuit","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":7,"suggestion":"longue"}]}
+{"id":"fr-adj-gender-27","text":"un nouveau lettre","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":10,"suggestion":"nouvelle"}]}
+{"id":"fr-adj-gender-28","text":"un grand page","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"grande"}]}
+{"id":"fr-adj-gender-29","text":"un bon photo","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":6,"suggestion":"bonne"}]}
+{"id":"fr-adj-gender-30","text":"un petit chose","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"petite"}]}
+{"id":"fr-adj-gender-31","text":"un vieux mer","expected":[{"rule_id":"gender","start":0,"end":2,"suggestion":"une"},{"rule_id":"fr-adj-gender","start":3,"end":8,"suggestion":"vieille"}]}
+# Reverse direction: feminine adjective before masculine noun (4)
+{"id":"fr-adj-gender-32","text":"une bonne livre","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"un"},{"rule_id":"fr-adj-gender","start":4,"end":9,"suggestion":"bon"}]}
+{"id":"fr-adj-gender-33","text":"une petite chat","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"un"},{"rule_id":"fr-adj-gender","start":4,"end":10,"suggestion":"petit"}]}
+{"id":"fr-adj-gender-34","text":"une grande jardin","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"un"},{"rule_id":"fr-adj-gender","start":4,"end":10,"suggestion":"grand"}]}
+{"id":"fr-adj-gender-35","text":"une nouvelle film","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"un"},{"rule_id":"fr-adj-gender","start":4,"end":12,"suggestion":"nouveau"}]}
+# Acceptance cases: correct gender agreement — must NOT flag (20)
+{"id":"fr-adj-gender-acc-1","text":"un bon livre","expected":[]}
+{"id":"fr-adj-gender-acc-2","text":"une bonne humeur","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"bonnet"}]}
+{"id":"fr-adj-gender-acc-3","text":"une belle femme","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"belte"}]}
+{"id":"fr-adj-gender-acc-4","text":"le petit chat","expected":[]}
+{"id":"fr-adj-gender-acc-5","text":"la petite maison","expected":[{"rule_id":"typo","start":3,"end":9,"suggestion":"petit"}]}
+{"id":"fr-adj-gender-acc-6","text":"la grande ville","expected":[{"rule_id":"typo","start":3,"end":9,"suggestion":"grandi"}]}
+{"id":"fr-adj-gender-acc-7","text":"un nouveau livre","expected":[]}
+{"id":"fr-adj-gender-acc-8","text":"une nouvelle voiture","expected":[]}
+{"id":"fr-adj-gender-acc-9","text":"le vieux monsieur","expected":[]}
+{"id":"fr-adj-gender-acc-10","text":"la vieille dame","expected":[{"rule_id":"typo","start":3,"end":10,"suggestion":"veuille"}]}
+{"id":"fr-adj-gender-acc-11","text":"un beau jardin","expected":[]}
+{"id":"fr-adj-gender-acc-12","text":"une belle fleur","expected":[{"rule_id":"typo","start":4,"end":9,"suggestion":"belte"}]}
+{"id":"fr-adj-gender-acc-13","text":"le long chemin","expected":[]}
+{"id":"fr-adj-gender-acc-14","text":"un gros problème","expected":[]}
+{"id":"fr-adj-gender-acc-15","text":"la bonne chanson","expected":[{"rule_id":"typo","start":3,"end":8,"suggestion":"bonnet"}]}
+{"id":"fr-adj-gender-acc-16","text":"le grand homme","expected":[]}
+{"id":"fr-adj-gender-acc-17","text":"la petite table","expected":[{"rule_id":"typo","start":3,"end":9,"suggestion":"petit"}]}
+{"id":"fr-adj-gender-acc-18","text":"un bon repas","expected":[]}
+{"id":"fr-adj-gender-acc-19","text":"le nouveau film","expected":[]}
+{"id":"fr-adj-gender-acc-20","text":"une longue histoire","expected":[{"rule_id":"typo","start":4,"end":10,"suggestion":"langue"}]}

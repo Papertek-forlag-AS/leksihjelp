@@ -35,7 +35,7 @@
     "en.34": { "rule_id": "en-morphology", "severity": "warning", "priority_band": "P2" },
     "en.38": { "rule_id": "en-morphology", "severity": "warning", "priority_band": "P2" },
     "en.39": { "rule_id": "en-word-family", "severity": "warning", "priority_band": "P2" },
-    "fr.51": { "rule_id": "fr-adj-gender", "severity": "warning", "priority_band": "P2" },
+    "fr.51": { "rule_id": "gender", "severity": "error", "priority_band": "P1" },
     "fr.57": { "rule_id": "fr-adj-gender", "severity": "warning", "priority_band": "P2" }
   }
 }
