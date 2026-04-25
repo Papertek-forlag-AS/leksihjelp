@@ -26,6 +26,10 @@
     "es.39": { "rule_id": "es-pro-drop", "severity": "hint", "priority_band": "P3" },
     "es.41": { "rule_id": "es-pro-drop", "severity": "hint", "priority_band": "P3" },
     "es.32": { "rule_id": "es-gustar", "severity": "warning", "priority_band": "P2" },
-    "fr.55": { "rule_id": "fr-clitic-order", "severity": "warning", "priority_band": "P2" }
+    "fr.55": { "rule_id": "fr-clitic-order", "severity": "warning", "priority_band": "P2" },
+    "de.48": { "rule_id": "doc-drift-de-address", "severity": "warning", "priority_band": "P2" },
+    "fr.56": { "rule_id": "doc-drift-fr-address", "severity": "warning", "priority_band": "P2" },
+    "nb.44": { "rule_id": "doc-drift-nb-register", "severity": "warning", "priority_band": "P2" },
+    "nn.40": { "rule_id": "doc-drift-nn-infinitive", "severity": "warning", "priority_band": "P2" }
   }
 }

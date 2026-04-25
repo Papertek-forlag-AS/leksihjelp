@@ -1,0 +1,40 @@
+# ─── BENCHMARK: NN (nynorsk student proofreading own writing) ─
+# CURRENTLY COVERED:
+#   - sarskriving: "bil dør", "skule sekk"
+#   - gender: NN-specific gender slips
+#   - modal_form: "eg kan gjekk"
+#   - typo (curated + fuzzy): hand-picked NN typos
+#   - dialect-mix: "jeg", "ikke", "hva" in NN-flagged text (NB-leakage)
+#   - homophone (å/og): "eg prøver og skrive"
+#
+# FUTURE / UNPLANNED:
+#   - a-infinitiv vs e-infinitiv consistency within a single text
+#     (NN tolerates both but NOT mixing within one register)
+#   - Sideform/hovedform governance: "dokker" (dialect) vs "dykk"
+#   - Hokjønn (fem.) vs hankjønn consistency: "boka" then "boken" same text
+#   - -ar vs -er plural endings applied to wrong class
+#   - Passive: "vert" vs "blir" mixing (NN prefers "vert")
+#   - Strong vs weak verb paradigm leakage from NB (stod vs stødde)
+#   - Pronoun system: "han" for inanimate masc. vs "den" ambiguity
+#   - Genitive "-s" overuse (NN prefers preposition circumlocution)
+#   - Word-order: V2 violations same as NB but additionally NN-specific
+#     focus-fronting patterns
+#   - Lexical Norwegianisation: loanwords kept in English form
+# ────────────────────────────────────────────────────────────
+
+I går skulle eg lage middag til familien min, men jeg fann ut at bil
+døra var stengt. Eg prøver og handle på butikken kvar fredag, men denne
+gongen måtte jeg gå ein tur til Storsenteret fordi eg var sein. Det er
+ikke enkelt å finne parkering der, og eg kan gjekk rundt i ti minutt
+før jeg fann ein plass. Inne i butikken såg eg at det var ein veldig
+stor kø ved kassen. Ei dame foran meg hadde et stor handlevogn full
+av mat pakke, frukost blanding og skule sekk til barna. Eg hadde berre
+nokre frukter og ei bok jeg skulle kjøpe til skulen. Boka var vakker,
+men boken kosta mykje. Kva ville du gjort? Hva tenker du om det? Jeg
+syns det er rart. Då eg kom heim, lufta eg hunden som er flink i å gå
+i band. Om kvelden prøvde jeg og skrive ferdig leksene, men eg var så
+trøytt at eg nesten sovna. Eg meiner det er viktig og øve på rettskriving.
+Huset vårt vert malt neste veke, eller kanskje blir det måla året etter.
+Eg las boken hans far i går — eller faren sin, eg veit ikkje kva som
+er rett. Hvorfor du trur at nynorsk er lett?
+Eg vil akseptera tilbodet. Han prover a analysere situasjonen. Ho likar a dansera.

@@ -97,6 +97,10 @@ const TARGETS = [
   'extension/content/spell-rules/es-pro-drop.js',
   'extension/content/spell-rules/es-gustar.js',
   'extension/content/spell-rules/fr-clitic-order.js',
+  'extension/content/spell-rules/doc-drift-de-address.js',
+  'extension/content/spell-rules/doc-drift-fr-address.js',
+  'extension/content/spell-rules/doc-drift-nb-register.js',
+  'extension/content/spell-rules/doc-drift-nn-infinitive.js',
 ];
 
 function resetGlobals() {

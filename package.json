@@ -42,7 +42,9 @@
     "check-benchmark-coverage": "node scripts/check-benchmark-coverage.js",
     "check-benchmark-coverage:test": "node scripts/check-benchmark-coverage.test.js",
     "check-governance-data": "node scripts/check-governance-data.js",
-    "check-governance-data:test": "node scripts/check-governance-data.test.js"
+    "check-governance-data:test": "node scripts/check-governance-data.test.js",
+    "check-stateful-rule-invalidation": "node scripts/check-stateful-rule-invalidation.js",
+    "check-stateful-rule-invalidation:test": "node scripts/check-stateful-rule-invalidation.test.js"
   },
   "repository": {
     "type": "git",

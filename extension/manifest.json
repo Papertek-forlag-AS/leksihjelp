@@ -76,6 +76,10 @@
         "content/spell-rules/es-pro-drop.js",
         "content/spell-rules/es-gustar.js",
         "content/spell-rules/fr-clitic-order.js",
+        "content/spell-rules/doc-drift-de-address.js",
+        "content/spell-rules/doc-drift-fr-address.js",
+        "content/spell-rules/doc-drift-nb-register.js",
+        "content/spell-rules/doc-drift-nn-infinitive.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",
