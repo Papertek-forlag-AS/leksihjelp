@@ -64,6 +64,7 @@
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const compoundNouns = vocab.compoundNouns || new Set();
+      const decompose = vocab.decomposeCompound; // Phase 17 COMP-07
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
@@ -76,18 +77,26 @@
           prev &&
           prev.word.length >= 2 && t.word.length >= 2 &&
           !SARSKRIVING_BLOCKLIST.has(prev.word) &&
-          !SARSKRIVING_BLOCKLIST.has(t.word) &&
-          compoundNouns.has(prev.word + t.word)
+          !SARSKRIVING_BLOCKLIST.has(t.word)
         ) {
-          out.push({
-            rule_id: 'sarskriving',
-            priority: rule.priority,
-            start: prev.start,
-            end: t.end,
-            original: `${prev.display} ${t.display}`,
-            fix: prev.display + t.display.toLowerCase(),
-            message: `Særskriving: "${prev.display} ${t.display}" skrives som ett ord`,
-          });
+          const concat = prev.word + t.word;
+          const isKnownCompound = compoundNouns.has(concat);
+          // Phase 17 COMP-07: decomposition fallback — only when stored lookup
+          // misses and only for high-confidence decompositions (both parts known nouns).
+          const isDecomposable = !isKnownCompound && decompose &&
+            (() => { const d = decompose(concat); return d && d.confidence === 'high'; })();
+
+          if (isKnownCompound || isDecomposable) {
+            out.push({
+              rule_id: 'sarskriving',
+              priority: rule.priority,
+              start: prev.start,
+              end: t.end,
+              original: `${prev.display} ${t.display}`,
+              fix: prev.display + t.display.toLowerCase(),
+              message: `Særskriving: "${prev.display} ${t.display}" skrives som ett ord`,
+            });
+          }
         }
       }
       return out;
