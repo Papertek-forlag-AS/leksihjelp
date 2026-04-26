@@ -18,6 +18,7 @@ let searchDirection = 'no-target'; // 'no-target' or 'target-no'
 let grammarFeatures = null; // Grammar features metadata
 let enabledFeatures = new Set(); // Set of enabled feature IDs
 let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
+let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compound decomposition when foreign lang selected
 
 /**
  * Get the appropriate Norwegian translation for an entry,
@@ -338,13 +339,19 @@ async function loadDictionary(lang) {
       try {
         noDictionary = await loadLanguageData(noLang);
         noWords = noDictionary ? flattenBanks(noDictionary) : [];
+        if (noDictionary && vocabCore && vocabCore.buildIndexes) {
+          const noIndexes = vocabCore.buildIndexes({ raw: noDictionary, lang: noLang });
+          noNounGenusMap = noIndexes.nounGenus || new Map();
+        }
       } catch {
         noDictionary = null;
         noWords = [];
+        noNounGenusMap = new Map();
       }
     } else {
       noDictionary = null;
       noWords = [];
+      noNounGenusMap = new Map();
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -1025,8 +1032,17 @@ async function buildLangSwitcher() {
 // Phase 17 COMP-01: attempt compound decomposition for unknown words
 function tryDecomposeQuery(query) {
   const vocabCore = self.__lexiVocabCore;
-  if (!vocabCore || !vocabCore.decomposeCompound || nounGenusMap.size === 0) return null;
-  return vocabCore.decomposeCompound(query.toLowerCase(), nounGenusMap, currentLang);
+  if (!vocabCore || !vocabCore.decomposeCompound) return null;
+  const q = query.toLowerCase();
+  if (nounGenusMap.size > 0) {
+    const result = vocabCore.decomposeCompound(q, nounGenusMap, currentLang);
+    if (result) return result;
+  }
+  if (noNounGenusMap.size > 0) {
+    const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
+    return vocabCore.decomposeCompound(q, noNounGenusMap, noLang);
+  }
+  return null;
 }
 
 function performSearch(query) {
