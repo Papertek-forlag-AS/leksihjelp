@@ -1172,3 +1172,71 @@
 #lexi-spell-overlay .lh-spell-vis-flere:hover {
   color: #1e293b;
 }
+
+/* ── Manual spell-check button (Phase 18 Plan 02) ── */
+
+.lh-spell-check-btn {
+  position: absolute;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #555;
+  cursor: pointer;
+  z-index: 2147483640;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: opacity 0.2s, background 0.15s;
+  line-height: 1;
+}
+
+.lh-spell-check-btn:hover {
+  background: #e0e0e0;
+}
+
+/* ── Spell-check toast (Phase 18 Plan 02) ── */
+
+@keyframes lh-toast-fade {
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.lh-spell-toast {
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 2147483641;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: lh-toast-fade 2.5s ease-in-out forwards;
+}
+
+/* Dark mode variants for button and toast */
+@media (prefers-color-scheme: dark) {
+  .lh-spell-check-btn {
+    background: #3a3d5c;
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #cbd5e1;
+  }
+
+  .lh-spell-check-btn:hover {
+    background: #4a4d6c;
+  }
+
+  .lh-spell-toast {
+    background: #1e2035;
+    color: #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+}
