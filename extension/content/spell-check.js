@@ -266,6 +266,8 @@
       // Phase 16: compound decomposition engine (pre-wired for Phase 17 rules)
       decomposeCompound:  VOCAB.getDecomposeCompound(),
       decomposeCompoundStrict: VOCAB.getDecomposeCompoundStrict(),
+      // Phase 19: s-passive form recognition for NB/NN rules.
+      sPassivForms:          VOCAB.getSPassivForms(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });
@@ -316,7 +318,7 @@
     if (overlay) return overlay;
     overlay = document.createElement('div');
     overlay.id = 'lexi-spell-overlay';
-    document.body.appendChild(overlay);
+    (document.fullscreenElement || document.body).appendChild(overlay);
     return overlay;
   }
 
@@ -659,7 +661,7 @@
     spellCheckBtn.title = t('spell_check_btn_title');
     spellCheckBtn.addEventListener('mousedown', e => e.preventDefault());
     spellCheckBtn.addEventListener('click', () => manualCheck());
-    document.body.appendChild(spellCheckBtn);
+    (document.fullscreenElement || document.body).appendChild(spellCheckBtn);
   }
 
   function positionButton() {
@@ -704,7 +706,7 @@
     const toast = document.createElement('div');
     toast.className = 'lh-spell-toast';
     toast.textContent = message;
-    document.body.appendChild(toast);
+    (document.fullscreenElement || document.body).appendChild(toast);
     // Position above the button
     if (spellCheckBtn) {
       const br = spellCheckBtn.getBoundingClientRect();
@@ -858,7 +860,7 @@
     mirror.appendChild(before);
     mirror.appendChild(marker);
     mirror.appendChild(after);
-    document.body.appendChild(mirror);
+    (document.fullscreenElement || document.body).appendChild(mirror);
     const mRect = marker.getBoundingClientRect();
     mirror.remove();
 

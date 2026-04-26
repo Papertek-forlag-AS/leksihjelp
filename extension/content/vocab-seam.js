@@ -318,6 +318,8 @@
     getDecomposeCompoundStrict: () => (state && state.decomposeCompoundStrict) ? state.decomposeCompoundStrict : null,
     // Grammar tables from synced grammarbank (replaces inline grammar-tables.js data)
     getGrammarTables: () => (state && state.grammarTables) ? state.grammarTables : {},
+    // Phase 19: s-passive form Map for NB overuse + NN finite s-passive rules.
+    getSPassivForms: () => (state && state.sPassivForms) ? state.sPassivForms : new Map(),
     // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;

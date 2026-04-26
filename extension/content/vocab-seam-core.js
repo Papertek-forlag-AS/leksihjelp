@@ -840,6 +840,49 @@
     return participleToAux;
   }
 
+  // ── Phase 19: Build s-passive form index from raw verbbank ──
+  // Maps lowercased s-passive forms (skrives, skrivast) to { baseVerb, isDeponent }.
+  // For deponent (st-)verbs, also maps regular conjugation forms so the rule
+  // can recognise "synest" (presens of deponent "synast").
+  function buildSPassivIndex(raw, lang) {
+    const sPassivForms = new Map();
+    if (!raw || !raw.verbbank) return sPassivForms;
+    for (const entry of Object.values(raw.verbbank)) {
+      const conj = entry.conjugations?.presens?.former;
+      if (!conj) continue;
+      const isDeponent = !!entry.isDeponent;
+      const baseVerb = entry.word;
+      // Collect s-passive forms
+      for (const key of ['s_passiv_infinitiv', 's_passiv_presens']) {
+        const forms = conj[key];
+        if (!forms) continue;
+        const arr = Array.isArray(forms) ? forms : [forms];
+        for (const f of arr) {
+          if (typeof f === 'string' && f.length > 0) {
+            sPassivForms.set(f.toLowerCase(), { baseVerb, isDeponent });
+          }
+        }
+      }
+      // For deponent verbs: also map their regular conjugation forms
+      // so the NN rule can recognise "synest" (presens of st-verb "synast")
+      if (isDeponent) {
+        for (const [fk, fv] of Object.entries(conj)) {
+          if (fk.startsWith('s_passiv')) continue; // already handled
+          const arr = Array.isArray(fv) ? fv : [fv];
+          for (const f of arr) {
+            if (typeof f === 'string' && f.length > 0) {
+              const clean = f.replace(/^a\s+/, '').replace(/^aa\s+/, '');
+              if (clean.length > 0) {
+                sPassivForms.set(clean.toLowerCase(), { baseVerb, isDeponent: true });
+              }
+            }
+          }
+        }
+      }
+    }
+    return sPassivForms;
+  }
+
   // ── Phase 11: Build mood/aspect reverse-lookup indexes from raw verbbank ──
   // Maps conjugated forms back to infinitive + person, and stores
   // subjuntivo/imperfecto/subjonctif forms keyed by infinitive|person.
@@ -1283,6 +1326,11 @@
     // Empty Map for non-EN languages. Built from raw data (not wordList).
     const irregularForms = lang === 'en' ? buildIrregularForms(raw) : new Map();
 
+    // Phase 19: s-passive form index for NB overuse + NN finite s-passive rules.
+    // Maps lowercased s-passive forms to { baseVerb, isDeponent }.
+    // Deponent entries also include all their regular conjugation forms.
+    const sPassivForms = (lang === 'nb' || lang === 'nn') ? buildSPassivIndex(raw, lang) : new Map();
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -1343,6 +1391,9 @@
       // Grammar tables from synced grammarbank. Keyed by table name
       // (e.g., "prep_case", "sein_verbs"). Empty when grammarbank not synced.
       grammarTables,
+      // Phase 19: s-passive form recognition index for NB/NN.
+      // Maps s-passive forms to { baseVerb, isDeponent }. Empty for non-NB/NN.
+      sPassivForms,
       // Phase 16: compound decomposition bound to this index's nounGenus and lang.
       decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
       // Phase 17-05: strict decomposition using lemma-only genus map (no inflected forms).
@@ -1353,7 +1404,7 @@
   // ── Dual-export footer ──
   // Writes `self.__lexiVocabCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path.
-  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore, decomposeCompound };
+  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore, decomposeCompound, buildSPassivIndex };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiVocabCore = api;
