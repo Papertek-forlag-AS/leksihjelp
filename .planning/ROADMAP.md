@@ -110,10 +110,10 @@ Plans:
   1. User looking up a FR word corresponding to NB "fin" sees the false-friend warning (fin ≠ fin)
   2. User looking up DE prepositions corresponding to NB "på" sees sense-grouped translations (4 senses)
   3. `npm run sync-vocab` pulls corrected data and all 8 release gates pass
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 21.2-01: Fix linkedTo entries at Papertek API + re-sync vocab
+- [ ] 21.2-01-PLAN.md — Fix linkedTo entries at Papertek API (fin_adj->FR, på_contr->DE) + re-sync vocab
 
 ### Phase 22: å/og Confusion Detection
 **Goal**: Students writing Norwegian get flagged when they confuse "å" and "og" — the single most common NB/NN writing error
