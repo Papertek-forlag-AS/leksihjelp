@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 19 of 20 (NB/NN Passiv-s Detection)
-current_plan: 2 of 2
+current_plan: 3 of 3
 status: complete
-last_updated: "2026-04-26T15:16:00.000Z"
+last_updated: "2026-04-26T15:54:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # Session State
@@ -26,17 +26,17 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 19 of 20 (NB/NN Passiv-s Detection)
-**Current plan:** 2 of 2 (complete)
-**Status:** Phase 19 complete
+**Current plan:** 3 of 3 (complete)
+**Status:** Phase 19 complete (including gap closure)
 
-Progress: [██████████] 100% (2/2 phase 19 plans complete)
+Progress: [██████████] 100% (3/3 phase 19 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10 (v2.1)
+- Total plans completed: 11 (v2.1)
 - Average duration: 5.5min
-- Total execution time: 55min
+- Total execution time: 61min
 
 **By Phase:**
 
@@ -46,7 +46,7 @@ Progress: [██████████] 100% (2/2 phase 19 plans complete)
 | 17 | 6/6 | 42min | 7.0min |
 | 18 | 2/2 | 6min | 3.0min |
 | Phase 18 P01 | 9min | 3 tasks | 8 files |
-| 19 | 2/2 | 23min | 11.5min |
+| 19 | 3/3 | 29min | 9.7min |
 
 ## Accumulated Context
 
@@ -72,6 +72,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 18-02: Manual Aa button uses absolute positioning anchored to textarea bottom-right; toast uses CSS animation with 2.5s auto-dismiss
 - Phase 19-02: severity 'hint' (not 'info') for NB overuse rule to pass explain-contract gate
 - Phase 19-02: Modal-verb rule updated to skip s-passive forms (prevents false 'wrong form' flags on valid NN s-passive after modal)
+- Phase 19-03: Fixture texts adjusted to avoid pre-existing typo FPs; accept-008 tests møtast (deponent infinitive) instead of trivast (absent from NN verbbank)
 
 ### Key Pitfall Warnings (from research)
 
@@ -93,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 19-02-PLAN.md
+Stopped at: Completed 19-03-PLAN.md (gap closure)
 Resume file: None
