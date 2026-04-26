@@ -4,11 +4,11 @@ milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 18 of 19 (Spell-Check Polish)
 current_plan: 18-02 COMPLETE
-status: in-progress
-last_updated: "2026-04-26T11:35:45Z"
+status: completed
+last_updated: "2026-04-26T11:43:02.482Z"
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
   completed_plans: 10
 ---
@@ -45,6 +45,7 @@ Progress: [██████████] 100% (2/2 phase 18 plans complete)
 | 16 | 2/2 | 7min | 3.5min |
 | 17 | 6/6 | 42min | 7.0min |
 | 18 | 2/2 | 6min | 3.0min |
+| Phase 18 P01 | 9min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -66,6 +67,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-05: nounLemmaGenus excludes inflected forms (nounform, plural, typo) — only base-form nouns with genus
 - Phase 17-05: Sarskriving uses decomposeCompoundStrict with fallback to decomposeCompound for backward compatibility
 - Phase 17-06: Decomposition fallback removed from sarskriving — 16 supplementary compounds added to preserve recall; decomposition deferred to Phase 19 with POS-aware gating
+- Phase 18-01: Demonstrative-gender amber dot, triple-letter red dot; triple-letter fixtures use non-typoFix words to avoid dedup
 - Phase 18-02: Manual Aa button uses absolute positioning anchored to textarea bottom-right; toast uses CSS animation with 2.5s auto-dismiss
 
 ### Key Pitfall Warnings (from research)

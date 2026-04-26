@@ -50,7 +50,7 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 
 - [x] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE (completed 2026-04-26)
 - [x] **Phase 17: Compound Integration** — Dictionary popup rendering, spell-check acceptance, NB/NN gender inference, DE engine consolidation, and sarskriving expansion for decomposable compounds (completed 2026-04-26)
-- [ ] **Phase 18: Spell-Check Polish** — Manual trigger button, demonstrative-mismatch rule, triple-letter typo rule
+- [x] **Phase 18: Spell-Check Polish** — Manual trigger button, demonstrative-mismatch rule, triple-letter typo rule (completed 2026-04-26)
 - [ ] **Phase 19: Browser Visual Verification** — Deferred Phase 6/7 visual checks plus v2.1 compound rendering verification
 
 ## Phase Details
@@ -157,7 +157,7 @@ Phases execute in numeric order: 16 → 17 → 18 → 19
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 17. Compound Integration | 6/6 | Complete    | 2026-04-26 | - |
-| 18. Spell-Check Polish | 1/2 | In Progress|  | - |
+| 18. Spell-Check Polish | 2/2 | Complete   | 2026-04-26 | - |
 | 19. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
