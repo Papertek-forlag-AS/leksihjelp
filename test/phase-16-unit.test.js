@@ -189,6 +189,62 @@ test('Gender comes from rightmost component', () => {
   assert.equal(result.gender, 'n', 'gender should come from rightmost part (hus=n)');
 });
 
+// ══════════════════════════════════════════════════════════════════
+// False-Positive Validation against real nounbank data
+// ══════════════════════════════════════════════════════════════════
+const fs = require('fs');
+
+function runFPValidation(langCode, langLabel) {
+  const dataPath = path.join(ROOT, 'extension', 'data', `${langCode}.json`);
+  if (!fs.existsSync(dataPath)) {
+    console.log(`[SKIP] ${langLabel}: ${dataPath} not found`);
+    return;
+  }
+
+  const raw = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+  // Build real indexes using buildIndexes to get nounGenus and compoundNouns
+  const indexes = vocabCore.buildIndexes({ raw, lang: langCode });
+  const { nounGenus, compoundNouns } = indexes;
+
+  // Collect single-word nouns: nounGenus entries that are NOT in compoundNouns
+  // and do not contain spaces (multi-word entries) and are >= 6 chars (decompose min)
+  const singleNouns = [];
+  for (const [word] of nounGenus) {
+    if (word.includes(' ')) continue;
+    if (word.length < 6) continue;
+    // Skip entries already in compoundNouns — they ARE compounds by data definition
+    if (compoundNouns.has(word)) continue;
+    singleNouns.push(word);
+  }
+
+  let falsePositives = 0;
+  const fpList = [];
+  for (const word of singleNouns) {
+    const result = vocabCore.decomposeCompound(word, nounGenus, langCode);
+    if (result !== null) {
+      falsePositives++;
+      fpList.push(`  ${word} -> ${result.parts.map(p => p.word).join(' + ')}`);
+    }
+  }
+
+  const rate = singleNouns.length > 0 ? (falsePositives / singleNouns.length * 100) : 0;
+  console.log(`[FP-CHECK] ${langLabel}: tested ${singleNouns.length} nouns, ${falsePositives} false positives (${rate.toFixed(2)}%)`);
+  if (fpList.length > 0 && fpList.length <= 20) {
+    for (const line of fpList) console.log(line);
+  } else if (fpList.length > 20) {
+    for (const line of fpList.slice(0, 20)) console.log(line);
+    console.log(`  ... and ${fpList.length - 20} more`);
+  }
+
+  test(`${langLabel} false-positive rate < 2%`, () => {
+    assert.ok(rate < 2, `FP rate ${rate.toFixed(2)}% exceeds 2% threshold (${falsePositives}/${singleNouns.length})`);
+  });
+}
+
+console.log('\n── False-Positive Validation ──');
+runFPValidation('nb', 'NB');
+runFPValidation('de', 'DE');
+
 // ── Summary ──
 console.log(`\n${passed + failed} tests: ${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);
