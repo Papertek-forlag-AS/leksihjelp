@@ -20,7 +20,7 @@ Requirements for v2.1 Compound Decomposition & Polish. Each maps to roadmap phas
 
 ### Spell-Check Polish
 
-- [ ] **SPELL-01**: User can trigger spell-check manually via a visible button, with result toast ("3 feil funnet" / "Ser bra ut!")
+- [x] **SPELL-01**: User can trigger spell-check manually via a visible button, with result toast ("3 feil funnet" / "Ser bra ut!")
 - [ ] **SPELL-02**: User sees demonstrative-mismatch flags ("Det boka", "Den huset") for den/det/denne/dette gender agreement
 - [ ] **SPELL-03**: User sees triple-letter typo flags ("tykkkjer") with compound-boundary consonant-elision awareness
 
@@ -73,7 +73,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-06 | Phase 16 | Complete |
 | COMP-07 | Phase 17 | Complete |
 | COMP-08 | Phase 17 | Complete |
-| SPELL-01 | Phase 18 | Pending |
+| SPELL-01 | Phase 18 | Complete |
 | SPELL-02 | Phase 18 | Pending |
 | SPELL-03 | Phase 18 | Pending |
 | VERIF-01 | Phase 19 | Pending |

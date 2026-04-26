@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
-current_phase: 17 of 19 (Compound Integration)
-current_plan: 17-06 COMPLETE
-status: completed
-last_updated: "2026-04-26T10:52:35.567Z"
+current_phase: 18 of 19 (Spell-Check Polish)
+current_plan: 18-02 COMPLETE
+status: in-progress
+last_updated: "2026-04-26T11:35:45Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # Session State
@@ -20,23 +20,23 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 17 — Compound Integration
+**Current focus:** Phase 18 — Spell-Check Polish
 
 ## Position
 
 **Milestone:** v2.1 Compound Decomposition & Polish
-**Current phase:** 17 of 19 (Compound Integration)
-**Current plan:** 17-06 COMPLETE
-**Status:** Milestone complete
+**Current phase:** 18 of 19 (Spell-Check Polish)
+**Current plan:** 18-02 COMPLETE
+**Status:** Phase 18 complete
 
-Progress: [██████████] 100% (6/6 phase 17 plans complete)
+Progress: [██████████] 100% (2/2 phase 18 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v2.1)
-- Average duration: 6.1min
-- Total execution time: 49min
+- Total plans completed: 10 (v2.1)
+- Average duration: 5.5min
+- Total execution time: 55min
 
 **By Phase:**
 
@@ -44,6 +44,7 @@ Progress: [██████████] 100% (6/6 phase 17 plans complete)
 |-------|-------|-------|----------|
 | 16 | 2/2 | 7min | 3.5min |
 | 17 | 6/6 | 42min | 7.0min |
+| 18 | 2/2 | 6min | 3.0min |
 
 ## Accumulated Context
 
@@ -65,6 +66,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-05: nounLemmaGenus excludes inflected forms (nounform, plural, typo) — only base-form nouns with genus
 - Phase 17-05: Sarskriving uses decomposeCompoundStrict with fallback to decomposeCompound for backward compatibility
 - Phase 17-06: Decomposition fallback removed from sarskriving — 16 supplementary compounds added to preserve recall; decomposition deferred to Phase 19 with POS-aware gating
+- Phase 18-02: Manual Aa button uses absolute positioning anchored to textarea bottom-right; toast uses CSS animation with 2.5s auto-dismiss
 
 ### Key Pitfall Warnings (from research)
 
@@ -86,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 17-06-PLAN.md
+Stopped at: Completed 18-02-PLAN.md
 Resume file: None
