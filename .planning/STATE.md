@@ -5,9 +5,9 @@ milestone_name: Data-Source Migration
 status: roadmap_drafted
 last_updated: "2026-04-27T00:45:00.000Z"
 progress:
-  total_phases: 5
+  total_phases: 1
   completed_phases: 0
-  total_plans: 16
+  total_plans: 6
   completed_plans: 0
 ---
 
@@ -18,20 +18,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** v3.0 Data-Source Migration — roadmap drafted (5 phases, 16 requirements mapped)
+**Current focus:** v3.0 Data-Source Migration — roadmap drafted (1 consolidated phase, 6 plans, 16 requirements mapped)
 
 ## Position
 
 **Milestone:** v3.0 Data-Source Migration
-**Phase:** 23 (next — Papertek API Vocabulary Endpoints)
+**Phase:** 23 (next — Data-Source Migration)
 **Plan:** —
 **Status:** Roadmap drafted; ready for `/gsd:plan-phase 23`
-**Last activity:** 2026-04-27 — v3.0 roadmap drafted (Phases 23–27)
+**Last activity:** 2026-04-27 — v3.0 roadmap consolidated to single phase (6 plans)
 
 ### Progress
 ```
-Phases: [.....] 0/5
-Plans:  [................] 0/16
+Phases: [.] 0/1
+Plans:  [......] 0/6
 ```
 
 ## Performance Metrics

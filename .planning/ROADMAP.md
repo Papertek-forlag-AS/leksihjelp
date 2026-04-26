@@ -6,7 +6,7 @@
 - ✅ **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15.1 (shipped 2026-04-25) — [archive](milestones/v2.0-ROADMAP.md)
 - ✅ **v2.1 Compound Decomposition & Polish** — Phases 16–19 (shipped 2026-04-26) — [archive](milestones/v2.1-ROADMAP.md)
 - ✅ **v2.2 Student Language Intelligence** — Phases 21–22 + 21.1/21.2 decimal inserts (shipped 2026-04-27) — [archive](milestones/v2.2-ROADMAP.md)
-- 🚧 **v3.0 Data-Source Migration** — Phases 23–27 (in progress)
+- 🚧 **v3.0 Data-Source Migration** — Phase 23 (in progress)
 
 ## Phases
 
@@ -71,85 +71,30 @@ See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success cr
 
 </details>
 
-### 🚧 v3.0 Data-Source Migration (Phases 23-27) — IN PROGRESS
+### 🚧 v3.0 Data-Source Migration (Phase 23) — IN PROGRESS
 
-- [ ] **Phase 23: Papertek API Vocabulary Endpoints** — Sibling-repo work; expose versioned per-language bundle + updates-check endpoints with CORS
-- [ ] **Phase 24: IndexedDB Cache Adapter + Schema Versioning** — Storage adapter, async hydration, schema_version compatibility check
-- [ ] **Phase 25: Bootstrap Path + NB Baseline + Network-Silence Gate** — ~100 KB NB baseline, service-worker bootstrap downloader, popup status UI, SC-06 carve-out + baseline-size gate
-- [ ] **Phase 26: Update Detection + Manual Refresh** — Startup revision check, "Nye ordlister tilgjengelig" notice, "Oppdater ordlister nå" button
-- [ ] **Phase 27: Migration + Bundled-Data Removal** — Silent v2.x→v3.0 transition; strip bundled JSON from package; lockdown adapter contract documented
+- [ ] **Phase 23: Data-Source Migration** — Strip bundled vocab from extension; fetch from Papertek API once + cache in IndexedDB; bootstrap, update detection, schema versioning, migration, gate adjustments — all in one consolidated phase
 
 ## Phase Details
 
-### Phase 23: Papertek API Vocabulary Endpoints
-**Goal**: Sibling-repo Papertek API exposes the endpoints the extension will fetch from, with revision metadata and CORS for the extension origin.
-**Depends on**: Nothing (sibling-repo prerequisite for everything else in v3.0)
-**Requirements**: API-01, API-02, API-03
+### Phase 23: Data-Source Migration
+**Goal**: Migrate the extension's vocabulary from bundled JSON files to a Papertek-API-fetched IndexedDB cache, preserving offline-first behavior via a tiny NB baseline and atomic update mechanics — while existing v2.x users transition silently and the network-silence gate documents the sanctioned bootstrap exception.
+**Depends on**: Nothing (consolidates all v3.0 work)
+**Requirements**: API-01, API-02, API-03, CACHE-01, CACHE-02, CACHE-03, SCHEMA-01, BOOT-01, BOOT-02, BOOT-03, GATES-01, GATES-02, UPDATE-01, UPDATE-02, UPDATE-03, MIGRATE-01
 **Success Criteria** (what must be TRUE):
-  1. A request to the per-language bundle endpoint (e.g. `GET /api/vocab/v1/bundle/de`) returns the full payload (all banks + freq + bigrams + grammar features + falseFriends + senses) plus `{schema_version, revision}` metadata in a single response
-  2. A request to the updates-check endpoint (e.g. `GET /api/vocab/v1/revisions`) returns a small `{language: revision}` map suitable for frequent polling
-  3. Both endpoints respond with appropriate `Access-Control-Allow-Origin` for `chrome-extension://...` and `https://leksihjelp.no` such that a browser fetch from those origins succeeds
-  4. Endpoint contracts are documented in the sibling repo so the extension's bootstrap and update paths can target a stable shape
+  1. **API endpoints live in papertek-vocabulary** — `GET /api/vocab/v1/bundle/{language}` returns the full per-language payload (all banks + freq + bigrams + grammar features + falseFriends + senses) plus `{schema_version, revision}` metadata in one response; `GET /api/vocab/v1/revisions` returns a small `{language: revision}` map; both endpoints CORS-allowed for `chrome-extension://...` and `https://leksihjelp.no`
+  2. **IndexedDB is the runtime data source** — Each cached language entry persists with `{schema_version, revision, fetched_at}`; `__lexiVocab` / `buildIndexes` reads from IndexedDB first, falls back to bundled NB baseline; spell-check + word-prediction operate on baseline indexes during async hydration and swap to full indexes once ready (no force-reload); schema_version mismatch preserves prior cache and surfaces "Versjonskonflikt" diagnostic
+  3. **First lookup works offline immediately on install** — Bundled NB baseline ≤ 200 KB (top-2k Zipf, common typos, pronouns/articles); on first install, service worker auto-downloads selected target language(s) into IndexedDB without blocking the popup; popup surfaces per-language progress, success state, and "Ordlister utilgjengelig — prøv igjen senere" on failure (baseline NB still functional)
+  4. **Update detection + manual refresh** — On extension startup, service worker calls updates-check endpoint and compares per-language revision against cache; when an update is available, popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button; user-triggered update downloads new bundle, replaces the cache entry atomically, new indexes activate on the next page load
+  5. **Existing users migrate silently and bundled data is removed** — A user upgrading from v2.x sees no functional regression on first run; the shipped extension zip no longer contains `extension/data/{de,es,fr,en,nb,nn}.json` full vocabularies (only the NB baseline remains); a documented adapter contract describes how lockdown can plug its own bootstrap into the vocab-seam
+  6. **Release gates updated** — `check-network-silence` continues to exit 0 against spell-check + word-prediction hot paths; `background/vocab-bootstrap.js` is the only sanctioned `fetch` site and is documented as such; new `check-baseline-bundle-size` gate enforces the NB baseline ≤ 200 KB with paired self-test (oversized baseline → gate fires; well-formed baseline → gate passes)
 **Plans**:
-- [ ] PLAN.md (TBD: bundle endpoint)
-- [ ] PLAN.md (TBD: updates-check endpoint)
-- [ ] PLAN.md (TBD: CORS + contract docs)
-
-### Phase 24: IndexedDB Cache Adapter + Schema Versioning
-**Goal**: A reusable IndexedDB cache adapter inside the extension that vocab-seam reads from, with schema_version compatibility checking before any persistence.
-**Depends on**: Phase 23 (cache populated from API responses; schema_version comes from API metadata)
-**Requirements**: CACHE-01, CACHE-02, CACHE-03, SCHEMA-01
-**Success Criteria** (what must be TRUE):
-  1. Each cached language entry persists in IndexedDB with `{schema_version, revision, fetched_at}` diagnostics alongside the payload
-  2. `__lexiVocab` / `buildIndexes` consults IndexedDB first and falls back to the bundled NB baseline when the requested language is absent from cache
-  3. Spell-check and word-prediction continue to function from the baseline indexes during async hydration; once full data is ready the indexes swap in without forcing a page reload
-  4. When an incoming payload's `schema_version` does not match the version the extension can read, the prior cache entry is preserved unchanged and a "Versjonskonflikt" diagnostic is visible in the popup developer view
-**Plans**:
-- [ ] PLAN.md (TBD: IndexedDB adapter + entry shape)
-- [ ] PLAN.md (TBD: vocab-seam hydration + index swap)
-- [ ] PLAN.md (TBD: schema_version compatibility check + diagnostic)
-
-### Phase 25: Bootstrap Path + NB Baseline + Network-Silence Gate
-**Goal**: First-run download path that populates the cache from the API, with a tiny bundled NB baseline ensuring the extension is useful from the moment of install — and the offline-promise gates updated to reflect the sanctioned exception.
-**Depends on**: Phase 24 (bootstrap writes through the cache adapter)
-**Requirements**: BOOT-01, BOOT-02, BOOT-03, GATES-01, GATES-02
-**Success Criteria** (what must be TRUE):
-  1. The packaged extension contains a bundled NB baseline file under 200 KB (top-2k Zipf, common typos, pronouns/articles) — first dictionary lookup works offline immediately on install with no network round-trip
-  2. On first install, the service worker fetches full vocabulary for the user's selected target language(s) into IndexedDB without blocking popup interaction; baseline NB stays available throughout
-  3. The popup surfaces download status — per-language progress while downloading, a success state on completion, and "Ordlister utilgjengelig — prøv igjen senere" on failure (with baseline NB still functional underneath)
-  4. `check-network-silence` continues to exit 0 against `extension/content/spell-check*.js`, `extension/content/spell-rules/**`, and `extension/content/word-prediction.js`; the new `background/vocab-bootstrap.js` is the only sanctioned `fetch` site and is documented as such
-  5. New release gate `check-baseline-bundle-size` exits 0 with the baseline ≤ 200 KB; paired self-test plants an oversized baseline and asserts the gate fires
-**Plans**:
-- [ ] PLAN.md (TBD: NB baseline construction + budget)
-- [ ] PLAN.md (TBD: service-worker bootstrap downloader)
-- [ ] PLAN.md (TBD: popup download status UI)
-- [ ] PLAN.md (TBD: SC-06 carve-out + check-baseline-bundle-size gate + self-test)
-
-### Phase 26: Update Detection + Manual Refresh
-**Goal**: Cached vocabulary stays fresh — startup revision check surfaces a non-blocking notice, and a manual button lets the student pull updates on demand.
-**Depends on**: Phase 25 (bootstrap must have populated the cache before update logic is meaningful)
-**Requirements**: UPDATE-01, UPDATE-02, UPDATE-03
-**Success Criteria** (what must be TRUE):
-  1. On extension startup, the service worker calls the updates-check endpoint and compares the returned revision to the cached revision per language; mismatches are surfaced to the popup
-  2. When an update is available, the popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button — the student is never forced to wait
-  3. Pressing the update button downloads the new bundle, replaces the IndexedDB cache entry atomically (no half-written state), and the new indexes activate on the next page load without manual extension reload
-**Plans**:
-- [ ] PLAN.md (TBD: startup revision check)
-- [ ] PLAN.md (TBD: popup update notice + button)
-- [ ] PLAN.md (TBD: atomic cache replacement + index activation)
-
-### Phase 27: Migration + Bundled-Data Removal
-**Goal**: Existing v2.x users transition silently to the new data path; the extension package stops shipping full per-language vocab, leaving only the NB baseline; lockdown's adapter contract is documented.
-**Depends on**: Phases 24, 25, 26 (cache, bootstrap, and update flow must all be working before bundled data can be removed)
-**Requirements**: MIGRATE-01
-**Success Criteria** (what must be TRUE):
-  1. A user upgrading from v2.x sees no functional regression on first run after upgrade — fresh data fetches into IndexedDB transparently and lookups continue to work (baseline-backed during hydration)
-  2. The shipped extension zip no longer contains `extension/data/{de,es,fr,en,nb,nn}.json` full vocabularies — only the NB baseline remains; `check-bundle-size` confirms the resulting reduction
-  3. A documented adapter contract describes how downstream consumers (lockdown) can plug their own bootstrap into the same vocab-seam without re-implementing the IndexedDB path
-**Plans**:
-- [ ] PLAN.md (TBD: v2.x → v3.0 silent migration path)
-- [ ] PLAN.md (TBD: bundled-data removal + package verification)
-- [ ] PLAN.md (TBD: lockdown adapter contract doc)
+- [ ] 23-01-PLAN.md — Papertek API vocabulary endpoints (sibling repo): bundle + revisions + CORS [API-01, API-02, API-03]
+- [ ] 23-02-PLAN.md — IndexedDB cache adapter + vocab-seam hydration + schema_version check [CACHE-01, CACHE-02, CACHE-03, SCHEMA-01]
+- [ ] 23-03-PLAN.md — NB baseline construction + service-worker bootstrap downloader + popup download status UI [BOOT-01, BOOT-02, BOOT-03]
+- [ ] 23-04-PLAN.md — Update detection + popup notice + manual refresh button + atomic cache replacement [UPDATE-01, UPDATE-02, UPDATE-03]
+- [ ] 23-05-PLAN.md — v2.x → v3.0 silent migration + bundled-data removal + lockdown adapter contract doc [MIGRATE-01]
+- [ ] 23-06-PLAN.md — SC-06 carve-out + new check-baseline-bundle-size gate + paired self-test [GATES-01, GATES-02]
 
 ## Progress
 
@@ -184,11 +129,7 @@ See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success cr
 | 21.1 Pipeline Fix (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
-| 23. Papertek API Vocabulary Endpoints | v3.0 | 0/3 | Not started | - |
-| 24. IndexedDB Cache Adapter + Schema | v3.0 | 0/3 | Not started | - |
-| 25. Bootstrap + NB Baseline + Gates | v3.0 | 0/4 | Not started | - |
-| 26. Update Detection + Manual Refresh | v3.0 | 0/3 | Not started | - |
-| 27. Migration + Bundled-Data Removal | v3.0 | 0/3 | Not started | - |
+| 23. Data-Source Migration | v3.0 | 0/6 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-27 — v3.0 Data-Source Migration phases drafted*
+*Roadmap updated: 2026-04-27 — v3.0 Data-Source Migration consolidated to single phase (6 plans)*

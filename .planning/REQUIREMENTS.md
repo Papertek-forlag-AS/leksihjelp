@@ -80,22 +80,22 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | Phase 23 | Pending |
-| API-02 | Phase 23 | Pending |
-| API-03 | Phase 23 | Pending |
-| CACHE-01 | Phase 24 | Pending |
-| CACHE-02 | Phase 24 | Pending |
-| CACHE-03 | Phase 24 | Pending |
-| SCHEMA-01 | Phase 24 | Pending |
-| BOOT-01 | Phase 25 | Pending |
-| BOOT-02 | Phase 25 | Pending |
-| BOOT-03 | Phase 25 | Pending |
-| GATES-01 | Phase 25 | Pending |
-| GATES-02 | Phase 25 | Pending |
-| UPDATE-01 | Phase 26 | Pending |
-| UPDATE-02 | Phase 26 | Pending |
-| UPDATE-03 | Phase 26 | Pending |
-| MIGRATE-01 | Phase 27 | Pending |
+| API-01 | Phase 23 (Plan 01) | Pending |
+| API-02 | Phase 23 (Plan 01) | Pending |
+| API-03 | Phase 23 (Plan 01) | Pending |
+| CACHE-01 | Phase 23 (Plan 02) | Pending |
+| CACHE-02 | Phase 23 (Plan 02) | Pending |
+| CACHE-03 | Phase 23 (Plan 02) | Pending |
+| SCHEMA-01 | Phase 23 (Plan 02) | Pending |
+| BOOT-01 | Phase 23 (Plan 03) | Pending |
+| BOOT-02 | Phase 23 (Plan 03) | Pending |
+| BOOT-03 | Phase 23 (Plan 03) | Pending |
+| UPDATE-01 | Phase 23 (Plan 04) | Pending |
+| UPDATE-02 | Phase 23 (Plan 04) | Pending |
+| UPDATE-03 | Phase 23 (Plan 04) | Pending |
+| MIGRATE-01 | Phase 23 (Plan 05) | Pending |
+| GATES-01 | Phase 23 (Plan 06) | Pending |
+| GATES-02 | Phase 23 (Plan 06) | Pending |
 
 **Coverage:**
 - v3.0 requirements: 16 total
@@ -104,4 +104,4 @@ Which phases cover which requirements.
 
 ---
 *Requirements defined: 2026-04-27*
-*Last updated: 2026-04-27 after v3.0 roadmap drafted (5 phases, 100% coverage)*
+*Last updated: 2026-04-27 after v3.0 roadmap consolidated (1 phase, 6 plans, 100% coverage)*
