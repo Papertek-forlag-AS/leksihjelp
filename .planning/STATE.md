@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 17 of 19 (Compound Integration)
-current_plan: 05 of 5 (17-05-PLAN.md) -- COMPLETE
+current_plan: 06 of 6 (17-06-PLAN.md) -- COMPLETE
 status: in-progress
-last_updated: "2026-04-26T08:59:00Z"
+last_updated: "2026-04-26T09:39:00Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 5
-  completed_plans: 5
+  total_plans: 6
+  completed_plans: 6
 ---
 
 # Session State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 17 of 19 (Compound Integration)
-**Current plan:** 17-05 COMPLETE
+**Current plan:** 17-06 COMPLETE
 **Status:** In progress
 
-Progress: [██████████] 100% (5/5 phase 17 plans complete)
+Progress: [██████████] 100% (6/6 phase 17 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7 (v2.1)
-- Average duration: 5.1min
-- Total execution time: 36min
+- Total plans completed: 8 (v2.1)
+- Average duration: 6.1min
+- Total execution time: 49min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 16 | 2/2 | 7min | 3.5min |
-| 17 | 5/5 | 29min | 5.8min |
+| 17 | 6/6 | 42min | 7.0min |
 
 ## Accumulated Context
 
@@ -64,6 +64,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-03: No index mutation from decomposition — compoundNouns/validWords unchanged
 - Phase 17-05: nounLemmaGenus excludes inflected forms (nounform, plural, typo) — only base-form nouns with genus
 - Phase 17-05: Sarskriving uses decomposeCompoundStrict with fallback to decomposeCompound for backward compatibility
+- Phase 17-06: Decomposition fallback removed from sarskriving — 16 supplementary compounds added to preserve recall; decomposition deferred to Phase 19 with POS-aware gating
 
 ### Key Pitfall Warnings (from research)
 
@@ -85,5 +86,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 17-05-PLAN.md
+Stopped at: Completed 17-06-PLAN.md
 Resume file: None
