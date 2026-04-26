@@ -48,6 +48,13 @@
     // infinitiv: always shown (base form, no gating)
   };
 
+  // Phase 16: Compound linking elements per language
+  const LINKERS_BY_LANG = {
+    nb: ['s', 'e'],
+    nn: ['s', 'e'],
+    de: ['s', 'n', 'en', 'er', 'e', 'es'],
+  };
+
   // Tense normalization — maps language-specific tense keys to common group names
   // Used for cross-language tense consistency detection
   const TENSE_GROUP = {
@@ -1058,6 +1065,122 @@
     return irregularForms;
   }
 
+  // ── Phase 16: Compound decomposition ──
+  //
+  // Splits compound nouns into constituent parts using both-sides validation
+  // (left AND right must be known nouns). Supports NB/NN/DE linking elements
+  // and recursive decomposition up to 4 components (depth 3).
+  //
+  // Returns: { parts: [{word, genus, linker}], gender, confidence } or null.
+
+  function decomposeCompound(word, nounGenus, lang, depth) {
+    if (depth === undefined) depth = 0;
+    // Max 4 components = max 3 splits (depth 0/1/2 = 3 recursive levels)
+    if (depth > 2) return null;
+    // Minimum compound length: 3 + 3
+    if (!word || word.length < 6) return null;
+    // Stored entry takes precedence (Tier 1)
+    if (nounGenus.has(word)) return null;
+
+    const linkers = LINKERS_BY_LANG[lang] || [];
+
+    for (let splitPos = 3; splitPos <= word.length - 3; splitPos++) {
+      const left = word.slice(0, splitPos);
+      if (!nounGenus.has(left)) continue;
+
+      const remainder = word.slice(splitPos);
+
+      // Zero-fuge direct match
+      if (nounGenus.has(remainder)) {
+        return {
+          parts: [
+            { word: left, genus: nounGenus.get(left), linker: '' },
+            { word: remainder, genus: nounGenus.get(remainder), linker: '' },
+          ],
+          gender: nounGenus.get(remainder),
+          confidence: 'high',
+        };
+      }
+
+      // Zero-fuge recursive
+      const subZero = decomposeCompound(remainder, nounGenus, lang, depth + 1);
+      if (subZero) {
+        return {
+          parts: [
+            { word: left, genus: nounGenus.get(left), linker: '' },
+            ...subZero.parts,
+          ],
+          gender: subZero.gender,
+          confidence: 'high',
+        };
+      }
+
+      // Linker-based splits
+      for (const linker of linkers) {
+        if (!remainder.startsWith(linker)) continue;
+        const stripped = remainder.slice(linker.length);
+        if (stripped.length < 3) continue;
+
+        if (nounGenus.has(stripped)) {
+          return {
+            parts: [
+              { word: left, genus: nounGenus.get(left), linker: linker },
+              { word: stripped, genus: nounGenus.get(stripped), linker: '' },
+            ],
+            gender: nounGenus.get(stripped),
+            confidence: 'high',
+          };
+        }
+
+        const subLinker = decomposeCompound(stripped, nounGenus, lang, depth + 1);
+        if (subLinker) {
+          return {
+            parts: [
+              { word: left, genus: nounGenus.get(left), linker: linker },
+              ...subLinker.parts,
+            ],
+            gender: subLinker.gender,
+            confidence: 'high',
+          };
+        }
+      }
+
+      // Triple-consonant elision: when left ends with a repeated char (e.g.
+      // "natt" ends with tt), the compound form drops one occurrence of the
+      // repeated letter. So "natt" + "time" is written "nattime" not "natttime".
+      // We try restoring the dropped letter to see if the right side is a known noun.
+      const lastChar = left[left.length - 1];
+      if (left.length >= 2 && left[left.length - 2] === lastChar) {
+        const restored = lastChar + remainder;
+
+        if (nounGenus.has(restored)) {
+          return {
+            parts: [
+              { word: left, genus: nounGenus.get(left), linker: '' },
+              { word: restored, genus: nounGenus.get(restored), linker: '' },
+            ],
+            gender: nounGenus.get(restored),
+            confidence: 'high',
+          };
+        }
+
+        const subElision = decomposeCompound(restored, nounGenus, lang, depth + 1);
+        if (subElision) {
+          return {
+            parts: [
+              { word: left, genus: nounGenus.get(left), linker: '' },
+              ...subElision.parts,
+            ],
+            gender: subElision.gender,
+            confidence: 'high',
+          };
+        }
+      }
+    }
+
+    return null;
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -1211,13 +1334,15 @@
       // Grammar tables from synced grammarbank. Keyed by table name
       // (e.g., "prep_case", "sein_verbs"). Empty when grammarbank not synced.
       grammarTables,
+      // Phase 16: compound decomposition bound to this index's nounGenus and lang.
+      decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
     };
   }
 
   // ── Dual-export footer ──
   // Writes `self.__lexiVocabCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path.
-  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore };
+  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore, decomposeCompound };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiVocabCore = api;
