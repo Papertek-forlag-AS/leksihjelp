@@ -118,6 +118,53 @@
 
 ---
 
+## Milestone: v2.1 — Compound Decomposition & Polish
+
+**Shipped:** 2026-04-26
+**Phases:** 4 code phases (Phase 20 browser verification deferred)
+**Plans:** 13
+**Duration:** 1 day (2026-04-25 → 2026-04-26), 70 commits
+
+### What Was Built
+
+- **Compound decomposition engine** — `decomposeCompound` splits unknown NB/NN/DE compounds at known noun boundaries with linking elements, recursive up to 4 components, 0% FP on full nounbank validation.
+- **Dictionary + spell-check compound integration** — "Samansett ord" popup card with clickable components; compound acceptance in spell-check; NB/NN compound gender mismatch; sarskriving expansion then decomposition fallback removal.
+- **Spell-check polish** — Manual trigger button with toast, demonstrative-gender rule, triple-letter typo rule.
+- **NB/NN s-passive detection** — Papertek data enrichment (648 NB + 435 NN forms); vocab-seam sPassivForms index; NN finite s-passive rule; NB overuse hint; deponent recognition; algorithmic presens derivation.
+- **Unit test suite** — 58 tests across 4 files, first formal test suite beyond regression fixtures.
+
+### What Worked
+
+- **Gap closure plans within phases** — Plans 17-04 through 17-06 and 19-03 were gap-closure plans added mid-phase rather than decimal-phase inserts. This kept phase count clean while still catching integration issues. The gap closure pattern has graduated from "audit-driven decimal insert" to "inline plan addition."
+- **Both-sides validation as primary FP guard** — Requiring both split components to be known nouns eliminated phantom compounds entirely. The decision to validate strictly upfront meant downstream consumers (sarskriving, gender inference) never had to second-guess decomposition results.
+- **Supplementary compounds over decomposition fallback** — When sarskriving's decomposition fallback produced 6 FP suites, instead of tuning the fallback, we removed it entirely and added 16 supplementary compounds to the stored list. Zero recall loss, zero FP. Simple beats clever.
+- **Algorithmic derivation over data round-trip** — NN presens derivation (-ast → -est) was implemented algorithmically in `buildSPassivIndex` rather than waiting for Papertek API enrichment. Unblocked the phase in minutes.
+
+### What Was Inefficient
+
+- **Phase 20 never executed** — Browser visual verification was planned as the final phase but never started. VERIF-01 has now been deferred across two milestones (v2.0 → v2.1 → next). The pattern suggests browser verification should be embedded in each code phase rather than batched at the end.
+- **`one_liner` frontmatter still missing from SUMMARYs** — Third milestone in a row where `gsd-tools milestone complete` extracted 0 accomplishments. Should either add `one_liner` to SUMMARY template or abandon the extraction approach entirely.
+
+### Patterns Established
+
+- **Gap closure as inline plans, not decimal phases** — When gaps are small (single rule fix, fixture expansion), add a plan within the existing phase rather than creating a decimal phase. Decimal phases are for cross-phase integration gaps found by audit.
+- **Both-sides validation for any acceptance path** — When adding a new "accept as valid" path (compound decomposition, sarskriving expansion), require evidence from both sides of the split/match before accepting. This prevents phantom matches.
+- **Unit test suite per phase** — v2.1 established the first per-phase unit test files (`test/phase-{N}-unit.test.js`). Plain Node.js + assert, no framework dependency.
+
+### Key Lessons
+
+1. **Browser verification shouldn't be a separate phase.** It keeps getting deferred because it has no code output and no clear owner. Next milestone should integrate browser checks into the code phase that introduces the visual change. (Learned: Phase 20 deferred twice.)
+2. **Supplementary data beats algorithmic fallback for narrow scope.** When sarskriving needed 16 more compounds to preserve recall without the decomposition fallback, adding data was faster, safer, and more maintainable than tuning the algorithm. (Learned: Phase 17-06.)
+3. **Inline gap closure is more efficient than decimal phases.** Plans 17-04 through 17-06 closed gaps without the overhead of a new phase directory, research, and planning cycle. Reserve decimal phases for gaps that span multiple phases. (Learned: Phase 17.)
+
+### Cost Observations
+
+- **Model mix:** Opus 4.6 for orchestration and execution, Sonnet 4.6 for research and plan-checking.
+- **Sessions:** ~3 sessions across 1 day. High throughput from accumulated v1.0/v2.0 infrastructure.
+- **Notable:** v2.1 shipped in 1 day (vs v2.0's 2 days, v1.0's 4 days). Velocity continues to increase as release gate infrastructure and fixture harness absorb more of the verification burden.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -126,19 +173,23 @@
 |-----------|--------|-----------------|---------------|------------|
 | v1.0 | 5 planned | 3 (02.1, 03.1, 05.1) | 8 | Established regression fixture + 8-gate release checklist + decimal-phase pattern for audit-driven inserts |
 | v2.0 | 10 planned | 2 (14.1, 15.1) | 9 | Structural grammar engine + 5-language coverage + benchmark-driven validation + document-state two-pass runner |
+| v2.1 | 4 code + 1 deferred | 0 (gaps closed as inline plans) | 9 | Compound decomposition + spell-check polish + s-passive detection + first unit test suite |
 
 ### Cumulative Quality
 
-| Milestone | Fixture Cases | Release Gates | Smoke-Test Scenarios | Zero-Dep Additions |
-|-----------|---------------|---------------|----------------------|--------------------|
-| v1.0 | 262 | 8 | 11/11 PASS | 1 (fixture + gates are pure Node scripts — no npm deps added) |
-| v2.0 | 3,326 | 9 | Pending (Phases 6/7 browser visuals) | 0 (all structural rules use `Intl.Segmenter` — browser built-in, no deps) |
+| Milestone | Fixture Cases | Release Gates | Unit Tests | Zero-Dep Additions |
+|-----------|---------------|---------------|------------|---------------------|
+| v1.0 | 262 | 8 | 0 | 1 (fixture + gates are pure Node scripts — no npm deps added) |
+| v2.0 | 3,326 | 9 | 0 | 0 (all structural rules use `Intl.Segmenter` — browser built-in, no deps) |
+| v2.1 | 3,326+ | 9 | 58 (phases 16-19) | 0 (compound decomposition + s-passive = pure heuristic, no deps) |
 
 ### Recurring Themes
 
 - **Fixture ≠ browser** — v1.0: SC-01 vocab shape divergence. v2.0: 9 missing vocab-seam getters. Same root cause, same fix pattern. A parity gate would prevent recurrence.
-- **Decimal phases close audit gaps cleanly** — 5 across two milestones, all < 1 hour each. The pattern is load-bearing infrastructure, not overhead.
-- **Data-logic separation compounds** — v1.0 established it for typo banks; v2.0 extended it to trigger tables, preposition-case maps, and closed-class sets. Every phase benefited.
+- **Gap closure evolving** — v1.0/v2.0: decimal phases (5 total). v2.1: inline plans within existing phases (17-04 through 17-06, 19-03). The pattern is maturing — small gaps get inline plans, cross-phase gaps get decimal phases.
+- **Data-logic separation compounds** — v1.0 established it for typo banks; v2.0 extended it to trigger tables; v2.1 extended it to s-passive forms and deponent marking. Every phase benefited.
+- **Browser verification keeps slipping** — deferred from v2.0 to v2.1 to next milestone. Need to embed visual checks in code phases rather than batching.
+- **Velocity increases with infrastructure** — v1.0: 8 phases / 4 days. v2.0: 12 phases / 2 days. v2.1: 4 phases / 1 day. Release gates, fixture harness, and plugin architecture are compounding investments.
 
 ---
-*Retrospective updated: 2026-04-25 after v2.0 Depth of Coverage milestone*
+*Retrospective updated: 2026-04-26 after v2.1 Compound Decomposition & Polish milestone*

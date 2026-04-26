@@ -54,37 +54,39 @@ they're working on.
 - ✓ **ES/FR opaque-noun gender** — v2.0, article-noun gender mismatch for opaque nouns (MORPH-02)
 - ✓ **Cross-language collocations** — v2.0, preposition-collocation errors in NB/DE/FR/ES with 97 seed entries (COLL-01 through COLL-04)
 - ✓ **9 release gates** — v2.0, check-fixtures + check-explain-contract + check-rule-css-wiring + check-network-silence + check-bundle-size + check-benchmark-coverage + check-governance-data + check-spellcheck-features + check-stateful-rule-invalidation
-
-## Current Milestone: v2.1 Compound Decomposition & Polish
-
-**Goal:** Algorithmic compound word decomposition for NB/NN/DE (dictionary, spell-check, gender inference) plus carry-over polish items from v1.0/v2.0.
+- ✓ **Compound decomposition engine** — v2.1, `decomposeCompound` splits unknown NB/NN/DE compounds at known noun boundaries with linking elements (s, e, n, en, er, es), recursive up to 4 components, <2% FP rate
+- ✓ **Dictionary popup for decomposed compounds** — v2.1, "Samansett ord" card with clickable components, gender badge from last component, floating-widget fallback
+- ✓ **Spell-check compound acceptance + sarskriving expansion** — v2.1, decomposable compounds accepted as valid; sarskriving detects split compounds verified by decomposition
+- ✓ **NB/NN compound gender inference** — v2.1, extends existing DE compound-gender to NB/NN via shared decomposeCompound engine
+- ✓ **Manual spell-check button** — v2.1, visible trigger near textarea with toast feedback ("3 feil funnet" / "Ser bra ut!")
+- ✓ **Demonstrative-mismatch rule** — v2.1, `nb-demonstrative-gender` (priority 12) for den/det/denne/dette + noun gender agreement
+- ✓ **Triple-letter typo rule** — v2.1, `nb-triple-letter` (priority 45) for accidental triple-letter typos with compound-boundary awareness
+- ✓ **NB/NN s-passive detection** — v2.1, NB overuse reminder (>3 s-passives), NN finite s-passive rule, st-verb/deponent recognition, algorithmic presens derivation
+- ✓ **Unit test suite** — v2.1, 58 tests across phases 16-19 (decomposition, compound gender, demonstrative-gender, triple-letter, s-passive)
 
 ### Active
 
-- [ ] Compound word decomposition engine (NB/NN/DE) — split unknown words at known noun boundaries with linking-element awareness
-- [ ] Dictionary popup for decomposed compounds — show gender + breakdown for unknowns, no inherited examples
-- [ ] Spell-check integration — accept decomposable compounds as valid, expand särskriving detection
-- [ ] Gender inference from last component — extend existing DE compound-gender to NB/NN
-- [ ] Manual "Run spell-check" button — explicit trigger for uncertain/dyslexic users
-- [ ] Demonstrative-mismatch rule (`Det boka`, `Den huset`) — extends nb-gender beyond en/ei/et
-- [ ] Triple-letter typo budget (`tykkkjer`) — frequency-weighted fuzzy-distance tiebreak
-- [ ] Browser visual verification — deferred Phases 6/7 checks (P1/P2/P3 dots, quotation suppression, word-order dots)
+- [ ] Browser visual verification — deferred from v2.0/v2.1 (P1/P2/P3 dots, quotation suppression, word-order dots, compound rendering)
 
 ### Deferred
 
-**Carry-over tech-debt (not in v2.1):**
+**Carry-over tech-debt:**
 
 - NN phrase-infinitive triage (~214 `papertek-vocabulary` verbbank entries)
 - Data-source architecture move: extension = functions only, bundled baseline + sync with papertek-vocabulary (memory `project_data_source_architecture.md`)
 - Leksi-in-skriv integration: embed spell-check/prediction as native feature inside `skriv.papertek.app` (memory `project_lexi_in_skriv_integration.md`)
 - `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
+- Vocab-seam parity gate: `check-vocab-seam-parity` to assert every `buildIndexes()` key has a matching getter (recurring v1.0/v2.0 gap)
 
-**v3.0 candidates (deferred from v2.0 scope):**
+**v3.0 candidates:**
 
 - Tense harmony & discourse (TH-01 through TH-03) — unmotivated tense switches, anaphora ambiguity, long-distance SV agreement
 - Idiomatic-literalism curated match (IDI-01) — ~20-idiom closed list, only if FP rate stays at zero
 - FR participe passé full corner cases (FR-04) — distance > adjacent window, pronominal reflexive DO, elided DO
+- Verb/adjective compound decomposition (COMP-09) — overtale, langvarig; different patterns from noun compounds
+- Definite-form compound lookup (COMP-10) — strip -en/-et/-a before decomposition
+- Per-noun fuge data in papertek-vocabulary (COMP-11) — lexical exceptions
 
 ### Out of Scope
 
@@ -121,12 +123,13 @@ they're working on.
 - v2.0 shipped over 2 days (2026-04-24 → 2026-04-25, ~140 commits) across 12 phases.
 - 9 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation).
 
-**Current state (post-v2.0):**
-- 42/42 v2.0 requirements shipped and verified (19/19 v1.0 prior).
-- 53 fixture suites, 3,326 fixture lines, all at F1=1.000.
-- 40/40 benchmark expectations met (P1: 5/5, P2: 31/31, P3: 4/4).
-- Browser visual verification pending for Phases 6/7 (P1/P2/P3 dot colours, quotation suppression, word-order dots).
-- No automated test suite beyond regression fixtures — `/gsd:add-tests` recommended before next release.
+**Current state (post-v2.1):**
+- 11/12 v2.1 requirements shipped (VERIF-01 deferred); 42/42 v2.0; 19/19 v1.0 prior.
+- 58 spell-check rule files in plugin architecture; core engine ~3k LOC.
+- 53+ fixture suites, all at F1=1.000; 40/40 benchmark expectations met.
+- 58 unit tests across phases 16-19, all passing.
+- 9 release gates all green. Bundle 12.59 MiB (37% headroom).
+- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → next milestone).
 
 ## Constraints
 
@@ -159,6 +162,13 @@ they're working on.
 | **Phase 16 deferred to v3.0** (v2.0 scope review) | Tense harmony/anaphora/long-distance SV agreement require deeper parsing; aspirational scope | ✓ Good — kept v2.0 shippable without unbounded parser work |
 | **FR PP 10.3b deferred to v3.0** (v2.0) | Full PP agreement (distance > adjacent window, pronominal reflexive DO) needs near-parser capability | ✓ Good — adjacent-window 10.3a ships correct; corner cases wait for better infrastructure |
 | **Gap closure via decimal phases** (v2.0) | 14.1 and 15.1 closed audit-found gaps without renumbering | ✓ Good — pattern established in v1.0 continues to work well |
+| **Both-sides validation for decomposition** (v2.1) | Require both split components to be known nouns before accepting decomposition | ✓ Good — 0% FP rate on full NB+DE nounbank; prevents phantom compounds |
+| **Decomposition does not mutate indexes** (v2.1) | Decomposed compounds don't add to validWords/compoundNouns — separate acceptance path | ✓ Good — no FP storm from accumulating questionable compounds |
+| **Typo d=1 wins over decomposition** (v2.1) | Misspelled words get corrected rather than accepted as compounds | ✓ Good — "skoledegen" corrected to "skoledagen", not accepted as a compound |
+| **Supplementary compounds over decomposition fallback in sarskriving** (v2.1) | Removed decomposition fallback from sarskriving; added 16 supplementary compounds to preserve recall | ✓ Good — eliminated 6 FP suites; sarskriving stays P=1.000 R=1.000 |
+| **Algorithmic NN presens derivation** (v2.1) | Derive -est from stored -ast infinitives instead of Papertek deploy round-trip | ✓ Good — unblocks NN finite presens without data-source change |
+| **Severity 'hint' for NB passiv overuse** (v2.1) | Document-level overuse is informational, not error; matches explain-contract gate | ✓ Good — doesn't alarm students, just suggests considering active voice |
+| **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across two milestones now |
 
 ---
-*Last updated: 2026-04-26 after v2.1 milestone start (Compound Decomposition & Polish)*
+*Last updated: 2026-04-26 after v2.1 milestone completion (Compound Decomposition & Polish)*

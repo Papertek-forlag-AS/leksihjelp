@@ -1,5 +1,34 @@
 # Milestones
 
+## v2.1 Compound Decomposition & Polish (Shipped: 2026-04-26)
+
+**Phases completed:** 4 code phases (16–19), 13 plans, 11/12 requirements satisfied. Phase 20 (browser visual verification) deferred.
+
+**Timeline:** 2026-04-25 → 2026-04-26 (1 day, 70 commits)
+**Code delta:** 39 files changed, +27,808 / -3,947 lines
+**Rule engine:** 58 rule files, 3 new rules (nb-compound-gender, nb-demonstrative-gender, nb-triple-letter, nn_passiv_s, doc-drift-nb-passiv-overuse)
+**Bundle:** 12.59 MiB / 20 MiB cap
+**Unit tests:** 58 tests across 4 test files, all passing
+
+**Delivered (one sentence):** Algorithmic compound decomposition for NB/NN/DE with dictionary popup rendering, spell-check acceptance, gender inference, sarskriving expansion — plus spell-check polish (manual trigger, demonstrative-gender, triple-letter) and NB/NN s-passive detection with deponent recognition.
+
+**Key accomplishments:**
+
+1. **Compound decomposition engine** (Phase 16) — `decomposeCompound` in `vocab-seam-core.js` splits unknown NB/NN/DE compounds at known noun boundaries with linking elements (s, e, n, en, er, es), recursive up to 4 components, <2% false-positive rate on full nounbank validation.
+2. **Compound dictionary + spell-check integration** (Phase 17) — "Samansett ord" card in popup with clickable components and gender badge; spell-check compound acceptance (typo d=1 > decomposition precedence); NB/NN compound gender mismatch rule via shared engine; sarskriving expansion with decomposition fallback then removal (supplementary compounds preserve recall).
+3. **Spell-check polish** (Phase 18) — Manual trigger button with toast feedback; `nb-demonstrative-gender` rule (priority 12) for den/det/denne/dette + noun mismatch; `nb-triple-letter` rule (priority 45) for accidental triple-letter typos.
+4. **NB/NN s-passive detection** (Phase 19) — Papertek data enrichment (648 NB + 435 NN s-passive forms, 8 deponent verbs); `sPassivForms` vocab-seam index; `nn_passiv_s` finite s-passive rule; `doc-drift-nb-passiv-overuse` hint; algorithmic NN presens derivation (-ast → -est); deponent override list.
+5. **Unit test suite** (cross-phase) — 58 tests covering decomposition, compound gender, demonstrative-gender, triple-letter, s-passive indexing, NN passiv rule, NB overuse hint. All passing.
+
+**Known Gap:**
+- VERIF-01: Browser visual verification (Phase 20) never executed — deferred to next milestone or ad-hoc verification.
+
+**See:**
+- `.planning/milestones/v2.1-ROADMAP.md` — full phase-by-phase roadmap
+- `.planning/milestones/v2.1-REQUIREMENTS.md` — final traceability (11/12)
+
+---
+
 ## v2.0 Depth of Coverage — Grammar Governance Beyond Tokens (Shipped: 2026-04-25)
 
 **Phases completed:** 12 phases (6–15.1, including 2 gap-closure decimal phases), 31 plans, 42/42 requirements satisfied.
