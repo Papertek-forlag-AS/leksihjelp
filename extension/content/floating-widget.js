@@ -1036,6 +1036,21 @@
       }
     } catch (e) { console.warn('Leksihjelp: inline lookup dictionary load failed', e); return; }
 
+    // Load NB dictionary for falseFriends/senses enrichment
+    let nbDict = null;
+    if (currentLang !== 'nb' && currentLang !== 'nn') {
+      try {
+        if (window.__lexiVocabStore) {
+          nbDict = await window.__lexiVocabStore.getCachedLanguage('nb');
+        }
+        if (!nbDict) {
+          const nbUrl = chrome.runtime.getURL('data/nb.json');
+          const nbRes = await fetch(nbUrl);
+          nbDict = await nbRes.json();
+        }
+      } catch (e) { /* NB enrichment is best-effort */ }
+    }
+
     const q = word.toLowerCase().trim();
 
     function searchDictBanks(dictData, query) {
@@ -1043,12 +1058,13 @@
       for (const bank of banks) {
         const bankData = dictData[bank];
         if (!bankData || typeof bankData !== 'object') continue;
-        for (const entry of Object.values(bankData)) {
+        for (const [entryId, entry] of Object.entries(bankData)) {
           if (!entry.word) continue;
           if (entry.word.toLowerCase() === query ||
               (getTranslation(entry) || '').toLowerCase() === query) {
             return {
               ...entry,
+              _wordId: entryId,
               translation: getTranslation(entry),
               partOfSpeech: bankToPos(bank),
               gender: entry.genus ? genusToGender(entry.genus) : null,
@@ -1074,6 +1090,24 @@
           if (baseMatch) {
             match = baseMatch;
             conjugatedFrom = word;
+          }
+        }
+      }
+    }
+
+    // Enrich match with NB falseFriends/senses via reverse linkedTo scan
+    if (match && nbDict && match._wordId) {
+      for (const bank of Object.keys(nbDict)) {
+        const bankData = nbDict[bank];
+        if (!bankData || typeof bankData !== 'object') continue;
+        for (const [, nbEntry] of Object.entries(bankData)) {
+          if (!nbEntry.linkedTo?.[currentLang]?.primary) continue;
+          if (nbEntry.linkedTo[currentLang].primary !== match._wordId) continue;
+          if (nbEntry.falseFriends) {
+            match.falseFriends = [...(match.falseFriends || []), ...nbEntry.falseFriends];
+          }
+          if (nbEntry.senses) {
+            match.senses = [...(match.senses || []), ...nbEntry.senses];
           }
         }
       }
