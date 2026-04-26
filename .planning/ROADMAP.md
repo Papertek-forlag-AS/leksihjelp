@@ -123,7 +123,7 @@ Plans:
   2. NB: when a text contains >3 s-passives, an informational hint suggests considering active voice for clarity
   3. NN: finite s-passive ("Boka lesest av mange") is flagged as error with suggestion to use bli/verte-passiv
   4. NN: s-passive after modal in infinitive ("Boka kan lesast") is accepted as correct
-  5. NN: participle agreement in bli/verte-passive is checked (skriven/skrive/skrivne must agree with subject gender/number; a-verbs exempt)
+  5. NN: bli/verte + participle forms are accepted as valid passive constructions (basic acceptance; full gender/number agreement checking deferred to a future phase per RESEARCH.md recommendation)
   6. NN: st-verbs (møtast, synast, trivast, finnast, etc.) are recognised as deponent/reciprocal, not flagged as passive errors
   7. All existing release gates pass after additions; no regression on fixture suites
 **Plans**: 2 plans
