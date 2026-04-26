@@ -5,7 +5,7 @@
 - ✅ **v1.0 Spell-Check & Prediction Quality** — Phases 1-5 + 02.1/03.1/05.1 decimal inserts (shipped 2026-04-21) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15.1 (shipped 2026-04-25) — [archive](milestones/v2.0-ROADMAP.md)
 - ✅ **v2.1 Compound Decomposition & Polish** — Phases 16–19 (shipped 2026-04-26) — [archive](milestones/v2.1-ROADMAP.md)
-- 🚧 **v2.2 Student Language Intelligence** — Phases 21–22 (in progress)
+- ✅ **v2.2 Student Language Intelligence** — Phases 21–22 + 21.1/21.2 decimal inserts (shipped 2026-04-27) — [archive](milestones/v2.2-ROADMAP.md)
 
 ## Phases
 
@@ -58,76 +58,17 @@ See: `.planning/milestones/v2.1-ROADMAP.md` for full phase detail and success cr
 
 </details>
 
-### 🚧 v2.2 Student Language Intelligence (In Progress)
+<details>
+<summary>✅ v2.2 Student Language Intelligence (Phases 21-22 + decimal inserts) — SHIPPED 2026-04-27</summary>
 
-**Milestone Goal:** Help students choose the right word — false-friend warnings, sense-grouped preposition translations, and å/og confusion detection.
+- [x] Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy (2/2 plans) — completed 2026-04-26
+- [x] Phase 21.1: Fix Dictionary Intelligence Data Pipeline (GAP CLOSURE) (1/1 plan) — completed 2026-04-26
+- [x] Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE) (1/1 plan) — completed 2026-04-26
+- [x] Phase 22: å/og Confusion Detection (1/1 plan) — completed 2026-04-26
 
-- [x] **Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy** - Data enrichment in Papertek API + popup and floating-widget rendering for cross-language false-friend warnings and sense-grouped translations (completed 2026-04-26)
-- [x] **Phase 21.1: Fix Dictionary Intelligence Data Pipeline (GAP CLOSURE)** - Wire falseFriends/senses data from nb.json through to popup.js and floating-widget.js renderers; fix filter direction inversion (completed 2026-04-26)
-- [x] **Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE)** - Fix missing linkedTo entries at Papertek API + re-sync vocab to close DE senses and FR false-friend gaps (completed 2026-04-26)
-- [x] **Phase 22: å/og Confusion Detection** - Sentence-level NB/NN spell-check rule for Norway's most common writing error (completed 2026-04-26)
+See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success criteria.
 
-## Phase Details
-
-### Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy
-**Goal**: Students see context that prevents wrong-word choices — false-friend warnings before they pick a translation, and sense-grouped preposition translations instead of a flat ambiguous list
-**Depends on**: Nothing (first phase of v2.2; uses existing popup/floating-widget rendering infrastructure)
-**Requirements**: FF-01, FF-02, FF-03, FF-04, POLY-01, POLY-02, POLY-03, POLY-04
-**Success Criteria** (what must be TRUE):
-  1. User looking up "aktuell" in the dictionary popup sees a prominent warning that it does not mean "actual" in English, rendered above the translation list
-  2. User looking up "på" in the dictionary popup sees translations grouped by sense (location, time, manner) with expandable headers, not a flat list
-  3. User selecting a false-friend word on a web page and triggering the floating-widget inline lookup sees the same false-friend warning as in the popup
-  4. User selecting a polysemous preposition on a web page sees sense-grouped translations in the floating-widget
-  5. False-friend and sense data originates from Papertek API fields (`falseFriends`, `senses`) — no hand-edited JSON in extension/data
-**Plans**: 2 plans
-
-Plans:
-- [ ] 21-01-PLAN.md — Sync vocabulary data + verify popup rendering (FF-01/02/03, POLY-01/02/03)
-- [ ] 21-02-PLAN.md — Floating-widget false-friend + polysemy rendering (FF-04, POLY-04)
-
-### Phase 21.1: Fix Dictionary Intelligence Data Pipeline (GAP CLOSURE)
-**Goal**: Wire falseFriends and senses data from nb.json through to popup.js and floating-widget.js renderers so students actually see false-friend warnings and sense-grouped translations
-**Depends on**: Phase 21 (rendering functions exist but receive wrong data)
-**Requirements**: FF-01, FF-03, FF-04, POLY-01, POLY-03, POLY-04
-**Gap Closure**: Closes 6 unsatisfied requirements + 4 integration gaps + 2 broken flows from v2.2 audit
-**Success Criteria** (what must be TRUE):
-  1. User looking up "aktuell" in the dictionary popup sees a visible false-friend warning banner (not empty string)
-  2. User looking up "på" in the dictionary popup sees sense-grouped translations (not flat translation fallback)
-  3. User selecting a false-friend word in the floating-widget sees the warning banner
-  4. User selecting "på" in the floating-widget sees sense-grouped translations
-  5. Filter direction correct: falseFriends entries with `lang: 'de'` render when target language is German
-**Plans**: 1 plan
-
-Plans:
-- [ ] 21.1-01-PLAN.md — Wire NB enrichment data through search pipeline in popup.js and floating-widget.js
-
-### Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE)
-**Goal**: Fix missing `linkedTo` entries at Papertek API so DE sense-grouped translations and FR `fin` false-friend warning reach students
-**Depends on**: Phase 21.1 (enrichment pipeline exists but 2 NB entries have incomplete linkedTo data)
-**Requirements**: FF-01 (partial FR), POLY-01 (partial DE), POLY-03 (partial DE), POLY-04 (partial DE)
-**Gap Closure**: Closes 2 integration gaps + 1 broken flow from v2.2 audit
-**Success Criteria** (what must be TRUE):
-  1. User looking up a FR word corresponding to NB "fin" sees the false-friend warning (fin ≠ fin)
-  2. User looking up DE prepositions corresponding to NB "på" sees sense-grouped translations (4 senses)
-  3. `npm run sync-vocab` pulls corrected data and all 8 release gates pass
-**Plans**: 1 plan
-
-Plans:
-- [ ] 21.2-01-PLAN.md — Fix linkedTo entries at Papertek API (fin_adj->FR, på_contr->DE) + re-sync vocab
-
-### Phase 22: å/og Confusion Detection
-**Goal**: Students writing Norwegian get flagged when they confuse "å" and "og" — the single most common NB/NN writing error
-**Depends on**: Nothing (independent spell-check rule; can run in parallel with Phase 21)
-**Requirements**: AAOG-01, AAOG-02, AAOG-03, AAOG-04
-**Success Criteria** (what must be TRUE):
-  1. User typing "hun liker og lese" sees a spell-check flag on "og" with suggestion to use "å"
-  2. User typing "kaffe å kake" sees a spell-check flag on "å" with suggestion to use "og"
-  3. User typing "sitter og leser" does NOT see a flag (posture verb + og + verb is grammatically correct)
-  4. Popover explain text renders in both NB and NN registers, following the explain-contract pattern
-**Plans**: 1 plan
-
-Plans:
-- [ ] 22-01-PLAN.md — å/og rule with posture-verb exceptions + fixtures + explain contract + gate wiring
+</details>
 
 ## Progress
 
@@ -159,9 +100,9 @@ Plans:
 | 19. NB/NN Passiv-s Detection | v2.1 | 3/3 | Complete | 2026-04-26 |
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
 | 21. Dictionary Intelligence | v2.2 | 2/2 | Complete | 2026-04-26 |
-| 21.1 Pipeline Fix (GAP) | 1/1 | Complete    | 2026-04-26 | - |
-| 21.2 Data Fixes (GAP) | 1/1 | Complete    | 2026-04-26 | - |
-| 22. å/og Confusion | 1/1 | Complete    | 2026-04-26 | - |
+| 21.1 Pipeline Fix (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
+| 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
+| 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
 
 ---
-*Roadmap updated: 2026-04-26 — gap closure phase 21.2 added after milestone audit*
+*Roadmap updated: 2026-04-27 — v2.2 Student Language Intelligence shipped*

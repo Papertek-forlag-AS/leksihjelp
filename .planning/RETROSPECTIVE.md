@@ -165,6 +165,55 @@
 
 ---
 
+## Milestone: v2.2 — Student Language Intelligence
+
+**Shipped:** 2026-04-27
+**Phases:** 4 (2 planned + 2 audit-driven decimal inserts: 21.1, 21.2)
+**Plans:** 5
+**Duration:** 1 day (2026-04-26 → 2026-04-27), 28 commits
+
+### What Was Built
+
+- **False-friend warning banners** — `renderFalseFriends` in popup.js and floating-widget.js; ~56 curated NB→EN/DE/ES/FR pairs from Papertek API `falseFriends` field.
+- **Sense-grouped translations** — `renderSenses` replaces flat translation list with expandable sense headers; prevents "grab first translation" errors.
+- **Cross-language enrichment pipeline** — Reverse `linkedTo` index pattern: NB canonical source, Map-based O(1) in popup, linear scan in floating-widget.
+- **Data pipeline fixes** — Two gap-closure phases (21.1, 21.2) fixed enrichment routing and missing `linkedTo` entries at Papertek API.
+- **å/og confusion detection** — `nb-aa-og.js` (priority 15) with posture-verb exception set; 12 regression fixtures.
+- **Unit test expansion** — 6 new tests for dictionary intelligence + å/og confusion.
+
+### What Worked
+
+- **NB-as-canonical-source pattern** — Using NB entries as the single source for `falseFriends` and `senses` data, with reverse `linkedTo` indexes at render time, meant only one API schema extension was needed. Target-language entries get enriched automatically.
+- **Audit-driven gap closure continues to pay off** — Phase 21.1 caught that rendering functions existed but received wrong data (enrichment pipeline not wired). Phase 21.2 caught 2 missing `linkedTo` entries at Papertek API. Both were single-plan fixes caught before shipping.
+- **Independent phases enable parallel progress** — Phases 21 and 22 had no dependency on each other. å/og detection shipped independently of dictionary intelligence, reducing critical path.
+- **Posture-verb exception set was the right abstraction** — Rather than trying to parse progressive aspect generally, a closed set of 4 posture verbs (sitter/står/ligger/går) with explicit og+verb pattern matching eliminated all known false positives cleanly.
+
+### What Was Inefficient
+
+- **`one_liner` frontmatter still missing** — Fourth milestone in a row where SUMMARY files lack the `one_liner` field. This is now clearly a template issue, not a per-session oversight.
+- **Version skew accumulated** — package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 was flagged by audit but not fixed during the milestone. Version alignment should be a phase-zero housekeeping task.
+- **VERIF-01 carried across 3 milestones** — 12 deferred browser visual tests have now accumulated across v2.0, v2.1, and v2.2. The pattern of deferring browser verification is a process smell.
+
+### Patterns Established
+
+- **Reverse enrichment index for cross-language data** — NB entries hold canonical data; target entries are enriched via reverse `linkedTo` lookup at render time. Popup uses Map for O(1); floating-widget uses linear scan for simplicity.
+- **Dedicated rule for common errors** — å/og was extracted from the generic homophones rule to a dedicated `nb-aa-og.js` with its own exception logic. Common errors deserve dedicated treatment.
+- **Data pipeline validation across API boundaries** — Gap-closure phases 21.1 and 21.2 validated that data round-trips (Papertek API → sync → bundled JSON → render pipeline) actually deliver visible output. Unit tests can't catch these integration seams.
+
+### Key Lessons
+
+1. **Enrichment pipelines need end-to-end validation.** Phase 21 shipped rendering functions that technically worked but received no data because the enrichment wasn't wired. Integration tests that verify "data reaches the UI" are worth the investment. (Learned: Phase 21.1.)
+2. **Cross-API data fixes are cheap but non-obvious.** Phase 21.2 was a 1-plan fix for 2 missing `linkedTo` entries at Papertek. The fix itself was trivial, but discovering the gap required tracing the full data flow from API → sync → bundle → render. (Learned: Phase 21.2.)
+3. **Deferred browser verification is tech debt, not a backlog item.** Three milestones of deferral means the pattern is broken. Next milestone should either embed browser checks in code phases or explicitly decide they're not needed.
+
+### Cost Observations
+
+- **Model mix:** Opus 4.6 for orchestration and execution.
+- **Sessions:** ~2 sessions, 1 day. Smallest milestone yet by commit count.
+- **Notable:** v2.2 was the most focused milestone — 12 requirements, 5 plans, all in one domain (dictionary intelligence + å/og). Tight scope enabled fast delivery.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -174,6 +223,7 @@
 | v1.0 | 5 planned | 3 (02.1, 03.1, 05.1) | 8 | Established regression fixture + 8-gate release checklist + decimal-phase pattern for audit-driven inserts |
 | v2.0 | 10 planned | 2 (14.1, 15.1) | 9 | Structural grammar engine + 5-language coverage + benchmark-driven validation + document-state two-pass runner |
 | v2.1 | 4 code + 1 deferred | 0 (gaps closed as inline plans) | 9 | Compound decomposition + spell-check polish + s-passive detection + first unit test suite |
+| v2.2 | 2 planned | 2 (21.1, 21.2) | 9 | Dictionary intelligence (false-friends + sense-grouped translations) + å/og confusion detection |
 
 ### Cumulative Quality
 
@@ -182,6 +232,7 @@
 | v1.0 | 262 | 8 | 0 | 1 (fixture + gates are pure Node scripts — no npm deps added) |
 | v2.0 | 3,326 | 9 | 0 | 0 (all structural rules use `Intl.Segmenter` — browser built-in, no deps) |
 | v2.1 | 3,326+ | 9 | 58 (phases 16-19) | 0 (compound decomposition + s-passive = pure heuristic, no deps) |
+| v2.2 | 3,326+ (12 new å/og) | 9 | 64 (+6 v2.2) | 0 (enrichment pipeline + å/og rule = pure heuristic, no deps) |
 
 ### Recurring Themes
 
@@ -189,7 +240,9 @@
 - **Gap closure evolving** — v1.0/v2.0: decimal phases (5 total). v2.1: inline plans within existing phases (17-04 through 17-06, 19-03). The pattern is maturing — small gaps get inline plans, cross-phase gaps get decimal phases.
 - **Data-logic separation compounds** — v1.0 established it for typo banks; v2.0 extended it to trigger tables; v2.1 extended it to s-passive forms and deponent marking. Every phase benefited.
 - **Browser verification keeps slipping** — deferred from v2.0 to v2.1 to next milestone. Need to embed visual checks in code phases rather than batching.
-- **Velocity increases with infrastructure** — v1.0: 8 phases / 4 days. v2.0: 12 phases / 2 days. v2.1: 4 phases / 1 day. Release gates, fixture harness, and plugin architecture are compounding investments.
+- **Velocity increases with infrastructure** — v1.0: 8 phases / 4 days. v2.0: 12 phases / 2 days. v2.1: 4 phases / 1 day. v2.2: 4 phases / 1 day. Release gates, fixture harness, and plugin architecture are compounding investments.
+- **SUMMARY `one_liner` extraction never works** — 4/4 milestones have needed manual accomplishment curation. Either fix the template or abandon the approach.
+- **Version skew accumulates silently** — package.json/manifest.json/index.html diverge between milestones because version bumps are a release-time step, not a per-phase step.
 
 ---
-*Retrospective updated: 2026-04-26 after v2.1 Compound Decomposition & Polish milestone*
+*Retrospective updated: 2026-04-27 after v2.2 Student Language Intelligence milestone*

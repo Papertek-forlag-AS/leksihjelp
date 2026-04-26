@@ -1,5 +1,36 @@
 # Milestones
 
+## v2.2 Student Language Intelligence (Shipped: 2026-04-27)
+
+**Phases completed:** 4 phases (21–22, including 21.1 and 21.2 gap-closure decimal phases), 5 plans, 12/12 requirements satisfied.
+
+**Timeline:** 2026-04-26 → 2026-04-27 (1 day, 28 commits)
+**Code delta:** 35 files changed, +3,258 / -104 lines
+**Rule engine:** 59 rule files (new: `nb-aa-og.js`), 12 new fixtures
+**Bundle:** 12.59 MiB / 20 MiB cap
+**Unit tests:** 6 new tests (dictionary intelligence + å/og confusion)
+
+**Delivered (one sentence):** Dictionary intelligence that prevents wrong-word choices — false-friend warning banners (~56 curated pairs), sense-grouped preposition translations, cross-language NB→target enrichment pipeline — plus å/og confusion detection for Norway's most common writing error.
+
+**Key accomplishments:**
+
+1. **False-friend warnings** (Phase 21) — `renderFalseFriends` in popup.js and floating-widget.js; 56 curated NB→EN/DE/ES/FR pairs from Papertek API `falseFriends` field; prominent banner above translations warns students before they pick a wrong cognate (e.g., "aktuell" ≠ "actual").
+2. **Sense-grouped translations** (Phase 21) — `renderSenses` replaces flat translation list with expandable sense headers (location, time, manner); prevents "grab first translation of på" error.
+3. **Cross-language enrichment pipeline** (Phase 21.1) — Reverse `linkedTo` index pattern: NB entries are canonical source for `falseFriends`/`senses`; popup builds Map-based `nbEnrichmentIndex` for O(1) lookup; floating-widget uses linear scan for single-word lookup.
+4. **Data pipeline fixes** (Phase 21.2) — Fixed missing `linkedTo` entries at Papertek API (`fin_adj`→FR, `på_contr`→DE); re-synced all 6 language data files; DE sense-grouped and FR false-friend now reachable end-to-end.
+5. **å/og confusion detection** (Phase 22) — `nb-aa-og.js` (priority 15) with posture-verb exception set (sitter/står/ligger/går + og + verb = valid progressive aspect); 12 regression fixtures; explain-contract + CSS wiring gates; removed å/og from homophones rule to prevent duplicate flagging.
+
+**Known Tech Debt (from audit):**
+- 12 deferred browser visual verification tests (accumulated across Phases 21, 21.1, 21.2, 22)
+- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 — needs alignment at release
+
+**See:**
+- `.planning/milestones/v2.2-ROADMAP.md` — full phase-by-phase roadmap
+- `.planning/milestones/v2.2-REQUIREMENTS.md` — final traceability (12/12)
+- `.planning/milestones/v2.2-MILESTONE-AUDIT.md` — audit report (tech_debt, all requirements satisfied)
+
+---
+
 ## v2.1 Compound Decomposition & Polish (Shipped: 2026-04-26)
 
 **Phases completed:** 4 code phases (16–19), 13 plans, 11/12 requirements satisfied. Phase 20 (browser visual verification) deferred.

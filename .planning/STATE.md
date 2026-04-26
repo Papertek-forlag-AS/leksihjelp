@@ -1,33 +1,33 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.2
-milestone_name: Student Language Intelligence
-status: completed
-last_updated: "2026-04-26T22:10:00.297Z"
+milestone: none
+milestone_name: none
+status: between_milestones
+last_updated: "2026-04-27T00:00:00.000Z"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Session State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-26)
+See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 22 — å/og Confusion Detection
+**Current focus:** Planning next milestone
 
 ## Position
 
-**Milestone:** v2.2 Student Language Intelligence
-**Phase:** 22 (å/og Confusion Detection)
-**Plan:** 01 complete (1 of 1)
-**Status:** Milestone complete
+**Milestone:** Between milestones (v2.2 shipped 2026-04-27)
+**Phase:** None
+**Plan:** None
+**Status:** Ready for next milestone
 
-Progress: [██████████] 100%
+Progress: N/A
 
 ## Performance Metrics
 
@@ -41,28 +41,18 @@ Progress: [██████████] 100%
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
-
-- [v2.2 roadmap]: Combined FF + POLY into single phase (shared data+rendering pattern)
-- [v2.2 roadmap]: Phase 21 and 22 are independent — can execute in parallel if desired
-- [21-02]: Used inline styles with CSS class hooks for floating-widget false-friend/sense rendering
-- [21-02]: Senses replace flat translation entirely when present (popup parity)
-- [Phase 21]: No code changes needed to popup.js -- rendering pipeline already complete
-- [Phase 21.1]: Reverse linkedTo index pattern for cross-language enrichment (Map in popup, linear scan in widget)
-- [Phase 21.1]: NB entries are the canonical source for falseFriends/senses; target entries enriched at render time
-- [Phase 21.2]: Used git push for Vercel deploy (CLI hit 250MB serverless limit)
-- [Phase 22]: Priority 15 for å/og rule (most common NB error); red-600 CSS dot; complete removal from homophones
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
 - VERIF-01 (browser visual verification) carried across 3 milestones now — consider ad-hoc resolution
+- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
 
 ## Session Continuity
 
-Last session: 2026-04-26
-Stopped at: Completed 22-01-PLAN.md (å/og confusion detection rule with posture-verb exceptions)
+Last session: 2026-04-27
+Stopped at: Completed v2.2 milestone archival
 Resume file: None

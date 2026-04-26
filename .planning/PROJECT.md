@@ -7,8 +7,9 @@ Chrome/Edge browser extension for Norwegian students learning foreign languages
 (text-to-speech), context-aware word prediction in any text input, and a
 production-quality spell-check surface covering Norwegian (NB + NN) token-level
 rules and structural grammar governance across all five target languages — word-order
-violations, case/agreement, aspect/mood, register drift, and collocations.
-Aimed especially at students with dyslexia. Distributed as a free, open-source
+violations, case/agreement, aspect/mood, register drift, collocations, and å/og confusion.
+Dictionary intelligence helps students choose the right word with false-friend warnings
+and sense-grouped translations. Aimed especially at students with dyslexia. Distributed as a free, open-source
 extension (MIT) with an optional premium subscription that funds the ElevenLabs
 TTS calls. All non-TTS features are 100% offline and free.
 
@@ -63,17 +64,15 @@ they're working on.
 - ✓ **Triple-letter typo rule** — v2.1, `nb-triple-letter` (priority 45) for accidental triple-letter typos with compound-boundary awareness
 - ✓ **NB/NN s-passive detection** — v2.1, NB overuse reminder (>3 s-passives), NN finite s-passive rule, st-verb/deponent recognition, algorithmic presens derivation
 - ✓ **Unit test suite** — v2.1, 58 tests across phases 16-19 (decomposition, compound gender, demonstrative-gender, triple-letter, s-passive)
-
-## Current Milestone: v2.2 Student Language Intelligence
-
-**Goal:** Help students choose the right word — false-friend warnings, sense-grouped preposition translations, å/og confusion detection, and EN headword fix for correct word prediction.
+- ✓ **False-friend warning banners** — v2.2, ~56 curated NB→EN/DE/ES/FR pairs from Papertek API; popup + floating-widget rendering with prominent banner above translations
+- ✓ **Sense-grouped translations** — v2.2, expandable sense headers (location/time/manner) replace flat translation list; popup + floating-widget parity
+- ✓ **Cross-language enrichment pipeline** — v2.2, NB→target reverse `linkedTo` index; Map-based O(1) in popup, linear scan in floating-widget
+- ✓ **å/og confusion detection** — v2.2, `nb-aa-og.js` (priority 15) with posture-verb exceptions; 12 regression fixtures; explain-contract compliant
+- ✓ **Unit test suite expansion** — v2.2, 6 new tests (dictionary intelligence + å/og confusion)
 
 ### Active
 
-- [ ] False-friend warnings — cross-language look-alike badges in dictionary popup (~50 curated pairs)
-- [ ] Sense-grouped preposition translations — group "på" etc. by sense (location, time, manner) instead of flat list
-- [ ] å/og confusion detection — sentence-level NB/NN spell-check rule for Norway's most common writing error
-- [ ] Browser visual verification — deferred from v2.0/v2.1 (P1/P2/P3 dots, quotation suppression, word-order dots, compound rendering)
+(No active milestone — next milestone to be planned)
 
 ### Deferred
 
@@ -85,6 +84,8 @@ they're working on.
 - `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
 - Vocab-seam parity gate: `check-vocab-seam-parity` to assert every `buildIndexes()` key has a matching getter (recurring v1.0/v2.0 gap)
+- Browser visual verification (VERIF-01) — deferred from v2.0 → v2.1 → v2.2; accumulated 12 deferred tests
+- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
 
 **v3.0 candidates:**
 
@@ -94,6 +95,8 @@ they're working on.
 - Verb/adjective compound decomposition (COMP-09) — overtale, langvarig; different patterns from noun compounds
 - Definite-form compound lookup (COMP-10) — strip -en/-et/-a before decomposition
 - Per-noun fuge data in papertek-vocabulary (COMP-11) — lexical exceptions
+- Context-aware sense selection (DICT-01) — popup reads surrounding sentence, highlights likely sense
+- Foreign-side false-friend entries (DICT-02) — EN→NB, DE→NB direction
 
 ### Out of Scope
 
@@ -130,13 +133,14 @@ they're working on.
 - v2.0 shipped over 2 days (2026-04-24 → 2026-04-25, ~140 commits) across 12 phases.
 - 9 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation).
 
-**Current state (post-v2.1):**
-- 11/12 v2.1 requirements shipped (VERIF-01 deferred); 42/42 v2.0; 19/19 v1.0 prior.
-- 58 spell-check rule files in plugin architecture; core engine ~3k LOC.
-- 53+ fixture suites, all at F1=1.000; 40/40 benchmark expectations met.
-- 58 unit tests across phases 16-19, all passing.
+**Current state (post-v2.2):**
+- 12/12 v2.2 requirements shipped; 11/12 v2.1; 42/42 v2.0; 19/19 v1.0.
+- 59 spell-check rule files in plugin architecture; core engine ~3k LOC.
+- 53+ fixture suites + 12 new å/og fixtures, all at F1=1.000.
+- 64 unit tests (58 v2.1 + 6 v2.2), all passing.
 - 9 release gates all green. Bundle 12.59 MiB (37% headroom).
-- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → next milestone).
+- Dictionary intelligence: false-friend warnings + sense-grouped translations in popup + floating-widget.
+- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → v2.2 → next milestone).
 
 ## Constraints
 
@@ -175,7 +179,11 @@ they're working on.
 | **Supplementary compounds over decomposition fallback in sarskriving** (v2.1) | Removed decomposition fallback from sarskriving; added 16 supplementary compounds to preserve recall | ✓ Good — eliminated 6 FP suites; sarskriving stays P=1.000 R=1.000 |
 | **Algorithmic NN presens derivation** (v2.1) | Derive -est from stored -ast infinitives instead of Papertek deploy round-trip | ✓ Good — unblocks NN finite presens without data-source change |
 | **Severity 'hint' for NB passiv overuse** (v2.1) | Document-level overuse is informational, not error; matches explain-contract gate | ✓ Good — doesn't alarm students, just suggests considering active voice |
-| **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across two milestones now |
+| **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across three milestones now |
+| **Combined FF + POLY into single phase** (v2.2) | Shared data enrichment + rendering pattern for false-friends and senses | ✓ Good — reduced from 2 separate phases to 1 phase with 2 plans |
+| **Reverse linkedTo index for cross-language enrichment** (v2.2) | NB entries are canonical source; target entries enriched at render time via reverse index | ✓ Good — O(1) in popup, O(n) in widget; additive enrichment preserves direct NB data |
+| **Priority 15 for å/og rule** (v2.2) | Most common NB writing error deserves high visibility; red-600 CSS dot | ✓ Good — clear visual signal without cluttering other priorities |
+| **å/og removed from homophones rule** (v2.2) | Dedicated rule with posture-verb exceptions handles the full complexity | ✓ Good — prevents duplicate flagging between nb-homophones and nb-aa-og |
 
 ---
-*Last updated: 2026-04-26 after v2.2 milestone start (Student Language Intelligence)*
+*Last updated: 2026-04-27 after v2.2 milestone (Student Language Intelligence)*
