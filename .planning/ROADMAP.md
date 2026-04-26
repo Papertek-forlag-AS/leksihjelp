@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 Spell-Check & Prediction Quality** — Phases 1-5 + 02.1/03.1/05.1 decimal inserts (shipped 2026-04-21) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15.1 (shipped 2026-04-25) — [archive](milestones/v2.0-ROADMAP.md)
+- 🚧 **v2.1 Compound Decomposition & Polish** — Phases 16–21 (in progress)
 
 ## Phases
 
@@ -43,7 +44,114 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 
 </details>
 
+### 🚧 v2.1 Compound Decomposition & Polish (In Progress)
+
+**Milestone Goal:** Algorithmic compound word decomposition for NB/NN/DE (dictionary, spell-check, gender inference) plus carry-over polish items from v1.0/v2.0.
+
+- [ ] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE
+- [ ] **Phase 17: Dictionary & Spell-Check Integration** — Compound popup rendering and spell-check acceptance of decomposable compounds
+- [ ] **Phase 18: NB/NN Compound Gender** — Gender inference from last component and compound-aware gender mismatch flags
+- [ ] **Phase 19: Sarskriving Expansion** — Decomposition-backed sarskriving detection beyond stored nounbank
+- [ ] **Phase 20: Spell-Check Polish** — Manual trigger button, demonstrative-mismatch rule, triple-letter typo rule
+- [ ] **Phase 21: Browser Visual Verification** — Deferred Phase 6/7 visual checks plus v2.1 compound rendering verification
+
+## Phase Details
+
+### Phase 16: Decomposition Engine
+**Goal**: Unknown compound words can be algorithmically split into known noun components with linking elements identified
+**Depends on**: Nothing (first phase of v2.1)
+**Requirements**: COMP-05, COMP-06
+**Success Criteria** (what must be TRUE):
+  1. `decomposeCompound("hverdagsmas", nounGenus, "nb")` returns parts [hverdag, mas] with linker "s" and gender from "mas"
+  2. `decomposeCompound("skolebroedoppskrift", nounGenus, "nb")` returns 3 components (recursive up to 4)
+  3. DE linking elements (s, n, en, er, e, es) and NB/NN linking elements (s, e) are all handled correctly
+  4. Words already in nounbank return null (stored entries take precedence over decomposition)
+  5. False-positive rate < 2% when run against all existing nounbank entries (non-compound nouns must not decompose)
+**Plans**: TBD
+
+Plans:
+- [ ] 16-01: TBD
+- [ ] 16-02: TBD
+
+### Phase 17: Dictionary & Spell-Check Integration
+**Goal**: Students see compound breakdowns in the dictionary popup and spell-check stops false-flagging valid compounds
+**Depends on**: Phase 16
+**Requirements**: COMP-01, COMP-02, COMP-03
+**Success Criteria** (what must be TRUE):
+  1. Searching an unknown compound in the popup shows a "Samansett ord" card with component breakdown (e.g., "hverdag + s + mas"), gender badge from last component, and no inherited examples
+  2. Each component in the breakdown is clickable — clicking triggers a new search for that component's full dictionary entry
+  3. Spell-check no longer flags decomposable compounds as unknown words (typo-fuzzy d=1 correction still wins over decomposition acceptance for misspelled compounds like "skoledegen")
+  4. Stored nounbank entries always take precedence — decomposition UI never appears for words already in the dictionary
+**Plans**: TBD
+
+Plans:
+- [ ] 17-01: TBD
+- [ ] 17-02: TBD
+
+### Phase 18: NB/NN Compound Gender
+**Goal**: Students see gender mismatch flags for compound nouns not in the stored dictionary
+**Depends on**: Phase 16
+**Requirements**: COMP-04, COMP-08
+**Success Criteria** (what must be TRUE):
+  1. "en fotballsko" is accepted (sko = m, matches "en") via decomposition gender inference for NB/NN
+  2. "et fotballsko" is flagged as gender mismatch (sko = m, "et" expects n) with correct suggestion
+  3. Existing DE compound-gender rule (`de-compound-gender.js`) delegates to the shared decomposition engine (no duplicated splitting logic)
+  4. Compound-gender inference only fires when the decomposition has high confidence (both components are known nouns)
+**Plans**: TBD
+
+Plans:
+- [ ] 18-01: TBD
+
+### Phase 19: Sarskriving Expansion
+**Goal**: Sarskriving detection covers productive compounds beyond the stored 2,124-entry nounbank
+**Depends on**: Phase 16 (decomposition engine must be stable with fixtures before this phase starts)
+**Requirements**: COMP-07
+**Success Criteria** (what must be TRUE):
+  1. "skole dag" is flagged as sarskriving even when "skoledag" is not stored in compoundNouns, because decomposition validates "skoledag" as a valid compound
+  2. Existing SARSKRIVING_BLOCKLIST still prevents false positives on function-word pairs ("god dag", "stor dag")
+  3. Sarskriving precision remains at or above the P >= 0.92 threshold in check-fixtures (expanded fixture suite with 15+ new acceptance and 15+ new rejection cases)
+  4. Only confidence=high decompositions trigger sarskriving flags (both components must be known nouns)
+**Plans**: TBD
+
+Plans:
+- [ ] 19-01: TBD
+
+### Phase 20: Spell-Check Polish
+**Goal**: Students have a manual spell-check trigger, demonstrative-gender checking, and triple-letter typo detection
+**Depends on**: Nothing (independent of decomposition; can run in parallel with Phases 17-19)
+**Requirements**: SPELL-01, SPELL-02, SPELL-03
+**Success Criteria** (what must be TRUE):
+  1. A visible spell-check button appears near the TTS widget; clicking it runs an immediate check and shows a toast ("3 feil funnet" or "Ser bra ut!"); no visual flash when text is unchanged since last auto-check
+  2. "Det boka" is flagged as demonstrative-mismatch (det expects n, boka = f) with suggestion "Den boka"; "Det bok" (indefinite noun) is handled by nb-gender, not the demonstrative rule
+  3. "tykkkjer" is flagged as triple-letter typo with suggestion "tykkjer"; the rule fires as a separate rule file (not a modification to nb-typo-fuzzy), at priority ~45
+  4. All 9 existing release gates pass after these additions; no regression on existing fixture suites
+**Plans**: TBD
+
+Plans:
+- [ ] 20-01: TBD
+- [ ] 20-02: TBD
+- [ ] 20-03: TBD
+
+### Phase 21: Browser Visual Verification
+**Goal**: All deferred visual checks from v2.0 plus v2.1 compound rendering are verified in a real browser
+**Depends on**: Phases 17, 18, 19, 20 (all code phases complete)
+**Requirements**: VERIF-01
+**Success Criteria** (what must be TRUE):
+  1. P1/P2/P3 dot colours render correctly in Chrome (error = red, warning = orange, hint = blue) on real page content
+  2. Quotation suppression works visually — text inside quotes does not show spell-check underlines
+  3. Word-order rule dots (NB V2, DE verb-final, FR BAGS) render at correct positions with correct severity colours
+  4. Compound decomposition popup renders correctly in the dictionary with component breakdown and gender badge
+  5. Manual spell-check button is visible, clickable, and toast appears with correct result count
+**Plans**: TBD
+
+Plans:
+- [ ] 21-01: TBD
+
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 16 → 17 → 18 → 19 → 20 → 21
+Note: Phase 20 is independent and can execute in parallel with Phases 17-19.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -59,7 +167,7 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 | 7. Word-Order Violations | v2.0 | 4/4 | Complete | 2026-04-24 |
 | 8. DE Case & Agreement | v2.0 | 3/3 | Complete | 2026-04-24 |
 | 9. ES ser/estar, por/para | v2.0 | 3/3 | Complete | 2026-04-25 |
-| 10. FR Élision, Auxiliary, PP | v2.0 | 3/3 | Complete | 2026-04-25 |
+| 10. FR Elision, Auxiliary, PP | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 11. Aspect & Mood | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 12. Pronoun & Pro-Drop | v2.0 | 3/3 | Complete | 2026-04-25 |
 | 13. Register Drift | v2.0 | 3/3 | Complete | 2026-04-25 |
@@ -67,6 +175,12 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 | 14.1 Vocab-Seam Wiring | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
+| 16. Decomposition Engine | v2.1 | 0/0 | Not started | - |
+| 17. Dictionary & Spell-Check | v2.1 | 0/0 | Not started | - |
+| 18. NB/NN Compound Gender | v2.1 | 0/0 | Not started | - |
+| 19. Sarskriving Expansion | v2.1 | 0/0 | Not started | - |
+| 20. Spell-Check Polish | v2.1 | 0/0 | Not started | - |
+| 21. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-25 — v2.0 milestone shipped, archived to milestones/v2.0-ROADMAP.md*
+*Roadmap updated: 2026-04-26 — v2.1 milestone roadmap created (6 phases, 12 requirements mapped)*

@@ -65,24 +65,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMP-01 | — | Pending |
-| COMP-02 | — | Pending |
-| COMP-03 | — | Pending |
-| COMP-04 | — | Pending |
-| COMP-05 | — | Pending |
-| COMP-06 | — | Pending |
-| COMP-07 | — | Pending |
-| COMP-08 | — | Pending |
-| SPELL-01 | — | Pending |
-| SPELL-02 | — | Pending |
-| SPELL-03 | — | Pending |
-| VERIF-01 | — | Pending |
+| COMP-01 | Phase 17 | Pending |
+| COMP-02 | Phase 17 | Pending |
+| COMP-03 | Phase 17 | Pending |
+| COMP-04 | Phase 18 | Pending |
+| COMP-05 | Phase 16 | Pending |
+| COMP-06 | Phase 16 | Pending |
+| COMP-07 | Phase 19 | Pending |
+| COMP-08 | Phase 18 | Pending |
+| SPELL-01 | Phase 20 | Pending |
+| SPELL-02 | Phase 20 | Pending |
+| SPELL-03 | Phase 20 | Pending |
+| VERIF-01 | Phase 21 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after initial definition*
+*Last updated: 2026-04-26 after roadmap creation (12/12 mapped)*
