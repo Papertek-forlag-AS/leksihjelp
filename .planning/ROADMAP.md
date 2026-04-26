@@ -161,7 +161,7 @@ Plans:
 | 21. Dictionary Intelligence | v2.2 | 2/2 | Complete | 2026-04-26 |
 | 21.1 Pipeline Fix (GAP) | 1/1 | Complete    | 2026-04-26 | - |
 | 21.2 Data Fixes (GAP) | 1/1 | Complete    | 2026-04-26 | - |
-| 22. å/og Confusion | 1/1 | Complete   | 2026-04-26 | - |
+| 22. å/og Confusion | 1/1 | Complete    | 2026-04-26 | - |
 
 ---
 *Roadmap updated: 2026-04-26 — gap closure phase 21.2 added after milestone audit*
