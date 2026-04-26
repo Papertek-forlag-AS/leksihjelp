@@ -64,8 +64,15 @@ they're working on.
 - ✓ **NB/NN s-passive detection** — v2.1, NB overuse reminder (>3 s-passives), NN finite s-passive rule, st-verb/deponent recognition, algorithmic presens derivation
 - ✓ **Unit test suite** — v2.1, 58 tests across phases 16-19 (decomposition, compound gender, demonstrative-gender, triple-letter, s-passive)
 
+## Current Milestone: v2.2 Student Language Intelligence
+
+**Goal:** Help students choose the right word — false-friend warnings, sense-grouped preposition translations, å/og confusion detection, and EN headword fix for correct word prediction.
+
 ### Active
 
+- [ ] False-friend warnings — cross-language look-alike badges in dictionary popup (~50 curated pairs)
+- [ ] Sense-grouped preposition translations — group "på" etc. by sense (location, time, manner) instead of flat list
+- [ ] å/og confusion detection — sentence-level NB/NN spell-check rule for Norway's most common writing error
 - [ ] Browser visual verification — deferred from v2.0/v2.1 (P1/P2/P3 dots, quotation suppression, word-order dots, compound rendering)
 
 ### Deferred
@@ -171,4 +178,4 @@ they're working on.
 | **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across two milestones now |
 
 ---
-*Last updated: 2026-04-26 after v2.1 milestone completion (Compound Decomposition & Polish)*
+*Last updated: 2026-04-26 after v2.2 milestone start (Student Language Intelligence)*
