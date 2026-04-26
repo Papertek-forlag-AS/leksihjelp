@@ -1106,6 +1106,47 @@
         ? `<div style="font-size:12px;color:#64748b;margin-bottom:6px;padding:4px 8px;background:rgba(17,180,154,0.06);border-radius:6px;border-left:3px solid #11B49A;">${escapeHtml(conjugatedFrom)} → <strong>${escapeHtml(match.word)}</strong></div>`
         : '';
 
+      // False-friend banner (FF-04)
+      let falseFriendHtml = '';
+      if (match.falseFriends && match.falseFriends.length) {
+        const pairs = match.falseFriends.filter(f => f.lang === currentLang);
+        if (pairs.length) {
+          const items = pairs.map(f => `
+            <div style="font-size:12px;color:#1e293b;">
+              <strong>${escapeHtml(f.form)}</strong> — ${escapeHtml(f.meaning || '')}
+              ${f.warning ? `<p style="margin:2px 0 0;font-size:11px;color:#64748b;">${sanitizeWarning(f.warning)}</p>` : ''}
+            </div>
+          `).join('');
+          falseFriendHtml = `
+            <div class="lh-ff-banner" style="margin:8px 0;padding:8px 10px;background:rgba(245,158,11,0.08);border-left:3px solid #f59e0b;border-radius:6px;">
+              <div style="font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:4px;">⚠ ${t('result_false_friend_heading')}</div>
+              ${items}
+            </div>
+          `;
+        }
+      }
+
+      // Sense-grouped translations (POLY-04) — replace flat translation when present
+      let translationHtml = '';
+      const sensesForLang = (match.senses || []).filter(s => s.translations && s.translations[currentLang]);
+      if (sensesForLang.length) {
+        const senseItems = sensesForLang.map(s => {
+          const tr = s.translations[currentLang];
+          const forms = Array.isArray(tr.forms) ? tr.forms : (tr.form ? [tr.form] : []);
+          const ex = tr.example || {};
+          return `
+            <div class="lh-sense-group" style="margin-bottom:6px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.04);">
+              <div style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.3px;">${escapeHtml(s.trigger || '')}</div>
+              <div style="font-size:14px;color:#1e293b;">${forms.map(escapeHtml).join(', ')}</div>
+              ${ex.sentence ? `<div style="font-size:11px;font-style:italic;color:#94a3b8;">${escapeHtml(ex.sentence)}${ex.translation ? ` — ${escapeHtml(ex.translation)}` : ''}</div>` : ''}
+            </div>
+          `;
+        }).join('');
+        translationHtml = `<div style="margin-bottom:8px;">${senseItems}</div>`;
+      } else {
+        translationHtml = `<div style="font-size:15px;margin-bottom:6px;">${escapeHtml(match.translation)}</div>`;
+      }
+
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
@@ -1113,7 +1154,8 @@
         </div>
         ${conjugHint}
         <div style="font-size:20px;font-weight:700;color:#11B49A;margin-bottom:2px;">${langFlag ? `<span style="margin-right:4px">${langFlag}${langSuffix}</span>` : ''}${escapeHtml(match.word)}</div>
-        <div style="font-size:15px;margin-bottom:6px;">${escapeHtml(match.translation)}</div>
+        ${falseFriendHtml}
+        ${translationHtml}
         <div style="display:flex;gap:6px;margin-bottom:8px;">
           <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.partOfSpeech)}</span>
           ${match.gender ? `<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.gender)}</span>` : ''}
@@ -1176,6 +1218,12 @@
     const d = document.createElement('span');
     d.textContent = str;
     return d.innerHTML;
+  }
+
+  // Sanitize pedagogical warning HTML — allow only <em> and <strong> tags.
+  function sanitizeWarning(html) {
+    return escapeHtml(html)
+      .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>');
   }
 
   // Ensure browser voices are loaded
