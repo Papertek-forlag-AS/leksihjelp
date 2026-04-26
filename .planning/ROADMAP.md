@@ -160,7 +160,7 @@ Plans:
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
 | 21. Dictionary Intelligence | v2.2 | 2/2 | Complete | 2026-04-26 |
 | 21.1 Pipeline Fix (GAP) | 1/1 | Complete    | 2026-04-26 | - |
-| 21.2 Data Fixes (GAP) | 1/1 | Complete   | 2026-04-26 | - |
+| 21.2 Data Fixes (GAP) | 1/1 | Complete    | 2026-04-26 | - |
 | 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
 
 ---
