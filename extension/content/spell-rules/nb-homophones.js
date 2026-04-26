@@ -1,12 +1,13 @@
 /**
  * Spell-check rule: Norwegian Homophones and Confused Words (priority 40).
- * 
+ *
  * Heuristic checks for classic dyslexic and learner errors:
- * - og vs å
  * - da vs når
  * - gjerne vs hjerne
  * - vær vs hver
- * 
+ *
+ * Note: å/og confusion moved to dedicated nb-aa-og.js rule (Phase 22).
+ *
  * Rule ID: 'homophone'
  */
 (function () {
@@ -15,17 +16,6 @@
   host.__lexiSpellRules = host.__lexiSpellRules || [];
   const core = host.__lexiSpellCore || {};
   const { matchCase, escapeHtml } = core;
-
-  const INFINITIVE_TRIGGERS = new Set([
-    'liker', 'likte', 'pleier', 'pleide', 'begynner', 'begynte',
-    'prøver', 'prøvde', 'ønsker', 'ønsket', 'elsker', 'elsket',
-    'hater', 'hatet', 'slutter', 'sluttet', 'fortsetter', 'fortsatte',
-    'kommer', 'kom', 'lærer', 'lærte', 'trenger', 'trengte',
-    'hjelper', 'hjalp', 'klarer', 'klarte', 'husker', 'husket',
-    'nekter', 'nektet', 'nekta', 'håper', 'håpet', 'håpa',
-    'godt', 'fint', 'viktig', 'vanskelig', 'lett', 'moro', 'gøy',
-    'kjedelig', 'umulig', 'klart', 'farlig', 'trygt'
-  ]);
 
   const PRONOUNS = new Set(['jeg', 'eg', 'du', 'han', 'hun', 'ho', 'vi', 'dere', 'de', 'dei', 'man']);
   const ARTICLES_POSSESSIVES = new Set(['en', 'ei', 'et', 'eit', 'den', 'det', 'de', 'dei', 'min', 'mi', 'mitt', 'mine', 'din', 'di', 'ditt', 'dine', 'vår', 'vårt', 'våre', 'hans', 'hennes', 'hennar', 'deres', 'deira']);
@@ -41,12 +31,6 @@
     priority: 40,
     severity: 'error',
     explain: (finding) => {
-      if (finding.subType === 'og-aa') {
-        return {
-          nb: `<strong>Å</strong> er et infinitivsmerke som står foran verb. <strong>Og</strong> er et bindeord som binder sammen setninger eller like ord.`,
-          nn: `<strong>Å</strong> er eit infinitivsmerke som står føre verb. <strong>Og</strong> er eit bindeord som bind saman setningar eller like ord.`,
-        };
-      }
       if (finding.subType === 'da-naar') {
         return {
           nb: `Huskeregel: "Den gang <strong>da</strong>, hver gang <strong>når</strong>". Bruk <em>da</em> om en enkelt hendelse i fortiden.`,
@@ -84,47 +68,8 @@
         const next = i < tokens.length - 1 ? tokens[i + 1].word.toLowerCase() : null;
         const nextNext = i < tokens.length - 2 ? tokens[i + 2].word.toLowerCase() : null;
 
-        // 1. å vs og
-        if (word === 'å' && next) {
-          // If 'å' is followed by a common article, pronoun, or preposition, it's likely 'og'
-          // We avoid checking nounGenus because many words are both (e.g. "sykle" is infinitive, "sykkel" is noun, but "en sykle" is wrong).
-          if (ARTICLES_POSSESSIVES.has(next) || PRONOUNS.has(next) || next === 'i' || next === 'på' || next === 'med' || next === 'til') {
-            out.push({
-              rule_id: 'homophone',
-              subType: 'og-aa',
-              priority: rule.priority,
-              start: t.start,
-              end: t.end,
-              original: t.display,
-              fix: matchCase(t.display, 'og'),
-              suggestions: [matchCase(t.display, 'og')],
-              message: `Forveksling: "å" foran ikke-verb. Prøv "og".`
-            });
-            if (suppressed) suppressed.add(i);
-          }
-        }
-        else if (word === 'og' && next && prev) {
-          // 'og' followed by infinitive AND preceded by a trigger verb -> should be 'å'
-          // E.g. "liker og bade" -> "liker å bade"
-          // Exclude if preceded by another infinitive: "hoppe og bade" is correct!
-          if (verbForms.has(next) && !verbForms.has(prev) && INFINITIVE_TRIGGERS.has(prev)) {
-            out.push({
-              rule_id: 'homophone',
-              subType: 'og-aa',
-              priority: rule.priority,
-              start: t.start,
-              end: t.end,
-              original: t.display,
-              fix: matchCase(t.display, 'å'),
-              suggestions: [matchCase(t.display, 'å')],
-              message: `Forveksling: "og" etter bøyd verb/adjektiv. Prøv "å".`
-            });
-            if (suppressed) suppressed.add(i);
-          }
-        }
-
-        // 2. da vs når
-        else if (word === 'da' && next && nextNext) {
+        // 1. da vs når (å/og moved to dedicated nb-aa-og.js rule)
+        if (word === 'da' && next && nextNext) {
           // da jeg går -> når jeg går
           if (PRONOUNS.has(next) && knownPresens.has(nextNext)) {
             out.push({
