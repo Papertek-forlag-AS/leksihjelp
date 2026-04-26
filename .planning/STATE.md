@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: Student Language Intelligence
 current_phase: 21
-current_plan: none
-status: ready_to_plan
+current_plan: 03
+status: executing
 last_updated: "2026-04-26"
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 2
 ---
 
 # Session State
@@ -26,10 +26,10 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.2 Student Language Intelligence
 **Phase:** 21 of 22 (Dictionary Intelligence — False Friends + Preposition Polysemy)
-**Plan:** None started
-**Status:** Ready to plan
+**Plan:** 02 complete, ready for 03
+**Status:** Executing
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -47,6 +47,8 @@ Recent decisions affecting current work:
 
 - [v2.2 roadmap]: Combined FF + POLY into single phase (shared data+rendering pattern)
 - [v2.2 roadmap]: Phase 21 and 22 are independent — can execute in parallel if desired
+- [21-02]: Used inline styles with CSS class hooks for floating-widget false-friend/sense rendering
+- [21-02]: Senses replace flat translation entirely when present (popup parity)
 
 ### Pending Todos
 
@@ -59,5 +61,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: v2.2 roadmap created — ready to plan Phase 21
+Stopped at: Completed 21-02-PLAN.md (floating-widget false-friends + senses)
 Resume file: None

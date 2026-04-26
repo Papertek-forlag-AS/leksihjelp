@@ -12,14 +12,14 @@ Requirements for v2.2 Student Language Intelligence. Each maps to roadmap phases
 - [ ] **FF-01**: User sees a warning banner on dictionary popup when looking up a word that has a cross-language false friend (e.g., "aktuell" shows warning: not "actual" in English)
 - [ ] **FF-02**: False-friend data lives in Papertek API as `falseFriends` field on NB entries, seeded with ~50 pairs across NB→EN/DE/ES/FR
 - [ ] **FF-03**: Warning renders prominently above translations so students see it before picking a translation
-- [ ] **FF-04**: Floating-widget inline lookup also shows false-friend warnings
+- [x] **FF-04**: Floating-widget inline lookup also shows false-friend warnings
 
 ### Preposition Polysemy
 
 - [ ] **POLY-01**: User sees sense-grouped translations for polysemous words in dictionary popup (e.g., "på" grouped by time/location/manner instead of flat list)
 - [ ] **POLY-02**: Sense data lives in Papertek API as structured `senses` field with trigger context and example sentences
 - [ ] **POLY-03**: Popup renders sense headers with expandable groups — student can't just grab the first translation
-- [ ] **POLY-04**: Floating-widget inline lookup shows sense grouping for polysemous words
+- [x] **POLY-04**: Floating-widget inline lookup shows sense grouping for polysemous words
 
 ### å/og Confusion
 
@@ -67,11 +67,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FF-01 | Phase 21 | Pending |
 | FF-02 | Phase 21 | Pending |
 | FF-03 | Phase 21 | Pending |
-| FF-04 | Phase 21 | Pending |
+| FF-04 | Phase 21 | Complete |
 | POLY-01 | Phase 21 | Pending |
 | POLY-02 | Phase 21 | Pending |
 | POLY-03 | Phase 21 | Pending |
-| POLY-04 | Phase 21 | Pending |
+| POLY-04 | Phase 21 | Complete |
 | AAOG-01 | Phase 22 | Pending |
 | AAOG-02 | Phase 22 | Pending |
 | AAOG-03 | Phase 22 | Pending |

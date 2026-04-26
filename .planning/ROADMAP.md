@@ -126,7 +126,7 @@ Plans:
 | 18. Spell-Check Polish | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 19. NB/NN Passiv-s Detection | v2.1 | 3/3 | Complete | 2026-04-26 |
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
-| 21. Dictionary Intelligence | v2.2 | 0/2 | Not started | - |
+| 21. Dictionary Intelligence | 1/2 | In Progress|  | - |
 | 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
 
 ---
