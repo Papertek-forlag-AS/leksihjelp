@@ -1,0 +1,12 @@
+{"id":"nb-aaog-og-to-aa-001","text":"hun liker og lese","expected":[{"rule_id":"aa_og","start":10,"end":12,"suggestion":"å"}],"must_not_flag":[]}
+{"id":"nb-aaog-og-to-aa-002","text":"det er viktig og trene","expected":[{"rule_id":"aa_og","start":14,"end":16,"suggestion":"å"}],"must_not_flag":[]}
+{"id":"nb-aaog-og-to-aa-003","text":"hun prøver og skrive","expected":[{"rule_id":"aa_og","start":11,"end":13,"suggestion":"å"}],"must_not_flag":[]}
+{"id":"nb-aaog-aa-to-og-001","text":"kaffe å kake","expected":[{"rule_id":"aa_og","start":6,"end":7,"suggestion":"og"}],"must_not_flag":[]}
+{"id":"nb-aaog-aa-to-og-002","text":"en hund å en katt","expected":[{"rule_id":"aa_og","start":8,"end":9,"suggestion":"og"}],"must_not_flag":[]}
+{"id":"nb-aaog-clean-001","text":"sitter og leser","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-002","text":"står og venter","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-003","text":"å spise og drikke er viktig","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-004","text":"hun og han","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-005","text":"Å lese er gøy","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-006","text":"satt og leste","expected":[],"must_not_flag":[]}
+{"id":"nb-aaog-clean-007","text":"ligger og sover","expected":[],"must_not_flag":[]}

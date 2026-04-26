@@ -1,6 +1,3 @@
-{"id":"nb-homophone-ogaa-001","text":"Jeg liker og spise epler","expected":[{"rule_id":"homophone","start":10,"end":12,"suggestion":"å"}],"must_not_flag":[]}
-{"id":"nb-homophone-ogaa-002","text":"En hund å en katt","expected":[{"rule_id":"homophone","start":8,"end":9,"suggestion":"og"}],"must_not_flag":[]}
-{"id":"nb-homophone-ogaa-003","text":"Å spise og drikke er viktig","expected":[],"must_not_flag":[]}
 {"id":"nb-homophone-danaar-001","text":"Da jeg går til skolen","expected":[{"rule_id":"homophone","start":0,"end":2,"suggestion":"Når"}],"must_not_flag":[]}
 {"id":"nb-homophone-danaar-002","text":"Når jeg var liten gutt","expected":[{"rule_id":"homophone","start":0,"end":3,"suggestion":"Da"}],"must_not_flag":[]}
 {"id":"nb-homophone-hjerne-001","text":"Jeg vil hjerne ha is","expected":[{"rule_id":"homophone","start":8,"end":14,"suggestion":"gjerne"}],"must_not_flag":[]}
