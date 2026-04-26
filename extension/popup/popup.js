@@ -1217,6 +1217,61 @@ function performSearch(query) {
   renderResults(combined.slice(0, 50));
 }
 
+// Phase 17 COMP-01/02: render compound decomposition card
+function renderCompoundCard(query, decomposition) {
+  const container = document.getElementById('search-results');
+  const { parts, gender } = decomposition;
+
+  // Build breakdown string: "hverdag + s + mas"
+  const breakdownParts = [];
+  for (const part of parts) {
+    breakdownParts.push(escapeHtml(part.word));
+    if (part.linker) {
+      breakdownParts.push(escapeHtml(part.linker));
+    }
+  }
+  const breakdownHtml = breakdownParts.map((p, i) =>
+    `<span class="compound-breakdown-part">${p}</span>`
+  ).join('<span class="compound-breakdown-sep"> + </span>');
+
+  // Build clickable component buttons (skip linkers)
+  const componentBtns = parts.map(part =>
+    `<button class="compound-component-btn" data-word="${escapeHtml(part.word)}">${escapeHtml(part.word)}</button>`
+  ).join('');
+
+  // Gender badge
+  const genderBadge = gender
+    ? `<span class="result-gender">${genusToGender(gender)}</span>`
+    : '';
+
+  container.innerHTML = `
+    <div class="result-card compound-card glass">
+      <div class="result-basic">
+        <div class="result-word-row">
+          <span class="result-word">${escapeHtml(query)}</span>
+        </div>
+        <div class="result-meta">
+          <span class="compound-badge">${t('compound_label')}</span>
+          <span class="result-pos">${t('pos_noun')}</span>
+          ${genderBadge}
+        </div>
+      </div>
+      <div class="compound-breakdown">${breakdownHtml}</div>
+      <div class="compound-components">${componentBtns}</div>
+    </div>
+  `;
+
+  // Wire up clickable component buttons
+  container.querySelectorAll('.compound-component-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const word = btn.dataset.word;
+      const input = document.getElementById('search-input');
+      if (input) input.value = word;
+      performSearch(word);
+    });
+  });
+}
+
 function renderResults(results, options = {}) {
   const container = document.getElementById('search-results');
   if (!results.length) {

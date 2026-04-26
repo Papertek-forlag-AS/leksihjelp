@@ -841,6 +841,66 @@ body {
   letter-spacing: 0.3px;
 }
 
+/* ── Compound Card (Phase 17) ── */
+.compound-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.compound-breakdown {
+  margin: 10px 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.compound-breakdown-sep {
+  color: var(--text-muted);
+  font-weight: 400;
+  padding: 0 2px;
+}
+
+.compound-components {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.compound-component-btn {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid rgba(17, 180, 154, 0.25);
+  border-radius: 6px;
+  background: rgba(17, 180, 154, 0.06);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.compound-component-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+[data-theme="dark"] .compound-badge {
+  background: rgba(124, 58, 237, 0.15);
+  color: #a78bfa;
+}
+
+[data-theme="dark"] .compound-component-btn {
+  background: rgba(17, 180, 154, 0.1);
+  border-color: rgba(17, 180, 154, 0.3);
+}
+
 /* Conjugation table */
 .conjugation-table {
   width: 100%;

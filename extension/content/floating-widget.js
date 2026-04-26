@@ -380,6 +380,8 @@
       const text = selection.toString().trim();
 
       if (text.length > 0 && text.length < 2000) {
+        const editor = document.getElementById('writing-editor');
+        if (editor && selection.anchorNode && editor.contains(selection.anchorNode)) return;
         selectedText = text;
         showWidget();
       } else if (!widget.contains(e.target)) {
@@ -1080,16 +1082,47 @@
         ${match.grammar ? `<div style="font-size:12px;color:#64748b;padding-top:8px;border-top:1px solid rgba(0,0,0,0.06);"><strong>${t('widget_lookup_grammar')}</strong> ${escapeHtml(match.grammar)}</div>` : ''}
       `;
     } else {
-      card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
-          <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
-        </div>
-        <div style="text-align:center;padding:16px 0;color:#94a3b8;">
-          <div style="font-size:15px;margin-bottom:4px;">"${escapeHtml(word)}"</div>
-          <div style="font-size:13px;">${t('widget_lookup_not_found')}</div>
-        </div>
-      `;
+      // Phase 17 COMP-01: try compound decomposition before showing not-found
+      const vocabSurface = self.__lexiVocab;
+      const decompose = vocabSurface && vocabSurface.getDecomposeCompound();
+      let decompResult = null;
+      if (decompose) {
+        decompResult = decompose(word.toLowerCase());
+      }
+
+      if (decompResult) {
+        // Show compound breakdown: "hverdagsmas = hverdag + s + mas (hankjonn)"
+        const breakdownParts = [];
+        for (const part of decompResult.parts) {
+          breakdownParts.push(escapeHtml(part.word));
+          if (part.linker) breakdownParts.push(escapeHtml(part.linker));
+        }
+        const breakdownStr = breakdownParts.join(' + ');
+        const genderStr = decompResult.gender ? ` (${genusToGender(decompResult.gender)})` : '';
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
+            <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
+          </div>
+          <div style="font-size:18px;font-weight:700;color:#11B49A;margin-bottom:2px;">${escapeHtml(word)}</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(124,58,237,0.08);color:#7c3aed;font-weight:600;">${t('compound_label')}</span>
+            <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${t('pos_noun')}</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;color:#1e293b;margin-bottom:4px;">${breakdownStr}${escapeHtml(genderStr)}</div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
+            <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
+          </div>
+          <div style="text-align:center;padding:16px 0;color:#94a3b8;">
+            <div style="font-size:15px;margin-bottom:4px;">"${escapeHtml(word)}"</div>
+            <div style="font-size:13px;">${t('widget_lookup_not_found')}</div>
+          </div>
+        `;
+      }
     }
 
     document.documentElement.appendChild(card);
