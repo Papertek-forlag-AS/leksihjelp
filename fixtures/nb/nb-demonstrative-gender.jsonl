@@ -1,0 +1,18 @@
+// NB demonstrative-gender ground truth cases.
+// Rule id: "nb-demonstrative-gender". Span convention: start inclusive, end EXCLUSIVE.
+
+// -- Positive cases -- demonstrative must flag --
+{"id":"nb-dem-gender-001","text":"Det boka","expected":[{"rule_id":"nb-demonstrative-gender","start":0,"end":3,"suggestion":"Den"}],"must_not_flag":[]}
+{"id":"nb-dem-gender-002","text":"Den huset","expected":[{"rule_id":"nb-demonstrative-gender","start":0,"end":3,"suggestion":"Det"}],"must_not_flag":[]}
+{"id":"nb-dem-gender-003","text":"Dette boka","expected":[{"rule_id":"nb-demonstrative-gender","start":0,"end":5,"suggestion":"Denne"}],"must_not_flag":[]}
+{"id":"nb-dem-gender-004","text":"Det store boka","expected":[{"rule_id":"nb-demonstrative-gender","start":0,"end":3,"suggestion":"Den"}],"must_not_flag":[]}
+{"id":"nb-dem-gender-005","text":"Denne huset","expected":[{"rule_id":"nb-demonstrative-gender","start":0,"end":5,"suggestion":"Dette"}],"must_not_flag":[]}
+
+// -- Negative cases -- should NOT flag --
+{"id":"nb-dem-gender-010","text":"Den boka","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-011","text":"Det huset","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-012","text":"Den store boka","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-013","text":"Det er fint","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-014","text":"Det barnet","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-015","text":"Denne stolen","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
+{"id":"nb-dem-gender-016","text":"Dette eplet","expected":[],"must_not_flag":["nb-demonstrative-gender"]}
