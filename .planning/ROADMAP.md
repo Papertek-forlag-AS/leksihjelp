@@ -31,7 +31,7 @@ See: `.planning/milestones/v1.0-ROADMAP.md` for full phase detail and success cr
 - [x] Phase 7: Word-Order Violations NB + DE + FR (4/4 plans) — completed 2026-04-24
 - [x] Phase 8: DE Case & Agreement Governance (3/3 plans) — completed 2026-04-24
 - [x] Phase 9: ES ser/estar, por/para, Personal "a" (3/3 plans) — completed 2026-04-25
-- [x] Phase 10: FR Élision, Auxiliary, Participe Passé 10.3a (3/3 plans) — completed 2026-04-25
+- [x] Phase 10: FR Elision, Auxiliary, Participe Passe 10.3a (3/3 plans) — completed 2026-04-25
 - [x] Phase 11: Aspect & Mood ES + FR (3/3 plans) — completed 2026-04-25
 - [x] Phase 12: Pronoun & Pro-Drop ES + FR (3/3 plans) — completed 2026-04-25
 - [x] Phase 13: Register Drift Within a Document (3/3 plans) — completed 2026-04-25
@@ -67,11 +67,11 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
   3. DE linking elements (s, n, en, er, e, es) and NB/NN linking elements (s, e) are all handled correctly
   4. Words already in nounbank return null (stored entries take precedence over decomposition)
   5. False-positive rate < 2% when run against all existing nounbank entries (non-compound nouns must not decompose)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01: TBD
-- [ ] 16-02: TBD
+- [ ] 16-01-PLAN.md — TDD: Implement decomposeCompound with unit tests (core algorithm + linking elements + recursion)
+- [ ] 16-02-PLAN.md — Wire through vocab-seam.js and spell-check.js + false-positive validation
 
 ### Phase 17: Dictionary & Spell-Check Integration
 **Goal**: Students see compound breakdowns in the dictionary popup and spell-check stops false-flagging valid compounds
@@ -175,7 +175,7 @@ Note: Phase 20 is independent and can execute in parallel with Phases 17-19.
 | 14.1 Vocab-Seam Wiring | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
-| 16. Decomposition Engine | v2.1 | 0/0 | Not started | - |
+| 16. Decomposition Engine | v2.1 | 0/2 | In progress | - |
 | 17. Dictionary & Spell-Check | v2.1 | 0/0 | Not started | - |
 | 18. NB/NN Compound Gender | v2.1 | 0/0 | Not started | - |
 | 19. Sarskriving Expansion | v2.1 | 0/0 | Not started | - |
@@ -183,4 +183,4 @@ Note: Phase 20 is independent and can execute in parallel with Phases 17-19.
 | 21. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-26 — v2.1 milestone roadmap created (6 phases, 12 requirements mapped)*
+*Roadmap updated: 2026-04-26 — Phase 16 plans created (2 plans, 2 waves)*
