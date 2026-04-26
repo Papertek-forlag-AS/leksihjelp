@@ -4,8 +4,10 @@
  * Phase 8. German compound nouns inherit gender from their LAST component:
  *   "die Haustür" (Tür = f), "das Kinderzimmer" (Zimmer = n)
  *
- * Flags article + noun where the noun is NOT already in nounGenus but its
- * longest suffix IS — and the article's gender doesn't match the suffix gender.
+ * Flags article + noun where the noun is NOT already in nounGenus but the
+ * shared decomposition engine (Phase 16) can split it into known noun
+ * components — and the article's gender doesn't match the last component's
+ * gender.
  *   Wrong:   "das Haustür" (Tür = f → die Haustür)
  *   Correct: "die Haustür"
  *
@@ -13,7 +15,7 @@
  *   (a) compound word NOT already in nounGenus (known nouns use de-gender rule)
  *   (b) preceded by a German article (der/die/das/ein/eine/einen/einem/einer)
  *   (c) inferred gender differs from article's gender
- *   (d) suffix length >= 3 to avoid short-word collisions
+ *   (d) decomposition has 'high' confidence (both parts are known nouns)
  *
  * Severity: warning (P2 amber dot).
  */
@@ -26,12 +28,6 @@
   // Correct nominative article for each genus
   const GENUS_TO_DEF_ARTICLE = { m: 'der', f: 'die', n: 'das' };
   const GENUS_TO_INDEF_ARTICLE = { m: 'ein', f: 'eine', n: 'ein' };
-
-  // Common linking elements in German compounds
-  const LINKERS = ['s', 'n', 'en', 'er', 'e', 'es'];
-
-  // Minimum suffix length to avoid short-word collisions
-  const MIN_SUFFIX_LEN = 3;
 
   // ── Lazy-init grammar tables (may not be loaded yet at IIFE time) ──
   let _allArticles = null;
@@ -66,40 +62,6 @@
       if (genders.size) _articleToNomGenera[art] = genders;
     }
     return true;
-  }
-
-  /**
-   * Greedy longest-suffix split: for a compound word, find the longest suffix
-   * that exists in nounGenus. Start from position 1 (leftmost split) so we get
-   * the longest possible suffix.
-   *
-   * If no direct suffix match, try stripping common linking elements.
-   */
-  function inferGenderFromSuffix(word, nounGenus) {
-    const lower = word.toLowerCase();
-
-    // Direct suffix search (longest first = start from position 1)
-    for (let i = 1; i <= lower.length - MIN_SUFFIX_LEN; i++) {
-      const suffix = lower.slice(i);
-      if (suffix.length >= MIN_SUFFIX_LEN && nounGenus.has(suffix)) {
-        return { genus: nounGenus.get(suffix), suffix };
-      }
-    }
-
-    // Try stripping linking elements
-    for (let i = 1; i <= lower.length - MIN_SUFFIX_LEN - 1; i++) {
-      for (const linker of LINKERS) {
-        const afterPrefix = lower.slice(i);
-        if (afterPrefix.startsWith(linker)) {
-          const suffix = afterPrefix.slice(linker.length);
-          if (suffix.length >= MIN_SUFFIX_LEN && nounGenus.has(suffix)) {
-            return { genus: nounGenus.get(suffix), suffix };
-          }
-        }
-      }
-    }
-
-    return null;
   }
 
   const rule = {
@@ -140,9 +102,18 @@
         // Skip if token is too short to be a compound
         if (t.word.length < 5) continue;
 
-        // Try to infer gender from longest suffix
-        const inference = inferGenderFromSuffix(t.word, nounGenus);
-        if (!inference) continue;
+        // Phase 17: delegate to shared decomposeCompound engine (replaces
+        // inline suffix-only gender inference). Requires BOTH parts to be
+        // known nouns — fewer false positives than suffix-only matching.
+        const decompose = vocab.decomposeCompound;
+        if (!decompose) continue;
+        const decomposition = decompose(t.word);
+        if (!decomposition || decomposition.confidence !== 'high') continue;
+        const inference = {
+          genus: decomposition.gender,
+          suffix: decomposition.parts[decomposition.parts.length - 1].word,
+        };
+        if (!inference.genus) continue;
 
         // Determine the article's possible genders (nominative context)
         const articleGenera = _articleToNomGenera[prev.word];

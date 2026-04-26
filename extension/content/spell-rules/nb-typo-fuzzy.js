@@ -175,6 +175,19 @@
               suggestions,               // top-K for UX-02 multi-suggest layout
               message: `Skrivefeil: "${t.display}" → "${suggestions[0]}"`,
             });
+          } else {
+            // Phase 17 COMP-03: no fuzzy match — try decomposition acceptance.
+            // Typo-fuzzy d=1 correction wins (checked above); only reach here
+            // when the word has NO close neighbors. Accept silently if the
+            // shared decomposition engine splits it into known nouns with high
+            // confidence. Do NOT add to validWords/compoundNouns (Pitfall 3/6).
+            const decompose = vocab.decomposeCompound;
+            if (decompose) {
+              const decomp = decompose(t.word);
+              if (decomp && decomp.confidence === 'high') continue;
+            }
+            // If decomposition also fails, do NOT flag — existing behaviour
+            // for unknown words without suggestions.
           }
         }
       }
