@@ -314,6 +314,8 @@
     // Returns a bound function (word) => decomposition result or null.
     // Returns null getter when state not ready (consumers must null-check).
     getDecomposeCompound: () => (state && state.decomposeCompound) ? state.decomposeCompound : null,
+    // Phase 17-05: strict decomposition (lemma-only genus map, no inflected forms).
+    getDecomposeCompoundStrict: () => (state && state.decomposeCompoundStrict) ? state.decomposeCompoundStrict : null,
     // Grammar tables from synced grammarbank (replaces inline grammar-tables.js data)
     getGrammarTables: () => (state && state.grammarTables) ? state.grammarTables : {},
     // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.

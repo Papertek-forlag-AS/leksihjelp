@@ -258,6 +258,7 @@
       irregularForms:     VOCAB.getIrregularForms(),
       // Phase 16: compound decomposition engine (pre-wired for Phase 17 rules)
       decomposeCompound:  VOCAB.getDecomposeCompound(),
+      decomposeCompoundStrict: VOCAB.getDecomposeCompoundStrict(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

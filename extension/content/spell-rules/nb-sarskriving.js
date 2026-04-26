@@ -64,7 +64,7 @@
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const compoundNouns = vocab.compoundNouns || new Set();
-      const decompose = vocab.decomposeCompound; // Phase 17 COMP-07
+      const decompose = vocab.decomposeCompoundStrict || vocab.decomposeCompound; // Phase 17-05: prefer strict (lemma-only) to avoid inflected-form FPs
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
