@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 17 of 19 (Compound Integration)
-current_plan: 04 of 4 (17-04-PLAN.md) -- COMPLETE
+current_plan: 05 of 5 (17-05-PLAN.md) -- COMPLETE
 status: in-progress
-last_updated: "2026-04-26T07:13:00Z"
+last_updated: "2026-04-26T08:59:00Z"
 progress:
   total_phases: 2
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Session State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 17 of 19 (Compound Integration)
-**Current plan:** 17-04 COMPLETE
+**Current plan:** 17-05 COMPLETE
 **Status:** In progress
 
-Progress: [██████████] 100% (4/4 phase 17 plans complete)
+Progress: [██████████] 100% (5/5 phase 17 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v2.1)
-- Average duration: 4.8min
-- Total execution time: 29min
+- Total plans completed: 7 (v2.1)
+- Average duration: 5.1min
+- Total execution time: 36min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 16 | 2/2 | 7min | 3.5min |
-| 17 | 4/4 | 22min | 5.5min |
+| 17 | 5/5 | 29min | 5.8min |
 
 ## Accumulated Context
 
@@ -62,6 +62,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-02: DE compound-gender recall drop R=0.829 is correct: suffix-only matches now require both-side validation
 - Phase 17-03: Only high-confidence decompositions trigger sarskriving (both parts known nouns)
 - Phase 17-03: No index mutation from decomposition — compoundNouns/validWords unchanged
+- Phase 17-05: nounLemmaGenus excludes inflected forms (nounform, plural, typo) — only base-form nouns with genus
+- Phase 17-05: Sarskriving uses decomposeCompoundStrict with fallback to decomposeCompound for backward compatibility
 
 ### Key Pitfall Warnings (from research)
 
@@ -83,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 17-04-PLAN.md
+Stopped at: Completed 17-05-PLAN.md
 Resume file: None
