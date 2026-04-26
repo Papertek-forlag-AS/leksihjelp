@@ -18,6 +18,7 @@ let searchDirection = 'no-target'; // 'no-target' or 'target-no'
 let grammarFeatures = null; // Grammar features metadata
 let enabledFeatures = new Set(); // Set of enabled feature IDs
 let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
+let nbEnrichmentIndex = new Map(); // Phase 21.1: NB entry ID → {falseFriends, senses} for target enrichment
 let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compound decomposition when foreign lang selected
 
 /**
@@ -339,6 +340,25 @@ async function loadDictionary(lang) {
       try {
         noDictionary = await loadLanguageData(noLang);
         noWords = noDictionary ? flattenBanks(noDictionary) : [];
+        // Build reverse index: target entry ID → NB entry (for falseFriends/senses enrichment)
+        nbEnrichmentIndex = new Map();
+        if (noDictionary) {
+          for (const bank of Object.keys(noDictionary)) {
+            const bankData = noDictionary[bank];
+            if (!bankData || typeof bankData !== 'object') continue;
+            for (const [id, entry] of Object.entries(bankData)) {
+              if (id.startsWith('_')) continue;
+              if (!entry.falseFriends && !entry.senses) continue;
+              const link = entry.linkedTo?.[currentLang];
+              if (!link?.primary) continue;
+              const existing = nbEnrichmentIndex.get(link.primary);
+              nbEnrichmentIndex.set(link.primary, {
+                falseFriends: [...(existing?.falseFriends || []), ...(entry.falseFriends || [])],
+                senses: [...(existing?.senses || []), ...(entry.senses || [])]
+              });
+            }
+          }
+        }
         if (noDictionary && vocabCore && vocabCore.buildIndexes) {
           const noIndexes = vocabCore.buildIndexes({ raw: noDictionary, lang: noLang });
           noNounGenusMap = noIndexes.nounGenus || new Map();
@@ -347,11 +367,13 @@ async function loadDictionary(lang) {
         noDictionary = null;
         noWords = [];
         noNounGenusMap = new Map();
+        nbEnrichmentIndex = new Map();
       }
     } else {
       noDictionary = null;
       noWords = [];
       noNounGenusMap = new Map();
+      nbEnrichmentIndex = new Map();
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -549,6 +571,7 @@ function flattenBanks(dict) {
 
       words.push({
         ...entry,
+        _wordId: wordId,
         _bank: bank,
         // Normalize fields for display
         partOfSpeech: bankToPos(bank),
@@ -1299,15 +1322,23 @@ function renderResults(results, options = {}) {
     ? `<div class="fallback-hint">${t('search_fallback_hint')}</div>`
     : '';
 
-  container.innerHTML = hintHtml + results.map(({ entry, inflectionHint }) => `
+  container.innerHTML = hintHtml + results.map(({ entry, inflectionHint }) => {
+    // Enrich with NB falseFriends/senses via reverse linkedTo index
+    const enrichment = entry._wordId ? nbEnrichmentIndex.get(entry._wordId) : null;
+    const enrichedEntry = enrichment ? {
+      ...entry,
+      falseFriends: [...(entry.falseFriends || []), ...(enrichment.falseFriends || [])],
+      senses: [...(entry.senses || []), ...(enrichment.senses || [])]
+    } : entry;
+    return `
     <div class="result-card glass" data-id="${entry._id || ''}">
       <div class="result-basic">
         <div class="result-word-row">
           <span class="result-word">${escapeHtml(entry.word || '')}</span>
           ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="${t('widget_play')}">${getPlayIcon()}</button>` : ''}
         </div>
-        ${renderFalseFriends(entry)}
-        ${renderSenses(entry) || `<div class="result-translation">${escapeHtml(getTranslation(entry))}</div>`}
+        ${renderFalseFriends(enrichedEntry)}
+        ${renderSenses(enrichedEntry) || `<div class="result-translation">${escapeHtml(getTranslation(entry))}</div>`}
         ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
         <div class="result-meta">
           <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
@@ -1337,7 +1368,7 @@ function renderResults(results, options = {}) {
         ${renderExamples(entry)}
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   // Attach expand listeners
   container.querySelectorAll('.explore-btn').forEach(btn => {
