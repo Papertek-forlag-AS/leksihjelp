@@ -145,6 +145,21 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     });
   }
 
+  // Error report — delegated from spell-check content script (SC-06 network silence)
+  if (msg.type === 'SEND_REPORT') {
+    (async () => {
+      try {
+        const stored = await chrome.storage.local.get(['sessionToken', 'siteUrl']);
+        const base = stored.siteUrl || 'https://leksihjelp.no';
+        const headers = { 'Content-Type': 'application/json', 'X-Lexi-Client': 'lexi-extension' };
+        if (stored.sessionToken) headers['Authorization'] = 'Bearer ' + stored.sessionToken;
+        const resp = await fetch(base + '/api/report', { method: 'POST', headers, body: JSON.stringify(msg.data) });
+        sendResponse(resp.ok);
+      } catch (_) { sendResponse(false); }
+    })();
+    return true; // async sendResponse
+  }
+
   // Verify access code
   if (msg.type === 'VERIFY_CODE') {
     verifyCode(msg.code).then(sendResponse);

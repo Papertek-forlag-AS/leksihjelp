@@ -795,12 +795,11 @@
 
   async function sendReport(data) {
     try {
-      const stored = await new Promise(r => chrome.storage.local.get(['sessionToken', 'siteUrl'], r));
-      const base = stored.siteUrl || 'https://leksihjelp.no';
-      const headers = { 'Content-Type': 'application/json', 'X-Lexi-Client': 'lexi-extension' };
-      if (stored.sessionToken) headers['Authorization'] = 'Bearer ' + stored.sessionToken;
-      const resp = await fetch(base + '/api/report', { method: 'POST', headers, body: JSON.stringify(data) });
-      return resp.ok;
+      return await new Promise(resolve => {
+        chrome.runtime.sendMessage({ type: 'SEND_REPORT', data }, ok => {
+          resolve(ok ?? false);
+        });
+      });
     } catch (_) { return false; }
   }
 
