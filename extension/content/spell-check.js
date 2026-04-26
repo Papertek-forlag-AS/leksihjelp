@@ -256,6 +256,8 @@
       frSubjonctifDiffers: VOCAB.getFrSubjonctifDiffers(),
       // Phase 14: EN irregular forms
       irregularForms:     VOCAB.getIrregularForms(),
+      // Phase 16: compound decomposition engine (pre-wired for Phase 17 rules)
+      decomposeCompound:  VOCAB.getDecomposeCompound(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });
