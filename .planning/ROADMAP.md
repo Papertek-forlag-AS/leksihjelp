@@ -178,7 +178,7 @@ Phases execute in numeric order: 16 → 17 → 18 → 19 → 20
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 17. Compound Integration | 6/6 | Complete    | 2026-04-26 | - |
 | 18. Spell-Check Polish | 2/2 | Complete    | 2026-04-26 | - |
-| 19. NB/NN Passiv-s | 3/3 | Complete   | 2026-04-26 | - |
+| 19. NB/NN Passiv-s | 3/3 | Complete    | 2026-04-26 | - |
 | 20. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---

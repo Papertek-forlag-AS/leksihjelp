@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 19 of 20 (NB/NN Passiv-s Detection)
-current_plan: 3 of 3
-status: complete
-last_updated: "2026-04-26T15:54:00.000Z"
+current_plan: 3 of 3 (complete)
+status: completed
+last_updated: "2026-04-26T16:01:22.658Z"
 progress:
-  total_phases: 5
+  total_phases: 4
   completed_phases: 4
   total_plans: 13
   completed_plans: 13
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 19 of 20 (NB/NN Passiv-s Detection)
 **Current plan:** 3 of 3 (complete)
-**Status:** Phase 19 complete (including gap closure)
+**Status:** Milestone complete
 
 Progress: [██████████] 100% (3/3 phase 19 plans complete)
 
