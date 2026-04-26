@@ -77,12 +77,11 @@ See: `.planning/milestones/v2.1-ROADMAP.md` for full phase detail and success cr
   3. User selecting a false-friend word on a web page and triggering the floating-widget inline lookup sees the same false-friend warning as in the popup
   4. User selecting a polysemous preposition on a web page sees sense-grouped translations in the floating-widget
   5. False-friend and sense data originates from Papertek API fields (`falseFriends`, `senses`) — no hand-edited JSON in extension/data
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 21-01: Papertek API data enrichment (falseFriends + senses schema, seed data, sync)
-- [ ] 21-02: Popup rendering (false-friend banner + sense-grouped translations)
-- [ ] 21-03: Floating-widget rendering (false-friend + polysemy in inline lookup)
+- [ ] 21-01-PLAN.md — Sync vocabulary data + verify popup rendering (FF-01/02/03, POLY-01/02/03)
+- [ ] 21-02-PLAN.md — Floating-widget false-friend + polysemy rendering (FF-04, POLY-04)
 
 ### Phase 22: å/og Confusion Detection
 **Goal**: Students writing Norwegian get flagged when they confuse "å" and "og" — the single most common NB/NN writing error
@@ -127,7 +126,7 @@ Plans:
 | 18. Spell-Check Polish | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 19. NB/NN Passiv-s Detection | v2.1 | 3/3 | Complete | 2026-04-26 |
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
-| 21. Dictionary Intelligence | v2.2 | 0/3 | Not started | - |
+| 21. Dictionary Intelligence | v2.2 | 0/2 | Not started | - |
 | 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
 
 ---
