@@ -88,12 +88,13 @@ Plans:
   10. Existing SARSKRIVING_BLOCKLIST still prevents false positives on function-word pairs ("god dag", "stor dag")
   11. Sarskriving precision remains at or above the P >= 0.92 threshold in check-fixtures (expanded fixture suite with 15+ new acceptance and 15+ new rejection cases)
   12. Only confidence=high decompositions trigger sarskriving flags (both components must be known nouns)
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Dictionary popup compound card rendering with clickable components + floating-widget fallback
-- [ ] 17-02-PLAN.md — Spell-check compound acceptance + DE engine consolidation + NB/NN compound gender rule
-- [ ] 17-03-PLAN.md — Sarskriving expansion with decomposition fallback + expanded fixture suite
+- [x] 17-01-PLAN.md — Dictionary popup compound card rendering with clickable components + floating-widget fallback
+- [x] 17-02-PLAN.md — Spell-check compound acceptance + DE engine consolidation + NB/NN compound gender rule
+- [x] 17-03-PLAN.md — Sarskriving expansion with decomposition fallback + expanded fixture suite
+- [ ] 17-04-PLAN.md — Gap closure: DE fixture pending markers + network silence fix
 
 ### Phase 18: Spell-Check Polish
 **Goal**: Students have a manual spell-check trigger, demonstrative-gender checking, and triple-letter typo detection
@@ -154,9 +155,9 @@ Phases execute in numeric order: 16 → 17 → 18 → 19
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
-| 17. Compound Integration | 3/3 | Complete   | 2026-04-26 | - |
+| 17. Compound Integration | v2.1 | 3/4 | In progress | - |
 | 18. Spell-Check Polish | v2.1 | 0/0 | Not started | - |
 | 19. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-26 — Phase 17 planned: 3 plans in 2 waves*
+*Roadmap updated: 2026-04-26 — Phase 17 gap closure: 4 plans in 2 waves*
