@@ -847,6 +847,16 @@
   function buildSPassivIndex(raw, lang) {
     const sPassivForms = new Map();
     if (!raw || !raw.verbbank) return sPassivForms;
+
+    // Known NN deponent/reciprocal st-verbs per Sprakradet and ROADMAP SC-6.
+    // These are lexicalised forms, NOT productive s-passives.
+    // Override isDeponent even if the verbbank derived them from a base verb
+    // (e.g., møtast derived from møte has isDeponent: false in data).
+    const NN_DEPONENTS = lang === 'nn' ? new Set([
+      'møtast', 'synast', 'trivast', 'finnast', 'lykkast',
+      'minnast', 'kjennast', 'slåast',
+    ]) : null;
+
     for (const entry of Object.values(raw.verbbank)) {
       const conj = entry.conjugations?.presens?.former;
       if (!conj) continue;
@@ -860,6 +870,19 @@
         for (const f of arr) {
           if (typeof f === 'string' && f.length > 0) {
             sPassivForms.set(f.toLowerCase(), { baseVerb, isDeponent });
+          }
+        }
+      }
+      // Gap closure: derive NN finite presens s-passive from infinitive.
+      // NN s-passive infinitive = stem + "ast" (e.g., lesast, skrivast).
+      // NN finite presens s-passive = stem + "est" (e.g., lesest, skrivest).
+      // Only derive when s_passiv_presens is absent from data (avoids overriding explicit data).
+      if (lang === 'nn' && conj.s_passiv_infinitiv && !conj.s_passiv_presens) {
+        const infForms = Array.isArray(conj.s_passiv_infinitiv) ? conj.s_passiv_infinitiv : [conj.s_passiv_infinitiv];
+        for (const inf of infForms) {
+          if (typeof inf === 'string' && inf.length >= 5 && inf.endsWith('ast')) {
+            const presens = inf.slice(0, -3) + 'est';
+            sPassivForms.set(presens.toLowerCase(), { baseVerb, isDeponent });
           }
         }
       }
@@ -880,6 +903,30 @@
         }
       }
     }
+
+    // Override deponent status for known NN st-verbs (Gap 2 closure).
+    // Verbs like møtast may be in the Map with isDeponent: false
+    // (derived from base verb møte). Force them to deponent.
+    if (NN_DEPONENTS) {
+      for (const dep of NN_DEPONENTS) {
+        const existing = sPassivForms.get(dep);
+        if (existing && !existing.isDeponent) {
+          sPassivForms.set(dep, { ...existing, isDeponent: true });
+        } else if (!existing) {
+          // Verb absent from verbbank entirely (e.g., trivast) — add it.
+          sPassivForms.set(dep, { baseVerb: dep, isDeponent: true });
+        }
+        // Also derive the -est presens form as deponent
+        if (dep.endsWith('ast') && dep.length >= 5) {
+          const presens = dep.slice(0, -3) + 'est';
+          const existingP = sPassivForms.get(presens);
+          if (!existingP || !existingP.isDeponent) {
+            sPassivForms.set(presens, { baseVerb: dep, isDeponent: true });
+          }
+        }
+      }
+    }
+
     return sPassivForms;
   }
 
