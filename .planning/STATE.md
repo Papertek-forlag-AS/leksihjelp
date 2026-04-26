@@ -58,6 +58,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-01: Purple badge for compound card to distinguish from POS badges
 - Phase 17-01: Floating-widget shows flat breakdown text (no clickable components) for widget context
 - Phase 17-01: Decomposition attempted only after all search phases fail -- stored nounbank always wins
+- Phase 17-02: NB common gender tolerance: 'en' accepted for feminine compounds (matches nb-gender.js)
+- Phase 17-02: DE compound-gender recall drop R=0.829 is correct: suffix-only matches now require both-side validation
 
 ### Key Pitfall Warnings (from research)
 
@@ -79,5 +81,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 17-01-PLAN.md
+Stopped at: Completed 17-02-PLAN.md
 Resume file: None

@@ -11,12 +11,12 @@ Requirements for v2.1 Compound Decomposition & Polish. Each maps to roadmap phas
 
 - [x] **COMP-01**: User sees dictionary entry for unknown compound nouns (NB/NN/DE) with gender badge and declension derived from last component
 - [x] **COMP-02**: User sees compound breakdown visualization ("hverdag + s + mas") labeled "Samansett ord" in dictionary popup
-- [ ] **COMP-03**: Decomposable compound nouns are accepted as valid words by spell-check (no false flags on productive compounds)
-- [ ] **COMP-04**: User sees gender inference from last component for NB/NN compound nouns (extends existing DE compound-gender)
+- [x] **COMP-03**: Decomposable compound nouns are accepted as valid words by spell-check (no false flags on productive compounds)
+- [x] **COMP-04**: User sees gender inference from last component for NB/NN compound nouns (extends existing DE compound-gender)
 - [x] **COMP-05**: Decomposition engine handles linking elements (NB/NN: s, e; DE: s, n, en, er, e, es) and zero-fuge
 - [x] **COMP-06**: Decomposition handles recursive compounds up to 4 components
 - [ ] **COMP-07**: Expanded sarskriving detection flags split compounds verified by decomposition, not just stored nounbank
-- [ ] **COMP-08**: User sees compound-aware NB/NN gender mismatch flags ("et fotballsko" when sko = m)
+- [x] **COMP-08**: User sees compound-aware NB/NN gender mismatch flags ("et fotballsko" when sko = m)
 
 ### Spell-Check Polish
 
@@ -67,12 +67,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | COMP-01 | Phase 17 | Complete |
 | COMP-02 | Phase 17 | Complete |
-| COMP-03 | Phase 17 | Pending |
-| COMP-04 | Phase 17 | Pending |
+| COMP-03 | Phase 17 | Complete |
+| COMP-04 | Phase 17 | Complete |
 | COMP-05 | Phase 16 | Complete |
 | COMP-06 | Phase 16 | Complete |
 | COMP-07 | Phase 17 | Pending |
-| COMP-08 | Phase 17 | Pending |
+| COMP-08 | Phase 17 | Complete |
 | SPELL-01 | Phase 18 | Pending |
 | SPELL-02 | Phase 18 | Pending |
 | SPELL-03 | Phase 18 | Pending |

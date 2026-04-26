@@ -1,0 +1,1 @@
+- check-network-silence fails on extension/content/spell-check.js:799-802 (report endpoint fetch) — pre-existing, not related to Phase 17 changes
