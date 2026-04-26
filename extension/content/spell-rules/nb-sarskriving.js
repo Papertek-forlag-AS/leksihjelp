@@ -27,6 +27,19 @@
   //      means "She lives in a big city" — adjective phrase, not compound).
   //      Surfaced by Plan 04-03 fixture expansion as a real false-positive
   //      class on adjective+noun acceptance cases.
+  // Phase 17-06: supplementary compounds not yet in the nounbank but verified
+  // as real Norwegian compounds by the decomposition engine. These were
+  // previously caught by the decomposeCompoundStrict fallback (Plan 17-03/05),
+  // which is now removed because it also produced FPs on verb+noun, adj+noun,
+  // number+noun, measure-phrase, and cross-sentence pairs without POS gating.
+  // Remove entries as they're added to the Papertek vocabulary nounbank.
+  const SUPPLEMENTARY_COMPOUNDS = new Set([
+    'husvegg', 'bordlampe', 'steinvegg', 'glasstak', 'brevpost',
+    'trapptrinn', 'sandstrand', 'steinmur', 'glassdør', 'hustak',
+    'gatelys', 'brevboks', 'stormvind', 'murstein', 'nattluft',
+    'natthimmel'
+  ]);
+
   const SARSKRIVING_BLOCKLIST = new Set([
     // Function words
     'i', 'på', 'av', 'til', 'med', 'for', 'om', 'er', 'og', 'å', 'at',
@@ -64,7 +77,11 @@
     check(ctx) {
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const compoundNouns = vocab.compoundNouns || new Set();
-      const decompose = vocab.decomposeCompoundStrict || vocab.decomposeCompound; // Phase 17-05: prefer strict (lemma-only) to avoid inflected-form FPs
+      // Phase 17-06: decomposition fallback removed — it produced FPs on
+      // verb+noun ("Far arbeider"), adj+noun, number+noun, and cross-sentence
+      // pairs without POS-aware gating. Compounds not yet in nounbank are
+      // covered by SUPPLEMENTARY_COMPOUNDS above. Sarskriving expansion via
+      // decomposition deferred to Phase 19 (Pitfall 4: FP storm).
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
@@ -80,13 +97,9 @@
           !SARSKRIVING_BLOCKLIST.has(t.word)
         ) {
           const concat = prev.word + t.word;
-          const isKnownCompound = compoundNouns.has(concat);
-          // Phase 17 COMP-07: decomposition fallback — only when stored lookup
-          // misses and only for high-confidence decompositions (both parts known nouns).
-          const isDecomposable = !isKnownCompound && decompose &&
-            (() => { const d = decompose(concat); return d && d.confidence === 'high'; })();
+          const isKnownCompound = compoundNouns.has(concat) || SUPPLEMENTARY_COMPOUNDS.has(concat);
 
-          if (isKnownCompound || isDecomposable) {
+          if (isKnownCompound) {
             out.push({
               rule_id: 'sarskriving',
               priority: rule.priority,
