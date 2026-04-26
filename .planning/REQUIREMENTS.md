@@ -64,24 +64,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FF-01 | TBD | Pending |
-| FF-02 | TBD | Pending |
-| FF-03 | TBD | Pending |
-| FF-04 | TBD | Pending |
-| POLY-01 | TBD | Pending |
-| POLY-02 | TBD | Pending |
-| POLY-03 | TBD | Pending |
-| POLY-04 | TBD | Pending |
-| AAOG-01 | TBD | Pending |
-| AAOG-02 | TBD | Pending |
-| AAOG-03 | TBD | Pending |
-| AAOG-04 | TBD | Pending |
+| FF-01 | Phase 21 | Pending |
+| FF-02 | Phase 21 | Pending |
+| FF-03 | Phase 21 | Pending |
+| FF-04 | Phase 21 | Pending |
+| POLY-01 | Phase 21 | Pending |
+| POLY-02 | Phase 21 | Pending |
+| POLY-03 | Phase 21 | Pending |
+| POLY-04 | Phase 21 | Pending |
+| AAOG-01 | Phase 22 | Pending |
+| AAOG-02 | Phase 22 | Pending |
+| AAOG-03 | Phase 22 | Pending |
+| AAOG-04 | Phase 22 | Pending |
 
 **Coverage:**
 - v2.2 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after initial definition*
+*Last updated: 2026-04-26 after roadmap creation*
