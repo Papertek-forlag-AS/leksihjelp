@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
-current_phase: 18 of 19 (Spell-Check Polish)
-current_plan: 18-02 COMPLETE
-status: completed
+current_phase: 19 of 20 (NB/NN Passiv-s Detection)
+current_plan: none
+status: not_started
 last_updated: "2026-04-26T11:46:51.450Z"
 progress:
-  total_phases: 3
+  total_phases: 5
   completed_phases: 3
   total_plans: 10
   completed_plans: 10
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 18 — Spell-Check Polish
+**Current focus:** Phase 19 — NB/NN Passiv-s Detection
 
 ## Position
 
 **Milestone:** v2.1 Compound Decomposition & Polish
-**Current phase:** 18 of 19 (Spell-Check Polish)
-**Current plan:** 18-02 COMPLETE
-**Status:** Milestone complete
+**Current phase:** 19 of 20 (NB/NN Passiv-s Detection)
+**Current plan:** Not started
+**Status:** Phase 19 not yet planned
 
 Progress: [██████████] 100% (2/2 phase 18 plans complete)
 

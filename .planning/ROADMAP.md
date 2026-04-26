@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Spell-Check & Prediction Quality** — Phases 1-5 + 02.1/03.1/05.1 decimal inserts (shipped 2026-04-21) — [archive](milestones/v1.0-ROADMAP.md)
 - ✅ **v2.0 Depth of Coverage — Grammar Governance Beyond Tokens** — Phases 6–15.1 (shipped 2026-04-25) — [archive](milestones/v2.0-ROADMAP.md)
-- 🚧 **v2.1 Compound Decomposition & Polish** — Phases 16–19 (in progress)
+- 🚧 **v2.1 Compound Decomposition & Polish** — Phases 16–20 (in progress)
 
 ## Phases
 
@@ -51,7 +51,8 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE (completed 2026-04-26)
 - [x] **Phase 17: Compound Integration** — Dictionary popup rendering, spell-check acceptance, NB/NN gender inference, DE engine consolidation, and sarskriving expansion for decomposable compounds (completed 2026-04-26)
 - [x] **Phase 18: Spell-Check Polish** — Manual trigger button, demonstrative-mismatch rule, triple-letter typo rule (completed 2026-04-26)
-- [ ] **Phase 19: Browser Visual Verification** — Deferred Phase 6/7 visual checks plus v2.1 compound rendering verification
+- [ ] **Phase 19: NB/NN Passiv-s Detection** — S-passive overuse reminder (NB), strict finite/infinitive s-passive rules (NN), st-verb recognition, participle agreement
+- [ ] **Phase 20: Browser Visual Verification** — Deferred Phase 6/7 visual checks plus v2.1 compound rendering verification
 
 ## Phase Details
 
@@ -113,9 +114,26 @@ Plans:
 - [ ] 18-01-PLAN.md — Demonstrative-gender mismatch rule + triple-letter typo rule with full release gate wiring
 - [ ] 18-02-PLAN.md — Manual spell-check button with toast feedback
 
-### Phase 19: Browser Visual Verification
+### Phase 19: NB/NN Passiv-s Detection
+**Goal**: Students get passiv-s guidance — NB overuse reminders, NN strict finite/infinitive rules, st-verb recognition, and participle agreement checking
+**Depends on**: Nothing (independent — but benefits from Papertek data enrichment of -s/-st verb forms)
+**Requirements**: DEBT-04
+**Success Criteria** (what must be TRUE):
+  1. NB: s-passive forms (e.g. "skrives", "leses") are accepted as valid words (not flagged as typos)
+  2. NB: when a text contains >3 s-passives, an informational hint suggests considering active voice for clarity
+  3. NN: finite s-passive ("Boka lesest av mange") is flagged as error with suggestion to use bli/verte-passiv
+  4. NN: s-passive after modal in infinitive ("Boka kan lesast") is accepted as correct
+  5. NN: participle agreement in bli/verte-passive is checked (skriven/skrive/skrivne must agree with subject gender/number; a-verbs exempt)
+  6. NN: st-verbs (møtast, synast, trivast, finnast, etc.) are recognised as deponent/reciprocal, not flagged as passive errors
+  7. All existing release gates pass after additions; no regression on fixture suites
+**Plans**: TBD
+
+Plans:
+- [ ] 19-01: TBD
+
+### Phase 20: Browser Visual Verification
 **Goal**: All deferred visual checks from v2.0 plus v2.1 compound rendering are verified in a real browser
-**Depends on**: Phases 17, 18 (all code phases complete)
+**Depends on**: Phases 17, 18, 19 (all code phases complete)
 **Requirements**: VERIF-01
 **Success Criteria** (what must be TRUE):
   1. P1/P2/P3 dot colours render correctly in Chrome (error = red, warning = orange, hint = blue) on real page content
@@ -126,12 +144,12 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 20-01: TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 16 → 17 → 18 → 19
+Phases execute in numeric order: 16 → 17 → 18 → 19 → 20
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -158,7 +176,8 @@ Phases execute in numeric order: 16 → 17 → 18 → 19
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 17. Compound Integration | 6/6 | Complete    | 2026-04-26 | - |
 | 18. Spell-Check Polish | 2/2 | Complete    | 2026-04-26 | - |
-| 19. Browser Verification | v2.1 | 0/0 | Not started | - |
+| 19. NB/NN Passiv-s | v2.1 | 0/0 | Not started | - |
+| 20. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
 *Roadmap updated: 2026-04-26 — Phase 17 gap closure: 5 plans in 2 waves*
