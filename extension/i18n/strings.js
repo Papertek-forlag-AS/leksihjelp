@@ -69,6 +69,7 @@ const _STRINGS = {
     result_inflection_conjugation: '«{query}» → bøyning av «{word}»',
     result_inflection_plural: '«{query}» → flertall av «{word}»',
     result_inflection_typo: '«{query}» → mente du «{word}»?',
+    result_false_friend_heading: 'Falsk venn',
 
     // ── Declension table headers ──
     decl_def_sg: 'Bestemt ent.',
@@ -226,6 +227,7 @@ const _STRINGS = {
     // ── Word prediction ──
     pred_typo_hint: 'mente du?',
     pred_compound_hint: 'sammensatt',
+    compound_label: 'Sammensatt ord',
     pred_tab_hint: 'Tab for å velge',
     pred_switch_lang: 'Bytt språk',
     pred_pause: 'Pause ordforslag',
@@ -296,6 +298,7 @@ const _STRINGS = {
     result_cases: 'Bøying (kasus)',
     result_inflection_conjugation: '«{query}» → bøying av «{word}»',
     result_inflection_plural: '«{query}» → fleirtal av «{word}»',
+    result_false_friend_heading: 'Falsk ven',
     result_inflection_typo: '«{query}» → meinte du «{word}»?',
 
     decl_def_sg: 'Bestemt ent.',
@@ -440,6 +443,7 @@ const _STRINGS = {
 
     pred_typo_hint: 'meinte du?',
     pred_compound_hint: 'samansett',
+    compound_label: 'Samansett ord',
     pred_tab_hint: 'Tab for å velje',
     pred_switch_lang: 'Byt språk',
     pred_pause: 'Pause ordforslag',
@@ -509,6 +513,7 @@ const _STRINGS = {
     result_inflection_conjugation: '"{query}" → conjugation of "{word}"',
     result_inflection_plural: '"{query}" → plural of "{word}"',
     result_inflection_typo: 'Did you mean "{word}"?',
+    result_false_friend_heading: 'False friend',
 
     decl_def_sg: 'Definite sg.',
     decl_indef_sg: 'Indefinite sg.',
@@ -650,6 +655,7 @@ const _STRINGS = {
 
     pred_typo_hint: 'did you mean?',
     pred_compound_hint: 'compound',
+    compound_label: 'Compound word',
     pred_tab_hint: 'Tab to select',
     pred_switch_lang: 'Switch language',
     pred_pause: 'Pause predictions',

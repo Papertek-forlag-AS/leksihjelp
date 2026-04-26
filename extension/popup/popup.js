@@ -17,6 +17,7 @@ let currentLang = 'es';
 let searchDirection = 'no-target'; // 'no-target' or 'target-no'
 let grammarFeatures = null; // Grammar features metadata
 let enabledFeatures = new Set(); // Set of enabled feature IDs
+let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
 
 /**
  * Get the appropriate Norwegian translation for an entry,
@@ -321,6 +322,14 @@ async function loadDictionary(lang) {
 
     allWords = flattenBanks(dictionary);
     inflectionIndex = buildInflectionIndex(allWords);
+
+    // Phase 17 COMP-01: build nounGenus for compound decomposition
+    const vocabCore = self.__lexiVocabCore;
+    if (vocabCore && vocabCore.buildIndexes) {
+      const indexes = vocabCore.buildIndexes({ raw: dictionary, lang: currentLang });
+      nounGenusMap = indexes.nounGenus || new Map();
+    }
+
     updateLangLabels();
 
     // Load Norwegian dictionary for two-way lookups (match UI language: nn or nb)
@@ -1013,6 +1022,13 @@ async function buildLangSwitcher() {
   });
 }
 
+// Phase 17 COMP-01: attempt compound decomposition for unknown words
+function tryDecomposeQuery(query) {
+  const vocabCore = self.__lexiVocabCore;
+  if (!vocabCore || !vocabCore.decomposeCompound || nounGenusMap.size === 0) return null;
+  return vocabCore.decomposeCompound(query.toLowerCase(), nounGenusMap, currentLang);
+}
+
 function performSearch(query) {
   if (!query || !allWords.length) {
     showPlaceholder();
@@ -1185,6 +1201,15 @@ function performSearch(query) {
         return fieldA.localeCompare(fieldB);
       });
       renderResults(fallbackResults.slice(0, 50), { fallbackHint: true });
+      return;
+    }
+  }
+
+  // Phase 17 COMP-01/02: try compound decomposition before showing no results
+  if (combined.length === 0) {
+    const decomp = tryDecomposeQuery(q);
+    if (decomp) {
+      renderCompoundCard(q, decomp);
       return;
     }
   }
