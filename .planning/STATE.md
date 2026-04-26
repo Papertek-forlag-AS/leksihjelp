@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
-current_phase: 16 of 21 (Decomposition Engine)
+current_phase: 17 of 19 (Compound Integration)
 current_plan: 02 of 2 (16-02-PLAN.md) -- COMPLETE
 status: completed
 last_updated: "2026-04-26T04:59:49.415Z"
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 16 — Decomposition Engine
+**Current focus:** Phase 17 — Compound Integration
 
 ## Position
 
 **Milestone:** v2.1 Compound Decomposition & Polish
-**Current phase:** 16 of 21 (Decomposition Engine)
-**Current plan:** 02 of 2 (16-02-PLAN.md) -- COMPLETE
-**Status:** Milestone complete
+**Current phase:** 17 of 19 (Compound Integration)
+**Current plan:** Not started
+**Status:** Planning
 
 Progress: [██████████] 100% (2/2 plans complete)
 

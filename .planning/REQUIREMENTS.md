@@ -68,15 +68,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-01 | Phase 17 | Pending |
 | COMP-02 | Phase 17 | Pending |
 | COMP-03 | Phase 17 | Pending |
-| COMP-04 | Phase 18 | Pending |
+| COMP-04 | Phase 17 | Pending |
 | COMP-05 | Phase 16 | Complete |
 | COMP-06 | Phase 16 | Complete |
-| COMP-07 | Phase 19 | Pending |
-| COMP-08 | Phase 18 | Pending |
-| SPELL-01 | Phase 20 | Pending |
-| SPELL-02 | Phase 20 | Pending |
-| SPELL-03 | Phase 20 | Pending |
-| VERIF-01 | Phase 21 | Pending |
+| COMP-07 | Phase 17 | Pending |
+| COMP-08 | Phase 17 | Pending |
+| SPELL-01 | Phase 18 | Pending |
+| SPELL-02 | Phase 18 | Pending |
+| SPELL-03 | Phase 18 | Pending |
+| VERIF-01 | Phase 19 | Pending |
 
 **Coverage:**
 - v2.1 requirements: 12 total
