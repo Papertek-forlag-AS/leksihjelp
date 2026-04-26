@@ -26,6 +26,7 @@ const testNounGenus = new Map([
   ['arbeit', 'f'], ['tag', 'm'], ['strasse', 'f'], ['bahn', 'f'],
   ['frau', 'f'], ['haus', 'n'], ['kind', 'n'], ['schule', 'f'],
   ['buch', 'n'],
+  ['hund', 'm'], ['land', 'n'],
 ]);
 
 let passed = 0;
@@ -187,6 +188,26 @@ test('Gender comes from rightmost component', () => {
   const result = vocabCore.decomposeCompound('skolehus', testNounGenus, 'nb');
   assert.ok(result, 'should not be null');
   assert.equal(result.gender, 'n', 'gender should come from rightmost part (hus=n)');
+});
+
+// ── Test 17: DE fuge-e ──
+test('DE fuge-e: hundehaus -> hund + e + haus', () => {
+  const result = vocabCore.decomposeCompound('hundehaus', testNounGenus, 'de');
+  assert.ok(result, 'should not be null');
+  assert.equal(result.parts[0].word, 'hund');
+  assert.equal(result.parts[0].linker, 'e');
+  assert.equal(result.parts[1].word, 'haus');
+  assert.equal(result.gender, 'n');
+});
+
+// ── Test 18: DE fuge-es ──
+test('DE fuge-es: landestag -> land + es + tag', () => {
+  const result = vocabCore.decomposeCompound('landestag', testNounGenus, 'de');
+  assert.ok(result, 'should not be null');
+  assert.equal(result.parts[0].word, 'land');
+  assert.equal(result.parts[0].linker, 'es');
+  assert.equal(result.parts[1].word, 'tag');
+  assert.equal(result.gender, 'm');
 });
 
 // ══════════════════════════════════════════════════════════════════
