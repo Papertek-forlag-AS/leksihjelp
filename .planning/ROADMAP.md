@@ -62,7 +62,7 @@ See: `.planning/milestones/v2.1-ROADMAP.md` for full phase detail and success cr
 
 **Milestone Goal:** Help students choose the right word — false-friend warnings, sense-grouped preposition translations, and å/og confusion detection.
 
-- [ ] **Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy** - Data enrichment in Papertek API + popup and floating-widget rendering for cross-language false-friend warnings and sense-grouped translations
+- [x] **Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy** - Data enrichment in Papertek API + popup and floating-widget rendering for cross-language false-friend warnings and sense-grouped translations (completed 2026-04-26)
 - [ ] **Phase 22: å/og Confusion Detection** - Sentence-level NB/NN spell-check rule for Norway's most common writing error
 
 ## Phase Details
@@ -126,7 +126,7 @@ Plans:
 | 18. Spell-Check Polish | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 19. NB/NN Passiv-s Detection | v2.1 | 3/3 | Complete | 2026-04-26 |
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
-| 21. Dictionary Intelligence | 1/2 | In Progress|  | - |
+| 21. Dictionary Intelligence | 2/2 | Complete   | 2026-04-26 | - |
 | 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
 
 ---
