@@ -88,14 +88,15 @@ Plans:
   10. Existing SARSKRIVING_BLOCKLIST still prevents false positives on function-word pairs ("god dag", "stor dag")
   11. Sarskriving precision remains at or above the P >= 0.92 threshold in check-fixtures (expanded fixture suite with 15+ new acceptance and 15+ new rejection cases)
   12. Only confidence=high decompositions trigger sarskriving flags (both components must be known nouns)
-**Plans**: 5 plans
+**Plans**: 6 plans
 
 Plans:
 - [x] 17-01-PLAN.md — Dictionary popup compound card rendering with clickable components + floating-widget fallback
 - [x] 17-02-PLAN.md — Spell-check compound acceptance + DE engine consolidation + NB/NN compound gender rule
 - [x] 17-03-PLAN.md — Sarskriving expansion with decomposition fallback + expanded fixture suite
 - [x] 17-04-PLAN.md — Gap closure: DE fixture pending markers + network silence fix
-- [ ] 17-05-PLAN.md — Gap closure: sarskriving decomposition false positives (lemma-only nounGenus)
+- [x] 17-05-PLAN.md — Gap closure: sarskriving decomposition false positives (lemma-only nounGenus)
+- [ ] 17-06-PLAN.md — Gap closure: remove decomposition fallback from sarskriving (zero recall loss, eliminates remaining 6 FP suites)
 
 ### Phase 18: Spell-Check Polish
 **Goal**: Students have a manual spell-check trigger, demonstrative-gender checking, and triple-letter typo detection
