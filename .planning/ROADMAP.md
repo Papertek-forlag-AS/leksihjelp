@@ -48,7 +48,7 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 
 **Milestone Goal:** Algorithmic compound word decomposition for NB/NN/DE (dictionary, spell-check, gender inference) plus carry-over polish items from v1.0/v2.0.
 
-- [ ] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE
+- [x] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE (completed 2026-04-26)
 - [ ] **Phase 17: Dictionary & Spell-Check Integration** — Compound popup rendering and spell-check acceptance of decomposable compounds
 - [ ] **Phase 18: NB/NN Compound Gender** — Gender inference from last component and compound-aware gender mismatch flags
 - [ ] **Phase 19: Sarskriving Expansion** — Decomposition-backed sarskriving detection beyond stored nounbank
@@ -175,7 +175,7 @@ Note: Phase 20 is independent and can execute in parallel with Phases 17-19.
 | 14.1 Vocab-Seam Wiring | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
-| 16. Decomposition Engine | 1/2 | In Progress|  | - |
+| 16. Decomposition Engine | 2/2 | Complete   | 2026-04-26 | - |
 | 17. Dictionary & Spell-Check | v2.1 | 0/0 | Not started | - |
 | 18. NB/NN Compound Gender | v2.1 | 0/0 | Not started | - |
 | 19. Sarskriving Expansion | v2.1 | 0/0 | Not started | - |
