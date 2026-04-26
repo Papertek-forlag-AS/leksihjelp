@@ -88,13 +88,13 @@ See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success cr
   4. **Update detection + manual refresh** — On extension startup, service worker calls updates-check endpoint and compares per-language revision against cache; when an update is available, popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button; user-triggered update downloads new bundle, replaces the cache entry atomically, new indexes activate on the next page load
   5. **Existing users migrate silently and bundled data is removed** — A user upgrading from v2.x sees no functional regression on first run; the shipped extension zip no longer contains `extension/data/{de,es,fr,en,nb,nn}.json` full vocabularies (only the NB baseline remains); a documented adapter contract describes how lockdown can plug its own bootstrap into the vocab-seam
   6. **Release gates updated** — `check-network-silence` continues to exit 0 against spell-check + word-prediction hot paths; `background/vocab-bootstrap.js` is the only sanctioned `fetch` site and is documented as such; new `check-baseline-bundle-size` gate enforces the NB baseline ≤ 200 KB with paired self-test (oversized baseline → gate fires; well-formed baseline → gate passes)
-**Plans**:
-- [ ] 23-01-PLAN.md — Papertek API vocabulary endpoints (sibling repo): bundle + revisions + CORS [API-01, API-02, API-03]
-- [ ] 23-02-PLAN.md — IndexedDB cache adapter + vocab-seam hydration + schema_version check [CACHE-01, CACHE-02, CACHE-03, SCHEMA-01]
-- [ ] 23-03-PLAN.md — NB baseline construction + service-worker bootstrap downloader + popup download status UI [BOOT-01, BOOT-02, BOOT-03]
-- [ ] 23-04-PLAN.md — Update detection + popup notice + manual refresh button + atomic cache replacement [UPDATE-01, UPDATE-02, UPDATE-03]
-- [ ] 23-05-PLAN.md — v2.x → v3.0 silent migration + bundled-data removal + lockdown adapter contract doc [MIGRATE-01]
-- [ ] 23-06-PLAN.md — SC-06 carve-out + new check-baseline-bundle-size gate + paired self-test [GATES-01, GATES-02]
+**Plans:** 6 plans in 4 waves
+- [ ] 23-01-PLAN.md (wave 1) — Papertek API vocabulary endpoints (sibling repo): bundle + revisions + CORS [API-01, API-02, API-03]
+- [ ] 23-02-PLAN.md (wave 2) — IndexedDB cache adapter + vocab-seam hydration + schema_version check [CACHE-01, CACHE-02, CACHE-03, SCHEMA-01]
+- [ ] 23-06-PLAN.md (wave 2) — SC-06 carve-out + new check-baseline-bundle-size gate + paired self-test [GATES-01, GATES-02]
+- [ ] 23-03-PLAN.md (wave 3) — NB baseline construction + service-worker bootstrap downloader + popup download status UI [BOOT-01, BOOT-02, BOOT-03]
+- [ ] 23-04-PLAN.md (wave 3) — Update detection + popup notice + manual refresh button + atomic cache replacement [UPDATE-01, UPDATE-02, UPDATE-03]
+- [ ] 23-05-PLAN.md (wave 4) — v2.x → v3.0 silent migration + bundled-data removal + lockdown adapter contract doc [MIGRATE-01]
 
 ## Progress
 
