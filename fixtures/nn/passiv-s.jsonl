@@ -16,3 +16,13 @@
 // Deponent / st-verbs (lexicalised, not passive)
 {"id":"nn-passiv-s-accept-004","text":"Ho synest at det er fint","expected":[],"must_not_flag":["nn_passiv_s"]}
 {"id":"nn-passiv-s-accept-005","text":"Det lykkast til slutt","expected":[],"must_not_flag":["nn_passiv_s"]}
+
+// ── Finite presens positive cases (Gap 1 — derived -est forms must flag) ──
+{"id":"nn-passiv-s-004","text":"Boka lesest no","expected":[{"rule_id":"nn_passiv_s","start":5,"end":11,"suggestion":null}],"must_not_flag":[]}
+{"id":"nn-passiv-s-005","text":"Huset byggest no","expected":[{"rule_id":"nn_passiv_s","start":6,"end":13,"suggestion":null}],"must_not_flag":[]}
+{"id":"nn-passiv-s-006","text":"Brevet skrivest no","expected":[{"rule_id":"nn_passiv_s","start":7,"end":15,"suggestion":null}],"must_not_flag":[]}
+
+// ── Deponent acceptance cases (Gap 2 — st-verbs must NOT flag) ──
+{"id":"nn-passiv-s-accept-006","text":"Vi møtast kvar dag","expected":[],"must_not_flag":["nn_passiv_s"]}
+{"id":"nn-passiv-s-accept-007","text":"Det finnast her no","expected":[],"must_not_flag":["nn_passiv_s"]}
+{"id":"nn-passiv-s-accept-008","text":"Vi møtast i dag","expected":[],"must_not_flag":["nn_passiv_s"]}
