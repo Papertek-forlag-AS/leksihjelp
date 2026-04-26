@@ -9,8 +9,8 @@ Requirements for v2.1 Compound Decomposition & Polish. Each maps to roadmap phas
 
 ### Compound Decomposition
 
-- [ ] **COMP-01**: User sees dictionary entry for unknown compound nouns (NB/NN/DE) with gender badge and declension derived from last component
-- [ ] **COMP-02**: User sees compound breakdown visualization ("hverdag + s + mas") labeled "Samansett ord" in dictionary popup
+- [x] **COMP-01**: User sees dictionary entry for unknown compound nouns (NB/NN/DE) with gender badge and declension derived from last component
+- [x] **COMP-02**: User sees compound breakdown visualization ("hverdag + s + mas") labeled "Samansett ord" in dictionary popup
 - [ ] **COMP-03**: Decomposable compound nouns are accepted as valid words by spell-check (no false flags on productive compounds)
 - [ ] **COMP-04**: User sees gender inference from last component for NB/NN compound nouns (extends existing DE compound-gender)
 - [x] **COMP-05**: Decomposition engine handles linking elements (NB/NN: s, e; DE: s, n, en, er, e, es) and zero-fuge
@@ -65,8 +65,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMP-01 | Phase 17 | Pending |
-| COMP-02 | Phase 17 | Pending |
+| COMP-01 | Phase 17 | Complete |
+| COMP-02 | Phase 17 | Complete |
 | COMP-03 | Phase 17 | Pending |
 | COMP-04 | Phase 17 | Pending |
 | COMP-05 | Phase 16 | Complete |

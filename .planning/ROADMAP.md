@@ -154,7 +154,7 @@ Phases execute in numeric order: 16 → 17 → 18 → 19
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
-| 17. Compound Integration | v2.1 | 0/3 | Not started | - |
+| 17. Compound Integration | 2/3 | In Progress|  | - |
 | 18. Spell-Check Polish | v2.1 | 0/0 | Not started | - |
 | 19. Browser Verification | v2.1 | 0/0 | Not started | - |
 
