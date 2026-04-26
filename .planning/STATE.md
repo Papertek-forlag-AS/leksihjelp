@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 16
-current_plan: none
-status: ready_to_plan
-last_updated: "2026-04-26T00:00:00.000Z"
+current_plan: 02
+status: executing
+last_updated: "2026-04-26T04:51:00.000Z"
 progress:
   total_phases: 6
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Session State
@@ -26,23 +26,23 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 16 of 21 (Decomposition Engine)
-**Current plan:** None (ready to plan)
-**Status:** Ready to plan Phase 16
+**Current plan:** 02 of 2 (16-02-PLAN.md)
+**Status:** Executing Phase 16
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50% (1/2 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v2.1)
-- Average duration: --
-- Total execution time: --
+- Total plans completed: 1 (v2.1)
+- Average duration: 4min
+- Total execution time: 4min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 16 | 1/2 | 4min | 4min |
 
 ## Accumulated Context
 
@@ -50,7 +50,8 @@ Progress: [░░░░░░░░░░] 0%
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-No v2.1 decisions yet.
+- Phase 16-01: Depth guard >2 (not >3) to enforce max 4 compound components
+- Phase 16-01: Triple-consonant elision restores dropped char unconditionally when left ends with double letter
 
 ### Key Pitfall Warnings (from research)
 
@@ -72,5 +73,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Roadmap created for v2.1 milestone
+Stopped at: Completed 16-01-PLAN.md
 Resume file: None

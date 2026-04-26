@@ -1,0 +1,1 @@
+- [ ] Pre-existing check-network-silence failure: spell-check.js:797-800 has fetch() and https:// URL literal (report endpoint). Not caused by Phase 16 changes.

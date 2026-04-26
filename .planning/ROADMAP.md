@@ -175,7 +175,7 @@ Note: Phase 20 is independent and can execute in parallel with Phases 17-19.
 | 14.1 Vocab-Seam Wiring | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
-| 16. Decomposition Engine | v2.1 | 0/2 | In progress | - |
+| 16. Decomposition Engine | 1/2 | In Progress|  | - |
 | 17. Dictionary & Spell-Check | v2.1 | 0/0 | Not started | - |
 | 18. NB/NN Compound Gender | v2.1 | 0/0 | Not started | - |
 | 19. Sarskriving Expansion | v2.1 | 0/0 | Not started | - |
