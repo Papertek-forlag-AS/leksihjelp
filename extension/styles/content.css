@@ -1244,3 +1244,21 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
   }
 }
+
+/* ── False-friend + sense display (floating-widget inline lookup) ── */
+#lexi-lookup-card .lh-ff-banner {
+  margin: 8px 0;
+  padding: 8px 10px;
+  background: rgba(245, 158, 11, 0.08);
+  border-left: 3px solid #f59e0b;
+  border-radius: 6px;
+}
+
+#lexi-lookup-card .lh-ff-banner em { font-style: italic; }
+#lexi-lookup-card .lh-ff-banner strong { font-weight: 700; }
+
+#lexi-lookup-card .lh-sense-group {
+  margin-bottom: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
