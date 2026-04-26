@@ -77,13 +77,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AAOG-03 | Phase 22 | Pending |
 | AAOG-04 | Phase 22 | Pending |
 
+### Integration Gap Tracking (from v2.2 audit)
+
+| Gap | Affected Reqs | Fix Phase | Status |
+|-----|---------------|-----------|--------|
+| `fin_adj` NB: null linkedTo → FR false-friend dropped | FF-01, FF-04 (partial FR) | Phase 21.2 | Pending |
+| `på_contr` NB: missing linkedTo.de → DE senses unreachable | POLY-01, POLY-03, POLY-04 (partial DE) | Phase 21.2 | Pending |
+
 **Coverage:**
 - v2.2 requirements: 12 total
 - Mapped to phases: 12
-- Complete: 2 (FF-02, POLY-02)
-- Pending: 10 (6 reassigned to Phase 21.1, 4 in Phase 22)
+- Complete: 8 (FF-01–04, POLY-01–04)
+- Pending: 4 (AAOG-01–04 in Phase 22)
+- Integration gaps: 2 (assigned to Phase 21.2)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-26*
-*Last updated: 2026-04-26 after roadmap creation*
+*Last updated: 2026-04-26 after milestone audit gap closure planning*

@@ -64,6 +64,7 @@ See: `.planning/milestones/v2.1-ROADMAP.md` for full phase detail and success cr
 
 - [x] **Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy** - Data enrichment in Papertek API + popup and floating-widget rendering for cross-language false-friend warnings and sense-grouped translations (completed 2026-04-26)
 - [x] **Phase 21.1: Fix Dictionary Intelligence Data Pipeline (GAP CLOSURE)** - Wire falseFriends/senses data from nb.json through to popup.js and floating-widget.js renderers; fix filter direction inversion (completed 2026-04-26)
+- [ ] **Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE)** - Fix missing linkedTo entries at Papertek API + re-sync vocab to close DE senses and FR false-friend gaps
 - [ ] **Phase 22: å/og Confusion Detection** - Sentence-level NB/NN spell-check rule for Norway's most common writing error
 
 ## Phase Details
@@ -99,6 +100,20 @@ Plans:
 
 Plans:
 - [ ] 21.1-01-PLAN.md — Wire NB enrichment data through search pipeline in popup.js and floating-widget.js
+
+### Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE)
+**Goal**: Fix missing `linkedTo` entries at Papertek API so DE sense-grouped translations and FR `fin` false-friend warning reach students
+**Depends on**: Phase 21.1 (enrichment pipeline exists but 2 NB entries have incomplete linkedTo data)
+**Requirements**: FF-01 (partial FR), POLY-01 (partial DE), POLY-03 (partial DE), POLY-04 (partial DE)
+**Gap Closure**: Closes 2 integration gaps + 1 broken flow from v2.2 audit
+**Success Criteria** (what must be TRUE):
+  1. User looking up a FR word corresponding to NB "fin" sees the false-friend warning (fin ≠ fin)
+  2. User looking up DE prepositions corresponding to NB "på" sees sense-grouped translations (4 senses)
+  3. `npm run sync-vocab` pulls corrected data and all 8 release gates pass
+**Plans**: TBD
+
+Plans:
+- [ ] 21.2-01: Fix linkedTo entries at Papertek API + re-sync vocab
 
 ### Phase 22: å/og Confusion Detection
 **Goal**: Students writing Norwegian get flagged when they confuse "å" and "og" — the single most common NB/NN writing error
@@ -145,7 +160,8 @@ Plans:
 | 20. Browser Verification | v2.1 | 0/0 | Deferred | - |
 | 21. Dictionary Intelligence | v2.2 | 2/2 | Complete | 2026-04-26 |
 | 21.1 Pipeline Fix (GAP) | 1/1 | Complete    | 2026-04-26 | - |
+| 21.2 Data Fixes (GAP) | v2.2 | 0/1 | Not started | - |
 | 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-26 — v2.2 milestone roadmap created*
+*Roadmap updated: 2026-04-26 — gap closure phase 21.2 added after milestone audit*
