@@ -107,12 +107,11 @@ Plans:
   2. "Det boka" is flagged as demonstrative-mismatch (det expects n, boka = f) with suggestion "Den boka"; "Det bok" (indefinite noun) is handled by nb-gender, not the demonstrative rule
   3. "tykkkjer" is flagged as triple-letter typo with suggestion "tykkjer"; the rule fires as a separate rule file (not a modification to nb-typo-fuzzy), at priority ~45
   4. All 9 existing release gates pass after these additions; no regression on existing fixture suites
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 18-01: TBD
-- [ ] 18-02: TBD
-- [ ] 18-03: TBD
+- [ ] 18-01-PLAN.md — Demonstrative-gender mismatch rule + triple-letter typo rule with full release gate wiring
+- [ ] 18-02-PLAN.md — Manual spell-check button with toast feedback
 
 ### Phase 19: Browser Visual Verification
 **Goal**: All deferred visual checks from v2.0 plus v2.1 compound rendering are verified in a real browser
