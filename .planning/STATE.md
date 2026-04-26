@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Compound Decomposition & Polish
 current_phase: 17 of 19 (Compound Integration)
-current_plan: 02 of 3 (17-02-PLAN.md) -- COMPLETE
+current_plan: 03 of 3 (17-03-PLAN.md) -- COMPLETE
 status: in-progress
-last_updated: "2026-04-26T06:57:39Z"
+last_updated: "2026-04-26T07:13:00Z"
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Session State
@@ -26,24 +26,24 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Milestone:** v2.1 Compound Decomposition & Polish
 **Current phase:** 17 of 19 (Compound Integration)
-**Current plan:** 17-02 COMPLETE
+**Current plan:** 17-03 COMPLETE
 **Status:** In progress
 
-Progress: [█████░░░░░] 50% (1/2 phase 17 plans complete)
+Progress: [██████████] 100% (3/3 phase 17 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v2.1)
-- Average duration: 3.5min
-- Total execution time: 14min
+- Total plans completed: 5 (v2.1)
+- Average duration: 5.4min
+- Total execution time: 27min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 16 | 2/2 | 7min | 3.5min |
-| 17 | 2/3 | 7min | 3.5min |
+| 17 | 3/3 | 20min | 6.7min |
 
 ## Accumulated Context
 
@@ -60,6 +60,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 17-01: Decomposition attempted only after all search phases fail -- stored nounbank always wins
 - Phase 17-02: NB common gender tolerance: 'en' accepted for feminine compounds (matches nb-gender.js)
 - Phase 17-02: DE compound-gender recall drop R=0.829 is correct: suffix-only matches now require both-side validation
+- Phase 17-03: Only high-confidence decompositions trigger sarskriving (both parts known nouns)
+- Phase 17-03: No index mutation from decomposition — compoundNouns/validWords unchanged
 
 ### Key Pitfall Warnings (from research)
 
@@ -81,5 +83,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 17-02-PLAN.md
+Stopped at: Completed 17-03-PLAN.md
 Resume file: None

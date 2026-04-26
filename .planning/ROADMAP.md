@@ -49,7 +49,7 @@ See: `.planning/milestones/v2.0-ROADMAP.md` for full phase detail and success cr
 **Milestone Goal:** Algorithmic compound word decomposition for NB/NN/DE (dictionary, spell-check, gender inference) plus carry-over polish items from v1.0/v2.0.
 
 - [x] **Phase 16: Decomposition Engine** — Pure compound-splitting algorithm in vocab-seam-core.js with linking-element awareness for NB/NN/DE (completed 2026-04-26)
-- [ ] **Phase 17: Compound Integration** — Dictionary popup rendering, spell-check acceptance, NB/NN gender inference, DE engine consolidation, and sarskriving expansion for decomposable compounds
+- [x] **Phase 17: Compound Integration** — Dictionary popup rendering, spell-check acceptance, NB/NN gender inference, DE engine consolidation, and sarskriving expansion for decomposable compounds (completed 2026-04-26)
 - [ ] **Phase 18: Spell-Check Polish** — Manual trigger button, demonstrative-mismatch rule, triple-letter typo rule
 - [ ] **Phase 19: Browser Visual Verification** — Deferred Phase 6/7 visual checks plus v2.1 compound rendering verification
 
@@ -154,7 +154,7 @@ Phases execute in numeric order: 16 → 17 → 18 → 19
 | 15. Collocations at Scale | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 15.1 Fixture Gate Triage | v2.0 | 1/1 | Complete | 2026-04-25 |
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
-| 17. Compound Integration | 2/3 | In Progress|  | - |
+| 17. Compound Integration | 3/3 | Complete   | 2026-04-26 | - |
 | 18. Spell-Check Polish | v2.1 | 0/0 | Not started | - |
 | 19. Browser Verification | v2.1 | 0/0 | Not started | - |
 
