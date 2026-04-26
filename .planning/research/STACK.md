@@ -1,221 +1,190 @@
-# Stack Research — v2.0 Structural Grammar Governance
+# Stack Research — v2.1 Compound Decomposition & Polish
 
-**Domain:** Offline, client-side structural grammar rules for a Chrome MV3 extension (Leksihjelp)
-**Researched:** 2026-04-24
-**Confidence:** HIGH (constraints are already binding; decisions follow from them)
+**Domain:** Algorithmic compound word decomposition for NB/NN/DE in an offline Chrome MV3 extension
+**Researched:** 2026-04-26
+**Confidence:** HIGH (core algorithm is dictionary-lookup-based; existing `de-compound-gender.js` proves the pattern; no new dependencies needed)
 
-## Summary up front
+---
 
-v2.0 **does not require new runtime dependencies**. Every structural capability
-called for by Phases 6–16 (sentence segmentation, light POS inference,
-clitic-order detection, register heuristics, V2/verb-final detection, aux
-choice, personal-a, BAGS adjective placement, participe passé agreement)
-can be achieved with:
+## Recommended Stack Additions
 
-1. **One new browser-native API** — `Intl.Segmenter` (Chromium Baseline since
-   April 2024, zero bundle cost) for sentence- and word-granularity tokenizing
-   that respects locale punctuation.
-2. **Data-schema additions in `papertek-vocabulary`** — additive fields on
-   existing bank entries (`separable`, `aux`, `copula`, `human`,
-   `placement: 'BAGS'`, `prepGovernance`, `register`, `collocations`) plus a
-   handful of new small lookup files (subjunctive triggers, clitic order
-   tables, idiomatic-redundancy list, register markers).
-3. **Roll-own micro-helpers** (estimated ~40–200 LOC each) for light
-   syntactic reasoning — finite-verb detection, subordinator-set check,
-   clitic-cluster permutation, prefix-stranding detection. Each lives next to
-   the rule that uses it; no shared parser.
+### No New Dependencies
 
-This preserves every hard constraint (offline, MIT, no build step, no ML,
-<20 MiB zip) and stays inside the plugin rule architecture (one file per
-rule under `extension/content/spell-rules/*.js`, consuming the
-`__lexiVocab` seam).
+The v2.1 compound decomposition engine requires **zero npm packages**. Every existing JS/Python compound-splitting library (CharSplit, jwordsplitter, german_compound_splitter, stts-se/decomp) is either Python/Java/Go, GPL-licensed, requires large external dictionaries (50K+ words), or depends on ML. All violate the project's constraints: no runtime dependencies, MIT license, offline-only, vanilla JS, no build step.
 
-## Recommended Stack
+The existing `inferGenderFromSuffix()` in `de-compound-gender.js` (lines 78-103) already implements the core algorithm — greedy longest-suffix matching with linking-element stripping — in ~25 lines. The v2.1 engine generalises this to NB/NN and adds multi-split recursion.
 
-### Core Technologies (additions on top of v1.0 stack)
+### Core Engine: `compound-decomposer.js`
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| `Intl.Segmenter` | Browser-native (Chromium 87+, Baseline 2024-04) | Locale-aware sentence + word segmentation. Drives Phase 7 (word order — needs main vs subordinate clause boundaries), Phase 13 (register-drift across sentences within a text), Phase 16 (tense harmony across sentences). | Zero bundle cost, zero license risk, ICU-backed, handles German/French/Spanish/Norwegian punctuation correctly (including `«»`, `¿?`, `;`). Alternative would be a rolled-own regex segmenter (fragile on abbreviations, decimals, and French/Spanish punctuation). |
-| Data schema additions in `papertek-vocabulary` | N/A — additive JSON fields | Authoritative source of governance info (case, aux, copula, separable flag, BAGS, clitic-order, human, collocations). | Cross-app single source of truth (shared with `papertek-webapps`, `papertek-nativeapps`). v1.0 already proved the additive pattern via `languagesbank` + `nationalitiesbank` + `CROSS_DIALECT_MAP`. Keeps extension as **logic-only** per `project_data_source_architecture.md`. |
-| Rolled-own rule-local helpers | vanilla JS, ~40–200 LOC each | Light syntactic reasoning: V2 detection, subordinator lookup, aux selection, personal-a trigger, participe-passé preceding-DO detection, clitic-cluster order check. | Every candidate library (below in "What NOT to Use") is either too heavy, not MIT, or multi-megabyte trained. The grammar phenomena are closed-set — rule-local heuristics hit ≥80% benchmark coverage without a shallow parser. |
+| Component | Implementation | Why |
+|-----------|---------------|-----|
+| Decomposition engine | New file `extension/content/compound-decomposer.js` | Pure module, dual-export (browser IIFE + Node module.exports), consumable by vocab-seam, spell-check, popup, and fixtures |
+| Lookup backing store | `Set` (validWords) + `Map` (nounGenus) from existing `__lexiVocab` seam | Already built; ~4K NB entries, ~1.6K DE entries — `Set.has()` is O(1), no trie needed |
+| Linking elements | Language-keyed config object in the engine | ~15 rules total across 3 languages; static, no data sync needed |
 
-### Supporting Libraries
+### Data Structure Decision: HashSet, Not Trie
 
-None. Recommending **zero new npm dependencies** in the extension runtime.
-All capability gains come from `Intl.Segmenter` + vocab data + roll-own helpers.
+**Recommendation: Use the existing `Set`-based `validWords` and `Map`-based `nounGenus` directly. Do NOT build a trie.**
 
-### New dev / gate scripts (extend v1.0 release gates)
+Rationale:
 
-| Script | Purpose | Notes |
-|--------|---------|-------|
-| `scripts/check-benchmark-coverage.js` (new, ~80 LOC) | Run each `benchmark-texts/<lang>.txt` through the rule pipeline and report % of "FUTURE" lines now flagged per phase. | Phase-close criterion is benchmark-anchored (≥80%); a script makes this measurable/repeatable instead of manual counting. |
-| `scripts/check-governance-data.js` (new, ~60 LOC) | Assert every verbbank entry that matches DR-MRS-VANDERTRAMP or motion-verb heuristic has `aux` set; every separable-prefix candidate has `separable` flag; every human noun used as DO example has `human: true`. | Guards against a governance rule going silent because vocab sync dropped a field. Mirrors v1.0's `check-spellcheck-features` philosophy. |
-| `scripts/check-explain-contract.js` (existing) | Already in TARGETS list; extend for every v2.0 popover-surfacing rule. | No code change — just add each new rule id to the TARGETS array. |
-| `scripts/check-rule-css-wiring.js` (existing) | Same as above — one CSS color binding per new rule. | Phase 05.1 lesson: missing CSS binding paints transparent → user sees native squiggle. |
+| Criterion | HashSet (Set/Map) | Trie |
+|-----------|-------------------|------|
+| Lookup speed | O(1) amortised | O(k) where k = key length |
+| Memory | ~200 KB for 4K entries (JS Set) | ~2-5 MB for equivalent trie (65x overhead per John Resig's JS trie benchmarks) |
+| Prefix search needed? | **No** — decomposition iterates suffix positions, not prefixes | Yes, but we don't need prefix search |
+| Implementation complexity | 0 lines (already exists) | ~80 lines for a trie class |
+| Build step | None (indexes built by `buildLookupIndexes`) | Would need trie construction at seam-build time |
 
-## Installation
+The decomposition algorithm iterates split positions left-to-right and checks if each suffix exists in the noun set. This is a series of `Set.has(suffix)` calls — exactly what HashSet excels at. A trie would help if we needed "find all words starting with X" (prefix completion), but compound decomposition works the opposite direction: "does this suffix exist as a known word?"
 
-No npm installs needed for the extension runtime. The only commands to run:
+**Performance estimate:** For a 15-character compound, the algorithm checks at most ~12 suffix positions x ~6 linker variants = ~72 `Set.has()` calls. At ~50ns per `Set.has()` in V8, total decomposition time is ~3.6 microseconds. No optimisation needed.
 
-```bash
-# Each time papertek-vocabulary ships a new schema field:
-npm run sync-vocab
-npm run check-fixtures
-npm run check-bundle-size
+### Linking Element Configuration
+
+Linking elements (Fugenelemente / fugebokstav) are the glue characters inserted between compound components. They are **lexically conditioned, not fully rule-based** — there is no universal algorithm to predict which linker a word takes. However, for *decomposition* (splitting, not generating), we only need to know the *set of possible linkers* to try stripping.
+
+```javascript
+const LINKERS = {
+  nb: ['s', 'e'],           // hverdags+mas, gutte+klær
+  nn: ['s', 'e'],           // same as NB
+  de: ['s', 'n', 'en', 'er', 'e', 'es'],  // already in de-compound-gender.js
+};
 ```
+
+**Why this is sufficient for decomposition:** When splitting "hverdagsmas", the algorithm tries:
+1. Direct suffix: "verdagsmas", "erdagsmas", ..., "mas" -> is "mas" in nounbank? Yes -> split found
+2. With linker strip: at position 7, remainder = "smas", try stripping "s" -> "mas" -> found
+
+The linker list is exhaustive for all three languages. Norwegian linguists confirm there is no universal rule for *which* linker a word takes (it's per-word/lexical), but the set of *possible* linkers is closed and small.
+
+**For generation (dictionary display):** When showing "hverdag + s + mas", the engine knows the linker was "s" because it was the character(s) stripped during decomposition. No per-word fuge metadata needed in papertek-vocabulary for v2.1.
+
+### Decomposition Algorithm
+
+Greedy longest-suffix-first, recursive, with linking-element awareness:
+
+```
+decomposeCompound(word, nounSet):
+  if word in nounSet: return [word]    // known word, no split needed
+  if word.length < 6: return null      // too short to be a compound (min 3+3)
+
+  for splitPos from 1 to word.length - 3:   // left part >= 1 char
+    leftCandidate = word[0..splitPos]
+    remainder = word[splitPos..]
+
+    // Try direct split
+    if leftCandidate in nounSet:
+      right = decomposeCompound(remainder, nounSet)
+      if right: return [leftCandidate, ...right]
+
+    // Try stripping each linker from the start of remainder
+    for linker in LINKERS[lang]:
+      if remainder.startsWith(linker):
+        strippedRemainder = remainder[linker.length..]
+        if strippedRemainder in nounSet:
+          right = decomposeCompound(strippedRemainder, nounSet)
+          if right: return [leftCandidate, linker, ...right]
+```
+
+**Key constraints:**
+- Minimum component length: 3 characters (matches existing `MIN_SUFFIX_LEN` in `de-compound-gender.js`)
+- Maximum recursion depth: 3 splits (4 components) — Norwegian and German rarely exceed 3-part compounds in student writing
+- Only split at noun boundaries — verbs and adjectives don't form the head of compounds (the last component is always a noun for gender inference)
+- Left components can be nouns, adjectives, or verbs (adverbs too in principle, but rare)
+
+### Integration Points
+
+| Consumer | How It Uses Decomposition | Integration |
+|----------|--------------------------|-------------|
+| **Spell-check** (`validWords` check) | Accept decomposable compounds as valid tokens — unknown word that decomposes = not a typo | Add `decomposeCompound` call in `spell-check-core.js` token validation path, after `validWords.has()` fails |
+| **Sarskriving rule** | Expand detection: "skole dag" flagged even if "skoledag" isn't stored, because "skole"+"dag" decomposes | Replace `compoundNouns.has(prev.word + t.word)` with `decomposeCompound(prev.word + t.word)` |
+| **Gender inference** (NB/NN) | Extend existing DE compound-gender to NB/NN: unknown compound -> gender from last component | New rule `nb-compound-gender.js` mirroring `de-compound-gender.js` |
+| **Dictionary popup** | Show decomposition for unknowns: "Samansett ord: hverdag + s + mas" with gender from last part | `popup.js` calls `decomposeCompound` when nounbank lookup returns null |
+| **Word prediction** | Decomposed compounds get frequency boost from last component | Score adjustment in `vocab-seam-core.js` wordList builder |
+
+### Vocab Seam Changes
+
+The decomposer needs access to a **noun-only** Set (not `validWords` which includes all POS). Current `compoundNouns` Set in `buildLookupIndexes` is close but only includes nounbank base entries. Need to also include noun forms (plural, definite) for left-component matching.
+
+```javascript
+// In buildLookupIndexes, expand:
+const nounLemmas = new Set();  // base forms only, for left-component matching
+// ... in the nounbank loop:
+nounLemmas.add(baseWord);
+```
+
+Expose via `__lexiVocab.getNounLemmas()` alongside existing `getValidWords()`, `getNounGenus()`.
+
+### Polish Items — No Stack Changes
+
+| Feature | Stack Impact |
+|---------|-------------|
+| Manual "Run spell-check" button | Pure UI: button in popup.html, click handler calls existing `CORE.runCheck()`. Zero new libraries. |
+| Demonstrative-mismatch rule | New rule file `nb-demonstrative.js`. Uses existing `nounGenus` Map. No stack additions. |
+| Triple-letter typo budget | Enhancement to existing `nb-typo-fuzzy.js` Levenshtein path. Add frequency-weighted distance. No stack additions. |
+| Browser visual verification | Manual testing protocol. No stack additions. |
+
+---
 
 ## Alternatives Considered
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| `Intl.Segmenter` | `sentencex-js` (Wikimedia, MIT, multilingual segmenter) | If Chrome dropped `Intl.Segmenter` — it hasn't. sentencex adds ~30 KB + its own language rules; duplicates what ICU already gives us for free. Revisit only if sentence-granularity segmentation proves insufficient for NB semicolon-lists. |
-| Roll-own POS helpers | `compromise` / `de-compromise` / `pos-js` | If we ever needed general-purpose tagging across arbitrary text. For our closed-set needs (is this token a finite verb? is it a subordinator?) a 20-line switch statement beats a 200 KB tagger and is easier to fixture-test. Revisit if Phase 16 (discourse / tense harmony) requires true POS across unseen vocab. |
-| Vocab-driven BAGS list | Hard-coded in rule file | When the BAGS list is 5 items (prototype). Move to `papertek-vocabulary` as soon as it exceeds ~10 items or another consumer (webapps, nativeapps) wants the data. Friction test per `project_data_logic_separation_philosophy.md`. |
-| Additive vocab schema | New bank / table per feature | If a feature is genuinely structural (e.g. clitic-order table doesn't belong on any existing word). Keep single-purpose banks small and explicit; avoid shoehorning into `generalbank`. |
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Compound splitting | Roll own (~120 LOC) | CharSplit, decomp, jwordsplitter | Wrong language (Python/Java/Go), GPL license, external dictionary dependency, ML-based |
+| Lookup structure | `Set`/`Map` (existing) | Trie, DAWG, suffix array | Unnecessary complexity; Set.has() is O(1) and sufficient for our ~4K noun vocabulary; trie's prefix-search advantage is irrelevant for suffix-based decomposition |
+| Linking element data | Static config in engine | Per-word `fuge` field in papertek-vocabulary | Decomposition only needs the *set of possible linkers* to try; per-word fuge data is needed for *generation* (not our use case in v2.1) |
+| Noun set scope | `nounLemmas` (base forms) | `validWords` (all POS) | Using `validWords` would cause false splits on verb/adjective boundaries ("springer" = verb, not a compound component) |
 
-## What NOT to Use
+---
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Hunspell / `nspell` / `spellchecker-wasm` | All mature Norwegian Hunspell dictionaries are **GPL-2.0**, incompatible with MIT. WASM builds push 500 KB–2 MB into the zip. Already out-of-scope per `PROJECT.md`. | Existing roll-own spell-check (~180 LOC in `spell-check.js` + rules) — v1.0 proved this hits P=1.000 R=1.000 on the gated rules. |
-| `compromise` / `nlp.js` / `natural` | 200 KB–2 MB each; English-biased; pulls in models/trainers we don't need; some subcomponents carry Apache-2.0 which is MIT-compatible but the bundle cost alone disqualifies. | Closed-set lookups in `papertek-vocabulary` + 20–50 LOC rule-local helpers. |
-| ML models (transformer taggers, distilled BERT, etc.) | Violates "no-ML" heuristic constraint; cannot ship inside SC-06 (network silence); offline models are multi-MB and blow the 20 MiB cap; fine-tuning/update cycle is outside this project's shipping rhythm. | Rule-based detection with vocab-driven trigger lists. Benchmark texts are the acceptance surface, not F1 on a held-out dev set. |
-| Custom build step (Rollup / esbuild / tsc) for extension code | Breaks "no build step — keeps the bar low for contributors" (PROJECT.md:106). Every file in `extension/` is directly loadable by Chrome. | Keep vanilla JS + ES-module imports. Build step allowed **only** for `scripts/` and `backend/` (already the case). |
-| Regex-only sentence segmenter | Breaks on Spanish `¿?`, French `«»`, Norwegian decimal `3,5`, and abbreviations (`f.eks.`, `bl.a.`, `Dr.`). Every line in `de.txt`/`es.txt`/`fr.txt` has at least one such construct. | `Intl.Segmenter({granularity: 'sentence'})` is locale-aware and ICU-backed. |
-| General dependency-parser port | Any UD-trained parser is ≥10 MB; spaCy / Stanza browser ports don't exist in maintained MIT form; even minimal CoNLL models are 5+ MB per language. | The phenomena we flag (V2 violation, verb-final, clitic order, BAGS, personal-a) all have surface patterns that a parser is overkill for. |
-| Runtime network calls for any rule | `check-network-silence` gate rejects this. Breaks landing-page offline promise. | Bundle all data; use background `sync-vocab` at install-time if a rule's data set grows past the point where it fits in the baseline bundle (see `project_data_source_architecture.md`). |
+## Data Requirements from papertek-vocabulary
 
-## Stack Patterns by Phase Group
+### v2.1: No schema changes needed
 
-**Phase 6 — Register / collocations / stylistic redundancy (cross-lang, S):**
-- Data: new `registerbank` file per language (colloquial tokens → formal
-  suggestion) in papertek. New `collocations.json` for EN seed. New
-  `redundancyphrases.json` (`return back` → `return`).
-- Code: one rule file per sub-phase (`en-register.js`, `en-collocation.js`,
-  `en-redundancy.js`, `nb-anglicism.js`, `fr-colloquial.js`). All
-  lookup-driven, no syntax reasoning. Zero new primitives — reuses v1.0
-  token-scan pattern.
+The decomposition engine works entirely with existing data:
+- `nounbank` entries provide the noun lemma set
+- `genus` field on noun entries provides gender for inference
+- `forms` object provides inflected forms for left-component matching
 
-**Phase 7 — Word order (M, NB+DE+FR):**
-- Data: add `subordinator: true` flag to conjunction entries in papertek
-  (`dass`, `weil`, `wenn`, `ob`, `obwohl` / `at`, `fordi`,
-  `hvis`, `om`, `som` / `que`, `parce que`, `quand`, `si`). Add `placement:
-  'BAGS'` to FR adjective entries.
-- Code: shared helper `detectFiniteVerbPosition(tokens)` (~60 LOC) used by
-  `nb-v2.js` and `de-v2.js`. Shared helper `detectMainVsSubordinate(sentence)`
-  (~40 LOC) keyed off subordinator flag. `Intl.Segmenter` provides the
-  sentence boundary. `fr-bags.js` reads placement from vocab — no parsing
-  needed.
+### Future (post-v2.1): Optional enrichment
 
-**Phase 8 — DE case & agreement governance (M):**
-- Data: new `prepbank` with `governance: 'dat'|'acc'|'gen'|'two-way'` per
-  preposition. `separable: true` on verbbank for `aufstehen`, `mitkommen`,
-  `ankommen`, etc. `aux: 'sein'|'haben'` on every verb. Compound-noun
-  recognition via existing nounbank (last-component gender lookup).
-- Code: `de-prep-case.js` (lookup), `de-trennbar.js` (detect prefix-verb used
-  un-split), `de-aux.js` (scan perfekt participle + auxiliary),
-  `de-compound-gender.js` (fallback when noun missing: longest-suffix match
-  in nounbank).
+If false-positive decompositions become a problem, add a `compoundable: false` flag to entries that should never be compound components (e.g., short nouns that cause spurious splits). This is additive and backward-compatible.
 
-**Phase 9 — ES ser/estar, por/para, personal-a (M):**
-- Data: predicate-adjective `copula: 'ser'|'estar'|'both'` on adjectivebank.
-  `por`/`para` trigger table (`porpara.json`) with ~15 patterns. `human:
-  true` on applicable nounbank entries + pronounbank.
-- Code: `es-copula.js` (match copula form against predicate type),
-  `es-porpara.js` (decision-tree over trigger contexts),
-  `es-personal-a.js` (detect transitive-verb + human noun without preceding
-  `a`).
+If the dictionary popup needs to show *which linker a word takes when used as a left component* (for student education), add `fuge: "s"` to entries in papertek-vocabulary. This is post-v2.1 scope — the decomposition engine doesn't need it.
 
-**Phase 10 — FR élision, auxiliary, participe passé (M):**
-- Data: `aux: 'être'|'avoir'` on verbbank (DR MRS VANDERTRAMP + pronominals).
-  Vowel-initial flag already derivable from first letter + known `h-aspiré`
-  list (new `hAspire.json`).
-- Code: `fr-elision.js` (regex-friendly, closed set of prefixes), `fr-aux.js`
-  (mirror of `de-aux.js`), `fr-pp-agreement.js` (the hard one — needs
-  preceding-DO detection; ship behind feature toggle).
+---
 
-**Phase 11 — Aspect & mood (L, ES+FR):**
-- Data: `subjunctive_triggers.json` (ES + FR) listing fixed expressions
-  (`quiero que`, `il faut que`). Already have conjugation tables for mood
-  forms.
-- Code: `es-subjuntivo.js`, `fr-subjonctif.js` — both scan sentence after
-  trigger and verify embedded verb mood using existing conjugation tables.
+## Bundle Size Impact
 
-**Phase 12 — Pronoun / pro-drop (M, ES+FR):**
-- Data: `clitic_order.json` for FR (me/te/se < le/la/les < lui/leur < y < en).
-  `gustar_class.json` for ES (list of gustar-pattern verbs).
-- Code: `es-prodrop.js` (soft warn if sentence-initial subject pronoun +
-  unambiguous verb form), `es-gustar.js` (pattern match),
-  `fr-clitic-order.js` (cluster detection + permutation check against table).
+| Addition | Estimated Size | Cumulative |
+|----------|---------------|------------|
+| `compound-decomposer.js` | ~4 KB (minified) | 12.47 + 0.004 = 12.47 MiB |
+| `nb-compound-gender.js` rule | ~2 KB | 12.48 MiB |
+| `nb-demonstrative.js` rule | ~2 KB | 12.48 MiB |
+| Manual spell-check button UI | ~1 KB | 12.48 MiB |
 
-**Phase 13 — Register consistency across text (L, cross-lang):**
-- Architectural seam change: rules currently fire per-sentence; this phase
-  needs **document-level state**. Proposal: add an optional
-  `rule.aggregate(findings, document)` phase that runs after per-sentence
-  scanning and can emit cross-sentence findings. Mentioned in
-  roadmap sequencing notes as a planned seam change. ~50 LOC in
-  `spell-check.js`.
-- Data: `register_markers.json` per language (riksmål tokens, a-infinitiv
-  tokens).
-- Code: `de-dusie-drift.js`, `fr-tuvous-drift.js`, `nb-riksmaal-drift.js`,
-  `nn-infinitiv-drift.js`. All share the aggregate pattern.
+Well within the 20 MiB ceiling. No bundle-size concerns.
 
-**Phase 14 — Morphology & agreement beyond tokens (M, EN+ES+FR):**
-- Data: `irregular_plurals.json` (EN) + `irregular_verbs.json` (EN) —
-  already partially present, extend. `word_families.json` (EN) for
-  creativity/creation/creative confusions.
-- Code: `en-morph-overgen.js` (any form that matches regular pattern for a
-  word on the irregular list → flag), `en-wordfamily.js`,
-  `es-gender-article-mismatch.js`, `fr-gender-article-mismatch.js`.
+---
 
-**Phase 15 — Collocations & idioms at scale (L, cross-lang):**
-- Data: scale the Phase 6.2 collocation pattern out: `collocations_nb.json`,
-  `collocations_de.json`, etc. Each is a list of
-  `{head, goodPreps:[], badPreps:[]}`.
-- Code: one rule per language; all lookup.
+## Installation
 
-**Phase 16 — Tense harmony & discourse (L, aspirational):**
-- Defer. Either split into v3.0 or attempt a minimal subset (unmotivated
-  tense switch detection via verb-form scan across `Intl.Segmenter` sentence
-  boundaries). No new dependency proposed.
+No new packages. No `npm install` step needed.
 
-## Version Compatibility
+The decomposer is a vanilla JS IIFE file added to:
+- `extension/manifest.json` content_scripts array (after `vocab-seam-core.js`, before `spell-check-core.js`)
+- `extension/content/compound-decomposer.js`
 
-| Addition | Required baseline | Notes |
-|----------|------------------|-------|
-| `Intl.Segmenter` (sentence granularity) | Chromium 87+ (2020-11); Baseline 2024-04 (all engines) | Leksihjelp targets Chrome + Edge + Brave only (PROJECT.md:131) — all Chromium, all covered. No polyfill needed. |
-| Additive vocab fields | `papertek-vocabulary` can add fields any time; consumers opt in | Backward-compatible by design — rule code `?.aux ?? null`-guards every new field. Cross-app impact minimized per `PROJECT.md:109`. |
-| New rules per phase | Plugin rule architecture (INFRA-03) | Adding a rule = one file under `spell-rules/*.js` + one CSS color + one explain contract + one `check-fixtures` entry. v1.0 shipped 5 rules this way. |
-| Phase 13 document-level aggregate | New optional method `rule.aggregate?(findings, document)` in rule contract | ~50 LOC change in `spell-check.js`. Existing rules unaffected — aggregate is opt-in. |
-
-## Integration with existing seams
-
-- **`__lexiVocab` seam** — extended, not replaced. New fields (`aux`,
-  `separable`, `copula`, `human`, `placement`, `governance`) show up as
-  additional indexes built in `buildIndexes()`. Rules read via existing
-  accessor patterns.
-- **Plugin rule architecture** — unchanged. Every v2.0 rule is a single
-  file exporting `{id, priority, check, explain}`. No edits to
-  `spell-check.js` except the one Phase 13 aggregate seam.
-- **`check-fixtures.js` harness** — unchanged harness; each new rule lands
-  with ≥30 positive + ≥15 acceptance cases per language (roadmap line 27).
-  P/R/F1 thresholds per rule tuned in `THRESHOLDS` table.
-- **Release gates** — all six v1.0 gates still apply. New rule ids auto-
-  qualify for `check-explain-contract` and `check-rule-css-wiring` by being
-  added to the respective TARGETS arrays.
+---
 
 ## Sources
 
-- [Intl.Segmenter — MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Segmenter) — HIGH confidence; verified sentence granularity + locale options.
-- [Intl.Segmenter is Baseline — web.dev 2024-04](https://web.dev/blog/intl-segmenter) — HIGH confidence; confirms Chromium/Firefox/Safari coverage as of April 2024.
-- [sentencex-js — Wikimedia](https://github.com/wikimedia/sentencex-js) — MEDIUM confidence alternative; not recommended due to redundancy with `Intl.Segmenter`.
-- [de-compromise](https://github.com/nlp-compromise/de-compromise), [pos-js](https://github.com/dariusk/pos-js) — MEDIUM confidence; reviewed and rejected for bundle cost + mismatch with closed-set needs.
-- `PROJECT.md` constraint block (lines 84–96, 124–132) — HIGH confidence; binding project constraints.
-- `.planning/v2.0-benchmark-driven-roadmap.md` (all phases) — HIGH confidence; phase capability requirements.
-- `benchmark-texts/de.txt`, `es.txt` — validation surface reviewed; every flagged phenomenon maps to a data-or-roll-own path above.
-- User memory `project_data_source_architecture.md` + `project_data_logic_separation_philosophy.md` — HIGH confidence; authoritative on data-vs-logic separation policy.
-
----
-*Stack research for: v2.0 structural grammar governance additions*
-*Researched: 2026-04-24*
+- [stts-se/decomp](https://github.com/stts-se/decomp) — Swedish/Norwegian Bokmal compound boundary guesser (Go, confirms linker set and algorithm shape)
+- [Algolia decompounding](https://www.algolia.com/blog/engineering/increase-decompounding-accuracy-by-generating-a-language-specific-lexicon) — lexicon-based decompounding approach (confirms dictionary-lookup is the standard non-ML method)
+- [Norwegian compound word binding](https://kuriousfox.com/norwegian-word-binding-to-form-compound-words/) — NB linking elements: -s- (most common), -e- (rare), zero-fuge (default)
+- [German Fugen-s rules](https://blogs.transparent.com/german/compound-words-das-fugen-s-im-deutschen-the-linking-s-in-german-part-1/) — German linking elements: -s-, -n-, -en-, -er-, -e-, -es-
+- [John Resig: JS Trie Performance](https://johnresig.com/blog/javascript-trie-performance-analysis/) — Trie vs Hash performance in JavaScript (hash wins for point lookups; trie wins for prefix search)
+- [Hash Table vs Trie](https://www.baeldung.com/cs/hash-table-vs-trie-prefix-tree) — Algorithmic complexity comparison
+- Existing codebase: `de-compound-gender.js` lines 78-103 (proven suffix-match + linker-strip algorithm)
+- Existing codebase: `vocab-seam-core.js` lines 706-807 (`buildLookupIndexes`, `compoundNouns` Set, `nounGenus` Map)

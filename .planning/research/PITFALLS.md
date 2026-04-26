@@ -1,416 +1,271 @@
-# Pitfalls Research — v2.0 Structural Grammar Governance
+# Domain Pitfalls — v2.1 Compound Decomposition & Polish
 
-**Domain:** Adding structural grammar rules (word-order, case governance, aspect/mood, register drift, collocations) on top of the v1.0 per-token spell-check surface for NB/NN/DE/ES/FR/EN. Offline heuristic rules. `benchmark-texts/` as validation source of truth.
+**Domain:** Adding compound word decomposition (NB/NN/DE) + carry-over polish items to existing 57-rule spell-check extension
+**Researched:** 2026-04-26
+**Confidence:** HIGH -- grounded in existing codebase analysis, Spraakraadet fuge documentation, and v1.0/v2.0 shipped rule interaction patterns
 
-**Researched:** 2026-04-24
-**Confidence:** HIGH — grounded in v1.0 audit evidence and stated v2.0 scope.
-
-**Scope note:** This file supersedes the v1.0-era PITFALLS.md for v2.0 roadmap planning. v1.0 token-level pitfalls (captured in that earlier document) are now embedded in release gates; v2.0 pitfalls are structural/integration-level.
+**System state:** 57 spell rules (plugin architecture), 2,124 NB nouns, 1,641 DE nouns, `dedupeOverlapping` priority-based conflict resolution, 9 release gates, 3,326 fixture lines at F1=1.000, 12.47 MiB zip (20 MiB cap).
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Fixture-Green False-Positive Avalanche on Structural Rules
+### Pitfall 1: Greedy longest-suffix produces phantom compound splits
 
-**What goes wrong:** A structural rule (Phase 7 NB V2, Phase 8 DE case, Phase 10 FR participe passé) hits P/R targets on a hand-authored fixture, ships, and then fires on half of a student's real sentences because legitimate constructions (quoted speech, interrogatives, subordinate clauses, stylistic fronting, poetic inversion) were never in the fixture.
+**What goes wrong:** The existing `de-compound-gender.js` (lines 78-103) uses greedy longest-suffix matching -- scan from position 1 rightward to find the longest tail in `nounGenus`. This works for DE gender inference (where you only validate the suffix) but fails for full decomposition because it never validates the PREFIX side. Result: words that happen to end with a real noun but are not compounds get accepted as valid.
 
-**Why it happens:** v1.0 fixtures were token-local — `et bok` either fires or doesn't. Structural rules operate on spans; the *acceptance set* (constructions the rule must NOT flag) is open-ended. Writing 30 positive cases is easy; enumerating every legitimate inversion is not, and authors unconsciously curate examples the rule already handles.
+Concrete examples from the NB nounbank:
+- "minister" contains suffix "ister" (suet/lard in Norwegian)
+- "angrep" contains suffix "rep" (rope)
+- "familie" contains suffix "lie" (a lie in English, but also in some dictionaries)
+- "karakter" contains "akter" (aft/stern)
 
-**How to avoid:**
-- Invert v1.0's fixture ratio: structural rules ship with **≥2× acceptance cases vs positive cases** (e.g., 30 positive + 60 acceptance).
-- New release gate `check-benchmark-acceptance` runs full `benchmark-texts/<lang>.txt` and asserts only lines tagged `# EXPECT-FLAG` light up; ceiling of ≤2 stray flags per 500-word passage.
-- Make the acceptance sweep binding — phase doesn't close without it green.
+With linking-element stripping, the surface expands further. Stripping a fuge-s from "ministers" yields "minister" -> suffix "ister" after dropping the 's' linker. Ghost splits multiply.
 
-**Warning signs:**
-- Fixture P=1.000 but first pilot paste of real prose has 40 underlines.
-- All acceptance cases are short single sentences, no multi-clause/quoted examples.
-- Reviewer says "this is just inversion detection, what could go wrong."
+**Why it happens:** The `inferGenderFromSuffix` function in `de-compound-gender.js` deliberately only checks the suffix side because its purpose is gender inference, not decomposition validation. Extending this approach to full decomposition without adding prefix validation replicates the one-sided check.
 
-**Phase to address:** Phase 7 MUST land `check-benchmark-acceptance` gate before any word-order rule ships. Every structural phase after inherits.
+**Consequences:** (a) False acceptance of misspelled words as valid compounds, (b) wrong dictionary popup results, (c) wrong gender inference propagating to article-correction rules, (d) expanded sarskriving false positives.
 
----
+**Prevention:**
+1. Require BOTH sides of every split to be valid entries. Prefix must be in `nounGenus` (or `validWords` for non-noun first components). Suffix must be in `nounGenus`.
+2. Minimum component length >= 3 for BOTH prefix AND suffix (not just suffix as in the current `MIN_SUFFIX_LEN = 3`).
+3. Build a validation corpus: run decomposition against all 2,124 existing NB nouns. Any noun that decomposes into parts where either part lacks independent meaning is a false positive. Target: <2% false-positive rate on existing nounbank.
+4. Maintain a small blocklist of known false splits (words that look decomposable but etymologically aren't). Seed from the validation corpus; grow from user reports.
 
-### Pitfall 2: Benchmark-Corpus Overfitting (Training-Set Leak)
-
-**What goes wrong:** Rule authors engineer detection for the specific phrasings in `benchmark-texts/<lang>.txt` lines. Fixture + benchmark both green; ship. A student writes the same error class with different words and the rule misses it — the rule was engineered to the benchmark's sentence shapes, not the underlying pattern.
-
-**Why it happens:** v2.0 roadmap explicitly ties "ship when 80% of promised benchmark lines flip." That's a direct incentive to overfit visible text. If fixture cases are written by paraphrasing benchmark lines (same author's intuition), the corpora reinforce rather than cross-validate.
-
-**How to avoid:**
-- **Hold-out corpus:** reserve 30% of each phase's benchmark additions as a hold-out set hidden during rule authoring. Rule must hit ≥0.80 recall on hold-out, not just training-visible lines.
-- Seed fixtures from *independent sources* (student writing samples, textbook errata, Språkrådet corpora) — not by paraphrasing the benchmark lines.
-- Phase plan's "Validates against:" bullet must cite ≥2 external sources of error evidence, not just benchmark line numbers.
-
-**Warning signs:**
-- Fixture cases and benchmark lines share the same 5 verbs and 3 adverbials.
-- Rule code has literal-string matches (`"i går"`) rather than category checks (`TIME_ADVERBIAL` set).
-- Phase claims 100% benchmark flip-rate but misses obviously-analogous student errors in smoke-test.
-
-**Phase to address:** Cross-cutting — roadmap instruction for every structural phase. Phase 7 is the first test.
+**Detection:** Automated test: for every noun already in nounbank, run decomposition. If the noun has a stored compound structure, verify decomposition recovers it. If the noun is NOT a compound, verify decomposition returns null. This test catches regressions when the noun bank grows.
 
 ---
 
-### Pitfall 3: Feature-Gated Index Starvation, v2
+### Pitfall 2: Linking element ambiguity creates wrong splits and missed splits
 
-**What goes wrong:** A structural rule reads `__lexiVocab.someIndex`, passes fixtures (harness uses unfiltered vocab, predicate `() => true`), but in the browser the user's grammar-feature preset filters `someIndex` to a subset that doesn't contain the lookup key. Rule silently no-ops — exactly the Phase 05.1 `check-spellcheck-features` bug, repeated at scale.
+**What goes wrong:** The same characters can be a linking element OR part of a word. "Arbeidsliv" = arbeid + s + liv (fuge-s). But in "arbeidslos" the 's' is part of the word stem, not a linker. For DE, "-en-" could be the linker or part of "Frauen" (which ends in -en). Trying all linking elements at every split point creates combinatorial splits where multiple decompositions are valid.
 
-**Why it happens:** v1.0 learned word-prediction filters by preset while spell-check must not. v2.0 structural rules introduce *new* indexes (preposition-case tables, separable-verb lists, BAGS adjectives, subjunctive trigger sets). Each new index is a new opportunity to wire the gated path by accident.
+NB/NN fuge rules are partially lexical, partially suffix-pattern-based. Spraakraadet documents that fuge-s is "almost always" used after word-endings -dom, -else, -het, -skap, -sjon, -tet, -ling. But outside these patterns, "Det kan vaere vanskelig aa vite" (it can be difficult to know). DE linguistics literature confirms: "there are no fixed rules" for Fugenelemente selection.
 
-**How to avoid:**
-- **Extend `check-spellcheck-features`** for every new index a structural rule consumes — assert it stays populated under minimal-preset simulation.
-- Convention: spell-check rule indexes go in `buildLookupIndexes()` (unfiltered); word-prediction indexes go in `buildIndexes()` (preset-filtered). Enforce with new gate `check-seam-routing` — static grep of rule files asserts `__lexiVocab.xxx` reads target the correct builder.
-- Phase plan "Verification" section MUST name the index path and which builder populates it.
+**Consequences:** Wrong linking element choice -> wrong split boundaries -> wrong gender inference from wrong suffix. Or: valid compound missed because the algorithm tries the wrong linker first and finds no valid split.
 
-**Warning signs:**
-- New rule works in `check-fixtures` but fires zero findings in a fresh-profile smoke-test.
-- Phase plan mentions "new vocab index" without specifying `buildLookupIndexes` vs `buildIndexes`.
-- Smoke-test done with all grammar features manually enabled.
+**Prevention:**
+1. For NB/NN: implement Spraakraadet's suffix-based heuristics as a first-pass fuge predictor. If the first component ends in -dom, -else, -het, -skap, -sjon, -tet, -ling, -nad: expect fuge-s. This covers the documented "naer alltid" (almost always) cases.
+2. For both NB and DE: try splits in this order: (a) zero-fuge first, (b) fuge-s (most common), (c) remaining linkers. Accept the FIRST valid split (both sides valid). Do not enumerate all possible splits -- greedy is acceptable here because ambiguous splits are rare enough not to justify exhaustive search.
+3. For DE: reuse the existing `LINKERS = ['s', 'n', 'en', 'er', 'e', 'es']` from `de-compound-gender.js` with the same priority ordering.
+4. Consider adding a `fuge` property to high-frequency first components in papertek-vocabulary nounbank (e.g., hverdag -> "s", skole -> "", barn -> "e"). Research question for phase planning: how many nouns commonly appear as first components? Estimate: <200 for NB. This is a data enrichment, not logic.
 
-**Phase to address:** Phase 6 (first v2.0 phase with new indexes — collocations, register markers). Every subsequent structural phase inherits.
+**Detection:** Benchmark test: for known compounds containing linking elements (hverdagsmas, gutteklasse, barnehage), verify decomposition recovers the correct split point and correct linker. Manual review of the first 50 decompositions on benchmark texts.
 
 ---
 
-### Pitfall 4: Discourse State Staleness (Phase 13)
+### Pitfall 3: Decomposition silences typo-fuzzy on misspelled long words
 
-**What goes wrong:** Phase 13 (register consistency, du/Sie drift, bokmål/riksmål mixing) needs state that spans sentences. State attached to a contenteditable DOM; user deletes half the text; state still describes ghost tokens; false positives erupt.
+**What goes wrong:** The typo-fuzzy rule (priority 50) fires on unknown words not in `validWords`. If decomposition adds successfully-decomposed compounds to the "accepted" set (or runs at a priority that preempts typo-fuzzy), a misspelled compound that accidentally decomposes into real parts is silently accepted.
 
-**Why it happens:** Every v1.0 rule is stateless — input is (token, neighbors, vocab), output is a finding. No rule has persistent cross-sentence state. Adding state means reasoning about invalidation (edits, focus changes, paste, undo), which no current rule does. Spell-check debounce updates incrementally rather than re-scanning from scratch.
+Example: student writes "skoledegen" (typo for "skoledagen", the school day). Decomposition: "skole" + "degen" -- "degen" IS a word (the rapier/sword). Decomposition says "valid compound", student never sees the typo correction.
 
-**How to avoid:**
-- **Document-level state = derived, never cached.** Phase 13 rules recompute from current DOM text every pass.
-- If cost forces caching, key state by a content hash; invalidate on hash change. Hash logic lives in the seam, not in rules.
-- Phase 13 research step (flagged in roadmap: *"Phase 13 depends on document-level state management that no current rule needs"*) must propose an explicit invalidation protocol BEFORE any rule is written.
-- New release gate `check-stateful-rule-invalidation` runs scripted edit sequences (type, delete, paste, undo) and asserts findings match the final text.
+This is the mirror image of v1.0 Pitfall 1 (typo entries shadowed into validWords, silencing the curated-typo branch -- fixed in `vocab-seam-core.js` line 777). Same class of error: an acceptance path that's too broad silences a correction path.
 
-**Warning signs:**
-- Rule code references a module-level `Map`/`Set` that accumulates findings across `runCheck` calls.
-- User reports "the underline stays after I delete the word."
-- Findings differ depending on typing vs. paste order.
+**Why it happens:** Decomposition validates syntactic validity (both parts are real words) but has no way to check semantic plausibility. In Norwegian and German, ANY two nouns can be productively compounded, so "skoledegen" (school rapier) is syntactically valid even though semantically nonsensical.
 
-**Phase to address:** Phase 13 research step (pre-Phase-13 seam change). Invalidation protocol must land before any Phase 13 rule code.
+**Consequences:** The system's primary value -- catching misspellings -- degrades for compound-length words, which are exactly the words students misspell most often.
 
----
+**Prevention:**
+1. Decomposition MUST NOT add compounds to `validWords`. It should be a separate acceptance path.
+2. Priority ordering: if typo-fuzzy finds a d=1 neighbor for the FULL compound word, the typo correction wins over decomposition acceptance. Implement: decomposition acceptance runs at priority > 50 (after typo-fuzzy); if typo-fuzzy already emitted a finding for this token, decomposition defers.
+3. Alternatively: decomposition only accepts compounds where the FIRST component is >= 4 characters AND the SECOND component is >= 4 characters, reducing the chance of accidental two-short-word matches.
+4. Fixture cases: include misspelled compounds where a typo-fuzzy correction exists. Verify the typo finding fires, not decomposition acceptance.
 
-### Pitfall 5: DE Case Governance Requires Parsing We Don't Have
-
-**What goes wrong:** Phase 8.1 (preposition-case governance) needs to find the NP head after a preposition, read its gender+number, and check the article. Without a real parser, the rule heuristically grabs "the next noun after the preposition" — German nouns can be 3 tokens away past adjective chains, compound articles, or a relative clause, and "the next noun" can belong to a different phrase. Norwegian learners of German produce exactly the ambiguous structures (adjective chains, embedded relatives) that break heuristic NP detection.
-
-**Why it happens:** v1.0 rules operated in a 1–3 token window. Phase 8's "closed morphology, tractable lookup" framing hides that *which noun to look up* is itself a parsing problem.
-
-**How to avoid:**
-- **Scope Phase 8.1 aggressively:** only flag prep+article pairs where the article is *immediately adjacent* to the prep (`mit den`, `mit dem`). No multi-token NP traversal. Sacrifice recall, keep precision.
-- **Precision floor** as explicit phase success criterion: DE benchmark acceptance sweep must hit precision ≥0.90 before recall is optimized. If precision dips, narrow scope.
-- Document limitation in rule's `explain()`: "Denne regelen sjekker bare artikkelen rett etter preposisjonen" — manage expectations.
-- Phase 8 plan has explicit "what this rule will NOT catch" bullet with examples.
-
-**Warning signs:**
-- Rule code has `while (i < tokens.length && !isNoun(tokens[i]))` — unbounded traversal.
-- No acceptance cases with intervening adjectives or relative clauses.
-- Precision drops on longer sentences.
-
-**Phase to address:** Phase 8 plan + research step. Precision floor is explicit success criterion.
+**Detection:** Write ~10 fixture cases of misspelled compounds that accidentally decompose (e.g., "skoledegen", "huskattten"). Verify typo-fuzzy fires on each.
 
 ---
 
-### Pitfall 6: FR Participe Passé Agreement Eats the Whole Phase
+### Pitfall 4: Sarskriving expansion without blocklist update causes false-positive storm
 
-**What goes wrong:** Phase 10.3 (`la pomme que j'ai mangée`) is the genuinely hard rule. "Ship with a feature toggle" is the escape hatch, not the plan. Full rule chains: find `avoir` aux → find past participle → find preceding DO pronoun (`la`/`les`/`que`) → resolve pronoun gender+number → check participle agreement. Five failure surfaces.
+**What goes wrong:** The current `nb-sarskriving.js` checks if `prev.word + t.word` exists in `compoundNouns` (a Set of nounbank base entries). With decomposition, you could flag "skole dag" even if "skoledag" isn't stored -- because decomposition verifies it's a valid compound. But this massively expands the firing surface. Every adjacent noun pair where the concatenation decomposes validly becomes a candidate.
 
-**Why it happens:** PP agreement is context-free-grammar-level. ML handles it by learning from examples; heuristic rules handle it by scoping tightly to reliable trigger windows. No middle ground.
+The existing `SARSKRIVING_BLOCKLIST` (lines 30-45 in `nb-sarskriving.js`) was tuned for the 2,124-entry `compoundNouns` set. It blocks function words and common adjectives. But it does NOT block noun-noun adjacency where both words are independently valid nouns. "glass bord" could be a list ("a glass and a table") or a compound ("glassbord", a glass table). The current system never had to decide because "glassbord" was either in `compoundNouns` or it wasn't.
 
-**How to avoid:**
-- **Split Phase 10.3 into 10.3a / 10.3b:**
-  - **10.3a:** only the `[DO-pronoun] [ai/as/a/avons/avez/ont] [past-participle-with-e/s-mismatch]` pattern — single finite window, no cross-clause resolution. ~30% recall, ~95% precision.
-  - **10.3b (aspirational, possibly v3.0):** the `que j'ai mangée` relative-clause case.
-- `grammar_fr_pp_agreement` toggle defaults **off** for first release of 10.3a. Opt-in, explicitly experimental. Flip to default-on only after one release cycle of field feedback.
-- Phase plan explicitly documents: the benchmark line `la pomme que j'ai mangée` may not flip in 10.3a. That's acceptable.
+**Consequences:** Sarskriving precision (currently P=1.000 on 55 NB + 46 NN cases) drops below the 0.92 threshold in `check-fixtures.js`. Students see false positives on legitimate noun phrases and lose trust in the rule.
 
-**Warning signs:**
-- Rule code does antecedent resolution across >3 tokens.
-- Phase plan treats 10.3 as "the full agreement rule."
-- Author says "we'll just also handle the relative-clause case."
+**Prevention:**
+1. DO NOT expand sarskriving to use decomposition in the first implementation phase. Ship decomposition for dictionary lookup and spell-check acceptance first. Sarskriving expansion is a separate, later step requiring its own fixture tuning round.
+2. When eventually expanding: require a linking element (fuge-s, fuge-e) in the concatenated form as a stronger signal. "skolesekk" (zero-fuge) is already in compoundNouns; "hverdagsmas" (fuge-s) is a strong signal because the 's' disambiguates from a two-word reading. Zero-fuge decomposition-based sarskriving has lower precision.
+3. Add minimum combined length >= 8 for decomposition-based sarskriving expansions.
+4. Run the expanded sarskriving against all benchmark texts; manual-review every new finding. If >10% are false positives, the expansion isn't ready.
 
-**Phase to address:** Phase 10 plan. Tight scope for 10.3a; explicit deferral of 10.3b.
+**Detection:** Before shipping sarskriving expansion: measure P/R delta on existing fixtures + benchmark corpus. Ship only if P stays >= 0.92.
 
 ---
 
-### Pitfall 7: Quoted Speech / Code-Block Bleed-Through
+## Moderate Pitfalls
 
-**What goes wrong:** Student pastes a German quote in a Norwegian document, or cites an example sentence, or writes dialogue in dialect. Structural rules fire inside quotation marks, `<code>`, `<pre>`, `<blockquote>`. Student sees noise in places the tool shouldn't touch.
+### Pitfall 5: Performance regression from decomposition on every unknown word
 
-**Why it happens:** v1.0's `nb-codeswitch` handles the *paragraph-density* case for full foreign paragraphs. It doesn't know about quotation marks. Structural rules trigger on shorter spans where a single quoted sentence lights up fully.
+**What goes wrong:** The typo-fuzzy rule already iterates `validWords` (a Set of every known form, likely 10,000+ entries for NB) for every unknown token. Adding decomposition means trying to split every unknown token at every position (average word length ~8), checking both halves against `nounGenus`. With ~2,124 NB nouns in `nounGenus`, each split-check is O(1) for the Map lookup, but there are O(word_length * linker_count) = ~48 split attempts per word. This runs on every keystroke during auto-detect.
 
-**How to avoid:**
-- Extend v1.0's `ctx.suppressed` infrastructure: quotation-span detector marks tokens inside `"…"`, `«…»`, `„…"`, `'…'` as suppressed **for structural rules** — but NOT for typo rules (typos in quoted text remain typos).
-- Tier suppression: `ctx.suppressedFor.structural` vs `ctx.suppressedFor.token`. Typo rules respect `.token`; structural rules respect `.structural`.
-- DOM-level: detect `<blockquote>`, `<code>`, `<pre>` and suppress their ranges entirely.
-- Benchmark corpus must include lines with quoted foreign sentences; assert they do NOT flag.
+**Why it happens:** Decomposition is inherently more expensive than a `Set.has()` lookup. The cost multiplies by the number of unknown tokens in the text.
 
-**Warning signs:**
-- Benchmark has no lines with `"…"` or block quotes.
-- Smoke-test protocol doesn't include pasting a quote.
-- User reports "it underlines my citations."
+**Prevention:**
+1. Gate decomposition behind minimum word length >= 6. Words shorter than 6 characters are almost never productive compounds in NB or DE.
+2. Cache decomposition results in a `Map<string, DecompResult|null>` cleared on language change. The same unknown word appears on every keystroke re-check; caching avoids redundant work.
+3. Run decomposition ONLY on tokens that fail `validWords.has()` AND `sisterValidWords.has()` -- same precondition as typo-fuzzy.
+4. Measure before optimizing: profile the spell-check pass on a 500-word benchmark text with and without decomposition. If delta < 50ms, no optimization needed. Current budget is probably ~20ms for the full pass.
 
-**Phase to address:** Phase 6 (first phase where register registers differently in quoted vs main text). Payoff compounds for Phases 7+.
+**Detection:** Performance test: time `check()` on a 500-word NB text with 20% unknown words, with and without decomposition. Alert threshold: 50ms delta.
 
----
+### Pitfall 6: `compoundNouns` Set semantics silently change
 
-### Pitfall 8: "Warn, Don't Hard-Flag" Softening That Never Actually Softens
+**What goes wrong:** The `compoundNouns` Set in `vocab-seam-core.js` (line 712, 793) currently contains only nounbank base entries. It's consumed exclusively by `nb-sarskriving.js`. If decomposition-verified compounds are added to this Set, the semantics change from "stored compounds" to "stored + inferred compounds." Any code that checks `compoundNouns.has(word)` gets a different answer than before.
 
-**What goes wrong:** Multiple Phase 11/12/13 rules say "soft warning — aspect legitimately varies" but ship with the same red 3px underline as typo rules. Users can't distinguish a definite typo from a soft aspect hint. Trust erodes.
+**Why it happens:** Reusing an existing data structure for a new purpose without auditing all consumers.
 
-**Why it happens:** Current popover/CSS wiring has one visual style — solid colored underline + dot. "Soft warning" requires a different UI affordance (dashed underline, muted colour, "hint" badge, different click behavior). That's a UX design task, not a flag-flip. Phase authors default to what exists.
+**Prevention:**
+1. DO NOT modify the `compoundNouns` Set. Keep it as the stored-compound set for sarskriving.
+2. Create a NEW function `decomposeCompound(word, vocab)` in `vocab-seam-core.js` that returns a decomposition result `{prefix, linker, suffix, genus}` or `null`. Export via `__lexiVocabCore` API.
+3. Rules that need decomposition call the function directly. The function is stateless and side-effect-free.
+4. grep-audit: `compoundNouns` currently appears only in `nb-sarskriving.js` (consumer) and `vocab-seam-core.js` (builder). Keep it that way.
 
-**How to avoid:**
-- Phase 6 (first phase with soft warnings via 6.1 register detector) builds a **second visual tier**: dashed/dotted underline, muted colour (amber/grey vs red/blue), popover copy prefixed "Kanskje:" / "Maybe:". Built once, reused by Phases 11/12/13/16.
-- Extend `check-rule-css-wiring`: rules declaring `severity: "hint"` must have `.lh-spell-<id>-hint` CSS class with distinct style; `severity: "error"` keeps the existing solid class.
-- Explain-contract extension: `{nb, nn, severity}`. Renderer honors severity in popover copy.
+**Detection:** grep for `compoundNouns` across all files after implementation. Only `nb-sarskriving.js` and `vocab-seam-core.js` should reference it.
 
-**Warning signs:**
-- Phase plan uses "soft warning" verbally; rule file looks identical to v1.0 rules.
-- Two rules of different confidence flag with identical visual weight.
-- User feedback: "I don't know which of these to trust."
+### Pitfall 7: Demonstrative-mismatch rule collides with nb-gender on overlapping spans
 
-**Phase to address:** Phase 6 builds the tier. Every subsequent phase using hints inherits.
+**What goes wrong:** New demonstrative-mismatch rule ("Det boka" -> "Den boka") flags det/den when the gender doesn't match the following noun. But `nb-gender` (priority 10) already flags article-noun gender mismatches for en/ei/et. If a student writes "Det bok" (wrong determiner + missing definiteness), both rules could fire on overlapping spans. `dedupeOverlapping` keeps the first (lowest priority number wins).
 
----
+Problem 1: If demonstrative-mismatch gets priority < 10, it suppresses nb-gender on cases where the student used "det" as a vague article (common student error pattern: "det bok" meaning "en bok"). The more common error gets no feedback.
 
-### Pitfall 9: papertek-vocabulary Schema Drift Across Consumers
+Problem 2: If demonstrative-mismatch gets priority > 10, nb-gender fires on "det boka" and suggests "en boka" or "ei boka" -- wrong fix. The article "det" is being used as a demonstrative (this), not an indefinite article.
 
-**What goes wrong:** Phase 8.2 lands `separable: true` on DE verbbank. Phase 8.3 adds `aux: "sein"`. Phase 10.2 uses the same `aux` on FR. By Phase 11, `papertek-webapps` or `papertek-nativeapps` breaks because they don't expect these fields, or a batch script leaks `separable` onto EN verbs that shouldn't have it.
+**Prevention:**
+1. Demonstrative-mismatch MUST distinguish demonstrative from article usage. Key signal: definiteness of the following noun. Demonstrative + definite noun ("det boka") is the demonstrative pattern. "Det" + indefinite noun ("det bok") is the article-usage pattern (nb-gender territory).
+2. Demonstrative-mismatch should ONLY fire when followed by a definite noun form (ending in -en, -a, -et, -ene, etc. for NB; -en, -a, -et, -ane, -ene for NN).
+3. Priority: 15 (after nb-gender at 10). On the rare overlap where both could fire, nb-gender wins, which is pedagogically correct -- article-gender is the higher-frequency student error.
+4. Skip tokens in the en/ei/et/ein/eit article set -- let nb-gender handle those exclusively.
 
-**Why it happens:** Additive schema changes are safe in the "old readers ignore new fields" sense, but *sparse* fields (present on some entries, absent on others) create branches in every consumer. Without a running spec of v2.0-owned fields, siblings either miss data or inherit it spuriously.
+**Detection:** Fixture cases: (a) "Det boka" -> "Den boka" fires demonstrative-mismatch, (b) "Et bok" -> "En bok" fires nb-gender only, (c) "Det bok" -> nb-gender fires (article error), demonstrative-mismatch does NOT fire (indefinite noun = not demonstrative pattern).
 
-**How to avoid:**
-- Maintain `papertek-vocabulary/SCHEMA.md` with per-field ownership: which repo introduced it, which banks+languages carry it, what absent-vs-false means.
-- Every v2.0 phase plan adding a field names: (a) exact field, (b) banks+languages, (c) consumer behavior when absent.
-- Before data PR ships, check sibling repos for adjacent-field consumers; warn maintainers.
-- `sync-vocab` sanity check: assert no DE-only field leaked into EN/ES/FR verbbanks (or inverse) after sync.
+### Pitfall 8: Triple-letter typo interacts badly with typo-fuzzy scoring
 
-**Warning signs:**
-- Data PR touches multiple languages' banks simultaneously without clear reason.
-- Sibling repos start failing CI after a vocab sync.
-- New field name overlaps with an existing field in another bank.
+**What goes wrong:** The triple-letter feature ("tykkkjer" -> "tykkjer") is a d=1 deletion in edit-distance terms. But the existing typo-fuzzy scoring (line 50-56 in `nb-typo-fuzzy.js`) penalizes shorter candidates by 50 points: `if (cand.length < query.length) s -= 50`. The correct fix "tykkjer" (shorter by 1 char) gets penalized, potentially losing to a wrong same-length substitute.
 
-**Phase to address:** Cross-cutting. Schema-documentation requirement lands in Phase 6 plan template; every phase inherits.
+Additionally, the first-character filter (`if (cand[0] !== first) continue` at line 103) means triple-letter at the start of a word (e.g., "ssskriv") would need the candidate "skriv" with a different first letter -- the filter blocks it.
 
----
+**Why it happens:** Typo-fuzzy was designed for common typo patterns (transposition, substitution, adjacent-key). Triple-letter repetition is a specific dyslexia-related pattern that the general scoring was never tuned for.
 
-### Pitfall 10: Rule Priority Collisions Cascade
+**Prevention:**
+1. Implement triple-letter as a SEPARATE rule file (`nb-typo-triple-letter.js`) with its own priority, not as a modification to typo-fuzzy. This keeps the 188+ existing typo fixture cases stable.
+2. Priority: ~45 (before typo-fuzzy at 50, after curated typo at 40). If the word contains 3+ consecutive identical letters and removing one produces a word in `validWords`, emit a finding.
+3. Simple pattern: `/(.)\1{2,}/` regex to detect triple-letter sequences. For each triple, try removing one instance and check `validWords.has()`. No edit-distance computation needed.
+4. Frequency-weighted tiebreak: if multiple single-letter removals each produce a valid word, prefer the higher-frequency one (using `vocab.freq`).
+5. The rule should fire on ALL languages (dyslexia-related key repetition isn't language-specific), not just NB/NN.
 
-**What goes wrong:** v1.0 priorities are sparse (proper-noun-guard=5, codeswitch=1, dialect-mix=35, etc.). v2.0 adds ~25 rules across 11 phases. Two rules fire on overlapping spans; which wins? Current behavior (typo-fuzzy short-circuits when dialect-mix fires) was hand-wired in Phase 05.1. Without an explicit priority contract, the 20th rule will silently shadow the 3rd.
+**Detection:** Fixture cases: "tykkkjer", "kommmmer", "skkole", "skkkole". Verify the triple-letter rule fires (not typo-fuzzy) and produces correct suggestions.
 
-**Why it happens:** Priority numbers are ints with ad-hoc spacing. No contract describes what "higher" means (fires first? instead-of? alongside?). v1.0 answered per-pair implicitly; v2.0's N² interaction space demands explicit policy.
+### Pitfall 9: Manual spell-check button re-running full check causes visual flash
 
-**How to avoid:**
-- Document priority semantics in `spell-rules/README.md`: what priority means, what bands reserved for what rule classes, how suppression interacts with priority.
-- **Priority bands:** 1–10 structural guards (codeswitch, proper-noun); 20–40 domain-specific structural (dialect-mix, V2, preposition-case); 50–70 morphological (gender, særskriving, modal); 80–95 typo (curated, fuzzy). New rules declare band + justify deviations.
-- New release gate `check-rule-priority-collisions`: when two rules emit findings on overlapping spans in the fixture, outcome must match documented expectation. No silent shadowing.
+**What goes wrong:** The auto-detect spell-check runs on a debounced keystroke timer and applies findings as DOM underlines. A manual "Run spell-check" button that calls the same `check()` pipeline clears and re-applies all underlines, causing a visible flash. If text hasn't changed since last auto-check, this is wasteful and visually jarring.
 
-**Warning signs:**
-- Adding a new rule breaks an existing rule's fixture without touching the existing rule.
-- Two rule files grep for the same trigger token.
-- Popover shows inconsistent rule attribution across re-renders.
+**Prevention:**
+1. Track a `lastCheckedText` hash (or the text itself, for short documents). Manual button compares current text against hash. If identical, skip re-check and show toast with existing findings count.
+2. The toast/acknowledgement is the primary UX value (per memory file: "so the button click feels acknowledged even when there's nothing to flag"). The re-check is secondary.
+3. Toast format: "X feil funnet" (X errors found) or "Alt ser bra ut!" (everything looks good).
+4. When text HAS changed: run full check, apply findings, then show toast. No different from auto-detect except user-initiated.
 
-**Phase to address:** Phase 6 documents bands + lands gate. Every subsequent phase respects.
+**Detection:** Manual browser test: type text, wait for auto-detect, click button. Verify no flash. Then type new text, click button before debounce. Verify check runs.
 
----
+### Pitfall 10: Dictionary popup for decomposed compounds shows wrong declension
 
-### Pitfall 11: Zero-Transfer Language-Specific Work Pretending to be Cross-Cutting
+**What goes wrong:** Gender is correctly inferred from the last component ("Schulranzen" -> Ranzen = m -> der Schulranzen). But plural forms of compounds often differ from the last component's standalone plural. "Spielplatz" plural is "Spielplatze" (not "Platze" in isolation). NB "barnehage" plural is "barnehager" but compound-specific plural forms may have irregularities not captured by the last component's entry.
 
-**What goes wrong:** Phase 8 is 100% DE, Phase 9 is 100% ES, Phase 10 is 100% FR. Each invents internal abstractions ("governance tables," "decision-tree wrappers," "trigger-list matchers") that sound reusable but aren't. Phase 11 ES subjuntivo tries to reuse Phase 10 FR subjonctif infrastructure; shapes don't align; developer rewrites or copy-pastes.
+**Prevention:**
+1. Show ONLY gender (inferred from last component) and the component breakdown in the decomposed popup. Do NOT show inferred plural or declension forms.
+2. The memory file explicitly states: "Do NOT inherit examples from components -- 'brod' examples are misleading on 'skolebrod'."
+3. Mark decomposed results clearly: "Samansett ord: hverdag + s + mas" with gender from "mas" (m -> en hverdagsmas).
+4. If the compound IS in the nounbank (Tier 1: stored compound), the stored entry takes precedence -- decomposition popup never overrides a stored entry.
 
-**Why it happens:** Under schedule pressure, language-siloed rules are written fast and specific. Shared abstractions emerge by accretion, not design. By Phase 15, four slightly-different trigger-list structures exist and nobody knows which to copy.
-
-**How to avoid:**
-- Phase 8 delivers a shared `grammar-tables.js` utility with documented data shapes for: preposition-case tables, trigger-phrase sets, closed-adjective lists. Phases 9/10/11 consume it.
-- gsd-roadmapper flags: Phase 8 research deliverable includes "shared table-lookup primitive spec."
-- Refactor-forcing gate: before Phase 11 opens, Phase 9/10 rules must consume the Phase 8 primitive or a refactor sub-phase blocks.
-
-**Warning signs:**
-- Two phases have near-identical utility functions with different names.
-- Each language's rules live in distinct folder conventions.
-- "Trigger list" appears in 4 files with 4 different shapes.
-
-**Phase to address:** Phase 8 research. Enforced at Phase 11 entry.
+**Detection:** Verify: for every stored compound in nounbank, decomposition either returns null (word found directly) or matches the stored entry's gender. Any mismatch is a data quality issue.
 
 ---
 
-### Pitfall 12: 80%-Flip-Rate Fetishism
+## Minor Pitfalls
 
-**What goes wrong:** Roadmap rule: "ship when 80% of promised benchmark lines flip." A phase lands, 8/10 flip, phase closes. The 2 that didn't were the most pedagogically important (e.g., subjunctive after `dudo que`); the 8 that did were easy cases. Headline hits; student value is marginal.
+### Pitfall 11: NB/NN fuge rules differ but share the same nounbank
 
-**Why it happens:** Benchmark lines aren't weighted by pedagogical priority. "80%" is a floor, not a quality bar.
+**What goes wrong:** NB and NN have slightly different fuge conventions. NB "gutteklasse" vs NN "guteklasse". The vocab seam builds one `nounGenus` from raw data for both NB and NN (via `buildLookupIndexes`). If decomposition uses language-specific fuge rules but language-neutral noun data, the NB decomposer might accept a split the NN decomposer should reject.
 
-**How to avoid:**
-- Tag each benchmark line with priority (`# P1`, `# P2`, `# P3`): P1 = high-frequency student error, P3 = edge case. Require 100% P1 flip, 80% P2, 50% P3.
-- Phase closure checklist lists which P1 lines flipped and which didn't. Any unflipped P1 blocks closure without written exception.
-- Manual teacher-eye pass: one human reads benchmark + detected flags side-by-side before closure.
+**Prevention:** Start with language-neutral fuge rules. The differences are minor -- a word that decomposes in NB almost always decomposes in NN too, with possibly a different linking element. The gender inference (from last component) is identical. If a specific NB/NN divergence causes a false positive in fixtures, add a per-language override at that point. Don't pre-engineer language splits.
 
-**Warning signs:**
-- Closure report is bare percentage, no qualitative discussion.
-- The 20% unflipped are always the same family.
-- Benchmark grows without P1/P2/P3 labels.
+### Pitfall 12: Bundle size growth from per-noun fuge data in papertek-vocabulary
 
-**Phase to address:** Phase 6 introduces labeling. Every phase inherits.
+**What goes wrong:** If fuge properties are added to every nounbank entry, JSON files grow. With 2,124 NB nouns + 1,641 DE nouns, adding `"fuge": "s"` is ~30KB total -- negligible against the current 12.47 MiB zip and 20 MiB cap (~38% headroom). Not a real risk for v2.1 but worth monitoring.
 
----
+**Prevention:** Monitor via `check-bundle-size` (already enforced). No action needed unless nounbank grows dramatically.
 
-## Technical Debt Patterns
+### Pitfall 13: Browser visual verification backlog masks compound-rule rendering bugs
 
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcoding trigger lists inside rule files instead of papertek-vocabulary | Ship today without a papertek PR cycle | Cross-app reuse lost; data-logic separation violated; contributors edit code for data changes | Spike/prototype only — promote to papertek within the same phase before close |
-| Literal-string matching over category matching (`if (token === 'mit')`) | Fewer moving parts initially | Rule won't generalize; every near-miss spawns a new rule | Never beyond the first positive fixture case |
-| "We'll just feature-toggle it if noisy" (Phase 10.3 escape hatch) | Ship risky rule without field testing | Features accumulate; defaults never change; users don't know which toggles matter | Only for explicitly-experimental rules with default-off and one-release review |
-| Regex-based tokenization for structural rules | Reuses v1.0 tokenizer | Structural rules need syntactic categories (subject position, finite-verb position) regex can't express | Phase 6 register only; never for Phase 7+ |
-| Skipping acceptance-case fixtures "because rule is narrow" | Cuts fixture authoring in half | FP avalanche on first pilot; phase closes with smoke-test gap | Never |
-| In-memory document state without hash invalidation | Simpler code | Ghost findings after edits; trust erosion; debugging nightmare | Never for Phase 13+ |
-| Cloning a rule file and tweaking it for another language (DE→ES) | One-day feature delivery | Four near-identical rule implementations; any bug needs four fixes | Never after Phase 8 primitive ships |
+**What goes wrong:** Phases 6/7 deferred browser visual verification (P1/P2/P3 dot colours, quotation suppression, word-order dots). Adding compound decomposition findings without verifying the existing visual layer means compound findings might render with wrong dot colour, wrong popover layout, or broken explain text -- and the deferred verification gap means nobody catches it.
+
+**Prevention:** Sequence the deferred browser verification BEFORE shipping compound decomposition to users. The v2.1 milestone already includes this as a carry-over item. Do it first.
+
+### Pitfall 14: Recursive decomposition (3+ component compounds) without depth limit
+
+**What goes wrong:** Norwegian and German allow chains: "bankregistreringsnummer" = bank + registrering + s + nummer. If decomposition is recursive (decompose prefix further if it's also unknown), without a depth limit you get: (a) performance regression on long words, (b) increasingly unlikely splits at depth 3+, (c) complex explain text in the popup.
+
+**Prevention:** Limit decomposition to 2 components in v2.1. Two-component splits cover the vast majority of student-relevant compounds. Three-component splits can be added in a future phase if needed. The longest NB nouns in the nounbank ("bankregistreringsnummer" at 23 chars) are stored entries -- decomposition doesn't need to handle them.
 
 ---
 
-## Integration Gotchas
+## Phase-Specific Warnings
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| `__lexiVocab` seam (INFRA-04) | Rule reads `__lexiVocab.someIndex` without checking it's populated by `buildLookupIndexes` (unfiltered) vs `buildIndexes` (preset-filtered) | Phase plan names builder; `check-spellcheck-features` extended to cover new index |
-| `ctx.suppressed` | Structural rule ignores suppression because "my rule is different" | Tier suppression: `ctx.suppressedFor.structural` vs `ctx.suppressedFor.token`; rule-API type check enforces tier awareness |
-| `rule.explain()` contract (UX-01) | Rule returns `{nb, nn}` but uses teacher jargon (`Akkusativ`, `Partizip`, `copula`) | Explain-contract gate extended with register-readability heuristic — rejects teacher jargon; requires student-register Norwegian |
-| CSS dot-colour wiring | New rule id ships without matching `.lh-spell-<id>` class | `check-rule-css-wiring` extended: if `severity` declared, require `.lh-spell-<id>-<severity>` binding |
-| papertek-vocabulary sync | Direct edits to `extension/data/*.json` for a "quick fix" | Always edit in papertek-vocabulary → `npm run sync-vocab`; lint asserts `extension/data/` files aren't ahead of API |
-| Priority ordering | New rule picks random int that shadows existing triggers | Documented bands in `spell-rules/README.md`; `check-rule-priority-collisions` gate |
-| Cross-sentence state (Phase 13) | Module-level `let`/`Map` caching across calls | Hash-keyed derived state; invalidation on content-hash change; release gate simulates edit sequences |
-| Benchmark corpus | Adding positive lines without acceptance contrast | New positive lines paired with acceptance sibling-lines that must NOT flag |
-
----
-
-## Performance Traps
-
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| O(n²) structural rules scanning long inputs | Debounce lags on 2000-word paste | Rules scan left-to-right once with pointer cursors, no nested loops | ~1500 words in one paste |
-| Re-parsing document on every keystroke (Phase 13) | CPU pegs while typing | Content-hash gate on document-level recompute | 500 words + active typing |
-| Rebuilding lookup indexes on preset toggle | Pause when student flips a feature | Build once from unfiltered data (v1.0 fix); preset filter is read-time predicate | Already v1.0 learning — don't regress |
-| Benchmark-acceptance gate running full corpus serially in CI | CI time climbs per phase | Parallelize per-language; cache tokenization; "changed rules only" local mode | 1000+ benchmark lines across languages |
-| Loading separable-verb / BAGS / trigger lists eagerly at content-script init | Cold-start latency on every page | Lazy-load per-language slice on first keystroke; reuse v1.0 per-language split | Cumulative loaded indexes exceed ~2 MB in memory |
-
-Bundle-size ceiling remains 20 MiB (`check-bundle-size`). Current 10.25 MiB.
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| Decomposition engine | #1 (phantom compounds), #2 (linking ambiguity), #14 (recursive depth) | Validate both sides; Spraakraadet suffix heuristics for NB fuge; limit to 2 components |
+| Spell-check integration | #3 (silencing typo-fuzzy), #6 (compoundNouns semantics) | New `decomposeCompound()` function; don't add to validWords/compoundNouns; priority > 50; typo-fuzzy d=1 wins |
+| Dictionary popup | #10 (wrong declension), stored-entry precedence | Show gender only, not declension; mark as "Samansett ord"; Tier 1 stored entries take precedence |
+| Sarskriving expansion | #4 (false-positive storm) | Defer to separate step; require linking element for new flags; min combined length 8 |
+| Gender inference (NB/NN) | #11 (NB/NN fuge divergence) | Start language-neutral; override only when evidence demands |
+| Demonstrative-mismatch | #7 (collision with nb-gender) | Require definite noun; priority 15; skip article tokens |
+| Triple-letter typo | #8 (fuzzy scoring interaction) | Separate rule file; priority 45; regex pattern match, no edit distance |
+| Manual spell-check button | #9 (UI flash) | Hash-compare before re-check; toast is primary value |
+| Performance | #5 (keystroke latency) | Min length 6; cache results; measure before optimizing |
+| Browser verification | #13 (visual bugs masked) | Sequence before compound decomposition ships |
 
 ---
 
-## Security / Trust Mistakes
+## "Looks Done But Isn't" Checklist (v2.1-specific)
 
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Adding a runtime network call "just for one collocation list" | Breaks SC-06 offline promise + landing-page free-offline-forever commitment | `check-network-silence` gate (already live) covers `spell-rules/**` |
-| Silent auto-correct after a structural flag | Dyslexia research: silent fixes compound errors; violates explicit v1.0 out-of-scope | Never replace user text programmatically; always require click-to-accept |
-| Sending student writing to papertek-vocabulary for "corpus building" | GDPR/Schrems-II; breaks telemetry-free commitment | Explicitly out of scope pending future milestone with legal review; code path must not exist |
-| Debug logging of rule inputs in production | Student writing appears in console; screen-share reveals private text | Debug logging behind dev-only flag; never persist |
-| chrome.storage.local for rule state across documents | State from one site leaks to another via shared popover | Rule state in-memory per content-script instance; storage only for user preferences |
-
----
-
-## UX Pitfalls
-
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Identical visual treatment for hard errors and soft hints | Student can't prioritize flags | Two-tier underline (solid=error, dashed=hint) + popover copy prefix |
-| Structural flags spanning 10+ tokens underline everything | Visual noise; student can't locate the issue | Underline only the anchor token (finite-verb position, missing-pronoun slot); popover explains the span |
-| Grammar-jargon explanations ("agreement mismatch nominative→dative") | Student doesn't learn from the flag | `explain()` uses student Norwegian, references the target-language learning goal |
-| No way to dismiss/snooze a structural rule per document | Student writing dialect dialogue sees flags they can't address | Per-document "Ignore this rule here" via Esc-dismiss, backed by in-memory doc state (not persisted without opt-in) |
-| New rules ship without in-UI discovery | Student doesn't know new rules exist | First-run notice on phase release: "Nytt: vi sjekker nå for …" in existing first-run UI slot |
-| Feature toggle defaults changing between releases | Student's "I turned this off" gets reset | Defaults frozen within a major version; changes require changelog + notification |
-| Soft warnings that block text flow visually | Student stops typing mid-sentence to check hints | Hint-tier rules fire at lower priority; popover appears only on hover/focus, never autofocus |
-
----
-
-## "Looks Done But Isn't" Checklist
-
-Walk this before closing any structural phase.
-
-- [ ] **New structural rule:** `check-fixtures` green — but `check-benchmark-acceptance` green on full language corpus? Ceiling of ≤2 stray flags per 500-word passage held?
-- [ ] **New vocab index:** `check-spellcheck-features` extended to cover it under minimal-preset simulation?
-- [ ] **Explain contract:** returns `{nb, nn}` — but in student register, not grammar-teacher jargon?
-- [ ] **Rule CSS wiring:** dot-colour bound — and if `severity: "hint"`, muted-tier CSS class also bound?
-- [ ] **Priority number:** int picked from documented band; `check-rule-priority-collisions` green?
-- [ ] **Data additions:** landed in papertek-vocabulary — SCHEMA.md updated with ownership + sibling-repo impact noted?
-- [ ] **Benchmark lines:** 80% flipped — and every P1 line flipped? Teacher-eye pass completed?
-- [ ] **Cross-sentence state (Phase 13):** rule survives paste+undo+delete sequence in edit-simulator gate?
-- [ ] **Quoted-speech / code-block:** sample quote in benchmark does NOT flag?
-- [ ] **Feature toggle:** documented in grammar-features JSON for the language; default matches phase plan?
-- [ ] **Soft warning:** visually distinguishable from hard errors in Chrome smoke-test (photograph it, compare)?
-- [ ] **Rule interaction:** new rule run alongside every existing rule on stress corpus — no silent shadowing?
-- [ ] **Hold-out corpus:** rule hit ≥0.80 recall on unseen lines, not just training-visible?
-- [ ] **Cross-repo sync:** `papertek-webapps` and `papertek-nativeapps` CIs green after data PR?
-
----
-
-## Recovery Strategies
-
-| Pitfall | Recovery Cost | Recovery Steps |
-|---------|---------------|----------------|
-| FP avalanche in field | MEDIUM | (a) Flip feature toggle default off; (b) harvest 50+ acceptance cases from reports; (c) narrow rule scope; (d) patch release with gate update |
-| Feature-gated index starvation v2 | LOW pre-release, HIGH in field | (a) Extend `check-spellcheck-features`; (b) patch seam routing; (c) re-run fixture + benchmark sweeps; (d) document in CLAUDE.md |
-| Discourse-state ghost findings | MEDIUM | (a) Disable Phase 13 rules via toggle; (b) rewrite state layer with content-hash invalidation; (c) ship invalidation gate; (d) re-enable |
-| Benchmark overfitting exposed by pilot | MEDIUM | (a) Introduce hold-out corpus for affected phase; (b) measure recall against hold-out; (c) broaden rule to category matching; (d) revalidate |
-| Priority collision | LOW | (a) Bump new rule into correct band; (b) add fixture case proving both fire appropriately; (c) extend `check-rule-priority-collisions` |
-| papertek-vocabulary schema break | HIGH (3 consumers) | (a) Coordinate rollback across three repos; (b) re-author as additive; (c) update SCHEMA.md; (d) re-release all three |
-| FR PP agreement over-firing | LOW if toggle default off | (a) Flip default off; (b) scope to 10.3a window; (c) defer 10.3b |
-| Hint-tier CSS missing | LOW | (a) Extend `check-rule-css-wiring` for severity tiers; (b) add `.lh-spell-<id>-hint` classes; (c) patch release |
-
----
-
-## Pitfall-to-Phase Mapping
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| #1 FP avalanche on structural rules | Phase 7 (land `check-benchmark-acceptance` gate) | ≤2 stray flags per 500-word benchmark passage |
-| #2 Benchmark overfitting | Phase 6 (hold-out corpus rule added to roadmap template) | Hold-out recall ≥0.80, measured independently |
-| #3 Feature-gated index starvation v2 | Phase 6 (extend `check-spellcheck-features`) | New index populated under minimal-preset simulation |
-| #4 Discourse-state staleness | Phase 13 research step (pre-phase seam change) | `check-stateful-rule-invalidation` passes paste+undo+delete scripts |
-| #5 DE case parsing overreach | Phase 8 plan (precision floor ≥0.90; adjacent-article scope) | DE benchmark sweep measures precision before phase closes |
-| #6 FR PP agreement eating phase | Phase 10 plan (split 10.3a/10.3b; default toggle off) | 10.3a ships narrow-scope, default-off; 10.3b explicitly deferred |
-| #7 Quoted-speech bleed-through | Phase 6 (quotation-span detector; `ctx.suppressedFor.structural`) | Quoted foreign-sentence benchmark lines do NOT flag |
-| #8 Hint tier never differentiated | Phase 6 (dashed-underline tier + gate extension) | Chrome smoke-test visually distinguishes hint from error |
-| #9 papertek-vocabulary schema drift | Phase 6 (SCHEMA.md ownership model; every phase updates) | Sibling-repo CI green after each data PR |
-| #10 Priority collisions | Phase 6 (document bands; `check-rule-priority-collisions`) | Overlapping-span fixture cases produce documented outcomes |
-| #11 Zero-transfer language work | Phase 8 (deliver shared `grammar-tables.js` primitive) | Phase 11 consumes Phase 8 primitive; refactor sub-phase otherwise |
-| #12 80%-flip fetishism | Phase 6 (P1/P2/P3 labeling) | Phase closure reports P1 recall (target 100%) separately |
-
----
-
-## Phase-Specific Risk Summary
-
-| Phase | Group | Highest-Risk Pitfall(s) | Prevention Landing This Phase |
-|-------|-------|-------------------------|-------------------------------|
-| 6 | Register (S, cross-lang) | #7 quotes, #8 hint tier, #9 schema, #10 priority bands, #12 P1/P2/P3 | **Meta-phase:** land infrastructure for 7–16. Benchmark-acceptance gate skeleton, hold-out corpus rule, priority-band doc, hint-tier CSS, quotation-span detector, SCHEMA.md ownership, P-label convention |
-| 7 | Word-order (M, NB+DE+FR) | #1 FP avalanche, #2 overfitting (NB V2 is easy to caricature) | `check-benchmark-acceptance` fully green; 2× acceptance cases; hold-out split |
-| 8 | DE case (M) | #5 parsing overreach, #11 zero-transfer | Precision floor ≥0.90; adjacent-token scope; deliver shared `grammar-tables.js` primitive |
-| 9 | ES (M) | #11 zero-transfer, #5 scope creep on ser/estar decision tree | Consume Phase 8 primitive; cap at ~15 trigger patterns for 9.2 |
-| 10 | FR (M) | #6 PP agreement eating phase | Split 10.3a/10.3b; 10.3a default-off toggle |
-| 11 | Aspect & mood (L, ES+FR) | #11 zero-transfer, #8 hint tier (aspect legitimately varies) | Phase 11.2 (pretérito vs imperfecto) uses hint tier, not error |
-| 12 | Pronoun & pro-drop (M, ES+FR) | #8 hint tier (pro-drop overuse is a hint) | All 12.x rules use hint tier |
-| 13 | Register consistency (L, cross-lang) | #4 discourse-state staleness — **highest-risk phase in v2.0** | Research step mandatory; `check-stateful-rule-invalidation` gate; content-hash invalidation |
-| 14 | Morphology (M, EN+ES+FR) | #9 schema drift (word-family + irregular-list fields) | SCHEMA.md entry per field; sibling-repo sync check |
-| 15 | Collocations (L, cross-lang) | #11 zero-transfer (should share Phase 6.2 seed shape) | Explicit dependency on Phase 6.2's list shape; no re-invention |
-| 16 | Tense harmony & discourse (L, aspirational) | #4 discourse-state staleness (cross-sentence tense tracking) | If Phase 13's invalidation protocol didn't generalize, defer to v3.0 — don't duct-tape |
+- [ ] Decomposition engine: false-positive rate < 2% measured against existing nounbank?
+- [ ] Decomposition engine: handles zero-fuge, fuge-s, fuge-e correctly for NB/NN?
+- [ ] Decomposition engine: handles DE Fugenelemente (s, n, en, er, e, es)?
+- [ ] Decomposition engine: limited to 2 components (no recursive chains)?
+- [ ] Spell-check integration: typo-fuzzy d=1 correction STILL wins over decomposition acceptance?
+- [ ] Sarskriving: NOT expanded to use decomposition (deferred)?
+- [ ] Gender inference: fires only when article precedes AND gender mismatches?
+- [ ] Dictionary popup: shows gender + breakdown only, no inherited declension/examples?
+- [ ] Demonstrative-mismatch: only fires with definite noun following?
+- [ ] Demonstrative-mismatch: does NOT overlap with nb-gender findings?
+- [ ] Triple-letter: separate rule file, not a typo-fuzzy modification?
+- [ ] Triple-letter: fixture cases green, no regression on existing typo fixtures?
+- [ ] Manual button: no visual flash on unchanged text?
+- [ ] Browser verification: deferred Phase 6/7 visual checks completed?
+- [ ] Performance: decomposition adds < 50ms to spell-check pass on 500-word text?
+- [ ] Bundle size: still under 20 MiB cap after any nounbank fuge-data additions?
+- [ ] All 9 existing release gates still pass?
 
 ---
 
 ## Sources
 
-- `.planning/milestones/v1.0-MILESTONE-AUDIT.md` — v1.0 bug taxonomy: SC-01 dead Zipf tiebreaker, feature-gated index starvation, CSS dot-colour wiring gap, modal-verb bare-infinitive silence, dialect-mix framing reversal (Phase 05.1 Gap D). HIGH confidence — direct project evidence.
-- `.planning/v2.0-benchmark-driven-roadmap.md` — phase groupings, validation protocol (80% flip rate), cross-cutting constraints. HIGH confidence.
-- `.planning/PROJECT.md` — constraints (SC-06 offline, 20 MiB cap, data-logic separation, free-tier commitment). HIGH confidence.
-- `CLAUDE.md` — release-gate suite and rationale per gate (fixtures, explain-contract, rule-CSS wiring, feature-independent indexes, network silence, bundle size). HIGH confidence.
-- `benchmark-texts/nb.txt` FUTURE/UNPLANNED section — explicit error-class enumeration (V2, register mix, collocations, double definiteness, anglicism, anaphora, hyphen compounds). HIGH confidence.
-- `extension/content/spell-rules/*.js` directory — 25 v1.0 rule files, priority distribution, one-file-per-rule convention, `ctx.suppressed` API shape. HIGH confidence.
-- User memory: `project_data_source_architecture.md`, `project_nb_nn_no_mixing.md`, `project_data_logic_separation_philosophy.md`, `project_phase5_manual_spellcheck_button.md`, `project_v2_benchmark_roadmap.md`. HIGH confidence.
-
-General heuristic-NLP framing (parse-heuristic false-positive rates, soft-warning UI patterns) is background; every specific pitfall cited maps to project evidence, not general claims. No LOW-confidence items.
+- [Spraakraadet: Fugebokstav (binde-s og binde-e)](http://www.sprakradet.no/svardatabase/etiketter/fugebokstav-binde-s-og-binde-e/) -- official NB/NN fuge guidance. Suffix patterns requiring fuge-s: -dom, -else, -het, -skap, -sjon, -tet, -ling, -nad.
+- [Fuge-s -- Wikipedia (Norwegian)](https://no.wikipedia.org/wiki/Fuge-s) -- NB fuge rules and suffix patterns with "naer alltid" documentation.
+- [Spraakraadet: Binde-s med -fag- og -spraak-](https://sprakradet.no/spraksporsmal-og-svar/binde-s-i-sammensetninger-med-fag-og-sprak/) -- specific fuge-s cases.
+- [Nuebling & Szczepaniak 2013: Linking elements in German](https://www.germanistik.uni-mainz.de/files/2015/03/Nuebling_Szczepaniak_2013_linking_elements_grammaticalization.pdf) -- DE Fugenelement linguistics; confirms "no fixed rules."
+- [German compound formation](https://www.giuliostarace.com/posts/compound-words-german/) -- DE compound rules overview.
+- Existing codebase: `de-compound-gender.js` lines 78-103 (`inferGenderFromSuffix`, `LINKERS`, `MIN_SUFFIX_LEN`). HIGH confidence.
+- Existing codebase: `nb-sarskriving.js` lines 30-45 (`SARSKRIVING_BLOCKLIST`), line 80 (`compoundNouns.has()`). HIGH confidence.
+- Existing codebase: `nb-typo-fuzzy.js` lines 59-83 (scoring formula, shorter-candidate penalty). HIGH confidence.
+- Existing codebase: `nb-gender.js` lines 19-21 (`ARTICLE_GENUS`, priority 10). HIGH confidence.
+- Existing codebase: `spell-check-core.js` lines 391-398 (`dedupeOverlapping`), lines 129-248 (rule runner, priority sorting). HIGH confidence.
+- Existing codebase: `vocab-seam-core.js` lines 706-807 (`buildLookupIndexes`, `compoundNouns` Set, `validWords` Set). HIGH confidence.
+- User memory: `project_compound_word_decomposition.md` (v2.1 scope, two-tier compound model, existing code to build on). HIGH confidence.
+- User memory: `project_phase5_manual_spellcheck_button.md` (manual button UX requirements). HIGH confidence.
 
 ---
-*Pitfalls research for: v2.0 structural grammar governance on top of per-token spell-check surface*
-*Researched: 2026-04-24*
+*Pitfalls research for: v2.1 Compound Decomposition & Polish*
+*Researched: 2026-04-26*
