@@ -23,11 +23,11 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Position
 
 **Milestone:** v2.2 Student Language Intelligence
-**Phase:** 21 of 22 (Dictionary Intelligence — False Friends + Preposition Polysemy)
-**Plan:** 02 complete, ready for 03
-**Status:** Milestone complete
+**Phase:** 21.1 (Dictionary Intelligence Pipeline Fix — gap closure)
+**Plan:** 01 complete (1 of 1)
+**Status:** Phase 21.1 complete
 
-Progress: [█████░░░░░] 50%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -48,6 +48,8 @@ Recent decisions affecting current work:
 - [21-02]: Used inline styles with CSS class hooks for floating-widget false-friend/sense rendering
 - [21-02]: Senses replace flat translation entirely when present (popup parity)
 - [Phase 21]: No code changes needed to popup.js -- rendering pipeline already complete
+- [Phase 21.1]: Reverse linkedTo index pattern for cross-language enrichment (Map in popup, linear scan in widget)
+- [Phase 21.1]: NB entries are the canonical source for falseFriends/senses; target entries enriched at render time
 
 ### Pending Todos
 
@@ -60,5 +62,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 21-01-PLAN.md (vocab sync + rendering verification) and 21-02-PLAN.md (floating-widget)
+Stopped at: Completed 21.1-01-PLAN.md (pipeline fix: NB enrichment wiring for falseFriends/senses)
 Resume file: None
