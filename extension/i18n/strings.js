@@ -237,6 +237,11 @@ const _STRINGS = {
     pred_vis_flere: 'Vis flere',
     pred_vis_faerre: 'Vis færre',
 
+    // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
+    spell_check_btn_title: 'Sjekk rettskriving',
+    spell_toast_errors: '{count} feil funnet',
+    spell_toast_clean: 'Ser bra ut!',
+
     // ── Context menus (service worker) ──
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
@@ -453,6 +458,11 @@ const _STRINGS = {
     pred_vis_flere: 'Vis fleire',
     pred_vis_faerre: 'Vis færre',
 
+    // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
+    spell_check_btn_title: 'Sjekk rettskriving',
+    spell_toast_errors: '{count} feil funne',
+    spell_toast_clean: 'Ser bra ut!',
+
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
     ctx_pause_predictions: 'Pause ordforslag',
@@ -662,6 +672,11 @@ const _STRINGS = {
     pred_resume: 'Resume predictions',
     pred_paused: 'Predictions paused',
     pred_resume_short: 'Resume',
+
+    // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
+    spell_check_btn_title: 'Check spelling',
+    spell_toast_errors: '{count} errors found',
+    spell_toast_clean: 'Looks good!',
 
     ctx_lookup: 'Look up "%s" in Leksihjelp',
     ctx_read: 'Read "%s" with Leksihjelp',

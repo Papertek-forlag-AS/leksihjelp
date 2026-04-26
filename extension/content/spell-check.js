@@ -27,6 +27,9 @@
   const CORE  = self.__lexiSpellCore;
   if (!VOCAB || !CORE) return; // vocab-seam.js + spell-check-core.js must load first
 
+  // i18n — strings.js exports to self.__lexiI18n; graceful fallback if not loaded.
+  const t = (self.__lexiI18n && self.__lexiI18n.t) || ((key) => key);
+
   // ── State ──
   let enabled = false;
   let paused = false;
@@ -170,6 +173,8 @@
     }
     activeEl = el;
     warn('focus → active', { tag: el.tagName, cls: el.className, ce: el.isContentEditable });
+    ensureButton();
+    positionButton();
     schedule();
   }
 
@@ -189,8 +194,10 @@
       if (!activeEl) return;
       const focusStillInside = activeEl === ae || activeEl.contains(ae);
       const focusInOverlay = overlay && overlay.contains(ae);
-      if (!focusStillInside && !focusInOverlay) {
+      const focusInBtn = spellCheckBtn && (spellCheckBtn === ae || spellCheckBtn.contains(ae));
+      if (!focusStillInside && !focusInOverlay && !focusInBtn) {
         hideOverlay();
+        hideButton();
       }
     }, 250);
   }
@@ -274,7 +281,8 @@
       textHead: (text || '').slice(0, 80),
       findingsCount: findings.length,
     });
-    if (findings.length === 0) { hideOverlay(); return; }
+    lastCheckedText = text;
+    if (findings.length === 0) { lastFindings = []; hideOverlay(); return; }
     lastFindings = findings;
     renderMarkers(findings);
   }
@@ -295,6 +303,8 @@
   let popover = null;
   let activePopoverIdx = -1;
   let lastFindings = [];
+  let lastCheckedText = '';
+  let spellCheckBtn = null;
   const dismissed = new Set();
   let posRefreshRaf = null;
   // Phase 5 / UX-02: popup Settings toggle subscriber. Plan 04 writes the key;
@@ -386,6 +396,7 @@
       if (popover && activePopoverIdx >= 0 && markers[activePopoverIdx]) {
         positionPopover(markers[activePopoverIdx].rect);
       }
+      positionButton();
     });
   }
 
@@ -635,6 +646,72 @@
     if (popover) popover.remove();
     popover = null;
     activePopoverIdx = -1;
+  }
+
+  // ── Manual spell-check button + toast (Phase 18, Plan 02) ──
+
+  function ensureButton() {
+    if (spellCheckBtn) return;
+    spellCheckBtn = document.createElement('button');
+    spellCheckBtn.type = 'button';
+    spellCheckBtn.className = 'lh-spell-check-btn';
+    spellCheckBtn.textContent = 'Aa';
+    spellCheckBtn.title = t('spell_check_btn_title');
+    spellCheckBtn.addEventListener('mousedown', e => e.preventDefault());
+    spellCheckBtn.addEventListener('click', () => manualCheck());
+    document.body.appendChild(spellCheckBtn);
+  }
+
+  function positionButton() {
+    if (!activeEl || !spellCheckBtn) return;
+    const rect = activeEl.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+      spellCheckBtn.style.display = 'none';
+      return;
+    }
+    spellCheckBtn.style.display = '';
+    spellCheckBtn.style.top = (rect.bottom + window.scrollY - 32) + 'px';
+    spellCheckBtn.style.left = (rect.right + window.scrollX - 42) + 'px';
+  }
+
+  function hideButton() {
+    if (spellCheckBtn) {
+      spellCheckBtn.remove();
+      spellCheckBtn = null;
+    }
+  }
+
+  function manualCheck() {
+    if (!activeEl) return;
+    const { text } = readInput(activeEl);
+    // No-flash optimization: skip re-check if text unchanged and markers rendered
+    if (text === lastCheckedText && (lastFindings.length === 0 || markers.length > 0)) {
+      showToast(lastFindings.length > 0
+        ? t('spell_toast_errors', { count: lastFindings.length })
+        : t('spell_toast_clean'));
+      return;
+    }
+    runCheck();
+    showToast(lastFindings.length > 0
+      ? t('spell_toast_errors', { count: lastFindings.length })
+      : t('spell_toast_clean'));
+  }
+
+  function showToast(message) {
+    // Remove any existing toast
+    const old = document.querySelector('.lh-spell-toast');
+    if (old) old.remove();
+    const toast = document.createElement('div');
+    toast.className = 'lh-spell-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    // Position above the button
+    if (spellCheckBtn) {
+      const br = spellCheckBtn.getBoundingClientRect();
+      toast.style.top = (br.top + window.scrollY - 36) + 'px';
+      toast.style.left = (br.left + window.scrollX - 20) + 'px';
+    }
+    setTimeout(() => toast.remove(), 2500);
   }
 
   // ── Apply fix ──
