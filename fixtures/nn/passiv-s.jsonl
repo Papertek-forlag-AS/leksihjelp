@@ -1,0 +1,18 @@
+// NN s-passive ground truth. Phase 19 DEBT-04.
+// Finite s-passive without modal verb = error on nynorsk.
+// St-verbs (deponents) and modal + s-passive infinitive = accepted.
+// Span convention: end EXCLUSIVE.
+
+// ── Positive cases — must flag ──
+{"id":"nn-passiv-s-001","text":"Boka byggast no","expected":[{"rule_id":"nn_passiv_s","start":5,"end":12,"suggestion":null}],"must_not_flag":[]}
+{"id":"nn-passiv-s-002","text":"Maten lagast her","expected":[{"rule_id":"nn_passiv_s","start":6,"end":12,"suggestion":null}],"must_not_flag":[]}
+{"id":"nn-passiv-s-003","text":"Brevet skrivast no","expected":[{"rule_id":"nn_passiv_s","start":7,"end":15,"suggestion":null}],"must_not_flag":[]}
+
+// ── Acceptance cases — must NOT flag ──
+// Modal + s-passive infinitive (accepted NN construction)
+{"id":"nn-passiv-s-accept-001","text":"Boka kan lesast no","expected":[],"must_not_flag":["nn_passiv_s"]}
+{"id":"nn-passiv-s-accept-002","text":"Det skal gjerast no","expected":[],"must_not_flag":["nn_passiv_s"]}
+{"id":"nn-passiv-s-accept-003","text":"Boka kan skrivast no","expected":[],"must_not_flag":["nn_passiv_s"]}
+// Deponent / st-verbs (lexicalised, not passive)
+{"id":"nn-passiv-s-accept-004","text":"Ho synest at det er fint","expected":[],"must_not_flag":["nn_passiv_s"]}
+{"id":"nn-passiv-s-accept-005","text":"Det lykkast til slutt","expected":[],"must_not_flag":["nn_passiv_s"]}

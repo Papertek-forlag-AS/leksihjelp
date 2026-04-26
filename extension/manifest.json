@@ -51,6 +51,7 @@
         "content/spell-rules/nb-compound-gender.js",
         "content/spell-rules/nb-demonstrative-gender.js",
         "content/spell-rules/nb-modal-verb.js",
+        "content/spell-rules/nb-nn-passiv-s.js",
         "content/spell-rules/nb-sarskriving.js",
         "content/spell-rules/universal-agreement.js",
         "content/spell-rules/nb-dialect-mix.js",
@@ -86,6 +87,7 @@
         "content/spell-rules/doc-drift-fr-address.js",
         "content/spell-rules/doc-drift-nb-register.js",
         "content/spell-rules/doc-drift-nn-infinitive.js",
+        "content/spell-rules/doc-drift-nb-passiv-overuse.js",
         "content/spell-check.js"
       ],
       "run_at": "document_idle",

@@ -104,6 +104,8 @@ const TARGETS = [
   'extension/content/spell-rules/doc-drift-fr-address.js',
   'extension/content/spell-rules/doc-drift-nb-register.js',
   'extension/content/spell-rules/doc-drift-nn-infinitive.js',
+  'extension/content/spell-rules/nb-nn-passiv-s.js',
+  'extension/content/spell-rules/doc-drift-nb-passiv-overuse.js',
 ];
 
 // Reset the shared globals the rule files register onto. Without this the

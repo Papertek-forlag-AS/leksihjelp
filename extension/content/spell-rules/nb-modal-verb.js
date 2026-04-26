@@ -74,6 +74,11 @@
             // `infinitiv` forms like `å skrive`), the token IS itself a
             // valid infinitive — skip the flag.
             if (validWords.has('å ' + t.word)) continue;
+            // Phase 19: NN s-passive infinitive after modal is valid
+            // ("kan lesast", "skal gjerast"). Don't suggest replacing
+            // the s-passive form with the plain infinitive.
+            const sPassivForms = vocab.sPassivForms;
+            if (sPassivForms && sPassivForms.has(t.word)) continue;
             out.push({
               rule_id: 'modal_form',
               priority: rule.priority,
