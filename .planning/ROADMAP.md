@@ -126,10 +126,11 @@ Plans:
   5. NN: participle agreement in bli/verte-passive is checked (skriven/skrive/skrivne must agree with subject gender/number; a-verbs exempt)
   6. NN: st-verbs (møtast, synast, trivast, finnast, etc.) are recognised as deponent/reciprocal, not flagged as passive errors
   7. All existing release gates pass after additions; no regression on fixture suites
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 19-01: TBD
+- [ ] 19-01-PLAN.md — Papertek data enrichment: add s-passive forms + deponent marking to NB/NN verbbanks, deploy and sync
+- [ ] 19-02-PLAN.md — Vocab-seam sPassivForms index + NN finite s-passive rule + NB overuse hint rule + fixtures + release gate wiring
 
 ### Phase 20: Browser Visual Verification
 **Goal**: All deferred visual checks from v2.0 plus v2.1 compound rendering are verified in a real browser
@@ -176,8 +177,8 @@ Phases execute in numeric order: 16 → 17 → 18 → 19 → 20
 | 16. Decomposition Engine | v2.1 | 2/2 | Complete | 2026-04-26 |
 | 17. Compound Integration | 6/6 | Complete    | 2026-04-26 | - |
 | 18. Spell-Check Polish | 2/2 | Complete    | 2026-04-26 | - |
-| 19. NB/NN Passiv-s | v2.1 | 0/0 | Not started | - |
+| 19. NB/NN Passiv-s | v2.1 | 0/2 | Planning complete | - |
 | 20. Browser Verification | v2.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-26 — Phase 17 gap closure: 5 plans in 2 waves*
+*Roadmap updated: 2026-04-26 — Phase 19 planned: 2 plans in 2 waves*
