@@ -88,6 +88,7 @@
   let browserTtsCharIndex = 0; // Last known charIndex for browser TTS restart
   let lexiPaused = false; // Global pause state
   let justDragged = false; // Prevents hideWidget after drag ends
+  let justDblClicked = false; // Prevents TTS widget on double-click (lookup handles it)
 
   // Font size settings
   const FONT_SIZE_MIN = 12;
@@ -185,7 +186,7 @@
       <select class="lh-voice-select" id="lh-voice"></select>
       <div class="lh-mode-badge"></div>
     `;
-    document.documentElement.appendChild(widget);
+    (document.fullscreenElement || document.documentElement).appendChild(widget);
 
     // Attach widget event listeners
     widget.querySelector('.lh-close').addEventListener('click', hideWidget);
@@ -361,9 +362,24 @@
 
   function attachListeners() {
     document.addEventListener('mouseup', handleTextSelection);
+    document.addEventListener('dblclick', handleDoubleClick);
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') hideWidget();
     });
+  }
+
+  function handleDoubleClick() {
+    if (lexiPaused) return;
+    justDblClicked = true;
+    setTimeout(() => { justDblClicked = false; }, 50);
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const word = selection.toString().trim();
+      if (word && word.length > 0 && !/\s/.test(word)) {
+        hideWidget();
+        showInlineLookup(word);
+      }
+    }, 10);
   }
 
   // ── Text Selection ──
@@ -376,12 +392,13 @@
     if (widget.contains(e.target)) return;
 
     setTimeout(() => {
+      if (justDblClicked) return;
       const selection = window.getSelection();
       const text = selection.toString().trim();
 
       if (text.length > 0 && text.length < 2000) {
         const editor = document.getElementById('writing-editor');
-        if (editor && selection.anchorNode && editor.contains(selection.anchorNode)) return;
+        if (editor && selection.anchorNode && editor.contains(selection.anchorNode) && /\s/.test(text)) return;
         selectedText = text;
         showWidget();
       } else if (!widget.contains(e.target)) {
@@ -1021,31 +1038,45 @@
 
     const q = word.toLowerCase().trim();
 
-    // Search across all banks for the word
-    let match = null;
-    const banks = Object.keys(BANK_TO_POS_KEY);
-    for (const bank of banks) {
-      const bankData = dict[bank];
-      if (!bankData || typeof bankData !== 'object') continue;
-
-      for (const entry of Object.values(bankData)) {
-        if (!entry.word) continue;
-        const wordMatch = entry.word.toLowerCase() === q;
-        const entryTrans = getTranslation(entry);
-        const translationMatch = entryTrans && entryTrans.toLowerCase() === q;
-        if (wordMatch || translationMatch) {
-          match = {
-            ...entry,
-            translation: getTranslation(entry),
-            partOfSpeech: bankToPos(bank),
-            gender: entry.genus ? genusToGender(entry.genus) : null,
-            grammar: entry.explanation?._description || null,
-            examples: entry.examples || []
-          };
-          break;
+    function searchDictBanks(dictData, query) {
+      const banks = Object.keys(BANK_TO_POS_KEY);
+      for (const bank of banks) {
+        const bankData = dictData[bank];
+        if (!bankData || typeof bankData !== 'object') continue;
+        for (const entry of Object.values(bankData)) {
+          if (!entry.word) continue;
+          if (entry.word.toLowerCase() === query ||
+              (getTranslation(entry) || '').toLowerCase() === query) {
+            return {
+              ...entry,
+              translation: getTranslation(entry),
+              partOfSpeech: bankToPos(bank),
+              gender: entry.genus ? genusToGender(entry.genus) : null,
+              grammar: entry.explanation?._description || null,
+              examples: entry.examples || []
+            };
+          }
         }
       }
-      if (match) break;
+      return null;
+    }
+
+    let match = searchDictBanks(dict, q);
+    let conjugatedFrom = null;
+
+    // Conjugation/declension fallback: "schreibe" → "schreiben"
+    if (!match) {
+      const vocab = self.__lexiVocab;
+      if (vocab) {
+        const inf = vocab.getVerbInfinitive?.()?.get?.(q);
+        if (inf && inf !== q) {
+          const baseMatch = searchDictBanks(dict, inf);
+          if (baseMatch) {
+            match = baseMatch;
+            conjugatedFrom = word;
+          }
+        }
+      }
     }
 
     // Remove old lookup card
@@ -1066,13 +1097,22 @@
       color: #1e293b; animation: lexi-fadein 0.2s ease-out;
     `;
 
+    const LANG_FLAGS = { de: '\u{1F1E9}\u{1F1EA}', es: '\u{1F1EA}\u{1F1F8}', fr: '\u{1F1EB}\u{1F1F7}', en: '\u{1F1EC}\u{1F1E7}', nb: '\u{1F1F3}\u{1F1F4}', nn: '\u{1F1F3}\u{1F1F4}', no: '\u{1F1F3}\u{1F1F4}' };
+    const langFlag = LANG_FLAGS[currentLang] || '';
+    const langSuffix = currentLang === 'nb' ? ' NB' : currentLang === 'nn' ? ' NN' : '';
+
     if (match) {
+      const conjugHint = conjugatedFrom
+        ? `<div style="font-size:12px;color:#64748b;margin-bottom:6px;padding:4px 8px;background:rgba(17,180,154,0.06);border-radius:6px;border-left:3px solid #11B49A;">${escapeHtml(conjugatedFrom)} → <strong>${escapeHtml(match.word)}</strong></div>`
+        : '';
+
       card.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
           <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
-        <div style="font-size:20px;font-weight:700;color:#11B49A;margin-bottom:2px;">${escapeHtml(match.word)}</div>
+        ${conjugHint}
+        <div style="font-size:20px;font-weight:700;color:#11B49A;margin-bottom:2px;">${langFlag ? `<span style="margin-right:4px">${langFlag}${langSuffix}</span>` : ''}${escapeHtml(match.word)}</div>
         <div style="font-size:15px;margin-bottom:6px;">${escapeHtml(match.translation)}</div>
         <div style="display:flex;gap:6px;margin-bottom:8px;">
           <span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(17,180,154,0.08);color:#11B49A;font-weight:500;">${escapeHtml(match.partOfSpeech)}</span>
@@ -1125,7 +1165,7 @@
       }
     }
 
-    document.documentElement.appendChild(card);
+    (document.fullscreenElement || document.documentElement).appendChild(card);
     card.querySelector('#lh-lookup-close').addEventListener('click', () => card.remove());
     document.addEventListener('keydown', function esc(e) {
       if (e.key === 'Escape') { card.remove(); document.removeEventListener('keydown', esc); }
