@@ -79,3 +79,44 @@
 // Rule has no adj+noun blocklist → flags today. Acceptance assertion
 // forces the P value down, driving the SC-05 threshold-lock decision.
 {"id":"nb-saer-accept-017","text":"Hun bor i en stor by","expected":[],"must_not_flag":[]}
+
+// ── Phase 17: decomposition-backed positive cases ──
+// Compounds NOT in stored compoundNouns but decomposable (both parts in nounGenus).
+// Tests the COMP-07 fallback path in nb-sarskriving.js.
+// Articles chosen to match the LAST noun's genus to avoid incidental gender findings.
+{"id":"nb-saer-039","text":"Vi malte hus vegg","expected":[{"rule_id":"sarskriving","start":9,"end":17,"suggestion":"husvegg"}],"must_not_flag":[]}
+{"id":"nb-saer-040","text":"Han kjøpte bord lampe","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"bordlampe"}],"must_not_flag":[]}
+{"id":"nb-saer-041","text":"Jeg ser stein vegg","expected":[{"rule_id":"sarskriving","start":8,"end":18,"suggestion":"steinvegg"}],"must_not_flag":[]}
+{"id":"nb-saer-042","text":"Det er et glass tak","expected":[{"rule_id":"sarskriving","start":10,"end":19,"suggestion":"glasstak"}],"must_not_flag":[]}
+{"id":"nb-saer-043","text":"Han sendte brev post","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"brevpost"}],"must_not_flag":[]}
+{"id":"nb-saer-044","text":"Jeg gikk opp trapp trinn","expected":[{"rule_id":"sarskriving","start":13,"end":24,"suggestion":"trapptrinn"}],"must_not_flag":[]}
+{"id":"nb-saer-045","text":"Vi lå på en sand strand","expected":[{"rule_id":"sarskriving","start":12,"end":23,"suggestion":"sandstrand"}],"must_not_flag":[]}
+{"id":"nb-saer-046","text":"Jeg ser en stein mur","expected":[{"rule_id":"sarskriving","start":11,"end":20,"suggestion":"steinmur"}],"must_not_flag":[]}
+{"id":"nb-saer-047","text":"Vi åpnet glass dør","expected":[{"rule_id":"sarskriving","start":9,"end":18,"suggestion":"glassdør"}],"must_not_flag":[]}
+{"id":"nb-saer-048","text":"Det er et hus tak","expected":[{"rule_id":"sarskriving","start":10,"end":17,"suggestion":"hustak"}],"must_not_flag":[]}
+{"id":"nb-saer-049","text":"Vi trengte gate lys","expected":[{"rule_id":"sarskriving","start":11,"end":19,"suggestion":"gatelys"}],"must_not_flag":[]}
+{"id":"nb-saer-050","text":"Han la brev boks","expected":[{"rule_id":"sarskriving","start":7,"end":16,"suggestion":"brevboks"}],"must_not_flag":[]}
+{"id":"nb-saer-051","text":"Det var en storm vind","expected":[{"rule_id":"sarskriving","start":11,"end":21,"suggestion":"stormvind"}],"must_not_flag":[]}
+{"id":"nb-saer-052","text":"Vi bygde en mur stein","expected":[{"rule_id":"sarskriving","start":12,"end":21,"suggestion":"murstein"}],"must_not_flag":[]}
+{"id":"nb-saer-053","text":"Det var natt luft","expected":[{"rule_id":"sarskriving","start":8,"end":17,"suggestion":"nattluft"}],"must_not_flag":[]}
+{"id":"nb-saer-054","text":"Jeg ser natt himmel","expected":[{"rule_id":"sarskriving","start":8,"end":19,"suggestion":"natthimmel"}],"must_not_flag":[]}
+
+// ── Phase 17: decomposition-backed acceptance cases ──
+// Pairs that must NOT flag: adjective+noun where adj is NOT a noun in nounGenus,
+// function-word pairs already in blocklist, and random noun pairs that don't compound.
+{"id":"nb-saer-accept-018","text":"Det var et fersk brød","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-019","text":"Hun hadde en mørk skog","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-020","text":"Han liker sterk kaffe","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-021","text":"Det var en ung mann","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-022","text":"Han har en flott hund","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-023","text":"Hun er en glad jente","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-024","text":"Det er en pen kjole","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-025","text":"Han har en stygg vane","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-026","text":"Vi kjøpte en billig sofa","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-027","text":"Det var en trist film","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-028","text":"Hun møtte en kjekk gutt","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-029","text":"Det er en rask bil","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-030","text":"Vi har en våt hund","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-031","text":"Det var et stort hus","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-032","text":"Han har ei tykk bok","expected":[],"must_not_flag":[]}
+{"id":"nb-saer-accept-033","text":"Vi spiste et varmt måltid","expected":[],"must_not_flag":[]}
