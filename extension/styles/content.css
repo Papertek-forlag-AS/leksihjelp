@@ -912,6 +912,7 @@
 }
 
 #lexi-spell-overlay .lh-spell-typo { background: #ef4444; }
+#lexi-spell-overlay .lh-spell-aa_og { background: #dc2626; } /* red-600 — high-severity å/og grammar error */
 #lexi-spell-overlay .lh-spell-homophone { background: #f97316; } /* orange-500 */
 #lexi-spell-overlay .lh-spell-context-typo { background: #f97316; }
 #lexi-spell-overlay .lh-spell-gender { background: #f59e0b; }

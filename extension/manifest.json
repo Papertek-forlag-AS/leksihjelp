@@ -52,6 +52,7 @@
         "content/spell-rules/nb-demonstrative-gender.js",
         "content/spell-rules/nb-modal-verb.js",
         "content/spell-rules/nb-nn-passiv-s.js",
+        "content/spell-rules/nb-aa-og.js",
         "content/spell-rules/nb-sarskriving.js",
         "content/spell-rules/universal-agreement.js",
         "content/spell-rules/nb-dialect-mix.js",
