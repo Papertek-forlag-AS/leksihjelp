@@ -55,23 +55,30 @@ they're working on.
 - ✓ **Cross-language collocations** — v2.0, preposition-collocation errors in NB/DE/FR/ES with 97 seed entries (COLL-01 through COLL-04)
 - ✓ **9 release gates** — v2.0, check-fixtures + check-explain-contract + check-rule-css-wiring + check-network-silence + check-bundle-size + check-benchmark-coverage + check-governance-data + check-spellcheck-features + check-stateful-rule-invalidation
 
-## Current Milestone: (none — planning next)
+## Current Milestone: v2.1 Compound Decomposition & Polish
+
+**Goal:** Algorithmic compound word decomposition for NB/NN/DE (dictionary, spell-check, gender inference) plus carry-over polish items from v1.0/v2.0.
 
 ### Active
 
-<!-- Carry-over tech-debt and candidate features for next milestone -->
+- [ ] Compound word decomposition engine (NB/NN/DE) — split unknown words at known noun boundaries with linking-element awareness
+- [ ] Dictionary popup for decomposed compounds — show gender + breakdown for unknowns, no inherited examples
+- [ ] Spell-check integration — accept decomposable compounds as valid, expand särskriving detection
+- [ ] Gender inference from last component — extend existing DE compound-gender to NB/NN
+- [ ] Manual "Run spell-check" button — explicit trigger for uncertain/dyslexic users
+- [ ] Demonstrative-mismatch rule (`Det boka`, `Den huset`) — extends nb-gender beyond en/ei/et
+- [ ] Triple-letter typo budget (`tykkkjer`) — frequency-weighted fuzzy-distance tiebreak
+- [ ] Browser visual verification — deferred Phases 6/7 checks (P1/P2/P3 dots, quotation suppression, word-order dots)
 
-**Carry-over tech-debt from v1.0/v2.0:**
+### Deferred
 
-- Manual "Run spell-check" button (Phase 5 deferred feature — user memory `project_phase5_manual_spellcheck_button.md`)
-- Demonstrative-mismatch rule (`Det boka`, `Den huset`) — extends nb-gender beyond en/ei/et
-- Triple-letter typo budget (`tykkkjer`) — frequency-weighted fuzzy-distance tiebreak
+**Carry-over tech-debt (not in v2.1):**
+
 - NN phrase-infinitive triage (~214 `papertek-vocabulary` verbbank entries)
 - Data-source architecture move: extension = functions only, bundled baseline + sync with papertek-vocabulary (memory `project_data_source_architecture.md`)
 - Leksi-in-skriv integration: embed spell-check/prediction as native feature inside `skriv.papertek.app` (memory `project_lexi_in_skriv_integration.md`)
 - `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
-- Browser visual verification for Phases 6/7 (P1/P2/P3 dots, quotation suppression, word-order dots)
 
 **v3.0 candidates (deferred from v2.0 scope):**
 
@@ -154,4 +161,4 @@ they're working on.
 | **Gap closure via decimal phases** (v2.0) | 14.1 and 15.1 closed audit-found gaps without renumbering | ✓ Good — pattern established in v1.0 continues to work well |
 
 ---
-*Last updated: 2026-04-25 after v2.0 milestone (Depth of Coverage — Grammar Governance Beyond Tokens)*
+*Last updated: 2026-04-26 after v2.1 milestone start (Compound Decomposition & Polish)*

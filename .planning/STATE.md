@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: Planning next milestone
+milestone: v2.1
+milestone_name: Compound Decomposition & Polish
 current_phase: none
 current_plan: none
-status: milestone_complete
-last_updated: "2026-04-25T19:30:00.000Z"
+status: defining_requirements
+last_updated: "2026-04-26T00:00:00.000Z"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -17,17 +17,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-25)
+See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Planning next milestone
+**Current focus:** v2.1 Compound Decomposition & Polish
 
 ## Position
 
 **Last milestone:** v2.0 Depth of Coverage — Grammar Governance Beyond Tokens (shipped 2026-04-25)
 **Current phase:** none
 **Current Plan:** none
-**Status:** Between milestones
+**Status:** Defining requirements
 
 ## Decisions
 
