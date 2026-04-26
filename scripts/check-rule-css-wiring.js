@@ -65,6 +65,7 @@ const TARGETS = [
   'extension/content/spell-rules/fr-grammar.js',
   'extension/content/spell-rules/fr-preposition.js',
   'extension/content/spell-rules/nb-gender.js',
+  'extension/content/spell-rules/nb-compound-gender.js',
   'extension/content/spell-rules/nb-modal-verb.js',
   'extension/content/spell-rules/nb-sarskriving.js',
   'extension/content/spell-rules/universal-agreement.js',

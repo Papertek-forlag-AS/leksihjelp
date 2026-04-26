@@ -937,6 +937,7 @@
 #lexi-spell-overlay .lh-spell-de-verb-final { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-03 */
 #lexi-spell-overlay .lh-spell-fr-bags { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 7 WO-04 */
 #lexi-spell-overlay .lh-spell-de-perfekt-aux { background: #f59e0b; }  /* amber — P2 warn, Phase 8 DE-03 */
+#lexi-spell-overlay .lh-spell-nb-compound-gender { background: #f59e0b; }  /* amber — P2 warn, Phase 17 COMP-04 */
 #lexi-spell-overlay .lh-spell-de-compound-gender { background: #f59e0b; }  /* amber — P2 warn, Phase 8 DE-04 */
 #lexi-spell-overlay .lh-spell-de-prep-case { background: #f59e0b; }  /* amber — P2 warn, Phase 8 DE-01 */
 #lexi-spell-overlay .lh-spell-de-separable-verb { background: #f59e0b; }  /* amber — P2 warn, Phase 8 DE-02 */

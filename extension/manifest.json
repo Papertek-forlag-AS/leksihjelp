@@ -48,6 +48,7 @@
         "content/spell-rules/nb-codeswitch.js",
         "content/spell-rules/nb-propernoun-guard.js",
         "content/spell-rules/nb-gender.js",
+        "content/spell-rules/nb-compound-gender.js",
         "content/spell-rules/nb-modal-verb.js",
         "content/spell-rules/nb-sarskriving.js",
         "content/spell-rules/universal-agreement.js",
