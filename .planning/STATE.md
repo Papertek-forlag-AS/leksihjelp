@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: Student Language Intelligence
 status: completed
-last_updated: "2026-04-26T20:04:17.338Z"
+last_updated: "2026-04-26T21:17:12.000Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # Session State
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-04-26)
 ## Position
 
 **Milestone:** v2.2 Student Language Intelligence
-**Phase:** 21.1 (Dictionary Intelligence Pipeline Fix — gap closure)
+**Phase:** 21.2 (Dictionary Intelligence Data Fixes — gap closure)
 **Plan:** 01 complete (1 of 1)
 **Status:** Milestone complete
 
@@ -50,6 +50,7 @@ Recent decisions affecting current work:
 - [Phase 21]: No code changes needed to popup.js -- rendering pipeline already complete
 - [Phase 21.1]: Reverse linkedTo index pattern for cross-language enrichment (Map in popup, linear scan in widget)
 - [Phase 21.1]: NB entries are the canonical source for falseFriends/senses; target entries enriched at render time
+- [Phase 21.2]: Used git push for Vercel deploy (CLI hit 250MB serverless limit)
 
 ### Pending Todos
 
@@ -62,5 +63,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 21.1-01-PLAN.md (pipeline fix: NB enrichment wiring for falseFriends/senses)
+Stopped at: Completed 21.2-01-PLAN.md (data fixes: linkedTo entries for FR false-friend and DE senses)
 Resume file: None
