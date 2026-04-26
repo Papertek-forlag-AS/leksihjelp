@@ -124,10 +124,10 @@ Plans:
   2. User typing "kaffe å kake" sees a spell-check flag on "å" with suggestion to use "og"
   3. User typing "sitter og leser" does NOT see a flag (posture verb + og + verb is grammatically correct)
   4. Popover explain text renders in both NB and NN registers, following the explain-contract pattern
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 22-01: å/og rule implementation with posture-verb exception list + fixtures + explain contract
+- [ ] 22-01-PLAN.md — å/og rule with posture-verb exceptions + fixtures + explain contract + gate wiring
 
 ## Progress
 
