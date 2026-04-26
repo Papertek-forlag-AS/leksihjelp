@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.2
 milestone_name: Student Language Intelligence
 status: completed
-last_updated: "2026-04-26T21:23:40.472Z"
+last_updated: "2026-04-26T22:06:44.567Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
 ---
 
 # Session State
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-26)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Phase 21 — Dictionary Intelligence (False Friends + Preposition Polysemy)
+**Current focus:** Phase 22 — å/og Confusion Detection
 
 ## Position
 
 **Milestone:** v2.2 Student Language Intelligence
-**Phase:** 21.2 (Dictionary Intelligence Data Fixes — gap closure)
+**Phase:** 22 (å/og Confusion Detection)
 **Plan:** 01 complete (1 of 1)
-**Status:** Milestone complete
+**Status:** Phase 22 complete
 
 Progress: [██████████] 100%
 
@@ -51,6 +51,7 @@ Recent decisions affecting current work:
 - [Phase 21.1]: Reverse linkedTo index pattern for cross-language enrichment (Map in popup, linear scan in widget)
 - [Phase 21.1]: NB entries are the canonical source for falseFriends/senses; target entries enriched at render time
 - [Phase 21.2]: Used git push for Vercel deploy (CLI hit 250MB serverless limit)
+- [Phase 22]: Priority 15 for å/og rule (most common NB error); red-600 CSS dot; complete removal from homophones
 
 ### Pending Todos
 
@@ -63,5 +64,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-04-26
-Stopped at: Completed 21.2-01-PLAN.md (data fixes: linkedTo entries for FR false-friend and DE senses)
+Stopped at: Completed 22-01-PLAN.md (å/og confusion detection rule with posture-verb exceptions)
 Resume file: None

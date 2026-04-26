@@ -23,10 +23,10 @@ Requirements for v2.2 Student Language Intelligence. Each maps to roadmap phases
 
 ### å/og Confusion
 
-- [ ] **AAOG-01**: User sees spell-check flag when "og" is used where "å" is required (e.g., "hun liker og lese" → "hun liker å lese")
-- [ ] **AAOG-02**: User sees spell-check flag when "å" is used where "og" is required (e.g., "kaffe å kake" → "kaffe og kake")
-- [ ] **AAOG-03**: Posture verb constructions correctly accepted ("sitter og leser" = valid)
-- [ ] **AAOG-04**: Rule has student-friendly explain text (NB/NN) following explain-contract
+- [x] **AAOG-01**: User sees spell-check flag when "og" is used where "å" is required (e.g., "hun liker og lese" → "hun liker å lese")
+- [x] **AAOG-02**: User sees spell-check flag when "å" is used where "og" is required (e.g., "kaffe å kake" → "kaffe og kake")
+- [x] **AAOG-03**: Posture verb constructions correctly accepted ("sitter og leser" = valid)
+- [x] **AAOG-04**: Rule has student-friendly explain text (NB/NN) following explain-contract
 
 ## Future Requirements
 
@@ -72,10 +72,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | POLY-02 | Phase 21 | Complete |
 | POLY-03 | Phase 21.1 | Complete |
 | POLY-04 | Phase 21.1 | Complete |
-| AAOG-01 | Phase 22 | Pending |
-| AAOG-02 | Phase 22 | Pending |
-| AAOG-03 | Phase 22 | Pending |
-| AAOG-04 | Phase 22 | Pending |
+| AAOG-01 | Phase 22 | Complete |
+| AAOG-02 | Phase 22 | Complete |
+| AAOG-03 | Phase 22 | Complete |
+| AAOG-04 | Phase 22 | Complete |
 
 ### Integration Gap Tracking (from v2.2 audit)
 

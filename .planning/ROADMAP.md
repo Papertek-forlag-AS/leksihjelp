@@ -65,7 +65,7 @@ See: `.planning/milestones/v2.1-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 21: Dictionary Intelligence — False Friends + Preposition Polysemy** - Data enrichment in Papertek API + popup and floating-widget rendering for cross-language false-friend warnings and sense-grouped translations (completed 2026-04-26)
 - [x] **Phase 21.1: Fix Dictionary Intelligence Data Pipeline (GAP CLOSURE)** - Wire falseFriends/senses data from nb.json through to popup.js and floating-widget.js renderers; fix filter direction inversion (completed 2026-04-26)
 - [x] **Phase 21.2: Dictionary Intelligence Data Fixes (GAP CLOSURE)** - Fix missing linkedTo entries at Papertek API + re-sync vocab to close DE senses and FR false-friend gaps (completed 2026-04-26)
-- [ ] **Phase 22: å/og Confusion Detection** - Sentence-level NB/NN spell-check rule for Norway's most common writing error
+- [x] **Phase 22: å/og Confusion Detection** - Sentence-level NB/NN spell-check rule for Norway's most common writing error (completed 2026-04-26)
 
 ## Phase Details
 
@@ -161,7 +161,7 @@ Plans:
 | 21. Dictionary Intelligence | v2.2 | 2/2 | Complete | 2026-04-26 |
 | 21.1 Pipeline Fix (GAP) | 1/1 | Complete    | 2026-04-26 | - |
 | 21.2 Data Fixes (GAP) | 1/1 | Complete    | 2026-04-26 | - |
-| 22. å/og Confusion | v2.2 | 0/1 | Not started | - |
+| 22. å/og Confusion | 1/1 | Complete   | 2026-04-26 | - |
 
 ---
 *Roadmap updated: 2026-04-26 — gap closure phase 21.2 added after milestone audit*
