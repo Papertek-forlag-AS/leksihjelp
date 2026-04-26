@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: between_milestones
-last_updated: "2026-04-27T00:00:00.000Z"
+milestone: v3.0
+milestone_name: Data-Source Migration
+status: defining_requirements
+last_updated: "2026-04-27T00:30:00.000Z"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -18,16 +18,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v3.0 Data-Source Migration
 
 ## Position
 
-**Milestone:** Between milestones (v2.2 shipped 2026-04-27)
-**Phase:** None
-**Plan:** None
-**Status:** Ready for next milestone
-
-Progress: N/A
+**Milestone:** v3.0 Data-Source Migration
+**Phase:** Not started (defining requirements)
+**Plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-04-27 — Milestone v3.0 started
 
 ## Performance Metrics
 
@@ -48,11 +47,11 @@ None.
 
 ### Blockers/Concerns
 
-- VERIF-01 (browser visual verification) carried across 3 milestones now — consider ad-hoc resolution
+- VERIF-01 (browser visual verification) carried across 3 milestones — consider ad-hoc resolution alongside v3.0 work
 - Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
 
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Completed v2.2 milestone archival
+Stopped at: Milestone v3.0 started — defining requirements
 Resume file: None

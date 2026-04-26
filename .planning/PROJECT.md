@@ -72,7 +72,18 @@ they're working on.
 
 ### Active
 
-(No active milestone — next milestone to be planned)
+## Current Milestone: v3.0 Data-Source Migration
+
+**Goal:** Strip bundled vocabulary from the extension; fetch from the Papertek API once at install, cache locally in IndexedDB, hot-update on revision change. Single source of truth across extension, webapps, and nativeapps. Offline promise preserved via tiny NB baseline + background download.
+
+**Target capabilities:**
+- Papertek API exposes versioned per-language vocabulary endpoints with revision metadata
+- Extension ships with ~100 KB NB baseline; full data downloads to IndexedDB on first run
+- Vocab-seam reads from IndexedDB cache with baseline fallback during hydration
+- Update detection on startup + manual "Oppdater ordlister nå" button
+- Schema-version compatibility check before persisting
+- Silent migration for v2.x users
+- SC-06 gate documents the service-worker bootstrap path as the sanctioned exception
 
 ### Deferred
 
@@ -186,4 +197,4 @@ they're working on.
 | **å/og removed from homophones rule** (v2.2) | Dedicated rule with posture-verb exceptions handles the full complexity | ✓ Good — prevents duplicate flagging between nb-homophones and nb-aa-og |
 
 ---
-*Last updated: 2026-04-27 after v2.2 milestone (Student Language Intelligence)*
+*Last updated: 2026-04-27 after v3.0 milestone start (Data-Source Migration)*
