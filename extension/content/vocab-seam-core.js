@@ -712,6 +712,7 @@
   // entry.word is already lowercased (buildWordList guarantees this).
   function buildLookupIndexes(wordList, lang) {
     const nounGenus = new Map();        // 'hus' → 'n'
+    const nounLemmaGenus = new Map();   // base-form nouns only (no inflected/typo)
     const verbInfinitive = new Map();   // 'spiser' → 'spise'
     const validWords = new Set();       // every known lowercase form
     const isAdjective = new Set();      // 'stor' → true
@@ -794,6 +795,13 @@
         if (!nounGenus.has(w)) nounGenus.set(w, entry.genus);
       }
 
+      // Phase 17-05: lemma-only genus for strict compound decomposition.
+      // Excludes inflected forms (nounform, plural) and typos to prevent
+      // false positives when sarskriving rule decomposes adjacent tokens.
+      if (entry.bank === 'nounbank' && entry.type !== 'typo' && entry.type !== 'nounform' && entry.type !== 'plural' && entry.genus) {
+        if (!nounLemmaGenus.has(w)) nounLemmaGenus.set(w, entry.genus);
+      }
+
       // For særskriving: only consider noun-bank base entries, to avoid
       // flagging "stor by" (valid phrase) as a compound of the adjective form.
       if (entry.bank === 'nounbank' && entry.type !== 'typo') {
@@ -810,7 +818,7 @@
       }
     }
 
-    return { nounGenus, verbInfinitive, validWords, isAdjective, knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns };
+    return { nounGenus, nounLemmaGenus, verbInfinitive, validWords, isAdjective, knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns };
   }
 
   // ── Phase 8: Build participle → auxiliary Map from raw verbbank ──
@@ -1206,9 +1214,9 @@
     const unfilteredWordList = (iff === iffTrue)
       ? wordList
       : buildWordList(raw, lang, iffTrue);
-    const { 
-      nounGenus, verbInfinitive, validWords, isAdjective, 
-      knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns 
+    const {
+      nounGenus, nounLemmaGenus, verbInfinitive, validWords, isAdjective,
+      knownPresens, knownPreteritum, verbForms, nounForms, typoFix, compoundNouns
     } = buildLookupIndexes(unfilteredWordList, lang);
      const normBigrams = bigrams ? normalizeBigrams(bigrams) : null;    // Hydrate Zipf frequency map from the sidecar shipped by Phase 2 DATA-01.
     // Freq is null for languages without a freq-{lang}.json sidecar (de/es/fr/en) —
@@ -1295,6 +1303,7 @@
     return {
       wordList,
       nounGenus,
+      nounLemmaGenus,
       isAdjective,
       knownPresens,
       knownPreteritum,
@@ -1336,6 +1345,8 @@
       grammarTables,
       // Phase 16: compound decomposition bound to this index's nounGenus and lang.
       decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
+      // Phase 17-05: strict decomposition using lemma-only genus map (no inflected forms).
+      decomposeCompoundStrict: (word) => decomposeCompound(word, nounLemmaGenus, lang),
     };
   }
 
