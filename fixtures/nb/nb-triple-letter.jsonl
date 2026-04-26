@@ -1,0 +1,21 @@
+// NB triple-letter typo ground truth cases.
+// Rule id: "nb-triple-letter". Span convention: start inclusive, end EXCLUSIVE.
+// Note: spell-check-core requires >=2 tokens, so all cases use multi-word text.
+// Note: Words also in typoFix are caught by typo-curated (priority 40) first,
+// so positive cases use words NOT in the curated typo map.
+
+// -- Positive cases -- triple letter must flag --
+{"id":"nb-triple-001","text":"Jeg villlle","expected":[{"rule_id":"nb-triple-letter","start":4,"end":11,"suggestion":"ville"}],"must_not_flag":[]}
+{"id":"nb-triple-002","text":"For alllle","expected":[{"rule_id":"nb-triple-letter","start":4,"end":10,"suggestion":"alle"}],"must_not_flag":[]}
+{"id":"nb-triple-003","text":"En ballll","expected":[{"rule_id":"nb-triple-letter","start":3,"end":9,"suggestion":"ball"}],"must_not_flag":[]}
+{"id":"nb-triple-004","text":"Er snilll","expected":[{"rule_id":"nb-triple-letter","start":3,"end":9,"suggestion":"snill"}],"must_not_flag":[]}
+{"id":"nb-triple-005","text":"En grillll","expected":[{"rule_id":"nb-triple-letter","start":3,"end":10,"suggestion":"grill"}],"must_not_flag":[]}
+{"id":"nb-triple-006","text":"Kan skillle","expected":[{"rule_id":"nb-triple-letter","start":4,"end":11,"suggestion":"skille"}],"must_not_flag":[]}
+
+// -- Negative cases -- should NOT flag (valid words with double letters) --
+{"id":"nb-triple-010","text":"En bakke","expected":[],"must_not_flag":["nb-triple-letter"]}
+{"id":"nb-triple-011","text":"Helt stille","expected":[],"must_not_flag":["nb-triple-letter"]}
+{"id":"nb-triple-012","text":"Er full","expected":[],"must_not_flag":["nb-triple-letter"]}
+{"id":"nb-triple-013","text":"For alle","expected":[],"must_not_flag":["nb-triple-letter"]}
+{"id":"nb-triple-014","text":"Kan finne","expected":[],"must_not_flag":["nb-triple-letter"]}
+{"id":"nb-triple-015","text":"Ja takk","expected":[],"must_not_flag":["nb-triple-letter"]}
