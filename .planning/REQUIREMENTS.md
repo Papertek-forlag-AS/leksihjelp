@@ -76,32 +76,32 @@ Explicitly excluded. Documented to prevent scope creep.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | TBD | Pending |
-| API-02 | TBD | Pending |
-| API-03 | TBD | Pending |
-| BOOT-01 | TBD | Pending |
-| BOOT-02 | TBD | Pending |
-| BOOT-03 | TBD | Pending |
-| CACHE-01 | TBD | Pending |
-| CACHE-02 | TBD | Pending |
-| CACHE-03 | TBD | Pending |
-| UPDATE-01 | TBD | Pending |
-| UPDATE-02 | TBD | Pending |
-| UPDATE-03 | TBD | Pending |
-| SCHEMA-01 | TBD | Pending |
-| MIGRATE-01 | TBD | Pending |
-| GATES-01 | TBD | Pending |
-| GATES-02 | TBD | Pending |
+| API-01 | Phase 23 | Pending |
+| API-02 | Phase 23 | Pending |
+| API-03 | Phase 23 | Pending |
+| CACHE-01 | Phase 24 | Pending |
+| CACHE-02 | Phase 24 | Pending |
+| CACHE-03 | Phase 24 | Pending |
+| SCHEMA-01 | Phase 24 | Pending |
+| BOOT-01 | Phase 25 | Pending |
+| BOOT-02 | Phase 25 | Pending |
+| BOOT-03 | Phase 25 | Pending |
+| GATES-01 | Phase 25 | Pending |
+| GATES-02 | Phase 25 | Pending |
+| UPDATE-01 | Phase 26 | Pending |
+| UPDATE-02 | Phase 26 | Pending |
+| UPDATE-03 | Phase 26 | Pending |
+| MIGRATE-01 | Phase 27 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 16 total
-- Mapped to phases: 0 (filled by roadmapper)
-- Unmapped: 16 ⚠️ (will resolve after roadmap)
+- Mapped to phases: 16 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-27*
-*Last updated: 2026-04-27 after v3.0 milestone start*
+*Last updated: 2026-04-27 after v3.0 roadmap drafted (5 phases, 100% coverage)*

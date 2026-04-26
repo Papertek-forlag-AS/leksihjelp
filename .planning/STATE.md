@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Data-Source Migration
-status: defining_requirements
-last_updated: "2026-04-27T00:30:00.000Z"
+status: roadmap_drafted
+last_updated: "2026-04-27T00:45:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 16
   completed_plans: 0
 ---
 
@@ -18,15 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Defining requirements for v3.0 Data-Source Migration
+**Current focus:** v3.0 Data-Source Migration — roadmap drafted (5 phases, 16 requirements mapped)
 
 ## Position
 
 **Milestone:** v3.0 Data-Source Migration
-**Phase:** Not started (defining requirements)
+**Phase:** 23 (next — Papertek API Vocabulary Endpoints)
 **Plan:** —
-**Status:** Defining requirements
-**Last activity:** 2026-04-27 — Milestone v3.0 started
+**Status:** Roadmap drafted; ready for `/gsd:plan-phase 23`
+**Last activity:** 2026-04-27 — v3.0 roadmap drafted (Phases 23–27)
+
+### Progress
+```
+Phases: [.....] 0/5
+Plans:  [................] 0/16
+```
 
 ## Performance Metrics
 
@@ -41,17 +47,25 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
+v3.0-specific commitments (carried from milestone definition, will be promoted into the table on completion):
+- Storage: IndexedDB (avoids `unlimitedStorage` permission and stricter Web Store review)
+- Bootstrap UX: tiny NB baseline (~100 KB cap) bundled + background download for full data
+- Update detection: startup revision check + manual "Oppdater ordlister nå" button
+- SC-06: service-worker bootstrap path is the sanctioned exception; spell-check + word-prediction stay network-silent
+- Lockdown bootstrap: out of scope; deliver documented adapter contract only
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
+- Phase 23 (Papertek API endpoints) is sibling-repo work — coordinate with `papertek-vocabulary` deploy before extension can integrate
 - VERIF-01 (browser visual verification) carried across 3 milestones — consider ad-hoc resolution alongside v3.0 work
-- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
+- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 — align before v3.0 release
 
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Milestone v3.0 started — defining requirements
-Resume file: None
+Stopped at: v3.0 roadmap drafted; awaiting `/gsd:plan-phase 23`
+Resume file: .planning/ROADMAP.md
