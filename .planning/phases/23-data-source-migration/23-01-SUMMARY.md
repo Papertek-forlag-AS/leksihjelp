@@ -45,6 +45,8 @@ requirements-completed: [API-01, API-02, API-03]
 
 duration: 12min
 completed: 2026-04-27
+follow-up:
+  - "Task 4 (pre-gzip + HEAD fix) added 2026-04-27 — sibling commits db576df8 + 99d19a98. Drops de wire size from 4.49 MiB to ~795 KB and clears the Vercel 4.5 MB cap concern entirely."
 ---
 
 # Phase 23 Plan 01: Papertek Bundle + Revisions API Summary
@@ -125,5 +127,61 @@ None - no environment variables or external service configuration. Both endpoint
 - All four production curl checks passed (CORS echo, revisions payload, bundle key list, OPTIONS preflight).
 
 ---
+
+## Follow-up: Task 4 — Pre-gzip bundle responses (added 2026-04-27)
+
+### Why this was added after close-out
+
+The original close-out flagged the de bundle at 4.49 MiB on the wire — only ~30 KB under Vercel's 4.5 MiB serverless body cap — and deferred the mitigation to plan 23-03 (under "switch to streaming or split heavy fields"). On reflection that was the wrong place for it: plan 23-03 adds data (freq, bigrams) that *grows* the bundle, so deferring meant 23-03 would inherit a near-overflowed payload before it could even start. Pre-gzipping at the response layer is a smaller, more local fix that buys ~5× headroom for free, so we re-opened 23-01 with Task 4 + Task 5 rather than letting 23-03 carry the risk.
+
+### What was built
+
+**Sibling repo (`papertek-vocabulary`):**
+
+- `lib/_bundle.js` — added `buildGzippedBundle(language)` (module-cached per `(lang, revision)` so warm Vercel invocations skip recompression) and `clientAcceptsGzip(headerValue)` (RFC-tolerant Accept-Encoding parser handling `q=0`, wildcard, whitespace, `identity`).
+- `api/vocab/v1/bundle/[language].js`:
+  - 304 short-circuit runs **before** compression (cache hits stay cheap).
+  - When client advertises gzip → returns gzipped buffer with `Content-Encoding: gzip`, explicit `Content-Length`, cached ETag.
+  - When client doesn't → returns raw JSON (function-layer fallback; see "known quirk" below).
+  - **HEAD support** restored (regression from the initial pre-gzip commit) — same headers as GET, no body, per RFC 7231 §4.3.2.
+
+### Compression results (all 6 languages, measured locally)
+
+| Language | Raw     | Gzipped | Ratio  |
+| -------- | ------- | ------- | ------ |
+| nb       | 3.48 MB | 752 KB  | 21.1%  |
+| nn       | 4.02 MB | 892 KB  | 21.7%  |
+| **de**   | 4.45 MB | **795 KB**  | **17.4%**  |
+| es       | 2.87 MB | 573 KB  | 19.5%  |
+| fr       | 2.68 MB | 541 KB  | 19.8%  |
+| en       | 2.73 MB | 592 KB  | 21.1%  |
+
+Live on `papertek-vocabulary.vercel.app`: de measured at **808,065 bytes** (matches local within rounding) with transparent decompression yielding identical 4,708,747 bytes to uncompressed. ~3.7 MB of headroom under the 4.5 MB cap — plans 23-03 (freq + bigrams, ~150 KB compressed worst case) and 23-04 (falseFriends + senses) fit easily.
+
+### Task 4 commits (sibling repo)
+
+1. `db576df8` — `feat(23-01): pre-gzip bundle responses to clear Vercel 4.5 MB cap` (initial pre-gzip + module cache + AE parser)
+2. `99d19a98` — `fix(23-01): allow HEAD on bundle endpoint (regression from pre-gzip)` (HEAD method support + Vercel-edge-compression note)
+
+### Live verification (post-deploy)
+
+| Check | Expectation | Result |
+| ----- | ----------- | ------ |
+| Wire size de + gzip | <1 MB | **808,065 bytes** ✓ |
+| Transparent decompression | gzip-decoded == uncompressed bytes | **4,708,747 == 4,708,747** ✓ |
+| ETag round-trip | `If-None-Match` → 304 | ✓ |
+| CORS | `Access-Control-Allow-Origin: https://leksihjelp.no` | ✓ |
+| HEAD (after fix commit) | 200 + headers, no body | ✓ |
+
+### Deviations / known quirks
+
+- **Vercel edge auto-gzip overrides our `identity` fallback.** The function-layer logic correctly returns raw JSON when the client sends `Accept-Encoding: identity`, but Vercel's edge layer re-compresses the response before sending it on the wire. We can't suppress this from a serverless handler. Real browsers and the leksihjelp extension always send `Accept-Encoding: gzip` so this is harmless in practice; the function-level fallback exists primarily for mock-request unit tests and HEAD probes that bypass the edge. Documented inline in `bundle/[language].js`.
+- **HEAD regression** (introduced and fixed within Task 4 itself, not a deferred issue). The first pre-gzip commit tightened the method check to GET-only, breaking `curl -sSI` probes used by our verification scripts. Caught by user in the live verification round; fixed in commit `99d19a98` before close-out.
+
+### Resolved blockers / deferred items
+
+- **De bundle size at 4.49 MiB** (logged in `.planning/phases/23-data-source-migration/deferred-items.md` and STATE.md "Blockers/Concerns"): **resolved by pre-gzip**. Cleared from both files in the close-out commit for this follow-up.
+
+---
 *Phase: 23-data-source-migration*
-*Completed: 2026-04-27*
+*Completed: 2026-04-27 (initial), Task 4 follow-up: 2026-04-27*

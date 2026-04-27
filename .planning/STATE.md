@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Data-Source Migration
 status: in_progress
-last_updated: "2026-04-27T00:00:00.000Z"
+last_updated: "2026-04-27T00:35:00.000Z"
 progress:
   total_phases: 1
   completed_phases: 0
@@ -62,6 +62,7 @@ Plan 23-01 decisions:
 - Revision format: `YYYY-MM-DD-<sha256-hex8>` over sorted `*bank.json` files; same helper used by both bundle and revisions endpoints so they cannot drift
 - Schema 1 with forward-compat empty stubs (freq/bigrams/falseFriends/senses/typobank) — plans 23-03/04 populate without a schema bump
 - Function-level `res.setHeader('Access-Control-Allow-Origin', origin)` overrides repo-wide `*` from `vercel.json` — explicit allow-list (chrome-extension://*, leksihjelp.no, localhost:3000) without disturbing other v1/v3 endpoints
+- Plan 23-01 Task 4 follow-up (added 2026-04-27): pre-gzip bundle responses with module-cached buffers per `(language, revision)`. Drops de wire size 4.45 MB → 795 KB. Chosen over the originally-deferred "streaming or split-fields" approach because pre-gzip is a smaller, more local fix that doesn't change the bundle contract; plans 23-03/04 inherit a payload with ~3.7 MB of headroom rather than ~30 KB. Function-layer `Accept-Encoding: identity` fallback is a known platform-quirk no-op (Vercel edge re-gzips), documented inline.
 
 ### Pending Todos
 
@@ -70,7 +71,7 @@ None.
 ### Blockers/Concerns
 
 - ~~Phase 23 (Papertek API endpoints) is sibling-repo work — coordinate with `papertek-vocabulary` deploy before extension can integrate~~ **Resolved by plan 23-01: bundle + revisions endpoints live, verified 2026-04-27**
-- **De bundle response at 4.49 MiB (production)** — ~30 KB under Vercel's 4.5 MiB cap. Plan 23-03 (freq/bigrams) needs to either switch to streaming or split heavy fields. See `.planning/phases/23-data-source-migration/deferred-items.md`.
+- ~~De bundle response at 4.49 MiB (production), ~30 KB under Vercel's 4.5 MiB cap~~ **Resolved 2026-04-27 by plan 23-01 Task 4 follow-up: pre-gzip + HEAD fix drops de wire size to ~795 KB. Sibling commits `db576df8` + `99d19a98`. See `23-01-SUMMARY.md` "Follow-up: Task 4".**
 - VERIF-01 (browser visual verification) carried across 3 milestones — consider ad-hoc resolution alongside v3.0 work
 - Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 — align before v3.0 release
 
