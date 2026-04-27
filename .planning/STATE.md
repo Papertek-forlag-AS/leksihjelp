@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Data-Source Migration
 status: in_progress
-last_updated: "2026-04-27T00:54:00.000Z"
-last_activity: 2026-04-27 — Plan 23-06 closed; GATES-01/GATES-02 satisfied
+last_updated: "2026-04-27T00:55:43Z"
+last_activity: 2026-04-27 — Plan 23-02 closed; CACHE-01/CACHE-02/CACHE-03/SCHEMA-01 satisfied
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 2  # 23-01 + 23-06; 23-02 in progress in parallel
+  completed_plans: 3
 ---
 
 # Session State
@@ -25,27 +25,28 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.0 Data-Source Migration
 **Phase:** 23 (in progress — Data-Source Migration)
-**Plan:** 02 in flight (cache adapter); 06 complete (release gates); 03/04/05 next
-**Status:** Plans 23-01 + 23-06 complete; release gates for SC-06 carve-out + 200 KB baseline cap in place. 23-02 running in parallel.
-**Last activity:** 2026-04-27 — Plan 23-06 closed; GATES-01/GATES-02 satisfied
+**Plan:** 03 (next — baseline trim); 02/06 complete; 04/05 still pending
+**Status:** Plans 23-01 + 23-02 + 23-06 complete; cache adapter + baseline-first hydration live alongside the release gates and v1 endpoints. 23-03 (baseline trim) is unblocked.
+**Last activity:** 2026-04-27 — Plan 23-02 closed; CACHE-01/CACHE-02/CACHE-03/SCHEMA-01 satisfied
 
 ### Progress
 ```
 Phases: [.] 0/1
-Plans:  [##....] 2/6
+Plans:  [###...] 3/6
 ```
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: ~7.5 min
-- Total execution time: 0.25 hours
+- Total plans completed: 3
+- Average duration: ~6.7 min
+- Total execution time: 0.33 hours
 
 | Plan  | Duration | Tasks | Files | Date       |
 | ----- | -------- | ----- | ----- | ---------- |
 | 23-01 | 12 min   | 3     | 5     | 2026-04-27 |
 | 23-06 | 3 min    | 2     | 6     | 2026-04-27 |
+| 23-02 | 5 min    | 2     | 5     | 2026-04-27 |
 
 ## Accumulated Context
 
@@ -68,6 +69,13 @@ Plan 23-01 decisions:
 - [Phase 23]: Plan 23-06: Skip-when-absent gate semantics for check-baseline-bundle-size — gate exits 0 with SKIP marker when extension/data/nb-baseline.json not yet built (pre-plan-23-03), becomes meaningful once 23-03 lands. Avoids blocking wave 2 plans on an artifact only 23-03 produces.
 - [Phase 23]: Plan 23-06: SC-06 sanctioned bootstrap carve-out enforced by both header documentation in check-network-silence.js AND self-test that plants fetch() in extension/background/vocab-bootstrap.js asserting gate stays green. Belt-and-braces guards against silent scan-set drift.
 
+Plan 23-02 decisions:
+- IDB rename leksihjelp-vocab → lexi-vocab (v3) with legacy `languages` store dropped on upgrade. Old caches re-download once; ETag/304 keeps the cost bounded. Avoids dual-shape support forever.
+- fake-indexeddb (devDependency) chosen over the inline shim option — one tiny package gives realistic transaction lifecycles and per-test reset via `new FDBFactory()`.
+- Atomic swap implemented via stable wrapper + mutable module-level `state`; getters dereference live so consumers that captured `__lexiVocab` once see every swap and never observe a half-built state. swapIndexes(lang, revision, indexes) idempotent on revision so plan 04 update detection can be liberal with calls.
+- Schema gate at fetch boundary: `schema_version !== 1` returns `schema-mismatch` AND emits `chrome.runtime.sendMessage({type: 'lexi:schema-mismatch', ...})` AND preserves the existing cache. Plan 04/05 popup will surface this as "Versjonskonflikt" under Developer view.
+- All vocab fetches funnel through `fetchBundle` — single symbol for plan 06's SC-06 carve-out documentation to reference.
+
 ### Pending Todos
 
 None.
@@ -82,5 +90,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Completed 23-06-PLAN.md (release gates for bootstrap path)
-Resume file: .planning/phases/23-data-source-migration/23-03-PLAN.md (after 23-02 finishes)
+Stopped at: Completed 23-02-PLAN.md (v1 cache adapter + baseline-first hydration)
+Resume file: .planning/phases/23-data-source-migration/23-03-PLAN.md

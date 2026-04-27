@@ -21,9 +21,9 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### CACHE (storage adapter)
 
-- [ ] **CACHE-01**: All language data persists in IndexedDB; each cache entry carries `{schema_version, revision, fetched_at}` for diagnostics
-- [ ] **CACHE-02**: Vocab-seam (`__lexiVocab` / `buildIndexes`) reads from IndexedDB cache; falls back to bundled NB baseline if cache empty for the requested language
-- [ ] **CACHE-03**: Cache hydration is async; spell-check + word-prediction operate on baseline indexes during hydration, swap to full indexes once ready (no force-reload)
+- [x] **CACHE-01**: All language data persists in IndexedDB; each cache entry carries `{schema_version, revision, fetched_at}` for diagnostics
+- [x] **CACHE-02**: Vocab-seam (`__lexiVocab` / `buildIndexes`) reads from IndexedDB cache; falls back to bundled NB baseline if cache empty for the requested language
+- [x] **CACHE-03**: Cache hydration is async; spell-check + word-prediction operate on baseline indexes during hydration, swap to full indexes once ready (no force-reload)
 
 ### UPDATE (update detection)
 
@@ -33,7 +33,7 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### SCHEMA (compatibility)
 
-- [ ] **SCHEMA-01**: Before persisting downloaded data, extension verifies `schema_version` against the version it knows how to read; on mismatch, preserves the prior cache entry and surfaces a "Versjonskonflikt" diagnostic in popup developer view
+- [x] **SCHEMA-01**: Before persisting downloaded data, extension verifies `schema_version` against the version it knows how to read; on mismatch, preserves the prior cache entry and surfaces a "Versjonskonflikt" diagnostic in popup developer view
 
 ### MIGRATE (existing-user transition)
 
@@ -83,10 +83,10 @@ Which phases cover which requirements.
 | API-01 | Phase 23 (Plan 01) | Complete |
 | API-02 | Phase 23 (Plan 01) | Complete |
 | API-03 | Phase 23 (Plan 01) | Complete |
-| CACHE-01 | Phase 23 (Plan 02) | Pending |
-| CACHE-02 | Phase 23 (Plan 02) | Pending |
-| CACHE-03 | Phase 23 (Plan 02) | Pending |
-| SCHEMA-01 | Phase 23 (Plan 02) | Pending |
+| CACHE-01 | Phase 23 (Plan 02) | Complete |
+| CACHE-02 | Phase 23 (Plan 02) | Complete |
+| CACHE-03 | Phase 23 (Plan 02) | Complete |
+| SCHEMA-01 | Phase 23 (Plan 02) | Complete |
 | BOOT-01 | Phase 23 (Plan 03) | Pending |
 | BOOT-02 | Phase 23 (Plan 03) | Pending |
 | BOOT-03 | Phase 23 (Plan 03) | Pending |

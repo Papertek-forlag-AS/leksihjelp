@@ -88,7 +88,7 @@ See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success cr
   4. **Update detection + manual refresh** — On extension startup, service worker calls updates-check endpoint and compares per-language revision against cache; when an update is available, popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button; user-triggered update downloads new bundle, replaces the cache entry atomically, new indexes activate on the next page load
   5. **Existing users migrate silently and bundled data is removed** — A user upgrading from v2.x sees no functional regression on first run; the shipped extension zip no longer contains `extension/data/{de,es,fr,en,nb,nn}.json` full vocabularies (only the NB baseline remains); a documented adapter contract describes how lockdown can plug its own bootstrap into the vocab-seam
   6. **Release gates updated** — `check-network-silence` continues to exit 0 against spell-check + word-prediction hot paths; `background/vocab-bootstrap.js` is the only sanctioned `fetch` site and is documented as such; new `check-baseline-bundle-size` gate enforces the NB baseline ≤ 200 KB with paired self-test (oversized baseline → gate fires; well-formed baseline → gate passes)
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 - [ ] 23-01-PLAN.md (wave 1) — Papertek API vocabulary endpoints (sibling repo): bundle + revisions + CORS [API-01, API-02, API-03]
 - [ ] 23-02-PLAN.md (wave 2) — IndexedDB cache adapter + vocab-seam hydration + schema_version check [CACHE-01, CACHE-02, CACHE-03, SCHEMA-01]
 - [ ] 23-06-PLAN.md (wave 2) — SC-06 carve-out + new check-baseline-bundle-size gate + paired self-test [GATES-01, GATES-02]
@@ -129,7 +129,7 @@ See: `.planning/milestones/v2.2-ROADMAP.md` for full phase detail and success cr
 | 21.1 Pipeline Fix (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
-| 23. Data-Source Migration | 2/6 | In Progress|  | - |
+| 23. Data-Source Migration | 3/6 | In Progress|  | - |
 
 ---
 *Roadmap updated: 2026-04-27 — v3.0 Data-Source Migration consolidated to single phase (6 plans)*
