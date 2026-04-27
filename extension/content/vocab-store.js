@@ -243,16 +243,25 @@
    * the service-worker proxy when called from a content script on a non-
    * extension origin (lockdown / web pages running the shim).
    */
+  function _ensureMetadata(payload) {
+    if (!payload || payload._metadata || !payload.language) return payload;
+    payload._metadata = {
+      language: payload.language,
+      languageName: payload.languageName || payload.language,
+    };
+    return payload;
+  }
+
   async function getCachedLanguage(lang) {
     if (!_isExtensionOrigin) {
       const cacheKey = `lang:${lang}`;
-      if (_proxyCache.has(cacheKey)) return _proxyCache.get(cacheKey);
+      if (_proxyCache.has(cacheKey)) return _ensureMetadata(_proxyCache.get(cacheKey));
       const data = await _sendMessageAsync({ type: 'VOCAB_GET_CACHED', language: lang });
       if (data) _proxyCache.set(cacheKey, data);
-      return data;
+      return _ensureMetadata(data);
     }
     const entry = await getCachedBundle(lang);
-    return entry ? entry.payload : null;
+    return _ensureMetadata(entry ? entry.payload : null);
   }
 
   async function getCachedGrammarFeatures(lang) {
@@ -357,7 +366,7 @@
       if (typeof onProgress === 'function') {
         try { onProgress({ phase: 'ready', lang, fromCache: true }); } catch (e) {}
       }
-      return cached ? cached.payload : null;
+      return _ensureMetadata(cached ? cached.payload : null);
     }
     if (result.status !== 200) {
       throw result.error || new Error(`downloadLanguage failed for ${lang}`);
@@ -370,7 +379,7 @@
     if (typeof onProgress === 'function') {
       try { onProgress({ phase: 'ready', lang, fromCache: false }); } catch (e) {}
     }
-    return result.body;
+    return _ensureMetadata(result.body);
   }
 
   // Legacy proxy: popup.js cache-version checks (e.g. "is the audio pack from

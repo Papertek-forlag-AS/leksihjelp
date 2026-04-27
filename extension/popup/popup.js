@@ -950,8 +950,11 @@ async function loadGrammarFeatures(lang) {
   try {
     // Try vocab store first (grammar features are embedded in language pack)
     if (window.__lexiVocabStore) {
-      const cached = await window.__lexiVocabStore.getCachedGrammarFeatures(lang);
-      if (cached) {
+      let cached = await window.__lexiVocabStore.getCachedGrammarFeatures(lang);
+      // Tolerate old-shape (flat array) cached payloads from pre-fix bundles —
+      // wrap so downstream `grammarFeatures.features` access works.
+      if (Array.isArray(cached)) cached = { features: cached, categories: [], presets: [] };
+      if (cached && Array.isArray(cached.features)) {
         grammarFeatures = cached;
         // Load enabled features from storage, default to all enabled
         const stored = await chromeStorageGet('enabledGrammarFeatures');
