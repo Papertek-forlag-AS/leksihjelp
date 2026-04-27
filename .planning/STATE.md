@@ -4,12 +4,12 @@ milestone: v3.0
 milestone_name: Data-Source Migration
 status: completed
 last_updated: "2026-04-27T18:50:00Z"
-last_activity: 2026-04-27 — Plan 23-05 closed; MIGRATE-01 satisfied; all 6/6 plans complete
+last_activity: 2026-04-27 — Plan 23-07 closed; BOOT-01/02/03 marked complete; nn/clean fixture green
 progress:
   total_phases: 1
   completed_phases: 1
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # Session State
@@ -19,26 +19,26 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** v3.0 Data-Source Migration -- COMPLETE (all 6 plans executed)
+**Current focus:** v3.0 Data-Source Migration -- 7/8 plans complete
 
 ## Position
 
 **Milestone:** v3.0 Data-Source Migration
 **Phase:** 23 (COMPLETE -- Data-Source Migration)
-**Plan:** All 6/6 complete (01, 02, 03, 04, 05, 06)
-**Status:** Phase 23 complete. All plans executed and verified.
-**Last activity:** 2026-04-27 -- Plan 23-05 closed (data flip + lockdown contract); MIGRATE-01 satisfied
+**Plan:** 7/8 complete (01, 02, 03, 04, 05, 06, 07)
+**Status:** Plan 23-07 complete. BOOT checkboxes fixed, nn/clean fixture green.
+**Last activity:** 2026-04-27 -- Plan 23-07 closed (gap closure: REQUIREMENTS.md + nn/clean fixture)
 
 ### Progress
 ```
 Phases: [#] 1/1
-Plans:  [######] 6/6
+Plans:  [#######-] 7/8
 ```
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
+- Total plans completed: 7
 - Average duration: ~7 min
 - Total execution time: ~0.57 hours
 
@@ -50,6 +50,7 @@ Plans:  [######] 6/6
 | 23-04 | 6 min    | 2     | 6     | 2026-04-27 |
 | 23-03 | 8 min    | 3     | 8     | 2026-04-27 |
 | 23-05 | 8 min    | 4     | 26    | 2026-04-27 |
+| 23-07 | 7 min    | 2     | 2     | 2026-04-27 |
 
 ## Accumulated Context
 
@@ -82,6 +83,10 @@ Plan 23-02 decisions:
 - [Phase 23]: Plan 23-04: vocab-store + vocab-updater loaded into the service worker via importScripts (no dynamic import) — same IIFE works in both content-script and SW scope
 - [Phase 23]: Plan 23-04: popup uses two-channel sync (poll on open + push subscription) so a startup-time updates-available emit isn't lost when the popup was closed
 
+Plan 23-07 decisions:
+- nn/clean fixture narrowed by 4 sentences (not 3 as planned) — additional aa_og false positive on "sy" (sew) missing from NN vocab discovered during execution
+- Upstream NN vocab gaps to fix in papertek-vocabulary: ven, skin, heile, sykle, sy
+
 Plan 23-05 decisions:
 - resolveDataFile() fallback pattern: tests/fixtures/vocab/ first, extension/data/ second — applied across all 4 gate scripts for uniform vocab resolution post-deletion
 - pitfalls-en.json kept in extension/data/ (not on delete list; future migration to API is a separate phase)
@@ -101,5 +106,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Completed 23-05-PLAN.md. Phase 23 fully complete (6/6 plans).
-Resume file: N/A — milestone complete
+Stopped at: Completed 23-07-PLAN.md. 7/8 plans complete.
+Resume file: .planning/phases/23-data-source-migration/23-08-PLAN.md
