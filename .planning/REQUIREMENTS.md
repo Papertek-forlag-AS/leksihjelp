@@ -10,9 +10,9 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 ### COMP (Compound Word Intelligence)
 
 - [x] **COMP-01**: Popup search suggests compound words when student types a valid first component + fuge element + partial second component (e.g., "chefsstu" → "chefsstuhl")
-- [ ] **COMP-02**: Compound card displays a pedagogical note explaining that the last component determines gender and conjugation, with a link to the last component entry
-- [ ] **COMP-03**: When navigating from a compound card to a component entry, popup shows a "Tilbake til [compound]" back-navigation link
-- [ ] **COMP-04**: Compound card shows a qualified translation guess by concatenating component translations, labeled "Kvalifisert gjetning av det sammensatte ordets betydning"
+- [x] **COMP-02**: Compound card displays a pedagogical note explaining that the last component determines gender and conjugation, with a link to the last component entry
+- [x] **COMP-03**: When navigating from a compound card to a component entry, popup shows a "Tilbake til [compound]" back-navigation link
+- [x] **COMP-04**: Compound card shows a qualified translation guess by concatenating component translations, labeled "Kvalifisert gjetning av det sammensatte ordets betydning"
 
 ### POPUP (Popup & Dictionary Fixes)
 
@@ -76,9 +76,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | COMP-01 | Phase 24 | Complete |
-| COMP-02 | Phase 24 | Pending |
-| COMP-03 | Phase 24 | Pending |
-| COMP-04 | Phase 24 | Pending |
+| COMP-02 | Phase 24 | Complete |
+| COMP-03 | Phase 24 | Complete |
+| COMP-04 | Phase 24 | Complete |
 | POPUP-01 | Phase 25 | Pending |
 | POPUP-02 | Phase 25 | Pending |
 | SPELL-01 | Phase 25 | Pending |
