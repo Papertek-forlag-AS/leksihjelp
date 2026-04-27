@@ -1279,6 +1279,72 @@
     return null;
   }
 
+  // ── Phase 24: Compound word prediction ──
+  //
+  // Given a partial input string, returns compound word suggestions by
+  // identifying a valid first component (+ optional fuge), then scanning
+  // nounGenus for words that complete the compound.
+  //
+  // Returns: Array<{ word: string, decomposition: decomposeResult }>
+
+  function predictCompound(partial, nounGenus, lang, decompFn) {
+    if (!partial || partial.length < 4) return [];
+    if (!decompFn) decompFn = function (w) { return decomposeCompound(w, nounGenus, lang); };
+
+    const input = partial.toLowerCase();
+    const linkers = LINKERS_BY_LANG[lang] || [];
+    const seen = new Set();
+    const results = [];
+
+    // Collect nounGenus keys once for prefix scanning
+    const allNouns = Array.from(nounGenus.keys());
+
+    for (let splitPos = 3; splitPos < input.length; splitPos++) {
+      if (results.length >= 10) break;
+
+      const left = input.slice(0, splitPos);
+      if (!nounGenus.has(left)) continue;
+
+      const remainder = input.slice(splitPos);
+      if (remainder.length < 1) continue;
+
+      // Zero-fuge: scan nouns starting with remainder
+      for (const noun of allNouns) {
+        if (results.length >= 10) break;
+        if (!noun.startsWith(remainder)) continue;
+        const candidate = left + noun;
+        if (seen.has(candidate)) continue;
+        const decomp = decompFn(candidate);
+        if (decomp) {
+          seen.add(candidate);
+          results.push({ word: candidate, decomposition: decomp });
+        }
+      }
+
+      // Linker-based: try each linker
+      for (const linker of linkers) {
+        if (results.length >= 10) break;
+        if (!remainder.startsWith(linker)) continue;
+        const stripped = remainder.slice(linker.length);
+        if (stripped.length < 1) continue;
+
+        for (const noun of allNouns) {
+          if (results.length >= 10) break;
+          if (!noun.startsWith(stripped)) continue;
+          const candidate = left + linker + noun;
+          if (seen.has(candidate)) continue;
+          const decomp = decompFn(candidate);
+          if (decomp) {
+            seen.add(candidate);
+            results.push({ word: candidate, decomposition: decomp });
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
   // ── Public API ──
 
   function buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled } = {}) {
@@ -1445,13 +1511,15 @@
       decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
       // Phase 17-05: strict decomposition using lemma-only genus map (no inflected forms).
       decomposeCompoundStrict: (word) => decomposeCompound(word, nounLemmaGenus, lang),
+      // Phase 24: compound word prediction bound to this index's nounGenus and lang.
+      predictCompound: (partial) => predictCompound(partial, nounGenus, lang, (w) => decomposeCompound(w, nounGenus, lang)),
     };
   }
 
   // ── Dual-export footer ──
   // Writes `self.__lexiVocabCore` in the browser (content script) AND
   // `module.exports` in Node — same API, same code path.
-  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore, decomposeCompound, buildSPassivIndex };
+  const api = { buildIndexes, phoneticNormalize, phoneticMatchScore, decomposeCompound, predictCompound, buildSPassivIndex };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiVocabCore = api;
