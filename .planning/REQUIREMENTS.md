@@ -41,8 +41,8 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### GATES (release gates)
 
-- [ ] **GATES-01**: SC-06 (network silence) gate explicitly excludes the service-worker bootstrap path (`background/service-worker.js` and a new `background/vocab-bootstrap.js`); documented as the sanctioned network exception. Spell-check + word-prediction hot paths remain network-silent.
-- [ ] **GATES-02**: New release gate `check-baseline-bundle-size` enforces the NB baseline stays under 200 KB (alarm if accidentally bundled too much); paired self-test plants an oversized baseline and asserts the gate fires
+- [x] **GATES-01**: SC-06 (network silence) gate explicitly excludes the service-worker bootstrap path (`background/service-worker.js` and a new `background/vocab-bootstrap.js`); documented as the sanctioned network exception. Spell-check + word-prediction hot paths remain network-silent.
+- [x] **GATES-02**: New release gate `check-baseline-bundle-size` enforces the NB baseline stays under 200 KB (alarm if accidentally bundled too much); paired self-test plants an oversized baseline and asserts the gate fires
 
 ## Future Requirements
 
@@ -94,8 +94,8 @@ Which phases cover which requirements.
 | UPDATE-02 | Phase 23 (Plan 04) | Pending |
 | UPDATE-03 | Phase 23 (Plan 04) | Pending |
 | MIGRATE-01 | Phase 23 (Plan 05) | Pending |
-| GATES-01 | Phase 23 (Plan 06) | Pending |
-| GATES-02 | Phase 23 (Plan 06) | Pending |
+| GATES-01 | Phase 23 (Plan 06) | Complete |
+| GATES-02 | Phase 23 (Plan 06) | Complete |
 
 **Coverage:**
 - v3.0 requirements: 16 total
