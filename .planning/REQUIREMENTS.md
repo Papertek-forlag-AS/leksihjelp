@@ -15,9 +15,9 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### BOOT (first-run bootstrap)
 
-- [ ] **BOOT-01**: Extension ships with a minimal NB baseline (~100 KB cap) — enough essentials (top-2k Zipf, common typos, pronouns/articles) so the first lookup works offline immediately on install
-- [ ] **BOOT-02**: On first install, service worker auto-downloads full vocabulary for the user's selected target language(s) into IndexedDB; baseline NB stays available throughout
-- [ ] **BOOT-03**: Popup surfaces download status — progress per language while downloading, success when complete, "Ordlister utilgjengelig — prøv igjen senere" if download fails (baseline NB still functional)
+- [x] **BOOT-01**: Extension ships with a minimal NB baseline (~100 KB cap) — enough essentials (top-2k Zipf, common typos, pronouns/articles) so the first lookup works offline immediately on install
+- [x] **BOOT-02**: On first install, service worker auto-downloads full vocabulary for the user's selected target language(s) into IndexedDB; baseline NB stays available throughout
+- [x] **BOOT-03**: Popup surfaces download status — progress per language while downloading, success when complete, "Ordlister utilgjengelig — prøv igjen senere" if download fails (baseline NB still functional)
 
 ### CACHE (storage adapter)
 
@@ -87,9 +87,9 @@ Which phases cover which requirements.
 | CACHE-02 | Phase 23 (Plan 02) | Complete |
 | CACHE-03 | Phase 23 (Plan 02) | Complete |
 | SCHEMA-01 | Phase 23 (Plan 02) | Complete |
-| BOOT-01 | Phase 23 (Plan 03) | Pending |
-| BOOT-02 | Phase 23 (Plan 03) | Pending |
-| BOOT-03 | Phase 23 (Plan 03) | Pending |
+| BOOT-01 | Phase 23 (Plan 03) | Complete |
+| BOOT-02 | Phase 23 (Plan 03) | Complete |
+| BOOT-03 | Phase 23 (Plan 03) | Complete |
 | UPDATE-01 | Phase 23 (Plan 04) | Complete |
 | UPDATE-02 | Phase 23 (Plan 04) | Complete |
 | UPDATE-03 | Phase 23 (Plan 04) | Complete |
