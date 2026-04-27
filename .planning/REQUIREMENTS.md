@@ -27,9 +27,9 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### UPDATE (update detection)
 
-- [ ] **UPDATE-01**: On extension startup, service worker calls the updates-check endpoint and compares revision against cached `revision` per language
-- [ ] **UPDATE-02**: When an update is available, popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button
-- [ ] **UPDATE-03**: User-triggered update downloads new bundle, replaces the cache entry atomically, and the new indexes activate on the next page load
+- [x] **UPDATE-01**: On extension startup, service worker calls the updates-check endpoint and compares revision against cached `revision` per language
+- [x] **UPDATE-02**: When an update is available, popup shows a non-blocking "Nye ordlister tilgjengelig" notice with an "Oppdater ordlister nå" button
+- [x] **UPDATE-03**: User-triggered update downloads new bundle, replaces the cache entry atomically, and the new indexes activate on the next page load
 
 ### SCHEMA (compatibility)
 
@@ -90,9 +90,9 @@ Which phases cover which requirements.
 | BOOT-01 | Phase 23 (Plan 03) | Pending |
 | BOOT-02 | Phase 23 (Plan 03) | Pending |
 | BOOT-03 | Phase 23 (Plan 03) | Pending |
-| UPDATE-01 | Phase 23 (Plan 04) | Pending |
-| UPDATE-02 | Phase 23 (Plan 04) | Pending |
-| UPDATE-03 | Phase 23 (Plan 04) | Pending |
+| UPDATE-01 | Phase 23 (Plan 04) | Complete |
+| UPDATE-02 | Phase 23 (Plan 04) | Complete |
+| UPDATE-03 | Phase 23 (Plan 04) | Complete |
 | MIGRATE-01 | Phase 23 (Plan 05) | Pending |
 | GATES-01 | Phase 23 (Plan 06) | Complete |
 | GATES-02 | Phase 23 (Plan 06) | Complete |

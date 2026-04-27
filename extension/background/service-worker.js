@@ -6,6 +6,10 @@ importScripts('/i18n/strings.js');
 // safe in service-worker scope (no DOM access; IndexedDB available).
 importScripts('/content/vocab-store.js');
 importScripts('/background/vocab-updater.js');
+// Plan 23-03: bootstrap orchestrator — auto-downloads selected target
+// language(s) into IndexedDB on install/update so first-run cache hits.
+// Depends on `self.__lexiVocabStore` from vocab-store.js loaded above.
+importScripts('/background/vocab-bootstrap.js');
 
 /**
  * Leksihjelp — Background Service Worker
@@ -65,6 +69,23 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.contextMenus.update('lexi-toggle-predictions', {
       title: paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
     }).catch(() => {});
+  });
+
+  // Plan 23-03: bootstrap selected target language(s) into IndexedDB.
+  // Runs on both 'install' and 'update' (the listener fires for both).
+  // Reads `targetLanguages` (multi-pick) first, then falls back to single
+  // `language`, then to `['de']` as a sane default for first-run users
+  // who haven't picked yet.
+  chrome.storage.local.get(['targetLanguages', 'language'], (result) => {
+    const langs = Array.isArray(result.targetLanguages) && result.targetLanguages.length
+      ? result.targetLanguages
+      : (result.language ? [result.language] : ['de']);
+    const bootstrap = self.__lexiVocabBootstrap;
+    if (bootstrap && typeof bootstrap.bootstrapAll === 'function') {
+      bootstrap.bootstrapAll(langs).catch(err => {
+        console.warn('[lexi-bootstrap] bootstrapAll failed:', err && err.message);
+      });
+    }
   });
 });
 
@@ -202,6 +223,31 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'VOCAB_LIST_CACHED') {
     listVocabLanguages().then(sendResponse).catch(() => sendResponse([]));
+    return true; // async
+  }
+
+  // Plan 23-03: manual bootstrap trigger (popup "Refresh"/first-run picker).
+  if (msg.type === 'lexi:bootstrap-now') {
+    const bootstrap = self.__lexiVocabBootstrap;
+    if (!bootstrap) { sendResponse({ ok: false, error: 'no-bootstrap' }); return; }
+    const langs = Array.isArray(msg.langs) && msg.langs.length ? msg.langs : [];
+    bootstrap.bootstrapAll(langs)
+      .then(results => sendResponse({ ok: true, results }))
+      .catch(err => sendResponse({ ok: false, error: err && err.message }));
+    return true; // async
+  }
+
+  // Plan 23-03: snapshot of which languages are currently cached.
+  // Popup opened mid-download uses this to render initial pill state.
+  if (msg.type === 'lexi:status') {
+    const store = self.__lexiVocabStore;
+    if (!store || typeof store.getCachedRevisions !== 'function') {
+      sendResponse({ revisions: {} });
+      return;
+    }
+    store.getCachedRevisions()
+      .then(revisions => sendResponse({ revisions }))
+      .catch(() => sendResponse({ revisions: {} }));
     return true; // async
   }
 });

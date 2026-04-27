@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Data-Source Migration
-status: in_progress
-last_updated: "2026-04-27T00:55:43Z"
-last_activity: 2026-04-27 — Plan 23-02 closed; CACHE-01/CACHE-02/CACHE-03/SCHEMA-01 satisfied
+status: completed
+last_updated: "2026-04-27T01:07:26.427Z"
+last_activity: 2026-04-27 — Plan 23-04 closed; UPDATE-01/UPDATE-02/UPDATE-03 satisfied
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Session State
@@ -25,28 +25,29 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.0 Data-Source Migration
 **Phase:** 23 (in progress — Data-Source Migration)
-**Plan:** 03 (next — baseline trim); 02/06 complete; 04/05 still pending
-**Status:** Plans 23-01 + 23-02 + 23-06 complete; cache adapter + baseline-first hydration live alongside the release gates and v1 endpoints. 23-03 (baseline trim) is unblocked.
-**Last activity:** 2026-04-27 — Plan 23-02 closed; CACHE-01/CACHE-02/CACHE-03/SCHEMA-01 satisfied
+**Plan:** 05 (next — migration + removal); 01/02/04/06 complete; 03 in parallel
+**Status:** Plans 23-01 + 23-02 + 23-04 + 23-06 complete; v1 endpoints + cache adapter + update-detection + release gates live. 23-03 (baseline trim) running in parallel; 23-05 unblocked once 23-03 lands.
+**Last activity:** 2026-04-27 — Plan 23-04 closed; UPDATE-01/UPDATE-02/UPDATE-03 satisfied
 
 ### Progress
 ```
 Phases: [.] 0/1
-Plans:  [###...] 3/6
+Plans:  [####..] 4/6
 ```
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~6.7 min
-- Total execution time: 0.33 hours
+- Total plans completed: 4
+- Average duration: ~6.5 min
+- Total execution time: ~0.43 hours
 
 | Plan  | Duration | Tasks | Files | Date       |
 | ----- | -------- | ----- | ----- | ---------- |
 | 23-01 | 12 min   | 3     | 5     | 2026-04-27 |
 | 23-06 | 3 min    | 2     | 6     | 2026-04-27 |
 | 23-02 | 5 min    | 2     | 5     | 2026-04-27 |
+| 23-04 | 6 min    | 2     | 6     | 2026-04-27 |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Plan 23-02 decisions:
 - Atomic swap implemented via stable wrapper + mutable module-level `state`; getters dereference live so consumers that captured `__lexiVocab` once see every swap and never observe a half-built state. swapIndexes(lang, revision, indexes) idempotent on revision so plan 04 update detection can be liberal with calls.
 - Schema gate at fetch boundary: `schema_version !== 1` returns `schema-mismatch` AND emits `chrome.runtime.sendMessage({type: 'lexi:schema-mismatch', ...})` AND preserves the existing cache. Plan 04/05 popup will surface this as "Versjonskonflikt" under Developer view.
 - All vocab fetches funnel through `fetchBundle` — single symbol for plan 06's SC-06 carve-out documentation to reference.
+- [Phase 23]: Plan 23-04: 'missing' status returned by absence (not a string) so popup never surfaces an update notice for languages the student hasn't opted into; bootstrap owns first-time downloads
+- [Phase 23]: Plan 23-04: vocab-store + vocab-updater loaded into the service worker via importScripts (no dynamic import) — same IIFE works in both content-script and SW scope
+- [Phase 23]: Plan 23-04: popup uses two-channel sync (poll on open + push subscription) so a startup-time updates-available emit isn't lost when the popup was closed
 
 ### Pending Todos
 
@@ -90,5 +94,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Completed 23-02-PLAN.md (v1 cache adapter + baseline-first hydration)
-Resume file: .planning/phases/23-data-source-migration/23-03-PLAN.md
+Stopped at: Completed 23-04-PLAN.md (vocab-updater startup check + popup refresh button)
+Resume file: .planning/phases/23-data-source-migration/23-05-PLAN.md

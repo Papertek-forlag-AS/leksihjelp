@@ -189,20 +189,43 @@
   // to read bundled JSON, but no network hits the wire (chrome-extension://
   // scheme). Consumers can still call __lexiVocab synchronously after this
   // initial promise resolves; the readyCallbacks queue handles the gap.
+  // Plan 23-03: trimmed baseline (data/nb-baseline.json) replaces full nb.json
+  // as the bundled fallback. The trimmed file embeds its own freq + (empty)
+  // bigrams maps; use those when present so we don't hit nb.json/freq-nb.json
+  // (which plan 23-05 will remove from the bundle). Falls back to the legacy
+  // full file path if nb-baseline.json is missing — keeps the seam working in
+  // older installs / lockdown contexts where the baseline hasn't been built.
   async function initBaseline() {
-    const raw = await loadBundledRaw(BASELINE_LANG);
+    let raw = await loadBundledSidecar('nb-baseline.json');
+    let usingTrimmedBaseline = !!raw;
+    if (!raw) {
+      raw = await loadBundledRaw(BASELINE_LANG);
+    }
     if (!raw) {
       console.error('[lexi-vocab] baseline NB load failed — extension unusable');
       return;
     }
-    const [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
-      loadBigrams(BASELINE_LANG), loadFrequency(BASELINE_LANG), loadSister(BASELINE_LANG), loadPitfalls(BASELINE_LANG),
-    ]);
+    let bigrams, freq, sisterRaw, pitfalls;
+    if (usingTrimmedBaseline) {
+      // Trimmed baseline carries its own freq + bigrams in-payload. Pitfalls
+      // and the sister-language word list aren't in the baseline; load them
+      // out-of-band when those sidecars happen to still be bundled, otherwise
+      // an empty fallback is fine for spell-check on the baseline path.
+      bigrams = (raw && raw.bigrams) || {};
+      freq = (raw && raw.freq) || {};
+      [sisterRaw, pitfalls] = await Promise.all([
+        loadSister(BASELINE_LANG), loadPitfalls(BASELINE_LANG),
+      ]);
+    } else {
+      [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
+        loadBigrams(BASELINE_LANG), loadFrequency(BASELINE_LANG), loadSister(BASELINE_LANG), loadPitfalls(BASELINE_LANG),
+      ]);
+    }
     const baseline = core.buildIndexes({
       raw, bigrams, freq, sisterRaw, lang: BASELINE_LANG, isFeatureEnabled: () => true,
     });
     baseline.pitfalls = pitfalls || {};
-    baseline._sourceTag = 'baseline-nb';
+    baseline._sourceTag = usingTrimmedBaseline ? 'baseline-nb-trimmed' : 'baseline-nb';
     state = baseline;
     ready = true;
     emitHydration(BASELINE_LANG, 'baseline');
