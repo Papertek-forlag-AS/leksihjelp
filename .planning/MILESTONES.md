@@ -1,5 +1,38 @@
 # Milestones
 
+## v3.0 Data-Source Migration (Shipped: 2026-04-27)
+
+**Phases completed:** 1 phase (23), 8 plans, 16/16 requirements satisfied.
+
+**Timeline:** 2026-04-27 (1 day, 28 commits)
+**Code delta:** 71 files changed, +5,242 / -2,472 lines
+**Extension LOC:** 21,091 JS
+**Bundle:** 2.17 MiB / 20 MiB cap (down from 12.59 MiB — bundled vocab removed)
+
+**Delivered (one sentence):** Migrated the extension's vocabulary data source from bundled JSON files to a Papertek-API-fetched IndexedDB cache with offline-first NB baseline, atomic update detection, silent v2→v3 migration, and two new release gates — shrinking the extension zip from 12.59 MiB to ~2 MiB while preserving the offline promise.
+
+**Key accomplishments:**
+
+1. **Papertek API vocabulary endpoints** (Plan 23-01) — `GET /api/vocab/v1/bundle/{language}` returns full per-language payload (all banks + freq + bigrams + grammar features + falseFriends + senses) with `{schema_version, revision}` metadata; `GET /api/vocab/v1/revisions` returns lightweight revision map; pre-gzip compression drops DE wire size from 4.45 MB to ~795 KB; CORS whitelists chrome-extension + leksihjelp.no.
+2. **IndexedDB cache adapter + baseline-first hydration** (Plan 23-02) — `vocab-store.js` IDB adapter with schema_version gating; `vocab-seam.js` loads NB baseline synchronously then swaps to full indexes asynchronously; `swapIndexes` idempotent atomic swap; spell-check + word-prediction never block on network.
+3. **NB baseline + service-worker bootstrap + popup status UI** (Plan 23-03) — `build-nb-baseline.js` filters to top-2k Zipf + pronouns/articles/typos (~130 KB); `vocab-bootstrap.js` auto-downloads on install; popup pills show per-language progress with offline error differentiation.
+4. **Update detection + manual refresh** (Plan 23-04) — `vocab-updater.js` checks revisions on startup; popup "Nye ordlister tilgjengelig" notice with "Oppdater ordlister nå" button; atomic cache replacement via IndexedDB transaction; two-channel sync (push + poll on popup open).
+5. **Silent v2→v3 migration + bundled data removal** (Plan 23-05) — `onInstalled` migration trigger writes `lexiMigratedFromV2` breadcrumb and bootstraps fresh IDB downloads; 20 bundled data files deleted (de/es/fr/en/nb/nn vocab + freq + bigrams + grammarfeatures); test fixtures migrated to `tests/fixtures/vocab/`; lockdown adapter contract documented.
+6. **Release gates: SC-06 carve-out + baseline cap** (Plan 23-06) — `check-network-silence` SC-06 carve-out documents `vocab-bootstrap.js` as the sanctioned fetch site with self-test; `check-baseline-bundle-size` enforces 200 KB cap on NB baseline with paired self-test.
+
+**Known Tech Debt (from audit):**
+- SCHEMA-01 developer-view UX: `lexi:schema-mismatch` message emitted but no popup subscriber (dormant while schema_version=1)
+- Stale `BUNDLED_LANGS` list in `vocab-seam.js` includes deleted nn/en files (cosmetic, no runtime break)
+- check-fixtures exits 1 from 5 pre-existing suites outside Phase 23 scope
+- 2 human verification items with code-level approval but incomplete step-by-step logs
+
+**See:**
+- `.planning/milestones/v3.0-ROADMAP.md` — full phase-by-phase roadmap
+- `.planning/milestones/v3.0-REQUIREMENTS.md` — final traceability (16/16)
+- `.planning/milestones/v3.0-MILESTONE-AUDIT.md` — audit report (tech_debt, all requirements satisfied)
+
+---
+
 ## v2.2 Student Language Intelligence (Shipped: 2026-04-27)
 
 **Phases completed:** 4 phases (21–22, including 21.1 and 21.2 gap-closure decimal phases), 5 plans, 12/12 requirements satisfied.

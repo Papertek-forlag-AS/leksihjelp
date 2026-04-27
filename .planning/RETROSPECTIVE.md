@@ -214,6 +214,59 @@
 
 ---
 
+## Milestone: v3.0 — Data-Source Migration
+
+**Shipped:** 2026-04-27
+**Phases:** 1 (consolidated — 8 plans in a single phase)
+**Plans:** 8 (6 planned + 2 gap-closure)
+**Duration:** 1 day (2026-04-27), 28 commits
+
+### What Was Built
+
+- **Papertek API vocabulary endpoints** — Bundle + revisions endpoints in sibling repo with CORS, ETag/304, pre-gzip compression (DE wire size 4.45 MB → ~795 KB).
+- **IndexedDB cache adapter + baseline-first hydration** — `vocab-store.js` IDB adapter; `vocab-seam.js` loads NB baseline synchronously, swaps to full indexes asynchronously; schema_version gating.
+- **NB baseline + service-worker bootstrap** — `build-nb-baseline.js` filters to top-2k Zipf + pronouns/articles/typos (~130 KB); auto-download on install; popup status pills with offline error differentiation.
+- **Update detection + manual refresh** — Startup revision check; "Nye ordlister tilgjengelig" notice; atomic cache replacement via IndexedDB transaction.
+- **Silent v2→v3 migration** — `onInstalled` migration trigger; 20 bundled data files removed; test fixtures migrated to `tests/fixtures/vocab/`.
+- **Release gates** — SC-06 carve-out for sanctioned bootstrap fetch + `check-baseline-bundle-size` (200 KB cap) with paired self-test.
+
+### What Worked
+
+- **Consolidated single phase with wave ordering** — Used 1M context window to run all 8 plans in one phase with natural wave dependencies (API first → cache adapter → bootstrap/updater → migration → gates → gap closure). Eliminated inter-phase coordination overhead.
+- **Pre-gzip as targeted fix** — When DE bundle hit 4.45 MB (30 KB under Vercel's 4.5 MB cap), module-cached pre-gzip compression was a surgical fix that dropped wire size to ~795 KB without changing the bundle contract. Plans 23-03/04 inherited comfortable headroom.
+- **IDB clean break over dual-shape support** — Renaming from `leksihjelp-vocab` v2 to `lexi-vocab` v3 meant no dual-shape support code. Old DB sits inert; new data downloads fresh. Simple and debuggable.
+- **Gate-first development for new infra** — Plan 23-06 shipped the baseline cap gate and SC-06 carve-out *before* Plan 23-03 built the baseline and Plan 23-05 removed bundled data. The gate was ready to catch regressions from the moment the artifacts appeared.
+- **Gap closure plans within the phase** — Plans 23-07 (REQUIREMENTS checkbox fix + nn/clean fixture) and 23-08 (offline install browser verification) closed verification gaps without needing a decimal phase.
+
+### What Was Inefficient
+
+- **SCHEMA-01 developer-view UX not delivered** — Plan 23-02 emitted `lexi:schema-mismatch` via `chrome.runtime.sendMessage` but plans 23-04/05 (which were supposed to subscribe and surface "Versjonskonflikt") never implemented the popup subscriber. User gets generic error pill instead. The gap is dormant (schema_version=1 on both sides) but is a known debt.
+- **`one_liner` frontmatter still absent** — Fifth milestone in a row. At this point the extraction approach is confirmed broken.
+- **check-fixtures exits 1 from pre-existing failures** — 5 suites outside Phase 23 scope (de/doc-drift, nb/homophone, nb/saerskriving, nn/typo, de/verb-final) have been failing since v2.0/v2.1. The verification report overstated gate status. These should be triaged or the fixture should split clean-exit from regression tracking.
+- **Stale BUNDLED_LANGS list** — `vocab-seam.js` still lists nn/en as bundled after plan 23-05 deleted those files. Cosmetic but symptomatic of incomplete cleanup after data removal.
+
+### Patterns Established
+
+- **Consolidated mega-phases for 1M context** — With 1M context, a single phase with 8 wave-ordered plans is more efficient than 3-4 smaller phases with inter-phase coordination. Reserve multi-phase milestones for genuinely independent work streams.
+- **Gate-first development** — Ship the release gate before the artifact it guards. The gate catches regressions from the moment the artifact lands, and paired self-tests validate the gate itself.
+- **Sanctioned exception documentation** — When an architectural constraint (SC-06 network silence) needs an exception, document the exception *and* add a self-test that asserts the exception path stays green. Belt-and-braces.
+- **Test fixture migration with resolveDataFile()** — When bundled data files are deleted, fixtures need an independent data source. The `resolveDataFile()` pattern (fixtures/vocab/ first, extension/data/ second) keeps gates green across the deletion boundary.
+
+### Key Lessons
+
+1. **Cross-plan promise tracking needs enforcement.** Plan 23-02 promised "Plan 04/05 will subscribe to `lexi:schema-mismatch`" but nobody tracked the promise. A "provides/requires" contract in plan frontmatter could catch these — the provides side emits a message, the requires side subscribes. (Learned: SCHEMA-01 gap.)
+2. **Consolidated phases are faster but harder to verify.** One phase with 8 plans shipped in 1 day, but the verification report had to check 8 plan-to-plan integration paths rather than just inter-phase boundaries. The wave structure helped, but verification effort scales with plan count, not phase count. (Learned: 23-VERIFICATION.md.)
+3. **Pre-existing fixture failures are tech debt that compounds.** The 5 failing suites from v2.0/v2.1 weren't triaged, so the check-fixtures gate became a "known-fail" gate. When the verification report claimed "exits 0," it was wrong. Known failures should be addressed or quarantined between milestones.
+4. **Bundle size drops are dramatic when data moves to API.** 12.59 MiB → 7.61 MiB by removing bundled vocab. The NB baseline at 130 KB is <2% of the original data footprint. This validates the data-source architecture memory from v1.0.
+
+### Cost Observations
+
+- **Model mix:** Opus 4.6 for orchestration and execution, Sonnet 4.6 for integration checking and verification.
+- **Sessions:** ~2 sessions, 1 day. Sibling-repo API work (plan 23-01) was the longest single plan.
+- **Notable:** The consolidated single-phase approach eliminated all inter-phase context switches. Total execution time (excluding API deployment) was under 1 hour for 7 plans. This is the highest velocity per plan of any milestone.
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -224,6 +277,7 @@
 | v2.0 | 10 planned | 2 (14.1, 15.1) | 9 | Structural grammar engine + 5-language coverage + benchmark-driven validation + document-state two-pass runner |
 | v2.1 | 4 code + 1 deferred | 0 (gaps closed as inline plans) | 9 | Compound decomposition + spell-check polish + s-passive detection + first unit test suite |
 | v2.2 | 2 planned | 2 (21.1, 21.2) | 9 | Dictionary intelligence (false-friends + sense-grouped translations) + å/og confusion detection |
+| v3.0 | 1 consolidated | 0 (gaps closed as inline plans) | 10 | Data-source migration: bundled vocab → API + IndexedDB cache; bundle 12.59→7.61 MiB |
 
 ### Cumulative Quality
 
@@ -233,6 +287,7 @@
 | v2.0 | 3,326 | 9 | 0 | 0 (all structural rules use `Intl.Segmenter` — browser built-in, no deps) |
 | v2.1 | 3,326+ | 9 | 58 (phases 16-19) | 0 (compound decomposition + s-passive = pure heuristic, no deps) |
 | v2.2 | 3,326+ (12 new å/og) | 9 | 64 (+6 v2.2) | 0 (enrichment pipeline + å/og rule = pure heuristic, no deps) |
+| v3.0 | 3,326+ (nn/clean narrowed) | 10 | 64 | 1 (fake-indexeddb devDep for vocab-store tests) |
 
 ### Recurring Themes
 
@@ -240,9 +295,11 @@
 - **Gap closure evolving** — v1.0/v2.0: decimal phases (5 total). v2.1: inline plans within existing phases (17-04 through 17-06, 19-03). The pattern is maturing — small gaps get inline plans, cross-phase gaps get decimal phases.
 - **Data-logic separation compounds** — v1.0 established it for typo banks; v2.0 extended it to trigger tables; v2.1 extended it to s-passive forms and deponent marking. Every phase benefited.
 - **Browser verification keeps slipping** — deferred from v2.0 to v2.1 to next milestone. Need to embed visual checks in code phases rather than batching.
-- **Velocity increases with infrastructure** — v1.0: 8 phases / 4 days. v2.0: 12 phases / 2 days. v2.1: 4 phases / 1 day. v2.2: 4 phases / 1 day. Release gates, fixture harness, and plugin architecture are compounding investments.
-- **SUMMARY `one_liner` extraction never works** — 4/4 milestones have needed manual accomplishment curation. Either fix the template or abandon the approach.
+- **Velocity increases with infrastructure** — v1.0: 8 phases / 4 days. v2.0: 12 phases / 2 days. v2.1: 4 phases / 1 day. v2.2: 4 phases / 1 day. v3.0: 1 phase (8 plans) / 1 day. Release gates, fixture harness, and plugin architecture are compounding investments.
+- **SUMMARY `one_liner` extraction never works** — 5/5 milestones have needed manual accomplishment curation. The template approach is confirmed broken.
 - **Version skew accumulates silently** — package.json/manifest.json/index.html diverge between milestones because version bumps are a release-time step, not a per-phase step.
+- **Pre-existing fixture failures compound** — check-fixtures has been "known-fail" since v2.0; 5 suites outside active scope keep failing. Need triage or quarantine.
+- **Consolidated phases suit 1M context** — v3.0 proved that a single 8-plan phase with wave ordering is more efficient than 3-4 smaller phases when the context window is large enough.
 
 ---
-*Retrospective updated: 2026-04-27 after v2.2 Student Language Intelligence milestone*
+*Retrospective updated: 2026-04-27 after v3.0 Data-Source Migration milestone*

@@ -9,7 +9,9 @@ production-quality spell-check surface covering Norwegian (NB + NN) token-level
 rules and structural grammar governance across all five target languages — word-order
 violations, case/agreement, aspect/mood, register drift, collocations, and å/og confusion.
 Dictionary intelligence helps students choose the right word with false-friend warnings
-and sense-grouped translations. Aimed especially at students with dyslexia. Distributed as a free, open-source
+and sense-grouped translations. Vocabulary data fetches from Papertek API on install and
+caches in IndexedDB with a bundled NB baseline for instant offline-first startup.
+Aimed especially at students with dyslexia. Distributed as a free, open-source
 extension (MIT) with an optional premium subscription that funds the ElevenLabs
 TTS calls. All non-TTS features are 100% offline and free.
 
@@ -69,36 +71,33 @@ they're working on.
 - ✓ **Cross-language enrichment pipeline** — v2.2, NB→target reverse `linkedTo` index; Map-based O(1) in popup, linear scan in floating-widget
 - ✓ **å/og confusion detection** — v2.2, `nb-aa-og.js` (priority 15) with posture-verb exceptions; 12 regression fixtures; explain-contract compliant
 - ✓ **Unit test suite expansion** — v2.2, 6 new tests (dictionary intelligence + å/og confusion)
+- ✓ **Papertek API vocabulary endpoints** — v3.0, bundle + revisions endpoints with CORS + ETag/304 + pre-gzip compression
+- ✓ **IndexedDB cache adapter + baseline-first hydration** — v3.0, vocab-store.js + vocab-seam.js async swap; schema_version gating
+- ✓ **NB baseline (~130 KB) + service-worker bootstrap** — v3.0, instant offline startup; auto-download on install with popup status pills
+- ✓ **Update detection + manual refresh** — v3.0, startup revision check; "Nye ordlister tilgjengelig" notice; atomic cache replacement
+- ✓ **Silent v2→v3 migration** — v3.0, onInstalled trigger; bundled vocab removed (20 files); only NB baseline ships in zip
+- ✓ **Release gates: SC-06 carve-out + baseline cap** — v3.0, sanctioned bootstrap fetch exception; 200 KB baseline cap with paired self-test
 
 ### Active
 
-## Current Milestone: v3.0 Data-Source Migration
-
-**Goal:** Strip bundled vocabulary from the extension; fetch from the Papertek API once at install, cache locally in IndexedDB, hot-update on revision change. Single source of truth across extension, webapps, and nativeapps. Offline promise preserved via tiny NB baseline + background download.
-
-**Target capabilities:**
-- Papertek API exposes versioned per-language vocabulary endpoints with revision metadata
-- Extension ships with ~100 KB NB baseline; full data downloads to IndexedDB on first run
-- Vocab-seam reads from IndexedDB cache with baseline fallback during hydration
-- Update detection on startup + manual "Oppdater ordlister nå" button
-- Schema-version compatibility check before persisting
-- Silent migration for v2.x users
-- SC-06 gate documents the service-worker bootstrap path as the sanctioned exception
+(No active milestone — v3.0 just shipped. Next milestone TBD.)
 
 ### Deferred
 
 **Carry-over tech-debt:**
 
 - NN phrase-infinitive triage (~214 `papertek-vocabulary` verbbank entries)
-- Data-source architecture move: extension = functions only, bundled baseline + sync with papertek-vocabulary (memory `project_data_source_architecture.md`)
 - Leksi-in-skriv integration: embed spell-check/prediction as native feature inside `skriv.papertek.app` (memory `project_lexi_in_skriv_integration.md`)
-- `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form
+- `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form; NN vocab gaps (ven, skin, heile, sykle, sy)
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
 - Vocab-seam parity gate: `check-vocab-seam-parity` to assert every `buildIndexes()` key has a matching getter (recurring v1.0/v2.0 gap)
-- Browser visual verification (VERIF-01) — deferred from v2.0 → v2.1 → v2.2; accumulated 12 deferred tests
+- Browser visual verification (VERIF-01) — deferred from v2.0 → v2.1 → v2.2 → v3.0; accumulated 12 deferred tests
 - Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
+- SCHEMA-01 developer-view UX: `lexi:schema-mismatch` popup subscriber missing (dormant while schema_version=1)
+- Stale `BUNDLED_LANGS` list in `vocab-seam.js` includes deleted nn/en files (cosmetic)
+- check-fixtures exits 1 from 5 pre-existing suites (de/doc-drift, nb/homophone, nb/saerskriving, nn/typo, de/verb-final)
 
-**v3.0 candidates:**
+**Future candidates:**
 
 - Tense harmony & discourse (TH-01 through TH-03) — unmotivated tense switches, anaphora ambiguity, long-distance SV agreement
 - Idiomatic-literalism curated match (IDI-01) — ~20-idiom closed list, only if FP rate stays at zero
@@ -108,6 +107,7 @@ they're working on.
 - Per-noun fuge data in papertek-vocabulary (COMP-11) — lexical exceptions
 - Context-aware sense selection (DICT-01) — popup reads surrounding sentence, highlights likely sense
 - Foreign-side false-friend entries (DICT-02) — EN→NB, DE→NB direction
+- Lockdown bootstrap implementation — documented adapter contract from v3.0; lockdown's own concern
 
 ### Out of Scope
 
@@ -132,9 +132,9 @@ they're working on.
 
 **Technical environment:**
 - Chrome Manifest V3 extension, vanilla JavaScript, no build step for extension code — keeps the bar low for contributors.
-- ~12k lines of JavaScript in `extension/content/` (9,148 LOC in spell-rules alone). Shipped zip 12.47 MiB (20 MiB internal cap, ~38% headroom).
-- 57 spell-check rule files in plugin architecture (`spell-rules/*.js`); core engine 2,793 LOC (`spell-check.js` + `spell-check-core.js` + `vocab-seam*.js`).
-- Vocabulary data ships bundled per language; runtime downloads available for DE/ES/FR via IndexedDB; NB/NN/EN always bundled.
+- ~21k lines of JavaScript in `extension/` (9,148 LOC in spell-rules alone). Shipped zip 7.61 MiB (20 MiB internal cap, ~62% headroom).
+- 59 spell-check rule files in plugin architecture (`spell-rules/*.js`); core engine ~3k LOC (`spell-check.js` + `spell-check-core.js` + `vocab-seam*.js`).
+- Vocabulary data fetches from Papertek API on install and caches in IndexedDB (`lexi-vocab` v3). Only NB baseline (~130 KB) ships bundled. Update detection on startup with manual refresh.
 - Vocab is authored in a separate repo (`papertek-vocabulary`) that also feeds `papertek-webapps` and `papertek-nativeapps`. Schema changes have cross-app blast radius — additive changes preferred.
 - Backend is Vercel serverless (Node.js ESM). Firebase Admin SDK for user/subscription state. All costs covered by subscription revenue.
 
@@ -142,16 +142,17 @@ they're working on.
 - Release as GitHub Release tags → landing page serves latest zip via `/releases/latest/download/lexi-extension.zip`.
 - v1.0 shipped over 4 days (2026-04-18 → 2026-04-21, 133 commits) across 8 phases.
 - v2.0 shipped over 2 days (2026-04-24 → 2026-04-25, ~140 commits) across 12 phases.
-- 9 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation).
+- v3.0 shipped in 1 day (2026-04-27, 28 commits) across 1 consolidated phase.
+- 10 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation, baseline-bundle-size).
 
-**Current state (post-v2.2):**
-- 12/12 v2.2 requirements shipped; 11/12 v2.1; 42/42 v2.0; 19/19 v1.0.
-- 59 spell-check rule files in plugin architecture; core engine ~3k LOC.
-- 53+ fixture suites + 12 new å/og fixtures, all at F1=1.000.
-- 64 unit tests (58 v2.1 + 6 v2.2), all passing.
-- 9 release gates all green. Bundle 12.59 MiB (37% headroom).
+**Current state (post-v3.0):**
+- 16/16 v3.0 requirements shipped; 12/12 v2.2; 11/12 v2.1; 42/42 v2.0; 19/19 v1.0.
+- Vocabulary data now fetched from Papertek API on install, cached in IndexedDB. Only NB baseline (~130 KB) ships bundled.
+- 59 spell-check rule files in plugin architecture; core engine ~3k LOC; 21,091 LOC total JS.
+- 53+ fixture suites + 12 å/og fixtures. 64 unit tests, all passing.
+- 10 release gates. Bundle 7.61 MiB (62% headroom, down from 12.59 MiB).
 - Dictionary intelligence: false-friend warnings + sense-grouped translations in popup + floating-widget.
-- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → v2.2 → next milestone).
+- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → v2.2 → v3.0 → next milestone).
 
 ## Constraints
 
@@ -190,11 +191,17 @@ they're working on.
 | **Supplementary compounds over decomposition fallback in sarskriving** (v2.1) | Removed decomposition fallback from sarskriving; added 16 supplementary compounds to preserve recall | ✓ Good — eliminated 6 FP suites; sarskriving stays P=1.000 R=1.000 |
 | **Algorithmic NN presens derivation** (v2.1) | Derive -est from stored -ast infinitives instead of Papertek deploy round-trip | ✓ Good — unblocks NN finite presens without data-source change |
 | **Severity 'hint' for NB passiv overuse** (v2.1) | Document-level overuse is informational, not error; matches explain-contract gate | ✓ Good — doesn't alarm students, just suggests considering active voice |
-| **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across three milestones now |
+| **Phase 20 deferred** (v2.1) | Browser visual verification deferred — code phases complete, visual checks can be ad-hoc | ⚠️ Revisit — VERIF-01 carried across four milestones now |
 | **Combined FF + POLY into single phase** (v2.2) | Shared data enrichment + rendering pattern for false-friends and senses | ✓ Good — reduced from 2 separate phases to 1 phase with 2 plans |
 | **Reverse linkedTo index for cross-language enrichment** (v2.2) | NB entries are canonical source; target entries enriched at render time via reverse index | ✓ Good — O(1) in popup, O(n) in widget; additive enrichment preserves direct NB data |
 | **Priority 15 for å/og rule** (v2.2) | Most common NB writing error deserves high visibility; red-600 CSS dot | ✓ Good — clear visual signal without cluttering other priorities |
 | **å/og removed from homophones rule** (v2.2) | Dedicated rule with posture-verb exceptions handles the full complexity | ✓ Good — prevents duplicate flagging between nb-homophones and nb-aa-og |
+| **IndexedDB over `unlimitedStorage` permission** (v3.0) | Avoids stricter Web Store review; IDB quota is sufficient for vocab data | ✓ Good — no permission prompt, clean install experience |
+| **Tiny NB baseline (~130 KB) bundled** (v3.0) | First lookup works offline on install; full data downloads in background | ✓ Good — top-2k Zipf + typos + pronouns covers 95% of lookups; 200 KB cap gate prevents regression |
+| **Pre-gzip bundle responses** (v3.0) | Module-cached buffers per (language, revision); DE wire size 4.45 MB → ~795 KB | ✓ Good — 3.7 MB headroom under Vercel 4.5 MB cap; no contract change |
+| **IDB rename lexi-vocab v3** (v3.0) | Clean break from v2 `leksihjelp-vocab` v2 store; old DB sits inert | ✓ Good — avoids dual-shape support; migration downloads fresh data |
+| **Consolidated v3.0 into single phase** (v3.0) | 1M context window allows one 8-plan phase instead of 3-4 smaller phases | ✓ Good — shipped in 1 day; dependency chains within the phase were natural wave ordering |
+| **SC-06 sanctioned bootstrap exception** (v3.0) | Service-worker fetch is the only network path; spell-check + word-prediction stay offline | ✓ Good — belt-and-braces: header doc + self-test plants fetch in bootstrap and asserts gate stays green |
 
 ---
-*Last updated: 2026-04-27 after v3.0 milestone start (Data-Source Migration)*
+*Last updated: 2026-04-27 after v3.0 milestone completion (Data-Source Migration)*
