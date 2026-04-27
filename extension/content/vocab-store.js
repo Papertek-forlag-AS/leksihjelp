@@ -1,34 +1,73 @@
 /**
- * Leksihjelp — Vocabulary Store
+ * Leksihjelp — Vocabulary Store (v1 cache adapter)
  *
- * Manages language pack downloads and caching via IndexedDB.
- * Languages are downloaded on demand from the Papertek Vocabulary API
- * and cached locally for offline use.
+ * Cache adapter for the Papertek v1 endpoints
+ * (`papertek-vocabulary.vercel.app/api/vocab/v1/*`).
  *
- * Shared across popup, content scripts, and service worker via
- * chrome.runtime.sendMessage (content scripts can't access IndexedDB
- * on the extension's origin, so the service worker proxies for them).
+ * Per-language entries persist in IndexedDB as
+ * `{schema_version, revision, fetched_at, payload}`. Plan 23-02 establishes
+ * the contract; plans 23-03/04/05 build update detection, migration, and
+ * service-worker bootstrap on top.
+ *
+ * The adapter ALSO retains the legacy audio-cache helpers (downloadAudioPack,
+ * getAudioFile, hasAudioCached) and the chrome.runtime proxy surface used by
+ * service-worker.js (VOCAB_GET_CACHED / VOCAB_GET_GRAMMAR / VOCAB_LIST_CACHED).
+ * Those are out of scope for plan 23-02 — left untouched by design.
+ *
+ * Network: ALL vocab fetch traffic must funnel through `fetchBundle` so
+ * plan 06's SC-06 carve-out targets one symbol.
+ *
+ * Sandbox shape (Node tests vs browser):
+ *   - In a test sandbox (vm.runInContext), expose api on `globalThis` (which
+ *     === `window` in the sandbox), then `__lexiVocabStore` is reachable.
+ *   - In the browser, `window` is the same surface.
  */
 
 (function () {
   'use strict';
 
-  const API_BASE = 'https://papertek-vocabulary.vercel.app/api/vocab';
+  // ── Constants ──
+  const API_BASE = 'https://papertek-vocabulary.vercel.app/api/vocab/v1';
   const SITE_BASE = 'https://papertek-vocabulary.vercel.app';
-  const DB_NAME = 'leksihjelp-vocab';
-  const DB_VERSION = 2;
-  const STORE_LANGUAGES = 'languages';
-  const STORE_AUDIO = 'audio'; // key: "{lang}/{filename}", value: Blob
+  const SUPPORTED_SCHEMA_VERSION = 1;
 
-  // ── IndexedDB helpers ──
+  const DB_NAME = 'lexi-vocab';        // renamed from legacy 'leksihjelp-vocab'
+  const DB_VERSION = 3;                // bump invalidates the v2 stores
+  const STORE_BUNDLES = 'bundles';     // v1 store; keyPath: 'lang'
+  const STORE_AUDIO = 'audio';         // unchanged: key '{lang}/{filename}', value Blob
+
+  // Legacy stores deleted on upgrade (kept here as a list so we delete
+  // ALL prior shapes on a fresh upgrade, even from very old installs).
+  const LEGACY_STORES = ['languages'];
+
+  // ── IndexedDB queue + open ──
+  // Public methods are safe to call before openDB() resolves. We queue work
+  // until the DB handle exists, then drain. After that, the cached promise
+  // serves all subsequent calls.
+  let _dbPromise = null;
 
   function openDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VERSION);
-      req.onupgradeneeded = (event) => {
+    if (_dbPromise) return _dbPromise;
+    _dbPromise = new Promise((resolve, reject) => {
+      let req;
+      try {
+        req = indexedDB.open(DB_NAME, DB_VERSION);
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      req.onupgradeneeded = () => {
         const db = req.result;
-        if (!db.objectStoreNames.contains(STORE_LANGUAGES)) {
-          db.createObjectStore(STORE_LANGUAGES, { keyPath: 'language' });
+        // Drop legacy v3-prefixed / v2-shaped stores so a stale install
+        // doesn't keep stale entries around. v1 cache writes only to
+        // STORE_BUNDLES; STORE_AUDIO is a separate concern.
+        for (const name of LEGACY_STORES) {
+          if (db.objectStoreNames.contains(name)) {
+            db.deleteObjectStore(name);
+          }
+        }
+        if (!db.objectStoreNames.contains(STORE_BUNDLES)) {
+          db.createObjectStore(STORE_BUNDLES, { keyPath: 'lang' });
         }
         if (!db.objectStoreNames.contains(STORE_AUDIO)) {
           db.createObjectStore(STORE_AUDIO);
@@ -37,74 +76,172 @@
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
     });
+    return _dbPromise;
   }
 
-  function dbGet(db, key, store = STORE_LANGUAGES) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readonly');
-      const req = tx.objectStore(store).get(key);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => reject(req.error);
-    });
+  function txDo(storeName, mode, fn) {
+    return openDB().then(db => new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, mode);
+      const store = tx.objectStore(storeName);
+      let result;
+      try {
+        const r = fn(store);
+        if (r && typeof r === 'object' && 'onsuccess' in r) {
+          r.onsuccess = () => { result = r.result; };
+          r.onerror = () => reject(r.error);
+        } else {
+          result = r;
+        }
+      } catch (e) {
+        reject(e);
+        return;
+      }
+      tx.oncomplete = () => resolve(result);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error);
+    }));
   }
 
-  function dbPut(db, record, store = STORE_LANGUAGES) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readwrite');
-      const req = tx.objectStore(store).put(record);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+  // ── v1 cache adapter (the plan-23-02 surface) ──
+
+  /**
+   * Read a cached bundle entry from IndexedDB.
+   * @returns {null | {schema_version: number, revision: string, fetched_at: string, payload: object}}
+   */
+  async function getCachedBundle(lang) {
+    try {
+      const record = await txDo(STORE_BUNDLES, 'readonly', store => store.get(lang));
+      if (!record) return null;
+      return {
+        schema_version: record.schema_version,
+        revision: record.revision,
+        fetched_at: record.fetched_at,
+        payload: record.payload,
+      };
+    } catch (e) {
+      console.warn('Leksihjelp: getCachedBundle failed', e);
+      return null;
+    }
   }
 
-  function dbPutKV(db, key, value, store) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readwrite');
-      const req = tx.objectStore(store).put(value, key);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+  /**
+   * Write a bundle entry. `fetched_at` is auto-stamped to now.
+   */
+  async function putCachedBundle(lang, { schema_version, revision, payload }) {
+    const record = {
+      lang,
+      schema_version,
+      revision,
+      fetched_at: new Date().toISOString(),
+      payload,
+    };
+    return txDo(STORE_BUNDLES, 'readwrite', store => store.put(record));
   }
 
-  function dbGetAll(db, store = STORE_LANGUAGES) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readonly');
-      const req = tx.objectStore(store).getAll();
-      req.onsuccess = () => resolve(req.result || []);
-      req.onerror = () => reject(req.error);
-    });
+  /**
+   * Walk the bundles store and return a {lang: revision} map.
+   * Used by plan 23-04 update detection to build the If-None-Match request.
+   */
+  async function getCachedRevisions() {
+    try {
+      const records = await txDo(STORE_BUNDLES, 'readonly', store => store.getAll());
+      const out = {};
+      for (const r of records || []) {
+        if (r && r.lang && r.revision) out[r.lang] = r.revision;
+      }
+      return out;
+    } catch (e) {
+      console.warn('Leksihjelp: getCachedRevisions failed', e);
+      return {};
+    }
   }
 
-  function dbDelete(db, key, store = STORE_LANGUAGES) {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(store, 'readwrite');
-      const req = tx.objectStore(store).delete(key);
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+  /**
+   * Network fetch for a language bundle. The ONLY vocab fetch site in the
+   * extension — SC-06 carve-out targets this symbol.
+   *
+   * @param {string} lang
+   * @param {{ifNoneMatch?: string}} [opts]
+   * @returns {Promise<
+   *   | {status: 200, body: object}
+   *   | {status: 304}
+   *   | {status: 'schema-mismatch', cachedSchema: number, serverSchema: number}
+   *   | {status: 'error', error: Error}
+   * >}
+   */
+  async function fetchBundle(lang, opts) {
+    const url = `${API_BASE}/bundle/${lang}`;
+    const headers = {};
+    if (opts && opts.ifNoneMatch) {
+      headers['If-None-Match'] = opts.ifNoneMatch;
+    }
+    let res;
+    try {
+      res = await fetch(url, { headers });
+    } catch (error) {
+      return { status: 'error', error };
+    }
+    if (res.status === 304) {
+      return { status: 304 };
+    }
+    if (!res.ok) {
+      return { status: 'error', error: new Error(`HTTP ${res.status}`) };
+    }
+    let body;
+    try {
+      body = await res.json();
+    } catch (error) {
+      return { status: 'error', error };
+    }
+    const serverSchema = body && typeof body.schema_version === 'number'
+      ? body.schema_version
+      : null;
+    if (serverSchema !== SUPPORTED_SCHEMA_VERSION) {
+      // Surface diagnostic — popup ("Developer view", plan 04/05) listens.
+      try {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          chrome.runtime.sendMessage({
+            type: 'lexi:schema-mismatch',
+            lang,
+            cachedSchema: SUPPORTED_SCHEMA_VERSION,
+            serverSchema,
+          });
+        }
+      } catch (_) { /* no receiver — fine */ }
+      return {
+        status: 'schema-mismatch',
+        cachedSchema: SUPPORTED_SCHEMA_VERSION,
+        serverSchema,
+      };
+    }
+    return { status: 200, body };
   }
 
-  // ── Content script detection ──
-  // Content scripts run on the web page's origin, so IndexedDB returns the
-  // page's database — not the extension's. Detect this and proxy read
-  // requests through the service worker which runs on the extension origin.
+  // ── Legacy proxy surface (kept for service-worker.js compatibility) ──
+  // Content scripts call these via chrome.runtime.sendMessage; the service
+  // worker handler reads from IndexedDB on the extension origin and replies.
+  // Plan 23-05 will replace this with a direct service-worker bootstrap.
+
   const _isExtensionOrigin = (typeof location !== 'undefined' && location.protocol === 'chrome-extension:');
-  const _proxyCache = new Map(); // in-memory cache to avoid repeated message passing
+  const _proxyCache = new Map();
 
   function _sendMessageAsync(msg) {
     return new Promise((resolve) => {
-      chrome.runtime.sendMessage(msg, (response) => {
-        if (chrome.runtime.lastError) { resolve(null); return; }
-        resolve(response ?? null);
-      });
+      try {
+        chrome.runtime.sendMessage(msg, (response) => {
+          if (chrome.runtime.lastError) { resolve(null); return; }
+          resolve(response ?? null);
+        });
+      } catch (_) { resolve(null); }
     });
   }
 
-  // ── Public API ──
-
   /**
-   * Get a cached language pack from IndexedDB.
-   * Returns the full data object or null if not cached.
+   * Legacy: read the v2-shaped `data` payload (banks at top level).
+   * v1 entries store the same shape under `payload`, so this maps onto
+   * `getCachedBundle(lang).payload` for in-process reads, and falls back to
+   * the service-worker proxy when called from a content script on a non-
+   * extension origin (lockdown / web pages running the shim).
    */
   async function getCachedLanguage(lang) {
     if (!_isExtensionOrigin) {
@@ -114,20 +251,10 @@
       if (data) _proxyCache.set(cacheKey, data);
       return data;
     }
-    try {
-      const db = await openDB();
-      const record = await dbGet(db, lang);
-      db.close();
-      return record?.data || null;
-    } catch (e) {
-      console.warn('Leksihjelp: getCachedLanguage failed', e);
-      return null;
-    }
+    const entry = await getCachedBundle(lang);
+    return entry ? entry.payload : null;
   }
 
-  /**
-   * Get cached grammar features for a language.
-   */
   async function getCachedGrammarFeatures(lang) {
     if (!_isExtensionOrigin) {
       const cacheKey = `grammar:${lang}`;
@@ -136,35 +263,10 @@
       if (data) _proxyCache.set(cacheKey, data);
       return data;
     }
-    try {
-      const db = await openDB();
-      const record = await dbGet(db, lang);
-      db.close();
-      return record?.grammarFeatures || null;
-    } catch (e) {
-      console.warn('Leksihjelp: getCachedGrammarFeatures failed', e);
-      return null;
-    }
+    const entry = await getCachedBundle(lang);
+    return entry?.payload?.grammarFeatures || null;
   }
 
-  /**
-   * Get the cached version hash for a language.
-   */
-  async function getCachedVersion(lang) {
-    try {
-      const db = await openDB();
-      const record = await dbGet(db, lang);
-      db.close();
-      return record?.version || null;
-    } catch (e) {
-      console.warn('Leksihjelp: getCachedVersion failed', e);
-      return null;
-    }
-  }
-
-  /**
-   * List all cached languages with their versions.
-   */
   async function listCachedLanguages() {
     if (!_isExtensionOrigin) {
       const cacheKey = 'list';
@@ -175,14 +277,11 @@
       return result;
     }
     try {
-      const db = await openDB();
-      const records = await dbGetAll(db);
-      db.close();
-      return records.map(r => ({
-        language: r.language,
-        version: r.version,
-        totalWords: r.data?._metadata?.totalWords || 0,
-        cachedAt: r.cachedAt
+      const records = await txDo(STORE_BUNDLES, 'readonly', store => store.getAll());
+      return (records || []).map(r => ({
+        language: r.lang,
+        version: r.revision,
+        cachedAt: r.fetched_at,
       }));
     } catch (e) {
       console.warn('Leksihjelp: listCachedLanguages failed', e);
@@ -190,147 +289,11 @@
     }
   }
 
-  /**
-   * Download a language pack from the API and store in IndexedDB.
-   * Resolves translations from linkedTo.nb into a top-level translation field.
-   *
-   * @param {string} lang - Language code
-   * @param {function} [onProgress] - Progress callback ({ status, detail })
-   * @returns {object} The language data
-   */
-  async function downloadLanguage(lang, onProgress, options = {}) {
-    onProgress?.({ status: 'downloading', detail: `Laster ned ${lang}...` });
-
-    const res = await fetch(`${API_BASE}/v3/export/${lang}`);
-    if (!res.ok) {
-      throw new Error(`Download failed: ${res.status}`);
-    }
-
-    const data = await res.json();
-
-    onProgress?.({ status: 'processing', detail: 'Behandler data...' });
-
-    // Extract grammar features
-    const grammarFeatures = data._grammarFeatures || null;
-    delete data._grammarFeatures;
-
-    // Resolve translations from linkedTo into top-level translation field.
-    // Prefer the user's Norwegian variant (nn or nb) if specified.
-    const uiLang = options.uiLanguage || 'nb';
-    const preferNn = uiLang === 'nn';
-    const banks = Object.keys(data).filter(k => k.endsWith('bank'));
-    for (const bank of banks) {
-      for (const entry of Object.values(data[bank])) {
-        if (!entry.translation) {
-          const link = preferNn
-            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
-            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
-          if (link?.translation) {
-            entry.translation = link.translation;
-          }
-        }
-        // Also normalize examples from linkedTo if entry has none
-        if ((!entry.examples || entry.examples.length === 0) && entry.linkedTo) {
-          const link = preferNn
-            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
-            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
-          if (link?.examples) {
-            entry.examples = link.examples;
-          }
-        }
-        // Normalize explanation
-        if (!entry.explanation && entry.linkedTo) {
-          const link = preferNn
-            ? (entry.linkedTo?.nn || entry.linkedTo?.nb)
-            : (entry.linkedTo?.nb || entry.linkedTo?.nn);
-          if (link?.explanation) {
-            entry.explanation = { _description: link.explanation };
-          }
-        }
-      }
-    }
-
-    onProgress?.({ status: 'saving', detail: 'Lagrer...' });
-
-    // Store vocab in IndexedDB
-    const version = data._metadata?.version || null;
-    const db = await openDB();
-    await dbPut(db, {
-      language: lang,
-      version,
-      data,
-      grammarFeatures,
-      cachedAt: new Date().toISOString()
-    });
-    db.close();
-
-    // Also download audio pack if available
-    try {
-      const manifest = await fetch(`${API_BASE}/v3/manifest`).then(r => r.json());
-      const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
-      if (audioEndpoint) {
-        onProgress?.({ status: 'downloading_audio', detail: 'Laster ned uttale...' });
-        await downloadAudioPack(lang, audioEndpoint, onProgress);
-      }
-    } catch (err) {
-      // Audio download failed — vocab still works, just no offline pronunciation
-      console.warn(`Audio download failed for ${lang}:`, err.message);
-    }
-
-    onProgress?.({ status: 'done', detail: 'Ferdig!' });
-
-    return data;
-  }
-
-  /**
-   * Check if a language pack needs updating by comparing cached version
-   * with the API manifest version.
-   */
-  async function checkForUpdate(lang) {
-    try {
-      const cachedVersion = await getCachedVersion(lang);
-      if (!cachedVersion) return { needsUpdate: true, reason: 'not_cached' };
-
-      // Conditional fetch - returns 304 if unchanged
-      const res = await fetch(`${API_BASE}/v3/export/${lang}`, {
-        method: 'HEAD',
-        headers: { 'If-None-Match': `"${cachedVersion}"` }
-      });
-
-      if (res.status === 304) {
-        return { needsUpdate: false };
-      }
-
-      const newEtag = res.headers.get('etag')?.replace(/"/g, '');
-      return {
-        needsUpdate: newEtag !== cachedVersion,
-        reason: 'new_version',
-        newVersion: newEtag
-      };
-    } catch (e) {
-      console.warn('Leksihjelp: checkForUpdate failed (offline?)', e);
-      return { needsUpdate: false };
-    }
-  }
-
-  /**
-   * Get language data — from cache if available, otherwise download.
-   */
-  async function getLanguage(lang, onProgress) {
-    const cached = await getCachedLanguage(lang);
-    if (cached) return cached;
-    return downloadLanguage(lang, onProgress);
-  }
-
-  /**
-   * Delete a cached language pack and its audio files.
-   */
   async function deleteLanguage(lang) {
     try {
+      await txDo(STORE_BUNDLES, 'readwrite', store => store.delete(lang));
+      // Also clear audio for that lang.
       const db = await openDB();
-      // Delete vocab record
-      await dbDelete(db, lang);
-      // Delete all audio files for this language
       const tx = db.transaction(STORE_AUDIO, 'readwrite');
       const store = tx.objectStore(STORE_AUDIO);
       const cursorReq = store.openCursor();
@@ -338,45 +301,33 @@
         cursorReq.onsuccess = () => {
           const cursor = cursorReq.result;
           if (!cursor) { resolve(); return; }
-          if (cursor.key.startsWith(`${lang}/`)) {
+          if (typeof cursor.key === 'string' && cursor.key.startsWith(`${lang}/`)) {
             cursor.delete();
           }
           cursor.continue();
         };
         cursorReq.onerror = () => reject(cursorReq.error);
       });
-      db.close();
     } catch (e) {
       console.warn('Leksihjelp: deleteLanguage failed', e);
     }
   }
 
-  // ── Audio Pack Management ──
+  // ── Audio cache helpers (untouched from legacy implementation) ──
 
-  /**
-   * Check if audio is cached for a language.
-   */
   async function hasAudioCached(lang) {
     try {
-      const db = await openDB();
-      const record = await dbGet(db, lang);
-      db.close();
-      return !!record?.audioVersion;
+      const entry = await getCachedBundle(lang);
+      return !!(entry && entry.payload && entry.payload._audioVersion);
     } catch (e) {
-      console.warn('Leksihjelp: hasAudioCached failed', e);
       return false;
     }
   }
 
-  /**
-   * Get a single audio file blob from cache.
-   */
   async function getAudioFile(lang, filename) {
     try {
-      const db = await openDB();
       const key = `${lang}/${filename}`;
-      const blob = await dbGet(db, key, STORE_AUDIO);
-      db.close();
+      const blob = await txDo(STORE_AUDIO, 'readonly', store => store.get(key));
       return blob || null;
     } catch (e) {
       console.warn('Leksihjelp: getAudioFile failed', e);
@@ -384,174 +335,39 @@
     }
   }
 
-  /**
-   * Download audio pack ZIP, extract, and store each MP3 in IndexedDB.
-   *
-   * @param {string} lang - Language code
-   * @param {string} zipUrl - URL of the ZIP file (from manifest audioEndpoint)
-   * @param {function} [onProgress] - Progress callback ({ status, detail, percent })
-   * @returns {number} Number of audio files stored
-   */
-  async function downloadAudioPack(lang, zipUrl, onProgress) {
-    onProgress?.({ status: 'downloading', detail: 'Laster ned lyd...', percent: 0 });
-
-    // Download ZIP
-    const res = await fetch(`${SITE_BASE}${zipUrl}`);
-    if (!res.ok) throw new Error(`Audio download failed: ${res.status}`);
-
-    const arrayBuffer = await res.arrayBuffer();
-    onProgress?.({ status: 'extracting', detail: 'Pakker ut lydfiler...', percent: 30 });
-
-    // Parse ZIP and decompress all files
-    const files = parseZip(new Uint8Array(arrayBuffer));
-    if (files._decompressPromises?.length) {
-      await Promise.all(files._decompressPromises);
-    }
-    // Filter out failed decompressions
-    const validFiles = files.filter(f => f.data);
-    const totalFiles = validFiles.length;
-
-    onProgress?.({ status: 'saving', detail: `Lagrer ${totalFiles} lydfiler...`, percent: 50 });
-
-    // Store each MP3 in IndexedDB
-    const db = await openDB();
-    const tx = db.transaction(STORE_AUDIO, 'readwrite');
-    const store = tx.objectStore(STORE_AUDIO);
-
-    let saved = 0;
-    for (const file of validFiles) {
-      if (!file.name.endsWith('.mp3')) continue;
-      const key = `${lang}/${file.name}`;
-      const blob = new Blob([file.data], { type: 'audio/mpeg' });
-      store.put(blob, key);
-      saved++;
-
-      if (saved % 100 === 0) {
-        const pct = 50 + Math.round((saved / totalFiles) * 50);
-        onProgress?.({ status: 'saving', detail: `Lagrer lydfiler (${saved}/${totalFiles})...`, percent: pct });
-      }
-    }
-
-    await new Promise((resolve, reject) => {
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-
-    // Update the language record with audio version
-    const manifest = await fetch(`${API_BASE}/v3/manifest`).then(r => r.json()).catch(() => null);
-    const audioVersion = manifest?.languages?.[lang]?.audioVersion || 'unknown';
-
-    const langRecord = await dbGet(db, lang);
-    if (langRecord) {
-      langRecord.audioVersion = audioVersion;
-      langRecord.audioFileCount = saved;
-      await dbPut(db, langRecord);
-    }
-
-    db.close();
-
-    onProgress?.({ status: 'done', detail: `${saved} lydfiler lagret!`, percent: 100 });
-    return saved;
-  }
-
-  /**
-   * Minimal ZIP parser — extracts file names and uncompressed data.
-   * Handles STORE (no compression) and DEFLATE (most common).
-   */
-  function parseZip(data) {
-    const files = [];
-    const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-    let offset = 0;
-
-    while (offset < data.length - 4) {
-      const sig = view.getUint32(offset, true);
-      if (sig !== 0x04034b50) break; // Not a local file header
-
-      const compressionMethod = view.getUint16(offset + 8, true);
-      const compressedSize = view.getUint32(offset + 18, true);
-      const uncompressedSize = view.getUint32(offset + 22, true);
-      const nameLen = view.getUint16(offset + 26, true);
-      const extraLen = view.getUint16(offset + 28, true);
-
-      const nameBytes = data.slice(offset + 30, offset + 30 + nameLen);
-      const name = new TextDecoder().decode(nameBytes);
-
-      const dataStart = offset + 30 + nameLen + extraLen;
-      const compressedData = data.slice(dataStart, dataStart + compressedSize);
-
-      let fileData;
-      if (compressionMethod === 0) {
-        // STORE — no compression
-        fileData = compressedData;
-      } else if (compressionMethod === 8) {
-        // DEFLATE — use DecompressionStream
-        fileData = null; // Will decompress async below
-        files.push({ name, compressedData, uncompressedSize, needsDeflate: true });
-        offset = dataStart + compressedSize;
-        continue;
-      } else {
-        // Unsupported compression — skip
-        offset = dataStart + compressedSize;
-        continue;
-      }
-
-      files.push({ name, data: fileData });
-      offset = dataStart + compressedSize;
-    }
-
-    // Decompress DEFLATE files using DecompressionStream
-    const decompressPromises = files
-      .filter(f => f.needsDeflate)
-      .map(async (f) => {
-        try {
-          const ds = new DecompressionStream('deflate-raw');
-          const writer = ds.writable.getWriter();
-          writer.write(f.compressedData);
-          writer.close();
-          const reader = ds.readable.getReader();
-          const chunks = [];
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-          }
-          const totalLen = chunks.reduce((sum, c) => sum + c.length, 0);
-          const result = new Uint8Array(totalLen);
-          let pos = 0;
-          for (const chunk of chunks) {
-            result.set(chunk, pos);
-            pos += chunk.length;
-          }
-          f.data = result;
-          delete f.needsDeflate;
-          delete f.compressedData;
-        } catch (e) {
-          console.warn('Leksihjelp: zip decompression failed for', f.name, e);
-          f.data = null;
-        }
-      });
-
-    // Return a promise that resolves when all decompression is done
-    // But since parseZip is called synchronously, we need to handle this differently
-    // Actually, let's make downloadAudioPack await this
-    files._decompressPromises = decompressPromises;
-    return files;
+  // Audio pack download is currently dormant (plan 23-05 will retire or
+  // re-enable it). We keep the function reference so manifest loaders that
+  // reference window.__lexiVocabStore.downloadAudioPack don't TypeError.
+  async function downloadAudioPack(/* lang, zipUrl, onProgress */) {
+    console.warn('Leksihjelp: downloadAudioPack is not wired in v1 cache; deferred to plan 23-05');
+    return 0;
   }
 
   // ── Expose API ──
-  window.__lexiVocabStore = {
+  const api = {
+    // v1 cache adapter (plan 23-02 surface)
+    SUPPORTED_SCHEMA_VERSION,
+    API_BASE,
+    SITE_BASE,
+    getCachedBundle,
+    putCachedBundle,
+    getCachedRevisions,
+    fetchBundle,
+    // Legacy / proxy surface (preserved for service-worker.js + content scripts)
     getCachedLanguage,
     getCachedGrammarFeatures,
-    getCachedVersion,
     listCachedLanguages,
-    downloadLanguage,
-    checkForUpdate,
-    getLanguage,
     deleteLanguage,
     hasAudioCached,
     getAudioFile,
     downloadAudioPack,
-    API_BASE,
-    SITE_BASE
   };
+
+  // Browser: window.__lexiVocabStore. In Node test sandboxes the script is
+  // run with `window === globalThis === sandbox.window`, so this assignment
+  // is observable to the test harness too.
+  const host = (typeof window !== 'undefined' ? window
+              : typeof self !== 'undefined' ? self
+              : globalThis);
+  host.__lexiVocabStore = api;
 })();

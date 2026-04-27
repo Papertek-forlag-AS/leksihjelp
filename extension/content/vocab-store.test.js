@@ -113,7 +113,9 @@ test('getCachedRevisions returns {lang: revision} from existing entries', async 
   await store.putCachedBundle('de', { schema_version: 1, revision: 'rev-de', payload: {} });
   await store.putCachedBundle('es', { schema_version: 1, revision: 'rev-es', payload: {} });
   const revs = await store.getCachedRevisions();
-  assert.deepStrictEqual(revs, { de: 'rev-de', es: 'rev-es' });
+  // Convert to plain object — vm sandbox values may have a different
+  // prototype than the test realm's Object.
+  assert.deepStrictEqual({ ...revs }, { de: 'rev-de', es: 'rev-es' });
 });
 
 test('fetchBundle 200 with matching schema returns body', async () => {
