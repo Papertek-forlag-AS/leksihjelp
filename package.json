@@ -30,6 +30,7 @@
     "check-fixtures:nn": "node scripts/check-fixtures.js nn",
     "build-frequencies": "node scripts/build-frequencies.js",
     "build-bigrams": "node scripts/build-bigrams.js",
+    "build-nb-baseline": "node scripts/build-nb-baseline.js",
     "package": "node scripts/package-extension.js",
     "check-bundle-size": "node scripts/check-bundle-size.js",
     "check-baseline-bundle-size": "node scripts/check-baseline-bundle-size.js",
