@@ -178,7 +178,198 @@ document.addEventListener('DOMContentLoaded', async () => {
   initDarkMode();
   initAuth();
   initReportForm();
+  initVocabUpdateNotice();
+  initVocabStatus();
 });
+
+// ── Plan 23-03: hydration status pills ─────────────────────────────
+// Renders one pill per language based on chrome.runtime 'lexi:hydration'
+// events emitted by:
+//   • extension/background/vocab-bootstrap.js (install/update auto-download)
+//   • extension/content/vocab-seam.js (target-language hydration)
+// On popup open, queries the service worker via 'lexi:status' so a popup
+// opened mid-download shows the latest cache state instead of a blank pill.
+function initVocabStatus() {
+  const container = document.getElementById('lexi-vocab-status');
+  if (!container) return;
+
+  const READY_AUTO_HIDE_MS = 3000;
+  const pills = new Map();   // lang → {el, state, hideTimer}
+
+  function langLabel(lang) {
+    if (typeof langName === 'function') {
+      try { return langName(lang); } catch (_) { /* fall through */ }
+    }
+    return lang;
+  }
+
+  function textForState(lang, state) {
+    const name = langLabel(lang);
+    if (state === 'fetching') return `Laster ned ${name}…`;
+    if (state === 'ready')    return `${name} klar`;
+    if (state === 'error')    return 'Ordlister utilgjengelig — prøv igjen senere';
+    if (state === 'baseline') return `${name} (basis)`;
+    return `${name} ${state}`;
+  }
+
+  function ensurePill(lang) {
+    let entry = pills.get(lang);
+    if (!entry) {
+      const el = document.createElement('span');
+      el.className = 'lexi-vocab-pill';
+      el.dataset.lang = lang;
+      container.appendChild(el);
+      entry = { el, state: null, hideTimer: null };
+      pills.set(lang, entry);
+    }
+    return entry;
+  }
+
+  function setPill(lang, state) {
+    if (state === 'baseline') return; // NB baseline is implicit; no pill.
+    const entry = ensurePill(lang);
+    if (entry.hideTimer) { clearTimeout(entry.hideTimer); entry.hideTimer = null; }
+    entry.state = state;
+    entry.el.classList.remove('is-fetching', 'is-ready', 'is-error');
+    entry.el.classList.add(`is-${state}`);
+    entry.el.textContent = textForState(lang, state);
+    container.hidden = false;
+
+    if (state === 'ready') {
+      entry.hideTimer = setTimeout(() => {
+        entry.el.remove();
+        pills.delete(lang);
+        if (pills.size === 0) container.hidden = true;
+      }, READY_AUTO_HIDE_MS);
+    }
+    // 'error' is sticky until the next state change for that lang.
+  }
+
+  // Snapshot of cached languages on popup open so a popup opened mid-download
+  // doesn't start with an empty pill row. Cached langs are 'ready' (and will
+  // auto-hide on the standard timer).
+  try {
+    chrome.runtime.sendMessage({ type: 'lexi:status' }, (response) => {
+      if (chrome.runtime.lastError) return;
+      const revisions = (response && response.revisions) || {};
+      for (const lang of Object.keys(revisions)) {
+        if (lang === 'nb') continue; // NB baseline is implicit
+        setPill(lang, 'ready');
+      }
+    });
+  } catch (_) { /* service worker unavailable — no-op */ }
+
+  // Live updates from bootstrap + content seam.
+  chrome.runtime.onMessage.addListener((m) => {
+    if (!m || m.type !== 'lexi:hydration' || !m.lang || !m.state) return;
+    if (m.lang === 'nb' && m.state === 'baseline') return; // implicit
+    setPill(m.lang, m.state);
+  });
+}
+
+// ── Plan 23-04: vocab update notice ───────────────────────────────
+// Polls the service worker on popup open ('lexi:check-updates-now') and
+// subscribes to push events ('lexi:updates-available' from startup check,
+// 'lexi:refresh-done' / 'lexi:hydration' state='error' from the refresh
+// flow). Click handler triggers refreshAll via 'lexi:refresh-now'.
+function initVocabUpdateNotice() {
+  const notice = document.getElementById('lexi-updates-notice');
+  const btn = document.getElementById('lexi-refresh-btn');
+  const msg = notice ? notice.querySelector('.lexi-updates-msg') : null;
+  if (!notice || !btn || !msg) return;
+
+  let staleLangs = [];      // langs we are currently inviting the user to refresh
+  let pendingLangs = null;  // langs awaiting refresh-done after click
+
+  const DEFAULT_TEXT = 'Nye ordlister tilgjengelig';
+  const REFRESHING_TEXT = 'Oppdaterer…';
+  const ERROR_TEXT = 'Oppdatering feilet — prøv igjen senere';
+  const REFRESH_LABEL = 'Oppdater ordlister nå';
+
+  function showNotice(langs, text) {
+    staleLangs = Array.isArray(langs) ? langs.slice() : [];
+    const suffix = staleLangs.length > 0 ? ` (${staleLangs.join(', ')})` : '';
+    msg.textContent = (text || DEFAULT_TEXT) + suffix;
+    btn.textContent = REFRESH_LABEL;
+    btn.disabled = false;
+    notice.hidden = false;
+  }
+
+  function hideNotice() {
+    notice.hidden = true;
+    staleLangs = [];
+    pendingLangs = null;
+  }
+
+  function showError() {
+    msg.textContent = ERROR_TEXT;
+    btn.textContent = REFRESH_LABEL;
+    btn.disabled = false;
+    notice.hidden = false;
+  }
+
+  // Poll once on popup open. The service worker may have run its startup
+  // check earlier (and emitted updates-available before the popup was
+  // listening), so we ask explicitly for the current state.
+  try {
+    chrome.runtime.sendMessage({ type: 'lexi:check-updates-now' }, (response) => {
+      if (chrome.runtime.lastError) return;
+      if (!response || !response.ok || !response.result) return;
+      const stale = Object.keys(response.result).filter(k => response.result[k] === 'stale');
+      if (stale.length > 0) showNotice(stale);
+    });
+  } catch (_) { /* service worker unavailable — no-op */ }
+
+  // Push events from the service worker / vocab-updater.
+  chrome.runtime.onMessage.addListener((m) => {
+    if (!m || !m.type) return;
+    if (m.type === 'lexi:updates-available' && Array.isArray(m.langs) && m.langs.length > 0) {
+      showNotice(m.langs);
+      return;
+    }
+    if (m.type === 'lexi:refresh-done' && pendingLangs) {
+      const idx = pendingLangs.indexOf(m.lang);
+      if (idx >= 0) pendingLangs.splice(idx, 1);
+      if (pendingLangs.length === 0) {
+        hideNotice();
+      } else {
+        msg.textContent = REFRESHING_TEXT + ` (${pendingLangs.join(', ')})`;
+      }
+      return;
+    }
+    if (m.type === 'lexi:hydration' && m.state === 'error' && pendingLangs && pendingLangs.includes(m.lang)) {
+      // One of the in-flight langs failed — show error, leave notice up.
+      pendingLangs = null;
+      showError();
+      return;
+    }
+  });
+
+  btn.addEventListener('click', () => {
+    if (staleLangs.length === 0) return;
+    pendingLangs = staleLangs.slice();
+    btn.disabled = true;
+    btn.textContent = REFRESHING_TEXT;
+    msg.textContent = REFRESHING_TEXT + ` (${pendingLangs.join(', ')})`;
+    try {
+      chrome.runtime.sendMessage({ type: 'lexi:refresh-now', langs: pendingLangs }, (response) => {
+        if (chrome.runtime.lastError) {
+          pendingLangs = null;
+          showError();
+          return;
+        }
+        if (response && response.ok === false) {
+          pendingLangs = null;
+          showError();
+        }
+        // Otherwise wait for per-lang refresh-done events.
+      });
+    } catch (_) {
+      pendingLangs = null;
+      showError();
+    }
+  });
+}
 
 /**
  * Show language picker for first-run users.

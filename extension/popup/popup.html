@@ -35,6 +35,19 @@
       </div>
     </header>
 
+    <!-- Plan 23-04: vocab update notice (non-blocking banner). Sits just
+         below the header so plan 23-03's hydration pill (also rendered near
+         the top) stacks vertically with this one rather than overlapping. -->
+    <div id="lexi-updates-notice" class="lexi-updates-notice" hidden role="status" aria-live="polite">
+      <span class="lexi-updates-msg">Nye ordlister tilgjengelig</span>
+      <button id="lexi-refresh-btn" class="lexi-updates-btn" type="button">Oppdater ordlister nå</button>
+    </div>
+
+    <!-- Plan 23-03: per-language hydration status pills (fetching / ready / error).
+         Populated by initVocabStatus() from chrome.runtime 'lexi:hydration'
+         events emitted by the service-worker bootstrap and content-side seam. -->
+    <div id="lexi-vocab-status" class="lexi-vocab-status" hidden role="status" aria-live="polite"></div>
+
     <!-- First-run UI language picker -->
     <div id="ui-language-picker" class="language-picker hidden">
       <div class="language-picker-content glass">
