@@ -155,7 +155,7 @@ Plans:
 | 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
-| 24. Compound Word Intelligence | 2/2 | Complete   | 2026-04-27 | - |
+| 24. Compound Word Intelligence | 2/2 | Complete    | 2026-04-27 | - |
 | 25. UX Polish & Tech Debt | v3.1 | 0/0 | Not started | - |
 
 ---
