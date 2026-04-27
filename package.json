@@ -51,5 +51,8 @@
     "url": "https://github.com/Papertek-forlag-AS/leksihjelp"
   },
   "author": "Papertek",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5"
+  }
 }
