@@ -99,7 +99,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
   2. Compound card displays a pedagogical note explaining that the last component determines gender, with a clickable link that navigates to the last component's dictionary entry
   3. After navigating from a compound card to a component entry, a "Tilbake til [compound]" link appears and returns the student to the compound card
   4. Compound card shows a translation guess assembled from component translations, labeled as a qualified guess ("Kvalifisert gjetning")
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 24-01-PLAN.md — Compound prediction engine (TDD) in vocab-seam-core.js
 - [ ] 24-02-PLAN.md — Wire prediction into popup search + enhanced compound card (pedagogy, back-nav, translation guess)
@@ -155,7 +155,7 @@ Plans:
 | 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
-| 24. Compound Word Intelligence | v3.1 | 0/2 | In progress | - |
+| 24. Compound Word Intelligence | 1/2 | In Progress|  | - |
 | 25. UX Polish & Tech Debt | v3.1 | 0/0 | Not started | - |
 
 ---
