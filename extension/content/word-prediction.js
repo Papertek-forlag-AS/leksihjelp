@@ -105,7 +105,7 @@
     await initI18n();
     const stored = await chromeStorageGet(['language', 'predictionEnabled', 'lexiPaused']);
     currentLang = stored.language || 'en';
-    enabled = stored.predictionEnabled !== false;
+    enabled = stored.predictionEnabled === true;
     lexiPaused = stored.lexiPaused || false;
 
     await loadRecentWords(currentLang);

@@ -29,16 +29,22 @@ let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compou
 function getTranslation(entry) {
   if (!entry) return '';
   const ui = getUiLanguage();
-  // If UI is nynorsk, prefer the nn link translation
   if (ui === 'nn' && entry.linkedTo?.nn?.translation) {
     return entry.linkedTo.nn.translation;
   }
-  // If UI is bokmål (or default), prefer the nb link translation
   if (ui === 'nb' && entry.linkedTo?.nb?.translation) {
     return entry.linkedTo.nb.translation;
   }
-  // Fallback: use the baked-in translation (typically nb)
-  return entry.translation || '';
+  if (entry.translation) return entry.translation;
+  // Resolve linkedTo primary ID via the loaded Norwegian dictionary
+  const link = entry.linkedTo?.[ui] || entry.linkedTo?.nb || entry.linkedTo?.nn;
+  if (link?.primary && noDictionary) {
+    for (const bank of Object.keys(BANK_TO_POS)) {
+      const resolved = noDictionary[bank]?.[link.primary];
+      if (resolved?.word) return resolved.word;
+    }
+  }
+  return '';
 }
 
 // Bank name to Norwegian part of speech mapping
@@ -2124,7 +2130,7 @@ async function initSettings() {
   const savedCode = await chromeStorageGet('accessCode');
   if (savedCode) codeInput.value = savedCode;
   const predEnabled = await chromeStorageGet('predictionEnabled');
-  predictionToggle.checked = predEnabled !== false;
+  predictionToggle.checked = predEnabled === true;
   const altStored = await chromeStorageGet('spellCheckAlternatesVisible');
   alternatesToggle.checked = altStored === true;  // default false when unset
 
