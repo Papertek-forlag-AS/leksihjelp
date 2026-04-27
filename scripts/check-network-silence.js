@@ -16,6 +16,20 @@
  *   - Comments and docstrings (lines starting with //, plus markdown inside
  *     JSDoc * blocks)
  *
+ * SC-06 sanctioned bootstrap path (Phase 23, do NOT add to scan set):
+ *   - extension/background/vocab-bootstrap.js
+ *   - extension/background/vocab-updater.js
+ *   - extension/content/vocab-store.js
+ * These files are the only places allowed to issue fetch() against the
+ * Papertek vocabulary API. They are deliberately OUT OF the scan set
+ * (SCAN_TARGETS / SCAN_DIRS below). Spell-check + word-prediction must remain
+ * network-silent — that contract is unchanged. The carve-out is enforced
+ * by omission: the scanner walks only the offline-surface files, so adding
+ * fetch() in vocab-bootstrap.js etc. is allowed by design. The companion
+ * self-test (check-network-silence.test.js) plants a fetch in vocab-bootstrap.js
+ * and asserts the gate stays green to prove the carve-out is real and not an
+ * accidental scan-set drift.
+ *
  * Exits 0 on clean scan, 1 if any hit.
  *
  * Usage:

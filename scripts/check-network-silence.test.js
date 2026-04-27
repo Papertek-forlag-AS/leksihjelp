@@ -11,6 +11,13 @@
  * spell-check-core.js (which is in SCAN_TARGETS too — same gate logic
  * applies). This keeps the self-test robust whether the spell-rules/
  * directory has been created yet or not.
+ *
+ * Phase 23 SC-06 carve-out scenario: also plants a fetch() inside
+ * extension/background/vocab-bootstrap.js (the sanctioned bootstrap path,
+ * outside the scan set) and asserts the gate STAYS GREEN. This proves the
+ * carve-out is real — the gate explicitly does not scan the bootstrap files
+ * even when they contain fetch() calls. If a future refactor accidentally
+ * adds these files to SCAN_TARGETS / SCAN_DIRS, this scenario fails loud.
  */
 'use strict';
 const fs = require('fs');
@@ -89,5 +96,55 @@ if (postCleanup !== 0) {
   process.exit(1);
 }
 
-console.log('OK — network-silence gate correctly detected and recovered from planted fetch().');
+// 4. Phase 23 SC-06 carve-out — plant a fetch() in the sanctioned bootstrap
+// path (extension/background/vocab-bootstrap.js) and assert the gate STAYS
+// GREEN. The carve-out is enforced by SCAN_TARGETS/SCAN_DIRS not including
+// background/ files. If a future change accidentally pulls them into scan
+// scope, this scenario fires loud.
+const BOOTSTRAP_DIR = path.join(ROOT, 'extension/background');
+const BOOTSTRAP_FILE = path.join(BOOTSTRAP_DIR, 'vocab-bootstrap.js');
+let bootstrapDirCreated = false;
+let bootstrapFileExisted = false;
+let bootstrapOriginal = null;
+try {
+  if (!fs.existsSync(BOOTSTRAP_DIR)) {
+    fs.mkdirSync(BOOTSTRAP_DIR, { recursive: true });
+    bootstrapDirCreated = true;
+  }
+  if (fs.existsSync(BOOTSTRAP_FILE)) {
+    bootstrapFileExisted = true;
+    bootstrapOriginal = fs.readFileSync(BOOTSTRAP_FILE, 'utf8');
+  }
+  // Plant a real-looking fetch in the sanctioned path.
+  fs.writeFileSync(
+    BOOTSTRAP_FILE,
+    "// Phase 23 sanctioned bootstrap — fetch() is allowed here by SC-06 carve-out.\n" +
+    "fetch('https://www.papertek.no/api/vocab/v1/bundle/nb');\n",
+    'utf8'
+  );
+  const carveoutResult = runGate();
+  if (carveoutResult !== 0) {
+    console.error('FAIL: gate fired on a fetch() in the sanctioned vocab-bootstrap.js — SC-06 carve-out is broken.');
+    console.error('  exit status:', carveoutResult);
+    console.error('  Either SCAN_TARGETS / SCAN_DIRS now includes background/ (regression),');
+    console.error('  or the whitelist no longer covers vocab-bootstrap. Investigate before shipping.');
+    process.exit(1);
+  }
+} finally {
+  // Restore the original bootstrap file (if any) or remove the plant.
+  try {
+    if (bootstrapFileExisted) {
+      fs.writeFileSync(BOOTSTRAP_FILE, bootstrapOriginal, 'utf8');
+    } else if (fs.existsSync(BOOTSTRAP_FILE)) {
+      fs.unlinkSync(BOOTSTRAP_FILE);
+    }
+    if (bootstrapDirCreated && fs.existsSync(BOOTSTRAP_DIR)) {
+      const remaining = fs.readdirSync(BOOTSTRAP_DIR);
+      if (remaining.length === 0) fs.rmdirSync(BOOTSTRAP_DIR);
+    }
+  } catch (_) { /* best-effort */ }
+}
+
+console.log('OK — network-silence gate correctly detected and recovered from planted fetch(),');
+console.log('and the SC-06 sanctioned bootstrap carve-out (vocab-bootstrap.js) is enforced.');
 process.exit(0);
