@@ -343,6 +343,44 @@
     return 0;
   }
 
+  // Legacy proxy: popup.js picker + welcome flow call this to fetch + cache a
+  // language bundle synchronously-relative-to-await. In v1 the real download
+  // path is fetchBundle → putCachedBundle. onProgress is preserved as a noop
+  // surface (v1 fetch is single-shot; no chunked progress yet).
+  async function downloadLanguage(lang, onProgress) {
+    if (typeof onProgress === 'function') {
+      try { onProgress({ phase: 'fetching', lang }); } catch (e) {}
+    }
+    const result = await fetchBundle(lang);
+    if (result.status === 304) {
+      const cached = await getCachedBundle(lang);
+      if (typeof onProgress === 'function') {
+        try { onProgress({ phase: 'ready', lang, fromCache: true }); } catch (e) {}
+      }
+      return cached ? cached.payload : null;
+    }
+    if (result.status !== 200) {
+      throw result.error || new Error(`downloadLanguage failed for ${lang}`);
+    }
+    await putCachedBundle(lang, {
+      schema_version: result.body.schema_version,
+      revision: result.body.revision,
+      payload: result.body,
+    });
+    if (typeof onProgress === 'function') {
+      try { onProgress({ phase: 'ready', lang, fromCache: false }); } catch (e) {}
+    }
+    return result.body;
+  }
+
+  // Legacy proxy: popup.js cache-version checks (e.g. "is the audio pack from
+  // the same revision as the bundle?"). v1 uses revision strings instead of
+  // numeric versions; callers compare for equality so the string is fine.
+  async function getCachedVersion(lang) {
+    const entry = await getCachedBundle(lang);
+    return entry ? entry.revision : null;
+  }
+
   // ── Expose API ──
   const api = {
     // v1 cache adapter (plan 23-02 surface)
@@ -361,6 +399,8 @@
     hasAudioCached,
     getAudioFile,
     downloadAudioPack,
+    downloadLanguage,
+    getCachedVersion,
   };
 
   // Browser: window.__lexiVocabStore. In Node test sandboxes the script is
