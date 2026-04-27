@@ -241,7 +241,7 @@ const _STRINGS = {
     pred_vis_faerre: 'Vis færre',
 
     // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
-    spell_check_btn_title: 'Sjekk rettskriving',
+    spell_check_btn_title: 'Sjekk rettskriving med Leksihjelp',
     spell_toast_errors: '{count} feil funnet',
     spell_toast_clean: 'Ser bra ut!',
 
@@ -465,7 +465,7 @@ const _STRINGS = {
     pred_vis_faerre: 'Vis færre',
 
     // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
-    spell_check_btn_title: 'Sjekk rettskriving',
+    spell_check_btn_title: 'Sjekk rettskriving med Leksihjelp',
     spell_toast_errors: '{count} feil funne',
     spell_toast_clean: 'Ser bra ut!',
 
@@ -683,7 +683,7 @@ const _STRINGS = {
     pred_resume_short: 'Resume',
 
     // ── Spell-check manual button + toast (Phase 18 Plan 02) ──
-    spell_check_btn_title: 'Check spelling',
+    spell_check_btn_title: 'Check spelling with Leksihjelp',
     spell_toast_errors: '{count} errors found',
     spell_toast_clean: 'Looks good!',
 
