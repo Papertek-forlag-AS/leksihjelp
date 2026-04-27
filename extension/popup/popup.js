@@ -1525,7 +1525,19 @@ function renderCompoundSuggestions(query, predictions) {
   });
 }
 
-// Phase 17 COMP-01/02: render compound decomposition card
+// Phase 24: look up a component word's translation from allWords/dictionary
+function getComponentTranslation(word) {
+  const lw = word.toLowerCase();
+  for (const entry of allWords) {
+    if (entry.word && entry.word.toLowerCase() === lw) {
+      const trans = getTranslation(entry);
+      if (trans) return trans;
+    }
+  }
+  return null;
+}
+
+// Phase 17 COMP-01/02 + Phase 24 COMP-02/03/04: render compound decomposition card
 function renderCompoundCard(query, decomposition) {
   const container = document.getElementById('search-results');
   const { parts, gender } = decomposition;
@@ -1552,7 +1564,32 @@ function renderCompoundCard(query, decomposition) {
     ? `<span class="result-gender">${genusToGender(gender)}</span>`
     : '';
 
+  // Phase 24 COMP-02: Pedagogical note about last component
+  const lastComponent = parts[parts.length - 1];
+  const lastComponentWord = lastComponent ? lastComponent.word : '';
+  const pedagogyNote = lastComponentWord
+    ? `<div class="compound-pedagogy">${t('compound_pedagogy', { lastComponent: `<a class="compound-pedagogy-link" data-word="${escapeHtml(lastComponentWord)}">${escapeHtml(lastComponentWord)}</a>` })}</div>`
+    : '';
+
+  // Phase 24 COMP-04: Translation guess from component translations
+  const guessSegments = parts.map(part => {
+    const trans = getComponentTranslation(part.word);
+    return trans || `(${part.word})`;
+  });
+  const guessHtml = `
+    <div class="compound-guess">
+      <span class="compound-guess-label">${t('compound_translation_guess')}:</span>
+      <span class="compound-guess-text">${escapeHtml(guessSegments.join(' + '))}</span>
+    </div>
+  `;
+
+  // Phase 24 COMP-03: Back-navigation link
+  const backLinkHtml = compoundNavStack.length > 0
+    ? `<a class="compound-back-link" href="#">${t('compound_back_link', { word: compoundNavStack[compoundNavStack.length - 1].query })}</a>`
+    : '';
+
   container.innerHTML = `
+    ${backLinkHtml}
     <div class="result-card compound-card glass">
       <div class="result-basic">
         <div class="result-word-row">
@@ -1566,6 +1603,8 @@ function renderCompoundCard(query, decomposition) {
       </div>
       <div class="compound-breakdown">${breakdownHtml}</div>
       <div class="compound-components">${componentBtns}</div>
+      ${pedagogyNote}
+      ${guessHtml}
     </div>
   `;
 
@@ -1573,11 +1612,39 @@ function renderCompoundCard(query, decomposition) {
   container.querySelectorAll('.compound-component-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const word = btn.dataset.word;
+      // Phase 24 COMP-03: push current state to nav stack before navigating
+      compoundNavStack.push({ query, decomposition });
       const input = document.getElementById('search-input');
       if (input) input.value = word;
       performSearch(word);
     });
   });
+
+  // Wire up pedagogy link
+  container.querySelectorAll('.compound-pedagogy-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const word = link.dataset.word;
+      compoundNavStack.push({ query, decomposition });
+      const input = document.getElementById('search-input');
+      if (input) input.value = word;
+      performSearch(word);
+    });
+  });
+
+  // Wire up back-link
+  const backLink = container.querySelector('.compound-back-link');
+  if (backLink) {
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const prev = compoundNavStack.pop();
+      if (prev) {
+        const input = document.getElementById('search-input');
+        if (input) input.value = prev.query;
+        renderCompoundCard(prev.query, prev.decomposition);
+      }
+    });
+  }
 }
 
 function renderResults(results, options = {}) {
@@ -1587,11 +1654,16 @@ function renderResults(results, options = {}) {
     return;
   }
 
+  // Phase 24 COMP-03: back-link when navigating from compound card
+  const backLinkHtml = compoundNavStack.length > 0
+    ? `<a class="compound-back-link" href="#">${t('compound_back_link', { word: compoundNavStack[compoundNavStack.length - 1].query })}</a>`
+    : '';
+
   const hintHtml = options.fallbackHint
     ? `<div class="fallback-hint">${t('search_fallback_hint')}</div>`
     : '';
 
-  container.innerHTML = hintHtml + results.map(({ entry, inflectionHint }) => {
+  container.innerHTML = backLinkHtml + hintHtml + results.map(({ entry, inflectionHint }) => {
     // Enrich with NB falseFriends/senses via reverse linkedTo index
     const enrichment = entry._wordId ? nbEnrichmentIndex.get(entry._wordId) : null;
     const enrichedEntry = enrichment ? {
@@ -1659,6 +1731,20 @@ function renderResults(results, options = {}) {
       }
     });
   });
+
+  // Phase 24 COMP-03: wire back-link in regular results view
+  const backLink = container.querySelector('.compound-back-link');
+  if (backLink) {
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const prev = compoundNavStack.pop();
+      if (prev) {
+        const input = document.getElementById('search-input');
+        if (input) input.value = prev.query;
+        renderCompoundCard(prev.query, prev.decomposition);
+      }
+    });
+  }
 }
 
 function showPlaceholder() {
