@@ -37,7 +37,7 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### MIGRATE (existing-user transition)
 
-- [ ] **MIGRATE-01**: First run after upgrading from v2.x silently fetches fresh data into IndexedDB; bundled JSON files are removed from the extension package once migration ships, leaving only the NB baseline
+- [x] **MIGRATE-01**: First run after upgrading from v2.x silently fetches fresh data into IndexedDB; bundled JSON files are removed from the extension package once migration ships, leaving only the NB baseline
 
 ### GATES (release gates)
 
@@ -93,7 +93,7 @@ Which phases cover which requirements.
 | UPDATE-01 | Phase 23 (Plan 04) | Complete |
 | UPDATE-02 | Phase 23 (Plan 04) | Complete |
 | UPDATE-03 | Phase 23 (Plan 04) | Complete |
-| MIGRATE-01 | Phase 23 (Plan 05) | Pending |
+| MIGRATE-01 | Phase 23 (Plan 05) | Complete |
 | GATES-01 | Phase 23 (Plan 06) | Complete |
 | GATES-02 | Phase 23 (Plan 06) | Complete |
 

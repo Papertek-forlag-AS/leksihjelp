@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Data-Source Migration
 status: completed
-last_updated: "2026-04-27T01:07:26.427Z"
-last_activity: 2026-04-27 — Plan 23-04 closed; UPDATE-01/UPDATE-02/UPDATE-03 satisfied
+last_updated: "2026-04-27T18:50:00Z"
+last_activity: 2026-04-27 — Plan 23-05 closed; MIGRATE-01 satisfied; all 6/6 plans complete
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 6
-  completed_plans: 4
+  completed_plans: 6
 ---
 
 # Session State
@@ -19,28 +19,28 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** v3.0 Data-Source Migration — plan 23-01 complete (Papertek bundle + revisions endpoints live)
+**Current focus:** v3.0 Data-Source Migration -- COMPLETE (all 6 plans executed)
 
 ## Position
 
 **Milestone:** v3.0 Data-Source Migration
-**Phase:** 23 (in progress — Data-Source Migration)
-**Plan:** 05 (next — migration + removal); 01/02/04/06 complete; 03 in parallel
-**Status:** Plans 23-01 + 23-02 + 23-04 + 23-06 complete; v1 endpoints + cache adapter + update-detection + release gates live. 23-03 (baseline trim) running in parallel; 23-05 unblocked once 23-03 lands.
-**Last activity:** 2026-04-27 — Plan 23-04 closed; UPDATE-01/UPDATE-02/UPDATE-03 satisfied
+**Phase:** 23 (COMPLETE -- Data-Source Migration)
+**Plan:** All 6/6 complete (01, 02, 03, 04, 05, 06)
+**Status:** Phase 23 complete. All plans executed and verified.
+**Last activity:** 2026-04-27 -- Plan 23-05 closed (data flip + lockdown contract); MIGRATE-01 satisfied
 
 ### Progress
 ```
-Phases: [.] 0/1
-Plans:  [####..] 4/6
+Phases: [#] 1/1
+Plans:  [######] 6/6
 ```
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: ~6.5 min
-- Total execution time: ~0.43 hours
+- Total plans completed: 6
+- Average duration: ~7 min
+- Total execution time: ~0.57 hours
 
 | Plan  | Duration | Tasks | Files | Date       |
 | ----- | -------- | ----- | ----- | ---------- |
@@ -48,6 +48,8 @@ Plans:  [####..] 4/6
 | 23-06 | 3 min    | 2     | 6     | 2026-04-27 |
 | 23-02 | 5 min    | 2     | 5     | 2026-04-27 |
 | 23-04 | 6 min    | 2     | 6     | 2026-04-27 |
+| 23-03 | 8 min    | 3     | 8     | 2026-04-27 |
+| 23-05 | 8 min    | 4     | 26    | 2026-04-27 |
 
 ## Accumulated Context
 
@@ -80,6 +82,11 @@ Plan 23-02 decisions:
 - [Phase 23]: Plan 23-04: vocab-store + vocab-updater loaded into the service worker via importScripts (no dynamic import) — same IIFE works in both content-script and SW scope
 - [Phase 23]: Plan 23-04: popup uses two-channel sync (poll on open + push subscription) so a startup-time updates-available emit isn't lost when the popup was closed
 
+Plan 23-05 decisions:
+- resolveDataFile() fallback pattern: tests/fixtures/vocab/ first, extension/data/ second — applied across all 4 gate scripts for uniform vocab resolution post-deletion
+- pitfalls-en.json kept in extension/data/ (not on delete list; future migration to API is a separate phase)
+- check-bundle-size.test.js Test 6 relaxed from pretty-print check to valid-JSON check since nb-baseline.json is intentionally compact
+
 ### Pending Todos
 
 None.
@@ -94,5 +101,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: Completed 23-04-PLAN.md (vocab-updater startup check + popup refresh button)
-Resume file: .planning/phases/23-data-source-migration/23-05-PLAN.md
+Stopped at: Completed 23-05-PLAN.md. Phase 23 fully complete (6/6 plans).
+Resume file: N/A — milestone complete
