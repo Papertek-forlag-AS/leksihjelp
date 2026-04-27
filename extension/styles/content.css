@@ -129,10 +129,14 @@
 #lexi-tts-widget .lh-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   cursor: grab;
   user-select: none;
   -webkit-user-select: none;
+}
+
+#lexi-tts-widget .lh-header .lh-close {
+  margin-left: auto;
 }
 
 #lexi-tts-widget .lh-header:active {
@@ -174,12 +178,19 @@
 }
 
 #lexi-tts-widget .lh-font-controls {
-  position: absolute;
-  top: 4px;
-  right: 4px;
   display: flex;
   gap: 2px;
-  z-index: 1;
+  align-items: center;
+}
+
+#lexi-tts-widget .lh-font-controls.mode-auto .lh-font-decrease,
+#lexi-tts-widget .lh-font-controls.mode-auto .lh-font-increase {
+  display: none;
+}
+
+#lexi-tts-widget .lh-header .lh-font-mode {
+  width: auto;
+  padding: 0 8px;
 }
 
 #lexi-tts-widget .lh-font-btn {

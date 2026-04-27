@@ -157,18 +157,19 @@
   function createWidget() {
     widget = document.createElement('div');
     widget.id = 'lexi-tts-widget';
+    const initialModeClass = fontSizeMode === 'auto' ? 'mode-auto' : 'mode-fixed';
     widget.innerHTML = `
       <div class="lh-header">
         <span class="lh-title">${t('widget_title')}</span>
+        <div class="lh-font-controls ${initialModeClass}">
+          <button class="lh-font-btn lh-font-mode" title="${t('widget_font_auto_tooltip')}">${fontSizeMode === 'auto' ? t('widget_font_auto') : t('widget_font_fixed')}</button>
+          <button class="lh-font-btn lh-font-decrease" title="${t('widget_font_smaller')}">A&minus;</button>
+          <button class="lh-font-btn lh-font-increase" title="${t('widget_font_larger')}">A+</button>
+        </div>
         <button class="lh-close" title="${t('widget_close')}">&times;</button>
       </div>
       <div class="lh-lang-toggle"></div>
       <div class="lh-text-area-wrapper">
-        <div class="lh-font-controls">
-          <button class="lh-font-btn lh-font-mode" title="${t('widget_font_auto_tooltip')}">${t('widget_font_auto')}</button>
-          <button class="lh-font-btn lh-font-decrease" title="${t('widget_font_smaller')}">A&minus;</button>
-          <button class="lh-font-btn lh-font-increase" title="${t('widget_font_larger')}">A+</button>
-        </div>
         <div class="lh-text-area" role="region" aria-label="${t('widget_selected_text')}"></div>
       </div>
       <div class="lh-controls">
@@ -562,6 +563,11 @@
       btn.title = fontSizeMode === 'auto'
         ? t('widget_font_auto_tooltip')
         : t('widget_font_fixed_tooltip');
+    }
+    const controls = widget?.querySelector('.lh-font-controls');
+    if (controls) {
+      controls.classList.toggle('mode-auto', fontSizeMode === 'auto');
+      controls.classList.toggle('mode-fixed', fontSizeMode !== 'auto');
     }
   }
 
