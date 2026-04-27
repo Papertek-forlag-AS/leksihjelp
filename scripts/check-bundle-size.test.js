@@ -21,7 +21,8 @@ const { execSync, spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const ZIP_PATH = path.join(ROOT, 'backend', 'public', 'lexi-extension.zip');
-const SOURCE_NB_JSON = path.join(ROOT, 'extension', 'data', 'nb.json');
+// Phase 23-05: nb.json deleted; nb-baseline.json is the sole bundled vocab file
+const SOURCE_NB_JSON = path.join(ROOT, 'extension', 'data', 'nb-baseline.json');
 const PACKAGE_HELPER = path.join(ROOT, 'scripts', 'package-extension.js');
 const GATE_SCRIPT = path.join(ROOT, 'scripts', 'check-bundle-size.js');
 const CEILING_BYTES = 20 * 1024 * 1024;
@@ -72,35 +73,34 @@ test('npm run package produces the zip', () => {
 });
 
 test('Test 1 (behavior): data/*.json inside zip are minified', () => {
-  // First 200 chars of unzipped data/nb.json must contain NO newline character
-  const head = run("unzip -p '" + ZIP_PATH + "' data/nb.json | head -c 400");
+  // Phase 23-05: nb.json deleted; check nb-baseline.json (sole bundled vocab)
+  const head = run("unzip -p '" + ZIP_PATH + "' data/nb-baseline.json | head -c 400");
   if (head.includes('\n')) {
-    throw new Error('data/nb.json in zip contains newlines — minification did not apply. Head was:\n' + head);
+    throw new Error('data/nb-baseline.json in zip contains newlines — minification did not apply. Head was:\n' + head);
   }
-  if (!head.startsWith('{"_metadata"')) {
-    // Accept any valid minified JSON start, but warn if the known key is missing
-    if (!head.startsWith('{')) throw new Error('zip data/nb.json does not start with `{` — got: ' + head.slice(0, 50));
-  }
+  if (!head.startsWith('{')) throw new Error('zip data/nb-baseline.json does not start with `{` — got: ' + head.slice(0, 50));
 });
 
 test('Test 2 (behavior): minified JSON in zip parses correctly', () => {
-  const body = run("unzip -p '" + ZIP_PATH + "' data/nb.json");
+  const body = run("unzip -p '" + ZIP_PATH + "' data/nb-baseline.json");
   try {
     const parsed = JSON.parse(body);
     if (!parsed || typeof parsed !== 'object') throw new Error('parsed body is not an object');
   } catch (err) {
-    throw new Error('JSON.parse failed on zip data/nb.json: ' + err.message);
+    throw new Error('JSON.parse failed on zip data/nb-baseline.json: ' + err.message);
   }
 });
 
-test('Test 6 (source-tree invariant): extension/data/*.json stays pretty-printed on disk', () => {
+test('Test 6 (source-tree invariant): extension/data/nb-baseline.json is valid JSON on disk', () => {
+  // Phase 23-05: nb-baseline.json may be minified (compact for 200 KB cap) or
+  // pretty-printed — either is valid. The invariant is that the file exists and
+  // parses correctly.
   const src = fs.readFileSync(SOURCE_NB_JSON, 'utf8');
-  if (!src.includes('\n')) {
-    throw new Error('SOURCE extension/data/nb.json is minified on disk — source-tree invariant violated');
-  }
-  const lines = src.split('\n').length;
-  if (lines < 100) {
-    throw new Error('source extension/data/nb.json only has ' + lines + ' lines — looks minified / near-minified');
+  try {
+    const parsed = JSON.parse(src);
+    if (!parsed || typeof parsed !== 'object') throw new Error('parsed body is not an object');
+  } catch (err) {
+    throw new Error('SOURCE extension/data/nb-baseline.json does not parse as JSON: ' + err.message);
   }
 });
 

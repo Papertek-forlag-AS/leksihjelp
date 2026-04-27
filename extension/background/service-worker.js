@@ -71,20 +71,48 @@ chrome.runtime.onInstalled.addListener((details) => {
     }).catch(() => {});
   });
 
-  // Plan 23-03: bootstrap selected target language(s) into IndexedDB.
-  // Runs on both 'install' and 'update' (the listener fires for both).
-  // Reads `targetLanguages` (multi-pick) first, then falls back to single
-  // `language`, then to `['de']` as a sane default for first-run users
-  // who haven't picked yet.
+  // Plan 23-03 + 23-05: bootstrap / migrate vocab into IndexedDB.
+  //
+  // reason === 'install' → fresh install, bootstrap target languages.
+  // reason === 'update' + previousVersion 2.x → v2→v3 migration: bundled
+  //   data files are gone, must fetch into IndexedDB. Same bootstrapAll call.
+  //   Leave a breadcrumb for support diagnostics.
+  // reason === 'update' from 3.x → check for stale data via vocab-updater.
   chrome.storage.local.get(['targetLanguages', 'language'], (result) => {
     const langs = Array.isArray(result.targetLanguages) && result.targetLanguages.length
       ? result.targetLanguages
       : (result.language ? [result.language] : ['de']);
     const bootstrap = self.__lexiVocabBootstrap;
-    if (bootstrap && typeof bootstrap.bootstrapAll === 'function') {
-      bootstrap.bootstrapAll(langs).catch(err => {
-        console.warn('[lexi-bootstrap] bootstrapAll failed:', err && err.message);
-      });
+    const updater = self.__lexiVocabUpdater;
+    const reason = details.reason;
+    const prevVer = details.previousVersion || '';
+
+    if (reason === 'install' || (reason === 'update' && prevVer.startsWith('2.'))) {
+      // Fresh install or v2→v3 migration: download all target languages.
+      if (reason === 'update' && prevVer.startsWith('2.')) {
+        chrome.storage.local.set({
+          lexiMigratedFromV2: true,
+          migratedAt: new Date().toISOString(),
+        });
+        console.log('[lexi-bootstrap] v2→v3 migration from ' + prevVer + ' — bootstrapping target languages');
+      }
+      if (bootstrap && typeof bootstrap.bootstrapAll === 'function') {
+        bootstrap.bootstrapAll(langs).catch(err => {
+          console.warn('[lexi-bootstrap] bootstrapAll failed:', err && err.message);
+        });
+      }
+    } else if (reason === 'update') {
+      // 3.x → 3.x update: bootstrap any missing languages, then check for stale data.
+      if (bootstrap && typeof bootstrap.bootstrapAll === 'function') {
+        bootstrap.bootstrapAll(langs).catch(err => {
+          console.warn('[lexi-bootstrap] bootstrapAll failed:', err && err.message);
+        });
+      }
+      if (updater && typeof updater.checkForUpdates === 'function') {
+        updater.checkForUpdates().catch(err => {
+          console.warn('[lexi-bootstrap] checkForUpdates on update failed:', err && err.message);
+        });
+      }
     }
   });
 });
