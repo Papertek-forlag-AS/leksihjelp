@@ -80,7 +80,22 @@ they're working on.
 
 ### Active
 
-(No active milestone — v3.0 just shipped. Next milestone TBD.)
+## Current Milestone: v3.1 Polish & Intelligence
+
+**Goal:** Compound word intelligence in the popup (prediction, pedagogical notes, translation guess), accumulated UX polish (language buttons, spell-check navigation, side panel, word prediction min chars), and tech-debt cleanup (version alignment, fixture triage, VERIF-01).
+
+**Target capabilities:**
+- Compound word prediction in popup search (partial input → compound suggestion)
+- Compound popup pedagogy ("last word decides gender") + back-navigation
+- Qualified compound translation guess ("kvalifisert gjetning av det sammensatte ordets betydning")
+- Fix NB/EN/NN language button switching in popup
+- Chrome Side Panel API to replace "Fest" popup (macOS fix)
+- Spell-check marker navigation (Tab cycling through markers)
+- Spell-check minimum text threshold (~20 chars)
+- Word prediction minimum 3 chars before showing suggestions
+- Version alignment (package.json / manifest.json / index.html)
+- check-fixtures triage (5 pre-existing failing suites)
+- Browser visual verification (VERIF-01 — carried across 4 milestones)
 
 ### Deferred
 
@@ -204,4 +219,4 @@ they're working on.
 | **SC-06 sanctioned bootstrap exception** (v3.0) | Service-worker fetch is the only network path; spell-check + word-prediction stay offline | ✓ Good — belt-and-braces: header doc + self-test plants fetch in bootstrap and asserts gate stays green |
 
 ---
-*Last updated: 2026-04-27 after v3.0 milestone completion (Data-Source Migration)*
+*Last updated: 2026-04-27 after v3.1 milestone start (Polish & Intelligence)*

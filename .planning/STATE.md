@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Data-Source Migration
-status: archived
-last_updated: "2026-04-27T22:00:00.000Z"
-last_activity: "2026-04-27 -- v3.0 milestone archived"
+milestone: v3.1
+milestone_name: Polish & Intelligence
+status: defining_requirements
+last_updated: "2026-04-27T23:00:00.000Z"
+last_activity: "2026-04-27 -- Milestone v3.1 started"
 progress:
-  total_phases: 1
-  completed_phases: 1
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Session State
@@ -19,19 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Core value:** Norwegian students write foreign languages better — with correct words, correct form, and confidence in pronunciation — without leaving the page they're working on.
-**Current focus:** Planning next milestone
+**Current focus:** v3.1 Polish & Intelligence — defining requirements
 
 ## Position
 
-**Milestone:** v3.0 Data-Source Migration — ARCHIVED
-**Status:** Milestone complete and archived. Next milestone TBD.
-**Last activity:** 2026-04-27 — v3.0 milestone archived
+**Milestone:** v3.1 Polish & Intelligence
+**Phase:** Not started (defining requirements)
+**Plan:** —
+**Status:** Defining requirements
+**Last activity:** 2026-04-27 — Milestone v3.1 started
 
 ## Accumulated Context
 
 ### Decisions
 
-All v3.0 decisions promoted to PROJECT.md Key Decisions table.
+Decisions are logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
@@ -39,10 +41,11 @@ None.
 
 ### Blockers/Concerns
 
-- VERIF-01 (browser visual verification) carried across 4 milestones — consider ad-hoc resolution
-- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 — align before next release
+- VERIF-01 (browser visual verification) carried across 4 milestones — in scope for v3.1
+- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1 — in scope for v3.1
+- check-fixtures 5 pre-existing failing suites — in scope for v3.1 triage
 
 ## Session Continuity
 
 Last session: 2026-04-27
-Stopped at: v3.0 milestone archived. Ready for /gsd:new-milestone.
+Stopped at: Defining requirements for v3.1 milestone.
