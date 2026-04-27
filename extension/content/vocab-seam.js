@@ -1,20 +1,35 @@
 /**
  * Leksihjelp — Vocab Seam (browser IIFE)
  *
- * Owns vocabulary loading end-to-end for content scripts:
- *   1. Reads language + pause state + grammar toggles from chrome.storage
- *   2. Loads raw vocab via __lexiVocabStore (IndexedDB) with fetch fallback
- *      for bundled languages (nb/nn/en)
- *   3. Loads bigrams via fetch (silently null if missing — many languages
- *      have no bigram file yet)
- *   4. Delegates all derived-index building to __lexiVocabCore.buildIndexes
- *   5. Exposes the full self.__lexiVocab surface consumed by spell-check.js
- *      and word-prediction.js (wired up in Plan 02)
- *   6. Rebuilds on LANGUAGE_CHANGED and GRAMMAR_FEATURES_CHANGED; tracks
- *      pause state from LEXI_PAUSED
+ * Plan 23-02 owns this layer's hydration policy:
  *
- * Manifest ordering (applied in Plan 02) guarantees vocab-store.js and
- * vocab-seam-core.js load before this file.
+ *   Phase 1 (sync, no network):
+ *     - Build baseline indexes from the bundled NB vocab (data/nb.json).
+ *     - Set self.__lexiVocab so spell-check + word-prediction render
+ *       immediately. NO awaits before this point — popup must work offline.
+ *     - Emit {type: 'lexi:hydration', lang: 'nb', state: 'baseline'}.
+ *
+ *   Phase 2 (async, target language):
+ *     a) vocabStore.getCachedBundle(lang) → if present, build full indexes
+ *        off-thread (requestIdleCallback / setTimeout fallback) and swap.
+ *     b) On cache miss, vocabStore.fetchBundle(lang) → on 200, putCachedBundle
+ *        + build + swap. On 304 (somehow with no cache), treat as error. On
+ *        schema-mismatch: keep baseline, emit state:'error'. On error: same.
+ *
+ *   Atomic swap: self.__lexiVocab is a stable wrapper object. Internal state
+ *   is held in a module-level mutable `state`; the wrapper's getters read
+ *   `state.<index>` at call time. This means a consumer that captures
+ *   `self.__lexiVocab` once (spell-check, word-prediction) sees the swap
+ *   without re-grabbing — and sees a consistent indexes object on every read,
+ *   never a half-built mix.
+ *
+ *   Idempotence: each swap records `lastRevision[lang]`. A second swap with
+ *   the same revision is a no-op (used by plan 04 update detection — if the
+ *   revision didn't change, don't rebuild).
+ *
+ * Network-silence: vocab-seam.js is NOT in the SC-06 scan target list. The
+ * fetchBundle call lives in vocab-store.js (also outside the scan list) and
+ * is the single carve-out plan 06 will document.
  */
 
 (function () {
@@ -27,18 +42,43 @@
     return;
   }
 
-  // ── Internal state ──
+  // ── Module state ──
+  // `state` holds the currently-published indexes. Wrappers below capture
+  // `state` by closure but read live through it, so a swap is observed by
+  // every existing __lexiVocab reference.
+  let state = null;
   let currentLang = 'en';
-  let state = null;            // output of core.buildIndexes(...)
   let ready = false;
   let paused = false;
   let enabledFeatures = new Set();
-  const readyCallbacks = [];   // drained when ready flips true
+  const readyCallbacks = [];
 
-  // Bundled languages shipped inside the extension package.
-  // For non-bundled languages (de/es/fr), we require the IndexedDB cache
-  // to be populated via __lexiVocabStore.downloadLanguage before usage.
+  // Per-language last-applied revision; gates idempotent swaps.
+  const lastRevision = new Map();
+
+  // Languages with bundled JSON in extension/data/. NB is the baseline; others
+  // are kept bundled today and trimmed by plan 23-03.
   const BUNDLED_LANGS = ['nb', 'nn', 'en'];
+  const BASELINE_LANG = 'nb';
+
+  // ── Hydration progress emitter ──
+  const hydrationListeners = new Set();
+  function emitHydration(lang, hydrationState) {
+    const msg = { type: 'lexi:hydration', lang, state: hydrationState };
+    for (const l of hydrationListeners) {
+      try { l(msg); } catch (_) { /* swallow */ }
+    }
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        chrome.runtime.sendMessage(msg);
+      }
+    } catch (_) { /* no receiver — fine */ }
+  }
+
+  function onHydrationProgress(handler) {
+    if (typeof handler === 'function') hydrationListeners.add(handler);
+    return () => hydrationListeners.delete(handler);
+  }
 
   // ── Storage helpers ──
   function storageGet(keys) {
@@ -46,14 +86,8 @@
   }
 
   // ── Grammar-feature predicate ──
-  // Builds an isFeatureEnabled(featureId) predicate mirroring word-prediction.js:108–126.
-  // Default when the stored value is missing: treat as "all enabled" so the seam
-  // emits the superset of forms. Consumers (spell-check, word-prediction) apply
-  // their own view-level filtering per CONTEXT.
   function buildFeaturePredicate(lang) {
-    if (enabledFeatures.size === 0) {
-      return () => true;
-    }
+    if (enabledFeatures.size === 0) return () => true;
     const langPrefix = `grammar_${lang}_`;
     const genericToLangMap = {
       'grammar_articles': [`${langPrefix}genus`],
@@ -73,20 +107,19 @@
     };
   }
 
-  // ── Vocab loading ──
-  async function loadRawVocab(lang) {
-    // Try IndexedDB cache first (served by vocab-store.js)
-    try {
-      if (typeof window !== 'undefined' && window.__lexiVocabStore) {
-        const cached = await window.__lexiVocabStore.getCachedLanguage(lang);
-        if (cached) return cached;
-      }
-    } catch (e) {
-      // Fall through to bundled fetch
+  // ── Off-thread scheduler ──
+  // Build full indexes during browser-idle so we don't compete with input
+  // events during typing. Falls back to setTimeout(0) when rIC is missing.
+  function scheduleIdle(fn) {
+    if (typeof requestIdleCallback === 'function') {
+      requestIdleCallback(() => { try { fn(); } catch (e) { console.warn('[lexi-vocab] swap build failed', e); } });
+    } else {
+      setTimeout(() => { try { fn(); } catch (e) { console.warn('[lexi-vocab] swap build failed', e); } }, 0);
     }
+  }
 
-    // Fall back to bundled file — only NB/NN/EN ship inside the extension.
-    // Non-bundled languages (de/es/fr) must be downloaded first.
+  // ── Bundled-data loaders (chrome.runtime.getURL — SC-06 whitelisted) ──
+  async function loadBundledRaw(lang) {
     if (!BUNDLED_LANGS.includes(lang)) return null;
     try {
       const url = chrome.runtime.getURL(`data/${lang}.json`);
@@ -94,102 +127,175 @@
       if (!res.ok) return null;
       return await res.json();
     } catch (e) {
-      console.error('[lexi-vocab] Failed to load bundled vocab for ' + lang, e);
+      console.warn('[lexi-vocab] bundled load failed for ' + lang, e);
       return null;
     }
   }
 
-  async function loadRawBigrams(lang) {
+  async function loadBundledSidecar(filename) {
     try {
-      const url = chrome.runtime.getURL(`data/bigrams-${lang}.json`);
+      const url = chrome.runtime.getURL(`data/${filename}`);
       const res = await fetch(url);
-      if (!res.ok) return null; // Not an error — many languages have no bigrams yet
+      if (!res.ok) return null;
       return await res.json();
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
-  async function loadRawFrequency(lang) {
-    try {
-      const url = chrome.runtime.getURL(`data/freq-${lang}.json`);
-      const res = await fetch(url);
-      if (!res.ok) return null; // No sidecar for this language — OK
-      return await res.json();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  // Phase 4 / SC-03: load the OTHER Norwegian variant's raw vocab so
-  // buildIndexes can derive a sisterValidWords Set. Only nb↔nn; all other
-  // langs get null (and buildIndexes returns an empty Set). Uses the same
-  // chrome.runtime.getURL + fetch pattern as loadRawVocab — no new network
-  // path. SC-06 network-silence gate continues to pass because
-  // chrome.runtime.getURL is explicitly whitelisted.
-  async function loadRawSister(lang) {
+  async function loadBigrams(lang) { return loadBundledSidecar(`bigrams-${lang}.json`); }
+  async function loadFrequency(lang) { return loadBundledSidecar(`freq-${lang}.json`); }
+  async function loadPitfalls(lang) { return loadBundledSidecar(`pitfalls-${lang}.json`); }
+  async function loadSister(lang) {
     const sister = lang === 'nb' ? 'nn' : lang === 'nn' ? 'nb' : null;
     if (!sister) return null;
-    try {
-      const url = chrome.runtime.getURL(`data/${sister}.json`);
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch (e) {
-      return null;
-    }
+    return loadBundledRaw(sister);
   }
 
-  async function loadRawPitfalls(lang) {
-    try {
-      const url = chrome.runtime.getURL(`data/pitfalls-${lang}.json`);
-      const res = await fetch(url);
-      if (!res.ok) return null;
-      return await res.json();
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function loadForLanguage(lang) {
-    ready = false;
-
-    // Refresh enabled features from storage (they may have been updated by
-    // the popup between message events)
+  // ── Index building + swap ──
+  async function buildAndApply(lang, raw, source) {
+    if (!raw) return false;
+    // Refresh enabled features (popup may have toggled mid-flight).
     const stored = await storageGet(['enabledGrammarFeatures']);
     if (stored.enabledGrammarFeatures && stored.enabledGrammarFeatures[lang]) {
       enabledFeatures = new Set(stored.enabledGrammarFeatures[lang]);
     } else {
       enabledFeatures = new Set();
     }
+    const [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
+      loadBigrams(lang), loadFrequency(lang), loadSister(lang), loadPitfalls(lang),
+    ]);
+    const isFeatureEnabled = buildFeaturePredicate(lang);
+    const fresh = core.buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled });
+    fresh.pitfalls = pitfalls || {};
+    fresh._sourceTag = source; // diagnostic
+    state = fresh;
+    return true;
+  }
 
-    const raw = await loadRawVocab(lang);
+  /**
+   * Public swap: idempotent on (lang, revision). Used by plan 04 update
+   * detection and exposed as a test seam on __lexiVocab.
+   */
+  function swapIndexes(lang, revision, freshIndexes) {
+    if (!freshIndexes) return;
+    if (revision && lastRevision.get(lang) === revision) return;
+    state = freshIndexes;
+    if (revision) lastRevision.set(lang, revision);
+  }
+
+  // ── Sync baseline init ──
+  // Async only because chrome.runtime.getURL + fetch is the standard MV3 way
+  // to read bundled JSON, but no network hits the wire (chrome-extension://
+  // scheme). Consumers can still call __lexiVocab synchronously after this
+  // initial promise resolves; the readyCallbacks queue handles the gap.
+  async function initBaseline() {
+    const raw = await loadBundledRaw(BASELINE_LANG);
     if (!raw) {
-      // Non-bundled language with no cache — leave state null and ready=false.
-      // Consumers will see isReady()=false and onReady callbacks stay queued
-      // until LANGUAGE_CHANGED flips to a language we can load.
-      state = null;
+      console.error('[lexi-vocab] baseline NB load failed — extension unusable');
+      return;
+    }
+    const [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
+      loadBigrams(BASELINE_LANG), loadFrequency(BASELINE_LANG), loadSister(BASELINE_LANG), loadPitfalls(BASELINE_LANG),
+    ]);
+    const baseline = core.buildIndexes({
+      raw, bigrams, freq, sisterRaw, lang: BASELINE_LANG, isFeatureEnabled: () => true,
+    });
+    baseline.pitfalls = pitfalls || {};
+    baseline._sourceTag = 'baseline-nb';
+    state = baseline;
+    ready = true;
+    emitHydration(BASELINE_LANG, 'baseline');
+    drainReady();
+  }
+
+  function drainReady() {
+    const toRun = readyCallbacks.splice(0);
+    for (const cb of toRun) {
+      try { cb(); } catch (_) { /* swallow */ }
+    }
+  }
+
+  // ── Target-language hydration ──
+  async function hydrateTarget(lang) {
+    if (lang === BASELINE_LANG) return; // baseline already serving NB
+    const store = (typeof window !== 'undefined' && window.__lexiVocabStore) || self.__lexiVocabStore;
+    if (!store) {
+      // No cache layer (rare — vocab-store.js not yet loaded). Fall back to
+      // bundled raw if available.
+      const raw = await loadBundledRaw(lang);
+      if (raw) {
+        await buildAndApply(lang, raw, 'bundled');
+        currentLang = lang;
+        emitHydration(lang, 'ready');
+      } else {
+        emitHydration(lang, 'error');
+      }
       return;
     }
 
-    const [bigrams, freq, sisterRaw, pitfalls] = await Promise.all([
-      loadRawBigrams(lang),
-      loadRawFrequency(lang),
-      loadRawSister(lang),
-      loadRawPitfalls(lang),
-    ]);
-    const isFeatureEnabled = buildFeaturePredicate(lang);
-
-    state = core.buildIndexes({ raw, bigrams, freq, sisterRaw, lang, isFeatureEnabled });
-    state.pitfalls = pitfalls || {};
-    ready = true;
-
-    // Drain ready callbacks. splice(0) so late subscribers arriving during
-    // drain go into the fresh (empty) queue, not the one we're iterating.
-    const toRun = readyCallbacks.splice(0);
-    for (const cb of toRun) {
-      try { cb(); } catch (_) { /* swallow: one broken listener must not break the rest */ }
+    // 1. IndexedDB hit?
+    let cached = null;
+    try { cached = await store.getCachedBundle(lang); } catch (_) { cached = null; }
+    if (cached && cached.payload) {
+      // Build off-thread to avoid jank during typing.
+      scheduleIdle(async () => {
+        const built = await buildAndApply(lang, cached.payload, 'cache');
+        if (built) {
+          lastRevision.set(lang, cached.revision);
+          currentLang = lang;
+          emitHydration(lang, 'ready');
+        } else {
+          emitHydration(lang, 'error');
+        }
+      });
+      return;
     }
+
+    // 2. Cache miss → fetch from API.
+    emitHydration(lang, 'fetching');
+    let result;
+    try {
+      result = await store.fetchBundle(lang, {});
+    } catch (e) {
+      result = { status: 'error', error: e };
+    }
+    if (result.status === 200) {
+      const body = result.body;
+      // Persist before swap so a reload sees the same data without re-fetching.
+      try {
+        await store.putCachedBundle(lang, {
+          schema_version: body.schema_version,
+          revision: body.revision,
+          payload: body,
+        });
+      } catch (e) {
+        console.warn('[lexi-vocab] putCachedBundle failed (continuing with in-memory build)', e);
+      }
+      scheduleIdle(async () => {
+        const built = await buildAndApply(lang, body, 'fetched');
+        if (built) {
+          lastRevision.set(lang, body.revision);
+          currentLang = lang;
+          emitHydration(lang, 'ready');
+        } else {
+          emitHydration(lang, 'error');
+        }
+      });
+      return;
+    }
+    if (result.status === 304) {
+      // Server says unchanged but we have nothing cached — treat as error.
+      emitHydration(lang, 'error');
+      return;
+    }
+    if (result.status === 'schema-mismatch') {
+      // Stay on baseline; popup surfaces the diagnostic.
+      emitHydration(lang, 'error');
+      return;
+    }
+    // 'error' or anything else
+    emitHydration(lang, 'error');
   }
 
   // ── Init ──
@@ -198,30 +304,29 @@
     currentLang = stored.language || 'en';
     paused = !!stored.lexiPaused;
 
-    chrome.runtime.onMessage.addListener(onMessage);
+    if (chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.addListener(onMessage);
+    }
 
-    await loadForLanguage(currentLang);
+    await initBaseline();
+    // Spawn target hydration without awaiting — popup + lookups are already
+    // serving baseline NB.
+    hydrateTarget(currentLang);
   }
 
   function onMessage(msg) {
     if (!msg || typeof msg !== 'object') return;
-
     if (msg.type === 'LANGUAGE_CHANGED') {
       currentLang = msg.language;
-      // Fire-and-forget: callers use onReady() to await the rebuild.
-      loadForLanguage(currentLang);
+      hydrateTarget(currentLang);
     } else if (msg.type === 'GRAMMAR_FEATURES_CHANGED') {
-      // Toggles affect which forms buildIndexes emits → full rebuild.
-      loadForLanguage(currentLang);
+      hydrateTarget(currentLang);
     } else if (msg.type === 'LEXI_PAUSED') {
       paused = !!msg.paused;
     }
-    // Intentionally ignored: PREDICTION_TOGGLED, SPELL_CHECK_TOGGLED —
-    // these are consumer-local policy flags, not vocab-level concerns
-    // (RESEARCH.md open-question #3).
   }
 
-  // ── isTextInput — copied verbatim from word-prediction.js:1805–1815 ──
+  // ── isTextInput — copied verbatim from word-prediction.js ──
   function isTextInput(el) {
     if (!el) return false;
     if (el.isContentEditable) return true;
@@ -234,9 +339,10 @@
     return false;
   }
 
-  // ── Public surface: self.__lexiVocab ──
+  // ── Public surface ──
+  // Wrapper object reads `state` live so the swap is atomic to consumers
+  // that captured __lexiVocab once. Every getter null-guards on state.
   self.__lexiVocab = {
-    // Legacy surface (ported from the old prediction seam at word-prediction.js:1829)
     getWordList: () => (state && state.wordList) ? state.wordList : [],
     getLanguage: () => currentLang,
     isReady: () => ready,
@@ -244,27 +350,22 @@
     isTextInput,
     onReady(cb) {
       if (typeof cb !== 'function') return;
-      if (ready) {
-        try { cb(); } catch (_) { /* swallow */ }
-        return;
-      }
+      if (ready) { try { cb(); } catch (_) {} return; }
       readyCallbacks.push(cb);
     },
 
-    // New data getters (INFRA-01: frequency tables + bigrams are part of the
-    // shared surface — Phase 2 DATA-01 populates freq, this file just exposes it)
+    // Plan 23-02 surfaces (consumed by plans 03/04/05 popup + tests):
+    onHydrationProgress,
+    swapIndexes,
+
+    // Data getters
     getFrequency: (word) => {
       if (!state || !state.freq || typeof word !== 'string') return null;
       const v = state.freq.get(word.toLowerCase());
       return typeof v === 'number' ? v : null;
     },
-    // Bigrams: null when no bigrams file was available for this language.
-    // Consumers already handle null today (see word-prediction.js bigramData usage).
     getBigrams: () => (state && state.bigrams) ? state.bigrams : null,
     getTypoBank: () => (state && state.typoBank) ? state.typoBank : null,
-
-    // Pre-built lookup indexes (previously rebuilt inside spell-check.js:136–172).
-    // Return empty Map/Set (never null) so consumers can skip null-guards.
     getNounGenus: () => (state && state.nounGenus) ? state.nounGenus : new Map(),
     getNounForms: () => (state && state.nounForms) ? state.nounForms : new Map(),
     getIsAdjective: () => (state && state.isAdjective) ? state.isAdjective : new Set(),
@@ -278,56 +379,30 @@
     getPitfalls: () => (state && state.pitfalls) ? state.pitfalls : {},
     phoneticNormalize: (str) => core.phoneticNormalize(str, currentLang),
     phoneticMatchScore: (queryPhonetic, targetPhonetic) => core.phoneticMatchScore(queryPhonetic, targetPhonetic),
-    // Frequency Map (Zipf-scored unigrams from freq-{lang}.json sidecar).
-    // NB/NN: populated ~13k / ~11k entries. DE/ES/FR/EN: empty Map (no sidecar shipped).
-    // Consumers (spell-rules/nb-typo-fuzzy.js) pass this through core.check → rule.check
-    // and read via vocab.freq.get(word). Empty-Map default matches the Set/Map pattern
-    // of the other pre-built indexes above, so the rule's null-guard on vocab.freq
-    // stays truthful and the inner `typeof z === 'number'` catches undefined lookups.
     getFreq: () => (state && state.freq instanceof Map) ? state.freq : new Map(),
-    // Phase 4 / SC-03: cross-dialect validWords Set (lowercased). Populated
-    // for nb (contains ~11k NN lemmas) and nn (contains ~13k NB lemmas);
-    // empty Set for de/es/fr/en sessions. Empty-Set default mirrors the
-    // getValidWords / getNounGenus / getVerbInfinitive / getCompoundNouns
-    // pattern — consumers skip null-guards with `.has()` returning false.
     getSisterValidWords: () => (state && state.sisterValidWords instanceof Set) ? state.sisterValidWords : new Set(),
-    // Phase 6: governance bank getters for register/collocation/redundancy rules.
     getRegisterWords: () => (state && state.registerWords) ? state.registerWords : new Map(),
     getCollocations: () => (state && state.collocations) ? state.collocations : [],
     getRedundancyPhrases: () => (state && state.redundancyPhrases) ? state.redundancyPhrases : [],
-    // Phase 8: participle → auxiliary Map for DE Perfekt auxiliary choice rule.
     getParticipleToAux: () => (state && state.participleToAux) ? state.participleToAux : new Map(),
-    // Phase 13: NN infinitive classification Map for DOC-04 register-drift rule.
     getNNInfinitiveClasses: () => (state && state.nnInfinitiveClasses) ? state.nnInfinitiveClasses : new Map(),
-    // Phase 11: ES mood/aspect indexes
     getEsPresensToVerb: () => (state && state.esPresensToVerb) ? state.esPresensToVerb : new Map(),
     getEsSubjuntivoForms: () => (state && state.esSubjuntivoForms) ? state.esSubjuntivoForms : new Map(),
     getEsImperfectoForms: () => (state && state.esImperfectoForms) ? state.esImperfectoForms : new Map(),
     getEsPreteritumToVerb: () => (state && state.esPreteritumToVerb) ? state.esPreteritumToVerb : new Map(),
-    // Phase 11: FR mood indexes
     getFrPresensToVerb: () => (state && state.frPresensToVerb) ? state.frPresensToVerb : new Map(),
     getFrSubjonctifForms: () => (state && state.frSubjonctifForms) ? state.frSubjonctifForms : new Map(),
     getFrSubjonctifDiffers: () => (state && state.frSubjonctifDiffers) ? state.frSubjonctifDiffers : new Map(),
-    // Phase 14: EN irregular form index
     getIrregularForms: () => (state && state.irregularForms) ? state.irregularForms : new Map(),
-    // Phase 16: compound decomposition engine.
-    // Returns a bound function (word) => decomposition result or null.
-    // Returns null getter when state not ready (consumers must null-check).
     getDecomposeCompound: () => (state && state.decomposeCompound) ? state.decomposeCompound : null,
-    // Phase 17-05: strict decomposition (lemma-only genus map, no inflected forms).
     getDecomposeCompoundStrict: () => (state && state.decomposeCompoundStrict) ? state.decomposeCompoundStrict : null,
-    // Grammar tables from synced grammarbank (replaces inline grammar-tables.js data)
     getGrammarTables: () => (state && state.grammarTables) ? state.grammarTables : {},
-    // Phase 19: s-passive form Map for NB overuse + NN finite s-passive rules.
     getSPassivForms: () => (state && state.sPassivForms) ? state.sPassivForms : new Map(),
-    // Phase 6: isFeatureEnabled passthrough for rules that need grammar-feature gating.
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;
       return enabledFeatures.has(featureId);
     },
   };
 
-  // Kick off loading. Content scripts run at document_idle which is late
-  // enough — no need to wait on DOMContentLoaded.
   init();
 })();
