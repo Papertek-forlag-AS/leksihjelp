@@ -9,9 +9,9 @@ Requirements for v3.0 Data-Source Migration. Each maps to a roadmap phase.
 
 ### API (Papertek vocabulary endpoints — sibling repo)
 
-- [ ] **API-01**: Papertek API exposes a versioned per-language vocabulary bundle endpoint that returns the full payload (verbbank, nounbank, adjectivebank, articlesbank, generalbank, numbersbank, phrasesbank, pronounsbank, typobank, freq, bigrams, grammar features, falseFriends, senses) plus `{schema_version, revision}` metadata
-- [ ] **API-02**: Papertek API exposes a lightweight updates-check endpoint returning `{language: revision}` map (small response, suitable for frequent polling)
-- [ ] **API-03**: Both endpoints are CORS-allowed for the extension origin (`chrome-extension://...`) and the leksihjelp.no web origin
+- [x] **API-01**: Papertek API exposes a versioned per-language vocabulary bundle endpoint that returns the full payload (verbbank, nounbank, adjectivebank, articlesbank, generalbank, numbersbank, phrasesbank, pronounsbank, typobank, freq, bigrams, grammar features, falseFriends, senses) plus `{schema_version, revision}` metadata
+- [x] **API-02**: Papertek API exposes a lightweight updates-check endpoint returning `{language: revision}` map (small response, suitable for frequent polling)
+- [x] **API-03**: Both endpoints are CORS-allowed for the extension origin (`chrome-extension://...`) and the leksihjelp.no web origin
 
 ### BOOT (first-run bootstrap)
 
@@ -80,9 +80,9 @@ Which phases cover which requirements.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | Phase 23 (Plan 01) | Pending |
-| API-02 | Phase 23 (Plan 01) | Pending |
-| API-03 | Phase 23 (Plan 01) | Pending |
+| API-01 | Phase 23 (Plan 01) | Complete |
+| API-02 | Phase 23 (Plan 01) | Complete |
+| API-03 | Phase 23 (Plan 01) | Complete |
 | CACHE-01 | Phase 23 (Plan 02) | Pending |
 | CACHE-02 | Phase 23 (Plan 02) | Pending |
 | CACHE-03 | Phase 23 (Plan 02) | Pending |
