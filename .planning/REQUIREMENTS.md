@@ -75,25 +75,25 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| COMP-01 | TBD | Pending |
-| COMP-02 | TBD | Pending |
-| COMP-03 | TBD | Pending |
-| COMP-04 | TBD | Pending |
-| POPUP-01 | TBD | Pending |
-| POPUP-02 | TBD | Pending |
-| SPELL-01 | TBD | Pending |
-| SPELL-02 | TBD | Pending |
-| SPELL-03 | TBD | Pending |
-| DEBT-01 | TBD | Pending |
-| DEBT-02 | TBD | Pending |
-| DEBT-03 | TBD | Pending |
-| DEBT-04 | TBD | Pending |
-| DEBT-05 | TBD | Pending |
+| COMP-01 | Phase 24 | Pending |
+| COMP-02 | Phase 24 | Pending |
+| COMP-03 | Phase 24 | Pending |
+| COMP-04 | Phase 24 | Pending |
+| POPUP-01 | Phase 25 | Pending |
+| POPUP-02 | Phase 25 | Pending |
+| SPELL-01 | Phase 25 | Pending |
+| SPELL-02 | Phase 25 | Pending |
+| SPELL-03 | Phase 25 | Pending |
+| DEBT-01 | Phase 25 | Pending |
+| DEBT-02 | Phase 25 | Pending |
+| DEBT-03 | Phase 25 | Pending |
+| DEBT-04 | Phase 25 | Pending |
+| DEBT-05 | Phase 25 | Pending |
 
 **Coverage:**
 - v3.1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-28*

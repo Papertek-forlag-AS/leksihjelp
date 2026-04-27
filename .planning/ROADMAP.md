@@ -7,6 +7,7 @@
 - ✅ **v2.1 Compound Decomposition & Polish** — Phases 16–19 (shipped 2026-04-26) — [archive](milestones/v2.1-ROADMAP.md)
 - ✅ **v2.2 Student Language Intelligence** — Phases 21–22 + 21.1/21.2 decimal inserts (shipped 2026-04-27) — [archive](milestones/v2.2-ROADMAP.md)
 - ✅ **v3.0 Data-Source Migration** — Phase 23 (shipped 2026-04-27) — [archive](milestones/v3.0-ROADMAP.md)
+- 🚧 **v3.1 Polish & Intelligence** — Phases 24–25 (in progress)
 
 ## Phases
 
@@ -80,6 +81,43 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 
 </details>
 
+### 🚧 v3.1 Polish & Intelligence (In Progress)
+
+**Milestone Goal:** Compound word intelligence in the popup (prediction, pedagogy, translation guess), accumulated UX polish (language buttons, side panel, spell-check navigation, min-chars thresholds), and tech-debt cleanup (version alignment, fixture triage, browser verification, schema-mismatch UX, stale code).
+
+- [ ] **Phase 24: Compound Word Intelligence** — Popup search suggests compounds, displays pedagogical notes, back-navigation, and qualified translation guesses
+- [ ] **Phase 25: UX Polish & Tech Debt** — Fix language buttons, replace Fest with Side Panel, spell-check navigation/thresholds, word-prediction min chars, version alignment, fixture triage, browser verification, schema-mismatch UX, stale code cleanup
+
+## Phase Details
+
+### Phase 24: Compound Word Intelligence
+**Goal**: Students discover and understand compound words through the popup — prediction from partial input, pedagogical explanation of how compounds work, and translation guesses for unknown compounds
+**Depends on**: Phase 23 (v3.0 — IndexedDB vocab data available for compound lookup)
+**Requirements**: COMP-01, COMP-02, COMP-03, COMP-04
+**Success Criteria** (what must be TRUE):
+  1. Student types a valid first component + fuge + partial second component in popup search and sees compound suggestions in the results list (e.g., "chefsstu" suggests "Chefsstuhl")
+  2. Compound card displays a pedagogical note explaining that the last component determines gender, with a clickable link that navigates to the last component's dictionary entry
+  3. After navigating from a compound card to a component entry, a "Tilbake til [compound]" link appears and returns the student to the compound card
+  4. Compound card shows a translation guess assembled from component translations, labeled as a qualified guess ("Kvalifisert gjetning")
+**Plans**: TBD
+
+### Phase 25: UX Polish & Tech Debt
+**Goal**: Accumulated UX friction points resolved and tech debt cleaned up so the extension feels polished and the codebase is healthy for future work
+**Depends on**: Phase 24 (compound intelligence complete; POPUP-02 side panel may interact with compound card rendering)
+**Requirements**: POPUP-01, POPUP-02, SPELL-01, SPELL-02, SPELL-03, DEBT-01, DEBT-02, DEBT-03, DEBT-04, DEBT-05
+**Success Criteria** (what must be TRUE):
+  1. Clicking NB, EN, or NN language buttons in popup switches the active lookup language and re-triggers search with updated results
+  2. "Fest" button opens a Chrome Side Panel that persists across tab switches on macOS (replacing the floating popup window)
+  3. Clicking the Aa spell-check button jumps viewport to the first marker; pressing Tab advances to the next marker sequentially
+  4. Aa spell-check button does not appear on text inputs with fewer than ~20 characters
+  5. Word prediction dropdown does not appear until the student has typed 3+ characters
+  6. Version numbers in package.json, manifest.json, and index.html are aligned
+  7. `npm run check-fixtures` exits 0 on main — all 5 pre-existing failing suites either fixed or quarantined
+  8. The 12 accumulated deferred browser visual verification tests from v2.0-v3.0 are executed and documented
+  9. Popup subscribes to `lexi:schema-mismatch` and surfaces a "Versjonskonflikt" diagnostic when schema versions diverge
+  10. Stale `BUNDLED_LANGS` entries (nn/en) removed from vocab-seam.js
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -114,6 +152,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 | 21.2 Data Fixes (GAP) | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
+| 24. Compound Word Intelligence | v3.1 | 0/0 | Not started | - |
+| 25. UX Polish & Tech Debt | v3.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-27 — v3.0 Data-Source Migration shipped*
+*Roadmap updated: 2026-04-28 — v3.1 Polish & Intelligence roadmap created*
