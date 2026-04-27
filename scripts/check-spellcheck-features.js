@@ -24,8 +24,27 @@
  */
 'use strict';
 
+const fs = require('fs');
 const path = require('path');
 const core = require(path.join(__dirname, '..', 'extension', 'content', 'vocab-seam-core.js'));
+
+// Phase 23-05: vocab data in tests/fixtures/vocab/, fall back to extension/data/
+const FIXTURE_VOCAB_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'vocab');
+const LEGACY_DATA_DIR   = path.join(__dirname, '..', 'extension', 'data');
+
+function resolveDataFile(filename) {
+  const fixture = path.join(FIXTURE_VOCAB_DIR, filename);
+  if (fs.existsSync(fixture)) return fixture;
+  const legacy = path.join(LEGACY_DATA_DIR, filename);
+  if (fs.existsSync(legacy)) return legacy;
+  return null;
+}
+
+function loadData(filename) {
+  const resolved = resolveDataFile(filename);
+  if (!resolved) throw new Error('[check-spellcheck-features] No data file found: ' + filename);
+  return require(resolved);
+}
 
 function fail(msg) {
   console.error('[check-spellcheck-features] FAIL:', msg);
@@ -177,7 +196,7 @@ function buildDisabledPredicate(disabledIds) {
 }
 
 function checkLanguage(config) {
-  const raw = require(path.join(__dirname, '..', 'extension', 'data', config.lang + '.json'));
+  const raw = loadData(config.lang + '.json');
   const isFeatureEnabled = buildDisabledPredicate(config.disabledFeatures);
   const state = core.buildIndexes({ raw, lang: config.lang, isFeatureEnabled });
 
@@ -243,8 +262,8 @@ function checkLanguage(config) {
 }
 
 function main() {
-  const raw = require(path.join(__dirname, '..', 'extension', 'data', 'nb.json'));
-  const sisterRaw = require(path.join(__dirname, '..', 'extension', 'data', 'nn.json'));
+  const raw = loadData('nb.json');
+  const sisterRaw = loadData('nn.json');
   const isFeatureEnabled = buildBasicPresetPredicate();
 
   const state = core.buildIndexes({ raw, sisterRaw, lang: 'nb', isFeatureEnabled });
@@ -326,7 +345,7 @@ function main() {
 
   // ── Phase 14: irregularForms must be populated for EN regardless of feature gating ──
   // Built from raw verbbank/nounbank data (not feature-gated wordList).
-  const enRawForIrregular = require(path.join(__dirname, '..', 'extension', 'data', 'en.json'));
+  const enRawForIrregular = loadData('en.json');
   const enStateIrregular = core.buildIndexes({ raw: enRawForIrregular, lang: 'en', isFeatureEnabled: buildDisabledPredicate(['grammar_en_past', 'grammar_en_plural', 'grammar_plural']) });
   if (!(enStateIrregular.irregularForms instanceof Map) || enStateIrregular.irregularForms.size === 0) {
     fail('[en] irregularForms must be a populated Map — buildIrregularForms regression.');
@@ -347,7 +366,7 @@ function main() {
   // ── Phase 11: mood/aspect reverse-lookup indexes must be populated ──
   // These indexes are built from raw verbbank data (not feature-gated wordList),
   // so they MUST be populated regardless of which features are enabled.
-  const esRaw = require(path.join(__dirname, '..', 'extension', 'data', 'es.json'));
+  const esRaw = loadData('es.json');
   const esState = core.buildIndexes({ raw: esRaw, lang: 'es', isFeatureEnabled: buildDisabledPredicate(['grammar_es_subjuntivo', 'grammar_es_imperfecto']) });
   if (!(esState.esPresensToVerb instanceof Map) || esState.esPresensToVerb.size === 0) {
     fail('[es] esPresensToVerb must be a populated Map — buildMoodIndexes regression.');
@@ -362,7 +381,7 @@ function main() {
     fail('[es] esPreteritumToVerb must be a populated Map — buildMoodIndexes regression.');
   }
 
-  const frRaw = require(path.join(__dirname, '..', 'extension', 'data', 'fr.json'));
+  const frRaw = loadData('fr.json');
   const frState = core.buildIndexes({ raw: frRaw, lang: 'fr', isFeatureEnabled: buildDisabledPredicate(['grammar_fr_subjonctif']) });
   if (!(frState.frPresensToVerb instanceof Map) || frState.frPresensToVerb.size === 0) {
     fail('[fr] frPresensToVerb must be a populated Map — buildMoodIndexes regression.');

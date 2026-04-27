@@ -3,9 +3,17 @@
 /**
  * Leksihjelp — Regression Fixture Runner (INFRA-02)
  *
+ * Vocab data path (Phase 23-05):
+ *   Primary:  tests/fixtures/vocab/{lang}.json  (copied from extension/data/ before
+ *             the bundled data files were deleted in v3.0)
+ *   Fallback: extension/data/{lang}.json        (pre-v3.0 layout, no longer shipped)
+ *
+ * The fixture runner NEVER reads vocab from IndexedDB — it always loads flat
+ * JSON files so results are deterministic and independent of browser state.
+ *
  * Runs hand-authored JSONL fixtures through `spell-check-core.check()` using
- * vocab indexes built via `vocab-seam-core.buildIndexes()` directly from
- * `extension/data/{lang}.json`. Computes per-rule-class precision / recall /
+ * vocab indexes built via `vocab-seam-core.buildIndexes()` from the fixture
+ * vocab path above. Computes per-rule-class precision / recall /
  * F1 and exits non-zero on any hard mismatch (missing expected finding OR
  * unexpected flag).
  *
@@ -94,8 +102,12 @@ if (fs.existsSync(SPELL_RULES_DIR)) {
   }
 }
 
-const DATA_DIR    = path.join(__dirname, '..', 'extension', 'data');
-const FIXTURE_DIR = path.join(__dirname, '..', 'fixtures');
+// Phase 23-05: vocab data lives in tests/fixtures/vocab/ (fixture-only copies
+// independent of the shipped extension). Falls back to extension/data/ for
+// pre-v3.0 compatibility (the files no longer exist after plan 23-05 Task 1b).
+const FIXTURE_VOCAB_DIR = path.join(__dirname, '..', 'tests', 'fixtures', 'vocab');
+const LEGACY_DATA_DIR   = path.join(__dirname, '..', 'extension', 'data');
+const FIXTURE_DIR       = path.join(__dirname, '..', 'fixtures');
 
 // ── Argv parsing (no commander/yargs) ──
 
@@ -134,17 +146,32 @@ function loadJsonl(file) {
 // runs are about rule correctness, not UI visibility — the runner always
 // sees every word the seam can emit.
 
+/**
+ * Resolve a vocab data file: prefer tests/fixtures/vocab/, fall back to
+ * extension/data/ (pre-v3.0 layout). Returns null if neither exists.
+ */
+function resolveDataFile(filename) {
+  const fixture = path.join(FIXTURE_VOCAB_DIR, filename);
+  if (fs.existsSync(fixture)) return fixture;
+  const legacy = path.join(LEGACY_DATA_DIR, filename);
+  if (fs.existsSync(legacy)) return legacy;
+  return null;
+}
+
 function loadVocab(lang) {
-  const raw = JSON.parse(fs.readFileSync(path.join(DATA_DIR, lang + '.json'), 'utf8'));
+  const rawPath = resolveDataFile(lang + '.json');
+  if (!rawPath) throw new Error('[check-fixtures] No vocab file found for ' + lang + ' in tests/fixtures/vocab/ or extension/data/');
+  const raw = JSON.parse(fs.readFileSync(rawPath, 'utf8'));
+
   let bigrams = null;
-  const bigramFile = path.join(DATA_DIR, 'bigrams-' + lang + '.json');
-  if (fs.existsSync(bigramFile)) {
-    bigrams = JSON.parse(fs.readFileSync(bigramFile, 'utf8'));
+  const bigramPath = resolveDataFile('bigrams-' + lang + '.json');
+  if (bigramPath) {
+    bigrams = JSON.parse(fs.readFileSync(bigramPath, 'utf8'));
   }
   let freq = null;
-  const freqFile = path.join(DATA_DIR, 'freq-' + lang + '.json');
-  if (fs.existsSync(freqFile)) {
-    freq = JSON.parse(fs.readFileSync(freqFile, 'utf8'));
+  const freqPath = resolveDataFile('freq-' + lang + '.json');
+  if (freqPath) {
+    freq = JSON.parse(fs.readFileSync(freqPath, 'utf8'));
   }
 
   // Phase 4 / SC-03: load sister-dialect raw vocab for NB↔NN cross-dialect
@@ -157,13 +184,14 @@ function loadVocab(lang) {
   let sisterRaw = null;
   if (lang === 'nb' || lang === 'nn') {
     const sisterLang = lang === 'nb' ? 'nn' : 'nb';
-    sisterRaw = JSON.parse(fs.readFileSync(path.join(DATA_DIR, sisterLang + '.json'), 'utf8'));
+    const sisterPath = resolveDataFile(sisterLang + '.json');
+    if (sisterPath) sisterRaw = JSON.parse(fs.readFileSync(sisterPath, 'utf8'));
   }
 
   let pitfalls = {};
-  const pitfallFile = path.join(DATA_DIR, 'pitfalls-' + lang + '.json');
-  if (fs.existsSync(pitfallFile)) {
-    pitfalls = JSON.parse(fs.readFileSync(pitfallFile, 'utf8'));
+  const pitfallPath = resolveDataFile('pitfalls-' + lang + '.json');
+  if (pitfallPath) {
+    pitfalls = JSON.parse(fs.readFileSync(pitfallPath, 'utf8'));
   }
 
   const vocab = vocabCore.buildIndexes({ raw, sisterRaw, bigrams, freq, lang, isFeatureEnabled: () => true });
@@ -179,7 +207,7 @@ function loadVocab(lang) {
   // data somehow lost it. NB/NN shipped freq sidecars in Phase 2; if they
   // vanish, fuzzy-ranking regressions would be silent.
   if ((lang === 'nb' || lang === 'nn') && (!(vocab.freq instanceof Map) || vocab.freq.size === 0)) {
-    throw new Error(`[check-fixtures] Expected populated freq Map for ${lang}, got empty. Check extension/data/freq-${lang}.json.`);
+    throw new Error(`[check-fixtures] Expected populated freq Map for ${lang}, got empty. Check tests/fixtures/vocab/freq-${lang}.json.`);
   }
 
   // Phase 4 / SC-03 data-contract guard: if NB/NN sisterValidWords Set is

@@ -27,8 +27,18 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const BENCHMARK_DIR = path.join(ROOT, 'benchmark-texts');
 const EXPECTATIONS_PATH = path.join(BENCHMARK_DIR, 'expectations.json');
-const DATA_DIR = path.join(ROOT, 'extension', 'data');
-const SPELL_RULES_DIR = path.join(ROOT, 'extension', 'content', 'spell-rules');
+// Phase 23-05: vocab data in tests/fixtures/vocab/, fall back to extension/data/
+const FIXTURE_VOCAB_DIR = path.join(ROOT, 'tests', 'fixtures', 'vocab');
+const LEGACY_DATA_DIR   = path.join(ROOT, 'extension', 'data');
+const SPELL_RULES_DIR   = path.join(ROOT, 'extension', 'content', 'spell-rules');
+
+function resolveDataFile(filename) {
+  const fixture = path.join(FIXTURE_VOCAB_DIR, filename);
+  if (fs.existsSync(fixture)) return fixture;
+  const legacy = path.join(LEGACY_DATA_DIR, filename);
+  if (fs.existsSync(legacy)) return legacy;
+  return null;
+}
 
 // Load spell-check-core (attaches to self/__lexiSpellCore)
 const vocabCore = require(path.join(ROOT, 'extension', 'content', 'vocab-seam-core.js'));
@@ -50,38 +60,38 @@ const vocabCache = {};
 function loadVocab(lang) {
   if (vocabCache[lang]) return vocabCache[lang];
 
-  const dataFile = path.join(DATA_DIR, lang + '.json');
-  if (!fs.existsSync(dataFile)) return null;
+  const dataPath = resolveDataFile(lang + '.json');
+  if (!dataPath) return null;
 
-  const raw = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  const raw = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
   let sisterRaw = null;
   if (lang === 'nb' || lang === 'nn') {
     const sisterLang = lang === 'nb' ? 'nn' : 'nb';
-    const sisterFile = path.join(DATA_DIR, sisterLang + '.json');
-    if (fs.existsSync(sisterFile)) {
-      sisterRaw = JSON.parse(fs.readFileSync(sisterFile, 'utf8'));
+    const sisterPath = resolveDataFile(sisterLang + '.json');
+    if (sisterPath) {
+      sisterRaw = JSON.parse(fs.readFileSync(sisterPath, 'utf8'));
     }
   }
 
   let bigrams = null;
-  const bigramFile = path.join(DATA_DIR, 'bigrams-' + lang + '.json');
-  if (fs.existsSync(bigramFile)) {
-    bigrams = JSON.parse(fs.readFileSync(bigramFile, 'utf8'));
+  const bigramPath = resolveDataFile('bigrams-' + lang + '.json');
+  if (bigramPath) {
+    bigrams = JSON.parse(fs.readFileSync(bigramPath, 'utf8'));
   }
 
   let freq = null;
-  const freqFile = path.join(DATA_DIR, 'freq-' + lang + '.json');
-  if (fs.existsSync(freqFile)) {
-    freq = JSON.parse(fs.readFileSync(freqFile, 'utf8'));
+  const freqPath = resolveDataFile('freq-' + lang + '.json');
+  if (freqPath) {
+    freq = JSON.parse(fs.readFileSync(freqPath, 'utf8'));
   }
 
   const vocab = vocabCore.buildIndexes({ raw, sisterRaw, bigrams, freq, lang, isFeatureEnabled: () => true });
 
   let pitfalls = {};
-  const pitfallFile = path.join(DATA_DIR, 'pitfalls-' + lang + '.json');
-  if (fs.existsSync(pitfallFile)) {
-    pitfalls = JSON.parse(fs.readFileSync(pitfallFile, 'utf8'));
+  const pitfallPath = resolveDataFile('pitfalls-' + lang + '.json');
+  if (pitfallPath) {
+    pitfalls = JSON.parse(fs.readFileSync(pitfallPath, 'utf8'));
   }
   vocab.pitfalls = pitfalls;
 

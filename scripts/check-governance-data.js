@@ -29,7 +29,17 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const DATA_DIR = path.join(ROOT, 'extension', 'data');
+// Phase 23-05: vocab data in tests/fixtures/vocab/, fall back to extension/data/
+const FIXTURE_VOCAB_DIR = path.join(ROOT, 'tests', 'fixtures', 'vocab');
+const LEGACY_DATA_DIR   = path.join(ROOT, 'extension', 'data');
+
+function resolveDataFile(filename) {
+  const fixture = path.join(FIXTURE_VOCAB_DIR, filename);
+  if (fs.existsSync(fixture)) return fixture;
+  const legacy = path.join(LEGACY_DATA_DIR, filename);
+  if (fs.existsSync(legacy)) return legacy;
+  return null;
+}
 
 const EXPECTED_BANKS = ['registerbank', 'collocationbank', 'phrasebank'];
 
@@ -57,15 +67,15 @@ function main() {
   let failures = [];
 
   for (const lang of LANGUAGES) {
-    const dataFile = path.join(DATA_DIR, lang + '.json');
-    if (!fs.existsSync(dataFile)) {
+    const dataPath = resolveDataFile(lang + '.json');
+    if (!dataPath) {
       console.log('  [' + lang + '] SKIP: no data file');
       continue;
     }
 
     let data;
     try {
-      data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+      data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     } catch (e) {
       failures.push({ lang, bank: '<parse>', reason: 'Failed to parse ' + lang + '.json: ' + e.message });
       continue;
