@@ -20,6 +20,8 @@ let enabledFeatures = new Set(); // Set of enabled feature IDs
 let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
 let nbEnrichmentIndex = new Map(); // Phase 21.1: NB entry ID → {falseFriends, senses} for target enrichment
 let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compound decomposition when foreign lang selected
+let currentIndexes = null; // Phase 24: indexes from buildIndexes for predictCompound
+let compoundNavStack = []; // Phase 24 COMP-03: navigation stack for compound back-navigation
 
 /**
  * Get the appropriate Norwegian translation for an entry,
@@ -532,6 +534,7 @@ async function loadDictionary(lang) {
     if (vocabCore && vocabCore.buildIndexes) {
       const indexes = vocabCore.buildIndexes({ raw: dictionary, lang: currentLang });
       nounGenusMap = indexes.nounGenus || new Map();
+      currentIndexes = indexes; // Phase 24: capture for predictCompound
     }
 
     updateLangLabels();
@@ -1160,6 +1163,7 @@ function initSearch() {
   let searchDebounceTimer;
   input.addEventListener('input', () => {
     clearBtn.classList.toggle('hidden', !input.value);
+    compoundNavStack = []; // Phase 24 COMP-03: clear back-nav on new input
     clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => performSearch(input.value.trim()), 150);
   });
@@ -1403,6 +1407,15 @@ function performSearch(query) {
   // Final order: exact/starts-with → inflection matches → contains
   const combined = [...directStartsWith, ...inflectionResults, ...directContains];
 
+  // Phase 24: try exact compound decomposition BEFORE fallback direction
+  if (combined.length === 0) {
+    const decomp = tryDecomposeQuery(q);
+    if (decomp) {
+      renderCompoundCard(q, decomp);
+      return;
+    }
+  }
+
   // Fallback: if no results and not monolingual, try the opposite direction
   if (combined.length === 0 && !isMonolingual) {
     const fallbackResults = [];
@@ -1449,16 +1462,67 @@ function performSearch(query) {
     }
   }
 
-  // Phase 17 COMP-01/02: try compound decomposition before showing no results
-  if (combined.length === 0) {
-    const decomp = tryDecomposeQuery(q);
-    if (decomp) {
-      renderCompoundCard(q, decomp);
+  // Phase 24 COMP-01: try compound prediction for partial input (no direct or fallback results)
+  if (combined.length === 0 && currentIndexes && currentIndexes.predictCompound) {
+    const predictions = currentIndexes.predictCompound(q);
+    if (predictions.length > 0) {
+      renderCompoundSuggestions(query, predictions);
       return;
     }
   }
 
   renderResults(combined.slice(0, 50));
+}
+
+// Phase 24 COMP-01: render compound suggestions from predictCompound
+function renderCompoundSuggestions(query, predictions) {
+  const container = document.getElementById('search-results');
+
+  const heading = `<div class="compound-suggestions-heading">${t('compound_suggestions_heading')}</div>`;
+
+  const cards = predictions.map(pred => {
+    const { parts, gender } = pred.decomposition;
+    const breakdownParts = [];
+    for (const part of parts) {
+      breakdownParts.push(escapeHtml(part.word));
+      if (part.linker) breakdownParts.push(escapeHtml(part.linker));
+    }
+    const breakdownHtml = breakdownParts.map(p =>
+      `<span class="compound-breakdown-part">${p}</span>`
+    ).join('<span class="compound-breakdown-sep"> + </span>');
+
+    const genderBadge = gender
+      ? `<span class="result-gender">${genusToGender(gender)}</span>`
+      : '';
+
+    return `
+      <div class="result-card compound-suggestion glass" data-compound-word="${escapeHtml(pred.word)}">
+        <div class="result-basic">
+          <div class="result-word-row">
+            <span class="result-word">${escapeHtml(pred.word)}</span>
+          </div>
+          <div class="result-meta">
+            <span class="compound-badge">${t('compound_label')}</span>
+            <span class="result-pos">${t('pos_noun')}</span>
+            ${genderBadge}
+          </div>
+        </div>
+        <div class="compound-breakdown compound-breakdown-compact">${breakdownHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = heading + cards;
+
+  // Wire click handlers: clicking a suggestion searches for the full compound word
+  container.querySelectorAll('.compound-suggestion').forEach(card => {
+    card.addEventListener('click', () => {
+      const word = card.dataset.compoundWord;
+      const input = document.getElementById('search-input');
+      if (input) input.value = word;
+      performSearch(word);
+    });
+  });
 }
 
 // Phase 17 COMP-01/02: render compound decomposition card
