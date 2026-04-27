@@ -203,11 +203,16 @@ function initVocabStatus() {
     return lang;
   }
 
-  function textForState(lang, state) {
+  function textForState(lang, state, reason) {
     const name = langLabel(lang);
     if (state === 'fetching') return `Laster ned ${name}…`;
     if (state === 'ready')    return `${name} klar`;
-    if (state === 'error')    return 'Ordlister utilgjengelig — prøv igjen senere';
+    if (state === 'error') {
+      if (reason === 'timeout-or-network' && !navigator.onLine) {
+        return t('hydration_error_offline');
+      }
+      return t('hydration_error_generic');
+    }
     if (state === 'baseline') return `${name} (basis)`;
     return `${name} ${state}`;
   }
@@ -225,14 +230,14 @@ function initVocabStatus() {
     return entry;
   }
 
-  function setPill(lang, state) {
+  function setPill(lang, state, reason) {
     if (state === 'baseline') return; // NB baseline is implicit; no pill.
     const entry = ensurePill(lang);
     if (entry.hideTimer) { clearTimeout(entry.hideTimer); entry.hideTimer = null; }
     entry.state = state;
     entry.el.classList.remove('is-fetching', 'is-ready', 'is-error');
     entry.el.classList.add(`is-${state}`);
-    entry.el.textContent = textForState(lang, state);
+    entry.el.textContent = textForState(lang, state, reason);
     container.hidden = false;
 
     if (state === 'ready') {
@@ -263,7 +268,7 @@ function initVocabStatus() {
   chrome.runtime.onMessage.addListener((m) => {
     if (!m || m.type !== 'lexi:hydration' || !m.lang || !m.state) return;
     if (m.lang === 'nb' && m.state === 'baseline') return; // implicit
-    setPill(m.lang, m.state);
+    setPill(m.lang, m.state, m.reason);
   });
 }
 
@@ -411,7 +416,7 @@ async function initFirstRunPicker() {
           resolve();
         } catch (err) {
           console.error('Language download failed:', err);
-          status.textContent = t('picker_failed');
+          status.textContent = !navigator.onLine ? t('picker_failed_offline') : t('picker_failed');
           picker.querySelectorAll('.lang-pick-btn').forEach(b => b.disabled = false);
           document.getElementById('lang-pick-skip').classList.remove('hidden');
           progress.classList.add('hidden');

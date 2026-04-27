@@ -35,6 +35,9 @@ const _STRINGS = {
     picker_skip: 'Velg senere i innstillinger',
     picker_downloading: 'Laster ned...',
     picker_failed: 'Nedlasting feilet. Prøv igjen.',
+    picker_failed_offline: 'Ingen internettilkobling. Koble til nettet og prøv igjen.',
+    hydration_error_offline: 'Ingen internettilkobling — ordlister lastes ned når du er på nett',
+    hydration_error_generic: 'Ordlister utilgjengelig — prøv igjen senere',
 
     // ── Language names ──
     lang_de: 'Tysk',
@@ -273,6 +276,9 @@ const _STRINGS = {
     picker_skip: 'Vel seinare i innstillingar',
     picker_downloading: 'Lastar ned...',
     picker_failed: 'Nedlasting feila. Prøv igjen.',
+    picker_failed_offline: 'Inga internettilkopling. Kopla til nettet og prøv igjen.',
+    hydration_error_offline: 'Inga internettilkopling — ordlister vert lasta ned når du er på nett',
+    hydration_error_generic: 'Ordlister utilgjengelege — prøv igjen seinare',
 
     lang_de: 'Tysk',
     lang_es: 'Spansk',
@@ -492,6 +498,9 @@ const _STRINGS = {
     picker_skip: 'Choose later in settings',
     picker_downloading: 'Downloading...',
     picker_failed: 'Download failed. Try again.',
+    picker_failed_offline: 'No internet connection. Connect to the internet and try again.',
+    hydration_error_offline: 'No internet connection — dictionaries will download when you are online',
+    hydration_error_generic: 'Dictionaries unavailable — try again later',
 
     lang_de: 'German',
     lang_es: 'Spanish',
