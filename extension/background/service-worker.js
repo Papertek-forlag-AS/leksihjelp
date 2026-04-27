@@ -1,4 +1,11 @@
 importScripts('/i18n/strings.js');
+// Plan 23-04: vocab-store + vocab-updater in service-worker scope so
+// startup revision check + manual refresh handler can run without a popup.
+// vocab-store.js is an IIFE that exposes self.__lexiVocabStore; vocab-updater
+// reads that surface to drive checkForUpdates / refreshAll. Both files are
+// safe in service-worker scope (no DOM access; IndexedDB available).
+importScripts('/content/vocab-store.js');
+importScripts('/background/vocab-updater.js');
 
 /**
  * Leksihjelp — Background Service Worker
@@ -401,3 +408,52 @@ refreshSession();
 
 // Initialize i18n for service worker
 initI18n();
+
+// ── Plan 23-04: startup revision check + manual refresh ──
+// Fire-and-forget; checkForUpdates internally handles its own 30s timeout
+// and offline-tolerant error paths. Emits 'lexi:updates-available' when any
+// cached language has a stale revision; popup picks that up.
+function runStartupVocabCheck() {
+  try {
+    const updater = self.__lexiVocabUpdater;
+    if (updater && typeof updater.checkForUpdates === 'function') {
+      updater.checkForUpdates().catch((e) => {
+        console.warn('Leksihjelp: startup checkForUpdates failed', e && e.message);
+      });
+    }
+  } catch (e) {
+    console.warn('Leksihjelp: startup vocab check threw', e && e.message);
+  }
+}
+chrome.runtime.onStartup.addListener(runStartupVocabCheck);
+// Also run once on this service-worker boot — onStartup only fires when the
+// browser starts, but the worker may also wake from idle. Idempotent.
+runStartupVocabCheck();
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  // Plan 23-04: popup polls "do we have updates?" on open.
+  if (msg && msg.type === 'lexi:check-updates-now') {
+    const updater = self.__lexiVocabUpdater;
+    if (updater && typeof updater.checkForUpdates === 'function') {
+      updater.checkForUpdates()
+        .then(result => sendResponse({ ok: true, result }))
+        .catch(err => sendResponse({ ok: false, error: err && err.message }));
+      return true; // async sendResponse
+    }
+    sendResponse({ ok: false, error: 'updater unavailable' });
+    return false;
+  }
+
+  // Plan 23-04: popup "Oppdater ordlister nå" button → refresh listed langs.
+  if (msg && msg.type === 'lexi:refresh-now') {
+    const updater = self.__lexiVocabUpdater;
+    if (updater && typeof updater.refreshAll === 'function') {
+      updater.refreshAll(msg.langs || [])
+        .then(() => sendResponse({ ok: true }))
+        .catch(err => sendResponse({ ok: false, error: err && err.message }));
+      return true; // async sendResponse
+    }
+    sendResponse({ ok: false, error: 'updater unavailable' });
+    return false;
+  }
+});
