@@ -56,6 +56,13 @@ function getTranslation(entry) {
   return '';
 }
 
+function generatedFromRefs(entry) {
+  const g = entry._generatedFrom;
+  if (!g) return [];
+  if (Array.isArray(g)) return g;
+  return g.split(',').map(s => s.trim());
+}
+
 // Bank name to Norwegian part of speech mapping
 const BANK_TO_POS = {
   verbbank: 'verb',
@@ -575,9 +582,7 @@ async function loadDictionary(lang) {
               }
               // Direction 1: NB→target (e.g. NB _generatedFrom "de-nb/bank:chef_noun")
               if (entry._generatedFrom && entry.word) {
-                const parts = entry._generatedFrom.split(',');
-                for (const part of parts) {
-                  const trimmed = part.trim();
+                for (const trimmed of generatedFromRefs(entry)) {
                   if (trimmed.startsWith(langPrefix)) {
                     const colonIdx = trimmed.indexOf(':');
                     if (colonIdx !== -1) {
@@ -601,9 +606,7 @@ async function loadDictionary(lang) {
             if (!bankData || typeof bankData !== 'object') continue;
             for (const [id, entry] of Object.entries(bankData)) {
               if (id.startsWith('_') || !entry._generatedFrom) continue;
-              const parts = entry._generatedFrom.split(',');
-              for (const part of parts) {
-                const trimmed = part.trim();
+              for (const trimmed of generatedFromRefs(entry)) {
                 if (trimmed.startsWith(revPrefix)) {
                   const colonIdx = trimmed.indexOf(':');
                   if (colonIdx !== -1) {
@@ -1392,9 +1395,7 @@ function performSearch(query) {
 
       // Direction 1: NB _generatedFrom has {currentLang}-nb/ (DE, ES)
       if (!targetWordId && noEntry._generatedFrom) {
-        const parts = noEntry._generatedFrom.split(',');
-        for (const part of parts) {
-          const trimmed = part.trim();
+        for (const trimmed of generatedFromRefs(noEntry)) {
           if (trimmed.startsWith(langPrefix)) {
             const colonIdx = trimmed.indexOf(':');
             if (colonIdx !== -1) {
