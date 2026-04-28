@@ -254,7 +254,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === 'VOCAB_LIST_CACHED') {
-    listVocabLanguages().then(sendResponse).catch(() => sendResponse([]));
+    // Route through __lexiVocabStore (DB name 'lex-vocab') instead of the
+    // legacy listVocabLanguages() reader below, which still points at the
+    // pre-rename 'leksihjelp-vocab' DB and would always answer []. The
+    // legacy reader is kept for VOCAB_GET_CACHED / VOCAB_GET_GRAMMAR until
+    // those are migrated too.
+    const store = self.__lexiVocabStore;
+    if (store && typeof store.listCachedLanguages === 'function') {
+      store.listCachedLanguages().then(sendResponse).catch(() => sendResponse([]));
+    } else {
+      listVocabLanguages().then(sendResponse).catch(() => sendResponse([]));
+    }
     return true; // async
   }
 
