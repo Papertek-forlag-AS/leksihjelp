@@ -8,77 +8,87 @@
  * to `host.__lexiSpellRules`; this registry covers everything that is NOT a
  * spell-check rule.
  *
+ * Policy (Phase 27, post-UAT round 1):
+ *   "Static reference information is allowed during exam; answer-generating
+ *    surfaces are not." A printed dictionary on the desk would be allowed,
+ *    so the digital equivalent is too. Live writing assistance (word
+ *    prediction) and active grammar feedback (Lær mer pedagogy with worked
+ *    examples) are not.
+ *
+ * Allowed in exam mode (safe: true):
+ *   popup.search, popup.conjugationTable, popup.ttsButton,
+ *   popup.grammarFeaturesPopover, widget.dictionary, widget.conjugation,
+ *   widget.tts, sidePanel.fest
+ *
+ * Suppressed in exam mode (safe: false):
+ *   wordPrediction.dropdown, widget.pedagogyPanel
+ *
  * Marker shape (matches the rule-side contract from CONTEXT.md):
  *   { id: string, exam: { safe: boolean, reason: string, category: string } }
  *
  * Categories (closed set, mirrors rule-side): 'spellcheck', 'grammar-lookup',
  * 'dictionary', 'tts', 'prediction', 'pedagogy', 'popup', 'widget'.
- *
- * Plan 02 (check-exam-marker gate) reads this registry to enforce the
- * contract; Plan 03 (runtime suppression) reads it to gate non-rule
- * surfaces when exam mode is on. This file is inert metadata until those
- * plans land.
  */
 (function () {
   'use strict';
   const host = typeof self !== 'undefined' ? self : globalThis;
 
-  host.__lexiExamRegistryVersion = 1;
+  host.__lexiExamRegistryVersion = 2;
 
   host.__lexiExamRegistry = Object.freeze([
     Object.freeze({
       id: 'popup.search',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Dictionary lookup results in popup exceed browser native spellcheck parity',
+        safe: true,
+        reason: 'Dictionary lookup is static reference material — equivalent to a printed dictionary, allowed during exam',
         category: 'dictionary',
       }),
     }),
     Object.freeze({
       id: 'popup.conjugationTable',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Conjugation tables in popup are reference material beyond browser native parity',
+        safe: true,
+        reason: 'Conjugation tables are static reference material, allowed during exam',
         category: 'dictionary',
       }),
     }),
     Object.freeze({
       id: 'popup.ttsButton',
       exam: Object.freeze({
-        safe: false,
-        reason: 'TTS playback in popup gives pronunciation assistance beyond browser native parity',
+        safe: true,
+        reason: 'TTS playback pronounces existing words; pronunciation aid is allowed during exam',
         category: 'tts',
       }),
     }),
     Object.freeze({
       id: 'popup.grammarFeaturesPopover',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Grammar-features descriptions are pedagogical content beyond browser native parity',
+        safe: true,
+        reason: 'Grammar-features popover is configuration UI for which features render in the dictionary view; static descriptions, allowed during exam',
         category: 'pedagogy',
       }),
     }),
     Object.freeze({
       id: 'widget.dictionary',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Floating-widget inline dictionary lookup exceeds browser native spellcheck parity',
+        safe: true,
+        reason: 'Floating-widget inline dictionary lookup is the same static reference as popup.search, allowed during exam',
         category: 'dictionary',
       }),
     }),
     Object.freeze({
       id: 'widget.conjugation',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Floating-widget conjugation surface is reference material beyond browser native parity',
+        safe: true,
+        reason: 'Floating-widget conjugation surface is static reference material, allowed during exam',
         category: 'dictionary',
       }),
     }),
     Object.freeze({
       id: 'widget.tts',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Floating-widget TTS button gives pronunciation assistance beyond browser native parity',
+        safe: true,
+        reason: 'Floating-widget TTS button is pronunciation aid for existing words, allowed during exam',
         category: 'tts',
       }),
     }),
@@ -86,7 +96,7 @@
       id: 'widget.pedagogyPanel',
       exam: Object.freeze({
         safe: false,
-        reason: 'Lær mer expanded pedagogy panel exceeds browser native parity',
+        reason: 'Lær mer pedagogy panel surfaces worked examples and grammatical explanations that can leak answers to grammar exam tasks',
         category: 'pedagogy',
       }),
     }),
@@ -94,15 +104,15 @@
       id: 'wordPrediction.dropdown',
       exam: Object.freeze({
         safe: false,
-        reason: 'Autocomplete suggestions in text inputs provide writing assistance beyond browser native parity',
+        reason: 'Autocomplete suggestions actively generate writing for the student — answer-generating, not allowed during exam',
         category: 'prediction',
       }),
     }),
     Object.freeze({
       id: 'sidePanel.fest',
       exam: Object.freeze({
-        safe: false,
-        reason: 'Chrome side-panel dictionary surface exceeds browser native parity',
+        safe: true,
+        reason: 'Festet side-panel is the same dictionary surface as the popup; static reference, allowed during exam',
         category: 'dictionary',
       }),
     }),

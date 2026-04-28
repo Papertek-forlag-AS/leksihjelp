@@ -117,16 +117,31 @@
     applyExamModeClass();
     attachListeners();
 
-    // Phase 27: live-toggle awareness. When examMode flips, hide any open
-    // widget/lookup and re-apply the amber border class.
+    // Phase 27: live-toggle awareness. The widget itself stays visible in
+    // exam mode (dictionary lookup + TTS are allowed static reference); only
+    // surfaces flagged unsafe in __lexiExamRegistry close. We close the
+    // pedagogy panel here so a Lær mer expansion doesn't survive the flip.
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
       if ('examMode' in changes) {
         examMode = !!changes.examMode.newValue;
         applyExamModeClass();
-        if (examMode && widget) hideWidget();
+        if (examMode && !isSurfaceAllowed('widget.pedagogyPanel')) {
+          collapsePedagogyPanelIfOpen();
+        }
       }
     });
+
+    function collapsePedagogyPanelIfOpen() {
+      // Best-effort: if any "Lær mer" disclosure is currently open inside the
+      // widget, close it. The widget renders pedagogy via a <details> element
+      // (or an .lh-pedagogy-open class) — both shapes covered.
+      if (!widget) return;
+      const det = widget.querySelectorAll('details[open]');
+      det.forEach(d => d.removeAttribute('open'));
+      const open = widget.querySelectorAll('.lh-pedagogy-open');
+      open.forEach(n => n.classList.remove('lh-pedagogy-open'));
+    }
 
     // Listen for setting changes and context menu actions
     chrome.runtime.onMessage.addListener((msg) => {
