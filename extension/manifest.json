@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Leksihjelp",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Ordbok, stavekontroll og uttale for norske elever — tysk, spansk, fransk, engelsk, bokmål og nynorsk.",
   "permissions": [
     "contextMenus",
@@ -21,6 +21,7 @@
       "css": ["styles/content.css"],
       "js": [
         "i18n/strings.js",
+        "exam-registry.js",
         "content/vocab-store.js",
         "content/vocab-seam-core.js",
         "content/vocab-seam.js",

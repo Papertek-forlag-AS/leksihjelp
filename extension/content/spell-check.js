@@ -36,6 +36,10 @@
   let activeEl = null;
   let debounceTimer = null;
 
+  // Phase 27: cached exam-mode flag. Updated on init + chrome.storage.onChanged.
+  // Read on every runCheck pass; cheap (single bool lookup).
+  let examMode = false;
+
   // ── Init ──
   init();
 
@@ -82,6 +86,10 @@
     chrome.storage.local.get('spellCheckAlternatesVisible', (r) => {
       alternatesVisible = r && r.spellCheckAlternatesVisible === true;
     });
+    // Phase 27: hydrate cached examMode + subscribe to live toggle.
+    chrome.storage.local.get('examMode', (r) => {
+      examMode = !!(r && r.examMode);
+    });
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local') return;
       if ('spellCheckAlternatesVisible' in changes) {
@@ -89,6 +97,14 @@
         if (popover && activePopoverIdx >= 0 && lastFindings[activePopoverIdx]) {
           showPopover(activePopoverIdx, lastFindings[activePopoverIdx]);
         }
+      }
+      if ('examMode' in changes) {
+        examMode = !!changes.examMode.newValue;
+        // Hide any open popover and clear markers on toggle; next runCheck()
+        // pass will repaint with the filtered rule set.
+        hideOverlay();
+        // Trigger a re-check so the dot/popover layer reflects the new flag.
+        if (activeEl) schedule();
       }
     });
 
@@ -306,6 +322,22 @@
     for (const f of findings) f.type = f.rule_id;
     findings = findings.filter(f => !dismissed.has(dismissKey(f)));
 
+    // Phase 27: exam-mode rule filter. Drops findings whose source rule has
+    // exam.safe = false when examMode is on. Dual-marker rules (rule.exam.safe
+    // = true but rule.explain.exam.safe = false — see de-prep-case in Plan
+    // 27-01) keep the dot but the popover-render gate (showPopover) hides the
+    // Lær mer panel + explain output.
+    if (examMode && self.__lexiExam && self.__lexiSpellRules) {
+      const ruleById = new Map();
+      for (const r of self.__lexiSpellRules) {
+        if (r && r.id) ruleById.set(r.id, r);
+      }
+      findings = findings.filter(f => {
+        const rule = ruleById.get(f.rule_id);
+        return self.__lexiExam.isRuleSafe(rule, true);
+      });
+    }
+
     warn('check', {
       lang,
       vocabSize: vocab.validWords.size,
@@ -468,6 +500,19 @@
 
   function showPopover(idx, finding) {
     hidePopover();
+
+    // Phase 27: dual-marker gate. If exam mode is on AND this finding's rule
+    // has rule.explain.exam.safe = false (e.g. de-prep-case Lær mer pedagogy
+    // surface), suppress the popover entirely. The dot still renders because
+    // the rule itself is exam-safe (rule.exam.safe = true). Without this
+    // guard, the pedagogy-rich popover would surface during exams.
+    if (examMode && self.__lexiExam && self.__lexiSpellRules && finding && finding.rule_id) {
+      const rule = self.__lexiSpellRules.find(r => r && r.id === finding.rule_id);
+      if (rule && !self.__lexiExam.isExplainSafe(rule, true)) {
+        return;
+      }
+    }
+
     activePopoverIdx = idx;
     popover = document.createElement('div');
     // Phase 6: severity-aware popover class

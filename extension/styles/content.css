@@ -78,6 +78,21 @@
   top: auto !important;
 }
 
+/* Phase 27: Exam-mode amber border tint on the floating widget. The widget
+ * is fully suppressed when exam mode is on (showWidget bails), so this rule
+ * is mostly a defensive marker — but if a future surface renders the widget
+ * shell in exam mode (e.g. teacher preview), the amber border gives a clear
+ * at-a-glance signal. Also ships to lockdown via the sync pipeline; the
+ * lockdown variant of leksihjelp may render this widget in exam contexts.
+ * Both the legacy-prefixed and current id selectors are included to match
+ * the shipping conventions. */
+#lexi-tts-widget.lh-exam-mode,
+.leksihjelp-floating-widget.lh-exam-mode,
+.lh-floating-widget.lh-exam-mode {
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), 0 8px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
 #lexi-tts-widget.visible {
   display: flex;
   animation: lexi-fadein 0.2s ease-out;

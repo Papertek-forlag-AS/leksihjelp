@@ -101,12 +101,25 @@
   // ── Init ──
   init();
 
+  // Phase 27: cached exam-mode flag. Updated on init + storage.onChanged.
+  let examMode = false;
+
   async function init() {
     await initI18n();
-    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'lexiPaused']);
+    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'lexiPaused', 'examMode']);
     currentLang = stored.language || 'en';
     enabled = stored.predictionEnabled === true;
     lexiPaused = stored.lexiPaused || false;
+    examMode = !!stored.examMode;
+
+    // Live-toggle awareness for examMode.
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'local') return;
+      if ('examMode' in changes) {
+        examMode = !!changes.examMode.newValue;
+        if (examMode) hideDropdown();
+      }
+    });
 
     await loadRecentWords(currentLang);
     createDropdown();
@@ -490,6 +503,13 @@
 
   function runPrediction(el) {
     if (lexiPaused) return;
+    // Phase 27: word-prediction dropdown is non-exam-safe (wordPrediction.dropdown).
+    // Bail at the entry point so no work runs and the dropdown never opens.
+    if (examMode) {
+      const helper = self.__lexiExam;
+      const allowed = helper ? helper.isSurfaceSafe('wordPrediction.dropdown', true) : false;
+      if (!allowed) { hideDropdown(); return; }
+    }
     activeElement = el;
     const { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords, numberContext, definitenessContext } = getTextContext(el);
 

@@ -81,6 +81,8 @@
   let isAuthenticated = false;
   let currentLang = 'en'; // Target language (from settings)
   let selectedText = '';
+  // Phase 27: cached exam-mode flag. Updated on init + storage.onChanged.
+  let examMode = false;
   let readingLang = 'target'; // 'target' or 'no' - which language to read aloud
   let widgetWordSpans = []; // DOM span references for each word in the widget text area
   let wordCharPositions = []; // [{word, charStart, charEnd}] for timing sync
@@ -103,15 +105,28 @@
 
   async function init() {
     await initI18n();
-    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize', 'fontSizeMode']);
+    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'lexiPaused', 'widgetFontSize', 'fontSizeMode', 'examMode']);
     isAuthenticated = stored.isAuthenticated || false;
     currentLang = stored.language || 'en';
     lexiPaused = stored.lexiPaused || false;
     widgetFontSize = stored.widgetFontSize || FONT_SIZE_DEFAULT;
     fontSizeMode = stored.fontSizeMode || 'auto';
+    examMode = !!stored.examMode;
 
     createWidget();
+    applyExamModeClass();
     attachListeners();
+
+    // Phase 27: live-toggle awareness. When examMode flips, hide any open
+    // widget/lookup and re-apply the amber border class.
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== 'local') return;
+      if ('examMode' in changes) {
+        examMode = !!changes.examMode.newValue;
+        applyExamModeClass();
+        if (examMode && widget) hideWidget();
+      }
+    });
 
     // Listen for setting changes and context menu actions
     chrome.runtime.onMessage.addListener((msg) => {
@@ -151,6 +166,22 @@
     return new Promise(resolve => {
       chrome.storage.local.get(keys, resolve);
     });
+  }
+
+  // Phase 27: apply/remove the exam-mode amber-border class on the widget root.
+  // CSS hook lives in styles/content.css (.lh-exam-mode) and ALSO ships to
+  // lockdown via the sync pipeline (see CLAUDE.md "Downstream consumer").
+  function applyExamModeClass() {
+    if (!widget) return;
+    widget.classList.toggle('lh-exam-mode', !!examMode);
+  }
+
+  // Phase 27: surface gate using the shared helper. Returns true when the
+  // surface should be SHOWN (safe), false when it should be hidden.
+  function isSurfaceAllowed(surfaceId) {
+    const helper = self.__lexiExam;
+    if (!helper) return !examMode; // fail-safe: if helper missing, off==allowed, on==hidden
+    return helper.isSurfaceSafe(surfaceId, examMode);
   }
 
   // ── Widget DOM ──
@@ -409,6 +440,11 @@
   }
 
   function showWidget() {
+    // Phase 27: TTS widget is non-exam-safe (widget.tts). Bail out so the
+    // widget never appears during exams. The amber border class is only
+    // visible if a non-suppressed surface (none today) ever rendered.
+    if (!isSurfaceAllowed('widget.tts')) return;
+
     stopPlayback();
     removeWordHighlight();
     updateVoiceOptions();
@@ -1029,6 +1065,9 @@
 
   // ── Inline dictionary lookup (context menu) ──
   async function showInlineLookup(word) {
+    // Phase 27: inline dictionary is non-exam-safe (widget.dictionary). Bail
+    // before any DOM/network work so the lookup never appears during exams.
+    if (!isSurfaceAllowed('widget.dictionary')) return;
     // Load dictionary from vocab store or bundled file
     let dict = null;
     try {
