@@ -493,7 +493,8 @@
     activeElement = el;
     const { currentWord, previousWord, hasModalVerb, detectedTense, expectedPOS, genderContext, posStrength, caseContext, previousTwoWords, numberContext, definitenessContext } = getTextContext(el);
 
-    if (currentWord && currentWord.length >= 3) {
+    const minChars = (currentLang === 'nb' || currentLang === 'nn' || currentLang === 'de') ? 4 : 3;
+    if (currentWord && currentWord.length >= minChars) {
       // Detect pronoun context for smart verb suggestions
       const pronounContext = getPronounContext(previousWord);
       // Infinitive markers (å, zu) only count when immediately preceding

@@ -292,9 +292,23 @@
       findingsCount: findings.length,
     });
     lastCheckedText = text;
-    if (findings.length === 0) { lastFindings = []; hideOverlay(); return; }
+    if (findings.length === 0) {
+      lastFindings = [];
+      hideOverlay();
+      if (pendingAdvanceIdx >= 0) {
+        pendingAdvanceIdx = -1;
+        showToast(t('spell_toast_review_done') || 'Ferdig revidert ✓');
+      }
+      return;
+    }
     lastFindings = findings;
     renderMarkers(findings);
+    if (pendingAdvanceIdx >= 0) {
+      const idx = Math.min(pendingAdvanceIdx, findings.length - 1);
+      pendingAdvanceIdx = -1;
+      showPopover(idx, findings[idx]);
+      scrollMarkerIntoView(idx);
+    }
   }
 
   function dismissKey(f) {
@@ -316,6 +330,7 @@
   let lastCheckedText = '';
   let spellCheckBtn = null;
   const dismissed = new Set();
+  let pendingAdvanceIdx = -1;
   let posRefreshRaf = null;
   // Phase 5 / UX-02: popup Settings toggle subscriber. Plan 04 writes the key;
   // this module hydrates on init and re-reads via chrome.storage.onChanged so
@@ -526,6 +541,7 @@
 
     popover.querySelector('.lh-spell-decline').addEventListener('click', () => {
       dismissed.add(dismissKey(finding));
+      pendingAdvanceIdx = activePopoverIdx;
       hidePopover();
       runCheck();
     });
@@ -547,7 +563,12 @@
           url: window.location.href,
         }).then(ok => {
           reportBtn.textContent = ok ? '✓ Sendt' : '✗ Feil';
-          setTimeout(() => { hidePopover(); runCheck(); }, 1200);
+          setTimeout(() => {
+            dismissed.add(dismissKey(finding));
+            pendingAdvanceIdx = activePopoverIdx;
+            hidePopover();
+            runCheck();
+          }, 1200);
         });
       });
     }
@@ -766,8 +787,8 @@
     } else {
       applyFixTextarea(finding);
     }
+    pendingAdvanceIdx = activePopoverIdx;
     hidePopover();
-    // Re-check so markers refresh with updated offsets.
     schedule();
   }
 

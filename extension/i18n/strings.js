@@ -248,6 +248,7 @@ const _STRINGS = {
     spell_check_btn_title: 'Sjekk rettskriving med Leksihjelp',
     spell_toast_errors: '{count} feil funnet',
     spell_toast_clean: 'Ser bra ut!',
+    spell_toast_review_done: 'Ferdig revidert ✓',
 
     // ── Context menus (service worker) ──
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
@@ -476,6 +477,7 @@ const _STRINGS = {
     spell_check_btn_title: 'Sjekk rettskriving med Leksihjelp',
     spell_toast_errors: '{count} feil funne',
     spell_toast_clean: 'Ser bra ut!',
+    spell_toast_review_done: 'Ferdig revidert ✓',
 
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
@@ -698,6 +700,7 @@ const _STRINGS = {
     spell_check_btn_title: 'Check spelling with Leksihjelp',
     spell_toast_errors: '{count} errors found',
     spell_toast_clean: 'Looks good!',
+    spell_toast_review_done: 'Review complete ✓',
 
     ctx_lookup: 'Look up "%s" in Leksihjelp',
     ctx_read: 'Read "%s" with Leksihjelp',
