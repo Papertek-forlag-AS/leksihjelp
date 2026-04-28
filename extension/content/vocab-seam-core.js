@@ -1444,6 +1444,51 @@
     // Deponent entries also include all their regular conjugation forms.
     const sPassivForms = (lang === 'nb' || lang === 'nn') ? buildSPassivIndex(raw, lang) : new Map();
 
+    // Phase 26-01: Preposition pedagogy index for the de-prep-case rule's
+    // "Lær mer" popover panel. Maps lowercase preposition surface forms to
+    // their `pedagogy` block as authored in papertek-vocabulary's
+    // generalbank entries (case, summary, explanation, examples,
+    // wechsel_pair, colloquial_note, contraction).
+    //
+    // Each lexicon entry's wordId looks like `durch_prep` / `ueber_prep` /
+    // `am_prep`. We strip the `_prep` suffix and key the Map by:
+    //   - the bare wordId stem (lowercase) — matches ASCII surface forms
+    //     the student types when they avoid umlauts (durch, am, ueber, fuer)
+    //   - the umlaut variant (ueber → über, fuer → für, waehrend → während)
+    //     so a student typing the canonical German form also resolves
+    //   - entry.word lowercased — covers any further canonical forms the
+    //     lexicon might carry (defensive — usually equals the stem)
+    //
+    // NOT feature-gated: pedagogy lookup must work regardless of which
+    // grammar features the user has enabled (mirrors the lookup-index
+    // philosophy enforced by check-spellcheck-features).
+    const prepPedagogy = new Map();
+    if (raw && raw.generalbank) {
+      const ASCII_TO_UMLAUT = [
+        ['ue', 'ü'],
+        ['oe', 'ö'],
+        ['ae', 'ä'],
+      ];
+      for (const [wordId, entry] of Object.entries(raw.generalbank)) {
+        if (!entry || !entry.pedagogy) continue;
+        const keys = new Set();
+        // Stem from wordId: drop trailing _prep / _adv / etc.
+        const stem = String(wordId).replace(/_[a-z]+$/i, '').toLowerCase();
+        if (stem) keys.add(stem);
+        // Umlaut expansion of the stem (lexicon stores ASCII; students may type either).
+        for (const [ascii, umlaut] of ASCII_TO_UMLAUT) {
+          if (stem.includes(ascii)) {
+            keys.add(stem.replaceAll(ascii, umlaut));
+          }
+        }
+        // Canonical surface form from entry.word (covers any divergence).
+        if (entry.word) keys.add(String(entry.word).toLowerCase());
+        for (const k of keys) {
+          if (k && !prepPedagogy.has(k)) prepPedagogy.set(k, entry.pedagogy);
+        }
+      }
+    }
+
     const redundancyPhrases = [];  // [{ trigger, suggestion }]
     if (raw && raw.phrasebank) {
       for (const [id, entry] of Object.entries(raw.phrasebank)) {
@@ -1507,6 +1552,10 @@
       // Phase 19: s-passive form recognition index for NB/NN.
       // Maps s-passive forms to { baseVerb, isDeponent }. Empty for non-NB/NN.
       sPassivForms,
+      // Phase 26-01: preposition pedagogy lookup for the "Lær mer" panel
+      // surfaced by the de-prep-case rule. Empty Map for non-DE languages
+      // (or when the bundled vocab pre-dates the pedagogy authoring pass).
+      prepPedagogy,
       // Phase 16: compound decomposition bound to this index's nounGenus and lang.
       decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
       // Phase 17-05: strict decomposition using lemma-only genus map (no inflected forms).
