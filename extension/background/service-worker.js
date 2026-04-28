@@ -79,9 +79,13 @@ chrome.runtime.onInstalled.addListener((details) => {
   //   Leave a breadcrumb for support diagnostics.
   // reason === 'update' from 3.x → check for stale data via vocab-updater.
   chrome.storage.local.get(['targetLanguages', 'language'], (result) => {
-    const langs = Array.isArray(result.targetLanguages) && result.targetLanguages.length
+    const targetLangs = Array.isArray(result.targetLanguages) && result.targetLanguages.length
       ? result.targetLanguages
       : (result.language ? [result.language] : ['de']);
+    const langs = [...targetLangs];
+    for (const uiLang of ['nb', 'nn', 'en']) {
+      if (!langs.includes(uiLang)) langs.push(uiLang);
+    }
     const bootstrap = self.__lexiVocabBootstrap;
     const updater = self.__lexiVocabUpdater;
     const reason = details.reason;

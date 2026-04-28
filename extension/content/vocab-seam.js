@@ -124,9 +124,18 @@
     try {
       const url = chrome.runtime.getURL(`data/${lang}.json`);
       const res = await fetch(url);
-      if (!res.ok) return null;
+      if (!res.ok) throw new Error('not bundled');
       return await res.json();
     } catch (e) {
+      // Bundled file missing (v2→v3 migration) — try IndexedDB/API
+      const store = window.__lexiVocabStore || self.__lexiVocabStore;
+      if (store) {
+        try {
+          const cached = await store.getCachedLanguage(lang);
+          if (cached) return cached;
+          return await store.downloadLanguage(lang, () => {});
+        } catch { /* fall through */ }
+      }
       console.warn('[lexi-vocab] bundled load failed for ' + lang, e);
       return null;
     }

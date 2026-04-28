@@ -1036,9 +1036,14 @@
         dict = await window.__lexiVocabStore.getCachedLanguage(currentLang);
       }
       if (!dict) {
-        const url = chrome.runtime.getURL(`data/${currentLang}.json`);
-        const res = await fetch(url);
-        dict = await res.json();
+        try {
+          const url = chrome.runtime.getURL(`data/${currentLang}.json`);
+          const res = await fetch(url);
+          if (res.ok) dict = await res.json();
+        } catch { /* bundled file missing */ }
+      }
+      if (!dict && window.__lexiVocabStore) {
+        try { dict = await window.__lexiVocabStore.downloadLanguage(currentLang, () => {}); } catch { /* */ }
       }
     } catch (e) { console.warn('Leksihjelp: inline lookup dictionary load failed', e); return; }
 
@@ -1050,9 +1055,14 @@
           nbDict = await window.__lexiVocabStore.getCachedLanguage('nb');
         }
         if (!nbDict) {
-          const nbUrl = chrome.runtime.getURL('data/nb.json');
-          const nbRes = await fetch(nbUrl);
-          nbDict = await nbRes.json();
+          try {
+            const nbUrl = chrome.runtime.getURL('data/nb.json');
+            const nbRes = await fetch(nbUrl);
+            if (nbRes.ok) nbDict = await nbRes.json();
+          } catch { /* bundled file missing */ }
+        }
+        if (!nbDict && window.__lexiVocabStore) {
+          try { nbDict = await window.__lexiVocabStore.downloadLanguage('nb', () => {}); } catch { /* */ }
         }
       } catch (e) { /* NB enrichment is best-effort */ }
     }

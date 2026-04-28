@@ -19,6 +19,8 @@ let grammarFeatures = null; // Grammar features metadata
 let enabledFeatures = new Set(); // Set of enabled feature IDs
 let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
 let nbEnrichmentIndex = new Map(); // Phase 21.1: NB entry ID → {falseFriends, senses} for target enrichment
+let nbTranslationIndex = new Map(); // target entry ID → Norwegian word (via _generatedFrom)
+let nbIdToTargetIndex = new Map(); // NB entry ID → target entry ID (for nb-fr style reverse links)
 let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compound decomposition when foreign lang selected
 let currentIndexes = null; // Phase 24: indexes from buildIndexes for predictCompound
 let compoundNavStack = []; // Phase 24 COMP-03: navigation stack for compound back-navigation
@@ -45,6 +47,11 @@ function getTranslation(entry) {
       const resolved = noDictionary[bank]?.[link.primary];
       if (resolved?.word) return resolved.word;
     }
+  }
+  // Resolve via nbTranslationIndex (built from NB _generatedFrom)
+  if (entry._wordId && nbTranslationIndex.size > 0) {
+    const nbWord = nbTranslationIndex.get(entry._wordId);
+    if (nbWord) return nbWord;
   }
   return '';
 }
@@ -545,22 +552,70 @@ async function loadDictionary(lang) {
       try {
         noDictionary = await loadLanguageData(noLang);
         noWords = noDictionary ? flattenBanks(noDictionary) : [];
-        // Build reverse index: target entry ID → NB entry (for falseFriends/senses enrichment)
+        // Build reverse indexes from NB dictionary
         nbEnrichmentIndex = new Map();
+        nbTranslationIndex = new Map();
+        const langPrefix = `${currentLang}-nb/`;
+        const nbIdToWord = new Map();
         if (noDictionary) {
           for (const bank of Object.keys(noDictionary)) {
             const bankData = noDictionary[bank];
             if (!bankData || typeof bankData !== 'object') continue;
             for (const [id, entry] of Object.entries(bankData)) {
               if (id.startsWith('_')) continue;
-              if (!entry.falseFriends && !entry.senses) continue;
-              const link = entry.linkedTo?.[currentLang];
-              if (!link?.primary) continue;
-              const existing = nbEnrichmentIndex.get(link.primary);
-              nbEnrichmentIndex.set(link.primary, {
-                falseFriends: [...(existing?.falseFriends || []), ...(entry.falseFriends || [])],
-                senses: [...(existing?.senses || []), ...(entry.senses || [])]
-              });
+              if (entry.word) nbIdToWord.set(id, entry.word);
+              // Enrichment index (falseFriends/senses via linkedTo)
+              if ((entry.falseFriends || entry.senses) && entry.linkedTo?.[currentLang]?.primary) {
+                const linkId = entry.linkedTo[currentLang].primary;
+                const existing = nbEnrichmentIndex.get(linkId);
+                nbEnrichmentIndex.set(linkId, {
+                  falseFriends: [...(existing?.falseFriends || []), ...(entry.falseFriends || [])],
+                  senses: [...(existing?.senses || []), ...(entry.senses || [])]
+                });
+              }
+              // Direction 1: NB→target (e.g. NB _generatedFrom "de-nb/bank:chef_noun")
+              if (entry._generatedFrom && entry.word) {
+                const parts = entry._generatedFrom.split(',');
+                for (const part of parts) {
+                  const trimmed = part.trim();
+                  if (trimmed.startsWith(langPrefix)) {
+                    const colonIdx = trimmed.indexOf(':');
+                    if (colonIdx !== -1) {
+                      const targetId = trimmed.substring(colonIdx + 1);
+                      if (!nbTranslationIndex.has(targetId)) {
+                        nbTranslationIndex.set(targetId, entry.word);
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        // Direction 2: target→NB (e.g. FR _generatedFrom "nb-fr/bank:skole_noun")
+        const revPrefix = `nb-${currentLang}/`;
+        nbIdToTargetIndex = new Map();
+        if (dictionary) {
+          for (const bank of Object.keys(dictionary)) {
+            const bankData = dictionary[bank];
+            if (!bankData || typeof bankData !== 'object') continue;
+            for (const [id, entry] of Object.entries(bankData)) {
+              if (id.startsWith('_') || !entry._generatedFrom) continue;
+              const parts = entry._generatedFrom.split(',');
+              for (const part of parts) {
+                const trimmed = part.trim();
+                if (trimmed.startsWith(revPrefix)) {
+                  const colonIdx = trimmed.indexOf(':');
+                  if (colonIdx !== -1) {
+                    const nbId = trimmed.substring(colonIdx + 1);
+                    const nbWord = nbIdToWord.get(nbId);
+                    if (nbWord) {
+                      if (!nbTranslationIndex.has(id)) nbTranslationIndex.set(id, nbWord);
+                      if (!nbIdToTargetIndex.has(nbId)) nbIdToTargetIndex.set(nbId, id);
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -573,12 +628,16 @@ async function loadDictionary(lang) {
         noWords = [];
         noNounGenusMap = new Map();
         nbEnrichmentIndex = new Map();
+        nbTranslationIndex = new Map();
+        nbIdToTargetIndex = new Map();
       }
     } else {
       noDictionary = null;
       noWords = [];
       noNounGenusMap = new Map();
       nbEnrichmentIndex = new Map();
+      nbTranslationIndex = new Map();
+      nbIdToTargetIndex = new Map();
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -620,9 +679,15 @@ async function loadLanguageData(lang) {
   try {
     const url = chrome.runtime.getURL(`data/${lang}.json`);
     const res = await fetch(url);
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error('not bundled');
     return res.json();
   } catch {
+    // Bundled file missing (v2→v3 migration) — download from API as last resort
+    if (window.__lexiVocabStore) {
+      try {
+        return await window.__lexiVocabStore.downloadLanguage(lang, () => {});
+      } catch { return null; }
+    }
     return null;
   }
 }
@@ -983,9 +1048,14 @@ async function loadGrammarFeatures(lang) {
     }
 
     // Fall back to bundled file
-    const url = chrome.runtime.getURL(`data/grammarfeatures-${lang}.json`);
-    const res = await fetch(url);
-    grammarFeatures = await res.json();
+    let gfData = null;
+    try {
+      const url = chrome.runtime.getURL(`data/grammarfeatures-${lang}.json`);
+      const res = await fetch(url);
+      if (res.ok) gfData = await res.json();
+    } catch { /* bundled file missing */ }
+    if (!gfData) return;
+    grammarFeatures = gfData;
 
     // Load enabled features from storage, default to basic preset
     const stored = await chromeStorageGet('enabledGrammarFeatures');
@@ -1308,25 +1378,43 @@ function performSearch(query) {
     }
   }
 
-  // Phase 1b: Two-way lookup via Norwegian dictionary's linkedTo
-  // When searching no→target, also search nb words and follow links to target language
+  // Phase 1b: Two-way lookup via Norwegian dictionary
+  // When searching no→target, search nb words and follow links to target language
   if (searchDirection === 'no-target' && noWords.length > 0) {
     const directEntryWords = new Set(directResults.map(r => r.entry.word?.toLowerCase()));
+    const langPrefix = `${currentLang}-nb/`;
 
     for (const noEntry of noWords) {
       if (!noEntry.word || !noEntry.word.toLowerCase().includes(q)) continue;
-      if (!noEntry.linkedTo) continue;
 
-      // Follow link to the target language
-      const link = noEntry.linkedTo[currentLang];
-      if (!link?.primary) continue;
+      // Try linkedTo first
+      let targetWordId = noEntry.linkedTo?.[currentLang]?.primary || null;
 
-      // Find the target entry in our dictionary
-      const targetWordId = link.primary;
+      // Direction 1: NB _generatedFrom has {currentLang}-nb/ (DE, ES)
+      if (!targetWordId && noEntry._generatedFrom) {
+        const parts = noEntry._generatedFrom.split(',');
+        for (const part of parts) {
+          const trimmed = part.trim();
+          if (trimmed.startsWith(langPrefix)) {
+            const colonIdx = trimmed.indexOf(':');
+            if (colonIdx !== -1) {
+              targetWordId = trimmed.substring(colonIdx + 1);
+              break;
+            }
+          }
+        }
+      }
+
+      // Direction 2: target _generatedFrom has nb-{currentLang}/ (FR)
+      if (!targetWordId && noEntry._wordId && nbIdToTargetIndex.size > 0) {
+        targetWordId = nbIdToTargetIndex.get(noEntry._wordId);
+      }
+
+      if (!targetWordId) continue;
+
       for (const bank of Object.keys(BANK_TO_POS)) {
         const targetEntry = dictionary[bank]?.[targetWordId];
         if (targetEntry && !directEntryWords.has(targetEntry.word?.toLowerCase())) {
-          // Build a result entry with the Norwegian word as context
           const flatEntry = allWords.find(w => w.word === targetEntry.word);
           if (flatEntry) {
             directResults.push({
@@ -1457,7 +1545,10 @@ function performSearch(query) {
         if (fieldB.startsWith(q) && !fieldA.startsWith(q)) return 1;
         return fieldA.localeCompare(fieldB);
       });
-      renderResults(fallbackResults.slice(0, 50), { fallbackHint: true });
+      const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
+      const searchLang = searchDirection === 'no-target' ? langName(noLang) : langName(currentLang);
+      const resultLang = searchDirection === 'no-target' ? langName(currentLang) : langName(noLang);
+      renderResults(fallbackResults.slice(0, 50), { fallbackHint: true, searchLang, resultLang });
       return;
     }
   }
@@ -1525,7 +1616,6 @@ function renderCompoundSuggestions(query, predictions) {
   });
 }
 
-// Phase 24: look up a component word's translation from allWords/dictionary
 function getComponentTranslation(word) {
   const lw = word.toLowerCase();
   for (const entry of allWords) {
@@ -1660,7 +1750,7 @@ function renderResults(results, options = {}) {
     : '';
 
   const hintHtml = options.fallbackHint
-    ? `<div class="fallback-hint">${t('search_fallback_hint')}</div>`
+    ? `<div class="fallback-hint">${t('search_fallback_hint', { searchLang: options.searchLang || '', resultLang: options.resultLang || '' })}</div>`
     : '';
 
   container.innerHTML = backLinkHtml + hintHtml + results.map(({ entry, inflectionHint }) => {
@@ -2323,14 +2413,19 @@ async function initSettings() {
       // Switch language
       currentLang = lang;
       await chromeStorageSet({ language: currentLang });
-      await loadDictionary(currentLang);
-      await loadGrammarFeatures(currentLang);
-      initGrammarSettings();
-      chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+      try {
+        await loadDictionary(currentLang);
+        await loadGrammarFeatures(currentLang);
+        initGrammarSettings();
+        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+      } catch (e) {
+        console.error('Language switch failed:', e);
+      }
 
-      // Update status after download completes
+      // Update status and rebuild lang switcher so dictionary view is ready
       btn.classList.remove('downloading');
       await updateLanguageListStatus();
+      await buildLangSwitcher();
     });
   });
 
@@ -2414,9 +2509,9 @@ function initNav() {
   });
 
   settingsBtn.addEventListener('click', () => showView('settings'));
-  settingsBackBtn.addEventListener('click', () => {
+  settingsBackBtn.addEventListener('click', async () => {
     showView('dictionary');
-    buildLangSwitcher(); // Refresh in case a new language was downloaded
+    await buildLangSwitcher();
   });
 }
 

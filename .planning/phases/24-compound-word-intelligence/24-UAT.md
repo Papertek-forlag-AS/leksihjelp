@@ -1,9 +1,9 @@
 ---
-status: complete
+status: diagnosed
 phase: 24-compound-word-intelligence
 source: [24-01-SUMMARY.md, 24-02-SUMMARY.md]
 started: 2026-04-28T12:00:00Z
-updated: 2026-04-28T12:10:00Z
+updated: 2026-04-28T12:15:00Z
 ---
 
 ## Current Test
@@ -49,14 +49,27 @@ skipped: 0
 ## Gaps
 
 - truth: "Translation guess assembles Norwegian translations of components with + separator"
-  status: failed
+  status: fixed
   reason: "User reported: pass partly. The translation of chefstudenten is chef + studenten."
   severity: major
   test: 4
-  root_cause: ""
-  artifacts: []
-  missing: []
-  debug_session: ""
+  root_cause: "getComponentTranslation only searched allWords (German dict) via getTranslation, which returns empty for German entries lacking linkedTo.nb. Needed reverse lookup through noWords to find NB entries linking back to the German entry ID."
+  artifacts:
+    - path: "extension/popup/popup.js"
+      issue: "getComponentTranslation missing reverse NB lookup"
+  missing:
+    - "Reverse lookup via noWords linkedTo[currentLang].primary"
+
+## Additional Fixes (discovered during testing)
+
+### Critical: v2→v3 migration breaks NB/NN/EN loading
+- root_cause: "Phase 23 removed bundled data files but bootstrap only downloaded target languages (DE/ES/FR). NB/NN/EN treated as 'bundled' but files gone."
+- files fixed:
+  - extension/background/service-worker.js — bootstrap now includes nb, nn, en
+  - extension/popup/popup.js — loadLanguageData falls back to API download
+  - extension/popup/popup.js — loadGrammarFeatures handles missing bundled file gracefully
+  - extension/content/vocab-seam.js — loadBundledRaw falls back to vocab-store
+  - extension/content/floating-widget.js — inline lookup falls back to vocab-store
 
 ## Notes (not Phase 24 gaps)
 
