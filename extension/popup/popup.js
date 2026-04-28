@@ -2477,11 +2477,31 @@ async function initExamMode() {
     // Hide non-exam-safe popup surfaces when exam mode is on.
     // Surface IDs map to DOM nodes here. We use [hidden] (display:none) so
     // toggling restores cleanly without re-running expensive init paths.
+    //
+    // The popup document does NOT load spell-check-core.js (that pulls the
+    // whole rule engine), so self.__lexiExam may be undefined here. We fall
+    // through to a direct registry lookup using __lexiExamRegistry, which
+    // popup.html loads as exam-registry.js. Without the registry the gate
+    // would default to "hide everything in exam mode" — too aggressive now
+    // that policy says static reference surfaces (popup.search,
+    // grammarFeaturesPopover, …) are explicitly exam-safe.
     const helper = (self.__lexiExam) || null;
+    function isSafeBySurface(surfaceId) {
+      if (!examMode) return true;
+      if (helper && typeof helper.isSurfaceSafe === 'function') {
+        return helper.isSurfaceSafe(surfaceId, examMode);
+      }
+      const reg = self.__lexiExamRegistry;
+      if (Array.isArray(reg)) {
+        const e = reg.find(x => x && x.id === surfaceId);
+        return e ? !!(e.exam && e.exam.safe === true) : false;
+      }
+      // Last-resort fail-safe: hide when exam is on and we can't decide.
+      return false;
+    }
     function gateNode(node, surfaceId) {
       if (!node) return;
-      const safe = helper ? helper.isSurfaceSafe(surfaceId, examMode) : !examMode;
-      node.hidden = !safe;
+      node.hidden = !isSafeBySurface(surfaceId);
     }
     // popup.search → entire dictionary view (search input + results)
     gateNode(document.getElementById('view-dictionary'), 'popup.search');
