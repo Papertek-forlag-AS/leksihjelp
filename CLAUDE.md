@@ -358,25 +358,29 @@ After making changes to files under `extension/`:
 5. Verify the offline surface stays network-silent (SC-06):
    - `npm run check-network-silence` — must exit 0. Scans `extension/content/spell-check*.js`, `extension/content/spell-rules/**`, and `extension/content/word-prediction.js` for `fetch(`, `XMLHttpRequest`, `sendBeacon`, and `http(s)://` URL literals. Whitelists `chrome.runtime.getURL` and `chrome-extension://` (local-resource access is fine). Exits 1 on any forbidden hit with file:line output.
    - Philosophically: this gate enforces the "free + offline forever" promise on the extension side. A PR that adds `fetch(...)` to a spell rule for "just one loan-word list" breaks the gate and gets the attention it needs.
-6. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
+6. Verify every user-visible feature carries a valid exam-mode marker (Phase 27):
+   - `npm run check-exam-marker` — must exit 0. Loads every rule under `extension/content/spell-rules/` and every entry in `extension/exam-registry.js` and asserts each carries a well-formed `exam: { safe: boolean, reason: string, category?: string }` marker (registry entries require `category`; rules accept it as optional but validate the closed set when present). Exits 1 with a per-rule diagnostic on any deviation.
+   - Paired self-test: `npm run check-exam-marker:test` — belt-and-braces against the gate going silently permissive. Plants malformed/missing/invalid-category scratch rules (gate must fire on each) and a well-formed scratch rule (gate must pass).
+   - Why this gate exists: Phase 27 ships exam-mode as a school-deployment feature. A new feature added without an exam marker would silently default to "unclassified" — the worst failure mode for an exam-compliance feature, since teachers couldn't trust that the extension is in fact suppressing every non-exam-safe surface. This gate ensures every shipped feature is explicitly classified.
+7. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
    - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
-7. Verify the bundled NB baseline stays under its 200 KB cap (GATES-02):
+8. Verify the bundled NB baseline stays under its 200 KB cap (GATES-02):
    - `npm run check-baseline-bundle-size` — must exit 0. Measures `extension/data/nb-baseline.json` (the source pretty-printed file). If it exceeds 200 KB, exits 1 with a fix hint. If the file does not exist yet (pre-plan-23-03 state), exits 0 with a "skipped — informational" message; the gate becomes meaningful once the baseline builder ships.
    - Paired self-test: `npm run check-baseline-bundle-size:test` — plants an oversized (250 KB) baseline → gate fires; plants a 5 KB well-formed baseline → gate passes; removes the file → gate skips. Backs up and restores any real baseline in try/finally.
    - Why this gate exists: Phase 23 removed bundled language data from the extension zip (data is now fetched at runtime via the sanctioned bootstrap path — see step 5 carve-out). The NB baseline is the only data file that ships in the zip going forward, so a regression that bloats it directly affects install footprint. This gate catches that class of regression early, before the packaged-zip gate (step 6) would.
-8. Validate benchmark flip-rate expectations (INFRA-08):
+9. Validate benchmark flip-rate expectations (INFRA-08):
    - `npm run check-benchmark-coverage` — must exit 0. Reads `benchmark-texts/expectations.json` and validates that each expected rule fires on the corresponding benchmark line. Prints per-priority-band (P1/P2/P3) flip-rate percentages. Passes when expectations are empty (nothing to check) or all expectations are met.
    - Paired self-test: `npm run check-benchmark-coverage:test` — plants a broken expectation (nonexistent rule on a benchmark line), confirms the gate fires; restores the empty (valid) manifest, confirms the gate passes.
-9. Validate governance data bank presence and shape (INFRA-09):
+10. Validate governance data bank presence and shape (INFRA-09):
    - `npm run check-governance-data` — must exit 0. Checks that governance data banks (`registerbank`, `collocationbank`, `phrasebank`) in bundled vocab have correct structural shape when present. Passes when no governance banks exist yet (pre-data-sync state).
    - Paired self-test: `npm run check-governance-data:test` — plants a data file with a broken registerbank (missing required fields), confirms the gate fires; plants a well-formed data file, confirms the gate passes; verifies baseline (no governance data) also passes.
-10. Update the version in all three places:
+11. Update the version in all three places:
     - `extension/manifest.json` (the Chrome extension version)
     - `package.json` (the project version)
     - `backend/public/index.html` (the landing page display version)
-11. Rebuild the zip: `npm run package`
-12. Upload the zip as a GitHub Release asset
+12. Rebuild the zip: `npm run package`
+13. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 

@@ -35,6 +35,8 @@
     "check-bundle-size": "node scripts/check-bundle-size.js",
     "check-baseline-bundle-size": "node scripts/check-baseline-bundle-size.js",
     "check-baseline-bundle-size:test": "node scripts/check-baseline-bundle-size.test.js",
+    "check-exam-marker": "node scripts/check-exam-marker.js",
+    "check-exam-marker:test": "node scripts/check-exam-marker.test.js",
     "check-explain-contract": "node scripts/check-explain-contract.js",
     "check-explain-contract:test": "node scripts/check-explain-contract.test.js",
     "check-pedagogy-shape": "node scripts/check-pedagogy-shape.js",
