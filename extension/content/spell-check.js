@@ -138,6 +138,7 @@
     document.addEventListener('keyup', onInput, true);
     document.addEventListener('focusin', onFocus, true);
     document.addEventListener('blur', onBlur, true);
+    document.addEventListener('keydown', onKeyDown, true);
     window.addEventListener('scroll', schedulePositionRefresh, true);
     window.addEventListener('resize', schedulePositionRefresh);
     document.addEventListener('click', onDocClick, true);
@@ -173,8 +174,7 @@
     }
     activeEl = el;
     warn('focus → active', { tag: el.tagName, cls: el.className, ce: el.isContentEditable });
-    ensureButton();
-    positionButton();
+    updateButtonVisibility();
     schedule();
   }
 
@@ -183,6 +183,7 @@
     const el = resolveEditable(e.target);
     if (!el) return;
     activeEl = el;
+    updateButtonVisibility();
     schedule();
   }
 
@@ -200,6 +201,13 @@
         hideButton();
       }
     }, 250);
+  }
+
+  function onKeyDown(e) {
+    if (e.key !== 'Tab' || !popover || activePopoverIdx < 0) return;
+    e.preventDefault();
+    if (e.shiftKey) navigateToPrevMarker();
+    else navigateToNextMarker();
   }
 
   function onDocClick(e) {
@@ -676,6 +684,19 @@
     spellCheckBtn.style.left = (rect.right + window.scrollX - 42) + 'px';
   }
 
+  const MIN_TEXT_LENGTH_FOR_BUTTON = 20;
+
+  function updateButtonVisibility() {
+    if (!activeEl) return;
+    const { text } = readInput(activeEl);
+    if (text.length >= MIN_TEXT_LENGTH_FOR_BUTTON) {
+      ensureButton();
+      positionButton();
+    } else {
+      hideButton();
+    }
+  }
+
   function hideButton() {
     if (spellCheckBtn) {
       spellCheckBtn.remove();
@@ -686,17 +707,37 @@
   function manualCheck() {
     if (!activeEl) return;
     const { text } = readInput(activeEl);
-    // No-flash optimization: skip re-check if text unchanged and markers rendered
-    if (text === lastCheckedText && (lastFindings.length === 0 || markers.length > 0)) {
+    const needsRecheck = text !== lastCheckedText || (lastFindings.length > 0 && markers.length === 0);
+    if (needsRecheck) runCheck();
+
+    if (lastFindings.length > 0 && markers.length > 0) {
+      showPopover(0, lastFindings[0]);
+      scrollMarkerIntoView(0);
+    } else {
       showToast(lastFindings.length > 0
         ? t('spell_toast_errors', { count: lastFindings.length })
         : t('spell_toast_clean'));
-      return;
     }
-    runCheck();
-    showToast(lastFindings.length > 0
-      ? t('spell_toast_errors', { count: lastFindings.length })
-      : t('spell_toast_clean'));
+  }
+
+  function scrollMarkerIntoView(idx) {
+    if (markers[idx] && markers[idx].el) {
+      markers[idx].el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function navigateToNextMarker() {
+    if (!lastFindings.length || !markers.length) return;
+    const next = (activePopoverIdx + 1) % lastFindings.length;
+    showPopover(next, lastFindings[next]);
+    scrollMarkerIntoView(next);
+  }
+
+  function navigateToPrevMarker() {
+    if (!lastFindings.length || !markers.length) return;
+    const prev = (activePopoverIdx - 1 + lastFindings.length) % lastFindings.length;
+    showPopover(prev, lastFindings[prev]);
+    scrollMarkerIntoView(prev);
   }
 
   function showToast(message) {

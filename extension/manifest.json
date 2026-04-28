@@ -6,7 +6,8 @@
   "permissions": [
     "contextMenus",
     "storage",
-    "identity"
+    "identity",
+    "sidePanel"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -96,6 +97,9 @@
       "match_origin_as_fallback": true
     }
   ],
+  "side_panel": {
+    "default_path": "popup/popup.html"
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {

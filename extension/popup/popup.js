@@ -2516,21 +2516,35 @@ function initNav() {
 }
 
 // ── Pin (Fest) Button ──────────────────────────────────────
-// Chrome extension popups close as soon as focus leaves, so the only way to
-// keep Leksihjelp persistently visible is to open it in a detached popup
-// window. The ?pinned=1 param lets that window hide its own Fest button.
 async function initPinButton() {
   const pinBtn = document.getElementById('pin-btn');
   if (!pinBtn) return;
 
   const params = new URLSearchParams(location.search);
   if (params.get('pinned') === '1') {
-    // Already running in the detached window — hide Fest, it'd just stack.
+    pinBtn.classList.add('hidden');
+    return;
+  }
+
+  // Hide Fest in side panel context (already persistent)
+  if (window.location.pathname.includes('popup.html') && window !== window.top) {
     pinBtn.classList.add('hidden');
     return;
   }
 
   pinBtn.addEventListener('click', async () => {
+    // Prefer Side Panel API (persistent, stays alongside page)
+    if (chrome.sidePanel) {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab) await chrome.sidePanel.open({ tabId: tab.id });
+        window.close();
+        return;
+      } catch (err) {
+        console.warn('Side panel open failed, falling back to popup:', err);
+      }
+    }
+    // Fallback: detached popup window
     try {
       await chrome.windows.create({
         url: chrome.runtime.getURL('popup/popup.html?pinned=1'),
@@ -2542,8 +2556,6 @@ async function initPinButton() {
       console.error('Failed to open pinned window:', err);
       return;
     }
-    // The toolbar popup closes itself as focus moves to the new window,
-    // but call window.close() explicitly so it feels instant.
     window.close();
   });
 }
