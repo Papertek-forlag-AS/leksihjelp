@@ -878,7 +878,12 @@ function buildInflectionIndex(words) {
           }
         } else if (typeof former === 'object') {
           for (const [pronoun, form] of Object.entries(former)) {
-            if (form) addToIndex(form.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
+            if (!form) continue;
+            if (Array.isArray(form)) {
+              for (const f of form) { if (f) addToIndex(f.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`); }
+            } else {
+              addToIndex(form.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
+            }
           }
         }
       }
@@ -887,9 +892,12 @@ function buildInflectionIndex(words) {
     // Noun plurals
     if (entry._bank === 'nounbank') {
       if (entry.plural) {
-        let p = entry.plural;
-        if (p.startsWith('die ')) p = p.slice(4);
-        addToIndex(p.toLowerCase(), entry, 'plural', null);
+        const plurals = Array.isArray(entry.plural) ? entry.plural : [entry.plural];
+        for (let p of plurals) {
+          if (!p || typeof p !== 'string') continue;
+          if (p.startsWith('die ')) p = p.slice(4);
+          addToIndex(p.toLowerCase(), entry, 'plural', null);
+        }
       }
       if (entry.declension?.flertall) {
         for (const variant of [entry.declension.flertall.ubestemt, entry.declension.flertall.bestemt]) {
