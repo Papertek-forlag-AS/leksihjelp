@@ -89,7 +89,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 25: UX Polish & Tech Debt** — Language buttons fixed, Side Panel hardened, spell-check Tab navigation + Aa threshold, prediction min-chars, version alignment, fixture triage (exit 0), schema-mismatch banner, BUNDLED_LANGS cleanup (completed 2026-04-28)
 - [x] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data (completed 2026-04-28)
 - [x] **Phase 27: Exam Mode** — Per-feature exam markers, popup toggle, lockdown teacher-lock, EKSAMENMODUS badge + amber widget border, check-exam-marker release gate (completed 2026-04-28)
-- [ ] **Phase 28: Lockdown Exam-Mode Sync (GAP CLOSURE)** — Close the cross-app half of EXAM-08: extend `lockdown/scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, prepend it to `LEKSI_BUNDLE` in `lockdown/public/js/leksihjelp-loader.js`, refresh stale content scripts, wire teacher-lock writer in lockdown's resource-profile resolver
+- [ ] **Phase 28: Lockdown Webapp Exam-Mode Sync (GAP CLOSURE)** — Close the cross-app half of EXAM-08 for the lockdown **webapp** (stb-lockdown.app / papertek.app): extend `lockdown/scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, prepend it to `LEKSI_BUNDLE` in `lockdown/public/js/leksihjelp-loader.js`, refresh stale content scripts, wire teacher-lock writer in `public/js/writing-test/student/writing-environment.js`
+- [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
 
 ## Phase Details
 
@@ -211,7 +212,24 @@ Plans:
   5. End-to-end: load lockdown locally with exam profile selected → leksihjelp popup shows toggle ON + disabled + locked caption; floating widget shows amber border; word-prediction dropdown does not open; grammar-lookup dots are suppressed but typo dots and dictionary lookups remain
 **Plans:** 1 plan
 Plans:
-- [ ] 28-01-PLAN.md — Lockdown exam-mode integration: sync script + LEKSI_BUNDLE order + re-sync + teacher-lock writer + CLAUDE.md note + human verify
+- [ ] 28-01-PLAN.md — Lockdown webapp exam-mode integration: sync script + LEKSI_BUNDLE order + re-sync + teacher-lock writer + CLAUDE.md note + human verify
+
+### Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE — DEFERRED)
+
+**Status:** Deferred — papertek zero (skriveokt-zero Tauri app) is **not yet pushed to consumers**, so closing EXAM-09 is NOT blocking for v3.1. Tracked here so it isn't lost; will become must-have once skriveokt-zero ships to schools.
+**Goal:** Same gap-closure as Phase 28 but for the **second** downstream consumer that the v3.1 audit blind-spotted: skriveokt-zero, the Tauri desktop app at `/Users/geirforbord/Papertek/lockdown/skriveokt-zero/` that consumes leksihjelp via npm postinstall (`node_modules/@papertek/leksihjelp` → `src/leksihjelp/`). It has its own `scripts/sync-leksihjelp.js`, its own loader (different from the webapp's `LEKSI_BUNDLE` pattern), and its own exam-profile flow.
+**Requirements:** EXAM-09
+**Depends on:** Phase 28 (so the webapp closure is the canonical reference implementation)
+**Cross-repo:** Modifies files inside `lockdown/skriveokt-zero/` and updates leksihjelp `CLAUDE.md`
+
+**Success Criteria** (what must be TRUE when un-deferred):
+  1. `lockdown/skriveokt-zero/scripts/sync-leksihjelp.js` copies `extension/exam-registry.js` into `src/leksihjelp/exam-registry.js`
+  2. Skriveokt-zero's loader injects `exam-registry.js` BEFORE `spell-check-core.js` so `__lexiExamRegistry` exists when consumers initialise
+  3. After running the refreshed sync, `grep -l examMode src/leksihjelp/*.js` returns matches in `floating-widget.js`, `word-prediction.js`, `spell-check.js`
+  4. The Tauri exam-profile path writes `chrome.storage.local.set({ examModeLocked: true, examMode: true })` via the chrome shim when teacher activates exam mode
+  5. End-to-end: launch the skriveokt-zero desktop app with exam mode enabled → toggle disabled with lock caption, badge visible, widget amber border, prediction suppressed, grammar-lookup dots suppressed, typo dots + dictionary lookups remain
+  6. Leksihjelp `CLAUDE.md` "Downstream consumer" section is updated to document BOTH consumers (the webapp + skriveokt-zero), with each consumer's sync path and loader contract listed
+**Plans:** 1 plan (estimated, deferred)
 
 ---
-*Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change); Phase 28 added (lockdown exam-mode sync — gap closure for EXAM-08 from v3.1 audit)*
+*Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change); Phase 28 added (lockdown webapp exam-mode sync — gap closure for EXAM-08 from v3.1 audit); Phase 28.1 added as DEFERRED (skriveokt-zero Tauri sync, EXAM-09 — surfaced during Phase 28 walkthrough as a second downstream consumer; not blocking v3.1 because skriveokt-zero is not yet shipped to consumers)*
