@@ -682,6 +682,8 @@
 
   // ── Manual spell-check button + toast (Phase 18, Plan 02) ──
 
+  let btnFixedPos = null; // {x, y} when user drags; null = auto-position
+
   function ensureButton() {
     if (spellCheckBtn) return;
     spellCheckBtn = document.createElement('button');
@@ -689,10 +691,36 @@
     spellCheckBtn.className = 'lh-spell-check-btn';
     spellCheckBtn.textContent = 'Aa';
     spellCheckBtn.title = t('spell_check_btn_title');
-    spellCheckBtn.addEventListener('mousedown', e => e.preventDefault());
-    spellCheckBtn.addEventListener('click', () => manualCheck());
+
+    let dragState = null;
+    spellCheckBtn.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      dragState = { startX: e.clientX, startY: e.clientY, moved: false };
+      spellCheckBtn.setPointerCapture(e.pointerId);
+    });
+    spellCheckBtn.addEventListener('pointermove', e => {
+      if (!dragState) return;
+      const dx = e.clientX - dragState.startX;
+      const dy = e.clientY - dragState.startY;
+      if (!dragState.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+      dragState.moved = true;
+      const x = clampX(e.clientX - 20);
+      const y = clampY(e.clientY - 14);
+      spellCheckBtn.style.left = x + 'px';
+      spellCheckBtn.style.top = y + 'px';
+      btnFixedPos = { x, y };
+    });
+    spellCheckBtn.addEventListener('pointerup', e => {
+      const wasDrag = dragState && dragState.moved;
+      dragState = null;
+      if (!wasDrag) manualCheck();
+    });
+
     (document.fullscreenElement || document.body).appendChild(spellCheckBtn);
   }
+
+  function clampX(x) { return Math.max(4, Math.min(x, window.innerWidth - 44)); }
+  function clampY(y) { return Math.max(4, Math.min(y, window.innerHeight - 32)); }
 
   function positionButton() {
     if (!activeEl || !spellCheckBtn) return;
@@ -702,8 +730,13 @@
       return;
     }
     spellCheckBtn.style.display = '';
-    spellCheckBtn.style.top = (rect.bottom + window.scrollY - 32) + 'px';
-    spellCheckBtn.style.left = (rect.right + window.scrollX - 42) + 'px';
+    if (btnFixedPos) {
+      spellCheckBtn.style.left = clampX(btnFixedPos.x) + 'px';
+      spellCheckBtn.style.top = clampY(btnFixedPos.y) + 'px';
+    } else {
+      spellCheckBtn.style.left = clampX(rect.right - 42) + 'px';
+      spellCheckBtn.style.top = clampY(rect.bottom - 32) + 'px';
+    }
   }
 
   const MIN_TEXT_LENGTH_FOR_BUTTON = 20;
