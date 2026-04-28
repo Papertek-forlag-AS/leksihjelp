@@ -37,6 +37,8 @@
     "check-baseline-bundle-size:test": "node scripts/check-baseline-bundle-size.test.js",
     "check-explain-contract": "node scripts/check-explain-contract.js",
     "check-explain-contract:test": "node scripts/check-explain-contract.test.js",
+    "check-pedagogy-shape": "node scripts/check-pedagogy-shape.js",
+    "check-pedagogy-shape:test": "node scripts/check-pedagogy-shape.test.js",
     "check-network-silence": "node scripts/check-network-silence.js",
     "check-network-silence:test": "node scripts/check-network-silence.test.js",
     "check-spellcheck-features": "node scripts/check-spellcheck-features.js",
