@@ -406,23 +406,33 @@ The vocabulary API (`papertek-vocabulary.vercel.app`) is a sibling project we co
 - Legacy access code auth coexists with Vipps token auth — both paths work in `tts.js`
 - Firebase service account key is in `.gitignore` — never commit to repo
 
-## Downstream consumer: Papertek Lockdown webapp
+## Downstream consumers: Lockdown webapp + skriveokt-zero
 
-The Papertek lockdown webapp (`/Users/geirforbord/Papertek/lockdown`, deployed to `stb-lockdown.app` and `papertek.app`) re-uses this extension's content scripts, styles, i18n, and data files in a non-extension context (plain web page, no Chrome API). Concretely:
+There are TWO downstream consumers re-using this extension's content scripts, styles, i18n, and data files in non-extension contexts (each via a chrome-API shim, no real Chrome API).
+
+### 1. Lockdown webapp (in production)
+
+`/Users/geirforbord/Papertek/lockdown`, deployed to `stb-lockdown.app` (staging) and `papertek.app` (prod). Re-uses leksihjelp via:
 
 - `extension/content/*.js` → `lockdown/public/leksihjelp/*.js`
+- `extension/exam-registry.js` → `lockdown/public/leksihjelp/exam-registry.js` (Phase 28 / EXAM-08 — must be loaded BEFORE `spell-check-core.js` so `__lexiExamRegistry` exists when consumers initialise; the loader's `LEKSI_BUNDLE` array enforces this order)
 - `extension/styles/content.css` → `lockdown/public/leksihjelp/styles/leksihjelp.css` (renamed)
 - `extension/data/*` → `lockdown/public/leksihjelp/data/`
 - `extension/i18n/*` → `lockdown/public/leksihjelp/i18n/`
 
 Lockdown copies these via `node scripts/sync-leksihjelp.js` (postinstall hook). The dependency is currently `file:../leksihjelp`; once published to GitHub Packages it'll be a versioned `npm install`.
 
+### 2. skriveokt-zero / lockdown-zero (Tauri desktop, NOT yet shipped to consumers)
+
+`/Users/geirforbord/Papertek/lockdown/skriveokt-zero/` — a Tauri desktop sibling that consumes leksihjelp through its own `scripts/sync-leksihjelp.js` (different from the webapp's — it pulls from `node_modules/@papertek/leksihjelp` and renames `spell-rules/` → `rules/`). Synced files land in `src/leksihjelp/`. Phase 27 exam-mode parity (EXAM-09) is tracked as **deferred Phase 28.1** in the leksihjelp roadmap; un-defer when skriveokt-zero starts shipping to schools.
+
 ### Implications for changes here
 
-- **CSS in `extension/styles/content.css`** also ships to lockdown. Don't assume "extension only" — selectors that don't match in the extension context (e.g. `.pdf-text-layer`, used by lockdown's PDF viewer) belong here too if lockdown needs them, since the file is sync'd whole.
-- **Content scripts** (`floating-widget.js`, `word-prediction.js`, `spell-check.js`, etc.) run in lockdown via a Chrome-API shim (`lockdown/public/js/leksihjelp-loader.js`). Avoid hard dependencies on extension-only APIs (e.g. `chrome.tabs`) — keep `chrome.runtime`/`chrome.storage` usage inside what the shim provides (`onMessage`, `sendMessage`, `storage.local.get/set`, `runtime.getURL`).
-- **Bumping `package.json` version** signals a downstream sync is needed. After a change that affects shared files, bump the version (matches the rule for `manifest.json` in the Release Workflow above) so lockdown can pin and audit it.
-- **Lockdown-only quick fixes** to `public/leksihjelp/**` over there are fine for testing, but the canonical change still belongs *here*. The lockdown CLAUDE.md documents the agreement: lockdown ports fixes upstream before merging to its `main` branch.
+- **CSS in `extension/styles/content.css`** also ships to both consumers. Don't assume "extension only" — selectors that don't match in the extension context (e.g. `.pdf-text-layer`, used by lockdown's PDF viewer) belong here too if a downstream consumer needs them, since the file is sync'd whole.
+- **Content scripts** (`floating-widget.js`, `word-prediction.js`, `spell-check.js`, etc.) run downstream via a Chrome-API shim. In the webapp the shim is `lockdown/public/js/leksihjelp-loader.js`; in zero the shim lives alongside the synced files. Avoid hard dependencies on extension-only APIs (e.g. `chrome.tabs`) — keep `chrome.runtime`/`chrome.storage` usage inside what the shims provide (`onMessage`, `sendMessage`, `storage.local.get/set`, `runtime.getURL`).
+- **`extension/exam-registry.js`** is also a synced surface (webapp today; zero when EXAM-09 lands). Adding a new entry — i.e. a new non-rule UI surface getting an exam marker — requires re-running each downstream consumer's sync so the registry stays in step.
+- **Bumping `package.json` version** signals a downstream sync is needed. After a change that affects shared files, bump the version (matches the rule for `manifest.json` in the Release Workflow above) so consumers can pin and audit it.
+- **Downstream-only quick fixes** to synced trees over there are fine for testing, but the canonical change still belongs *here*. The downstream CLAUDE.md documents the agreement: ports fixes upstream before merging.
 
 ### When a fix arrives via lockdown's PR
 
