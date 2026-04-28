@@ -119,7 +119,13 @@ Plans:
   8. The 12 accumulated deferred browser visual verification tests from v2.0-v3.0 are executed and documented
   9. Popup subscribes to `lexi:schema-mismatch` and surfaces a "Versjonskonflikt" diagnostic when schema versions diverge
   10. Stale `BUNDLED_LANGS` entries (nn/en) removed from vocab-seam.js
-**Plans**: TBD
+**Plans:** 5 plans
+Plans:
+- [ ] 25-01-PLAN.md — Version alignment + BUNDLED_LANGS cleanup + prediction min-3-chars (DEBT-01, DEBT-05, SPELL-03)
+- [ ] 25-02-PLAN.md — Popup NB/EN/NN buttons + schema-mismatch banner (POPUP-01, DEBT-04)
+- [ ] 25-03-PLAN.md — Spell-check Tab navigation + Aa 20-char threshold (SPELL-01, SPELL-02)
+- [ ] 25-04-PLAN.md — check-fixtures triage: fix or quarantine 5 failing suites (DEBT-02)
+- [ ] 25-05-PLAN.md — Side Panel macOS hardening + 12 deferred browser visual tests (POPUP-02, DEBT-03)
 
 ## Progress
 
@@ -159,4 +165,4 @@ Plans:
 | 25. UX Polish & Tech Debt | v3.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-28 — Phase 24 planned (2 plans in 2 waves)*
+*Roadmap updated: 2026-04-28 — Phase 25 planned (5 plans in 2 waves)*
