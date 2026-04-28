@@ -42,8 +42,9 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 - [x] **EXAM-05**: When exam mode is ON, the popup shows a persistent "EKSAMENMODUS" badge near the logo and the floating widget gains an amber border tint — both visible at-a-glance for teacher walkthrough
 - [x] **EXAM-06**: A new release gate `check-exam-marker` (in `scripts/check-exam-marker.js`) hard-fails CI if any spell-rule file or registry entry is missing the `exam` marker, the marker is malformed (missing `safe` boolean or non-empty `reason` string), or category (when present) is not a recognized value; paired self-test `check-exam-marker.test.js` plants malformed and well-formed rules to prove the gate is not silently permissive
 - [x] **EXAM-07**: All exam-mode UI text (toggle label, EKSAMENMODUS badge, "Slått på av lærer" caption) reads from i18n strings with nb/nn/en variants matching the existing `chrome.storage.local.uiLanguage` mechanism
-- [ ] **EXAM-08**: Cross-app contract (lockdown webapp): `extension/exam-registry.js` and modified `extension/content/*.js` files (gating logic, widget border tint) propagate to the lockdown webapp at `/Users/geirforbord/Papertek/lockdown` via its `scripts/sync-leksihjelp.js` pipeline; `LEKSI_BUNDLE` in `public/js/leksihjelp-loader.js` injects exam-registry.js before consumers; teacher-lock writer in `public/js/writing-test/student/writing-environment.js` writes `chrome.storage.local.{examModeLocked,examMode}` on exam profile (reset 2026-04-28 — v3.1 audit found lockdown webapp half incomplete → reassigned to Phase 28)
-- [ ] **EXAM-09**: Cross-app contract (skriveokt-zero / lockdown-zero Tauri app): same exam-mode propagation as EXAM-08 for the second downstream consumer at `/Users/geirforbord/Papertek/lockdown/skriveokt-zero` — its own `scripts/sync-leksihjelp.js` (npm-postinstall path, pulls from `node_modules/@papertek/leksihjelp`) extended to copy `extension/exam-registry.js` into `src/leksihjelp/`; the Tauri loader equivalent injects it before consumers; refresh stale `src/leksihjelp/*.js` to include Phase 27 `examMode` references; teacher-lock writer wired in the Tauri exam-profile path; CLAUDE.md "Downstream consumer" section updated to document both consumers (added 2026-04-28 — v3.1 audit Phase-28 walkthrough surfaced skriveokt-zero as a second sibling consumer that the original audit treated as singular)
+- [x] **EXAM-08**: Cross-app contract — leksihjelp exam-mode plumbing propagates to the lockdown webapp at `/Users/geirforbord/Papertek/lockdown`: `extension/exam-registry.js` synced to `public/leksihjelp/exam-registry.js`; `LEKSI_BUNDLE` in `public/js/leksihjelp-loader.js` injects it before `spell-check-core.js`; Phase 27 content scripts (`floating-widget.js`, `word-prediction.js`, `spell-check.js`) refreshed downstream with `examMode` runtime gating; leksihjelp `CLAUDE.md` documents both consumers and the load-order rule. Closed 2026-04-28 by Phase 28 (lockdown commit b7a92b4 on staging branch; leksihjelp commit c6aff0f). Teacher-control of the lock — originally bundled into this requirement — split out as EXAM-10.
+- [ ] **EXAM-09**: Cross-app contract (skriveokt-zero / lockdown-zero Tauri app): same exam-mode propagation as EXAM-08 for the second downstream consumer at `/Users/geirforbord/Papertek/lockdown/skriveokt-zero` — its own `scripts/sync-leksihjelp.js` (npm-postinstall path, pulls from `node_modules/@papertek/leksihjelp`) extended to copy `extension/exam-registry.js` into `src/leksihjelp/`; the Tauri loader equivalent injects it before consumers; refresh stale `src/leksihjelp/*.js` to include Phase 27 `examMode` references; teacher-lock writer wired in the Tauri exam-profile path (depends on EXAM-10 product decision)
+- [ ] **EXAM-10**: Teacher-controlled exam-mode lock in the lockdown webapp — when a teacher opts students into "leksihjelp + Phase 27 lock" via a chosen UX (new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` profile vs per-test toggle vs other), `public/js/writing-test/student/writing-environment.js` writes `chrome.storage.local.set({ examModeLocked: true, examMode: true })` and clears both flags on profile transition away. Requires `firestore.rules` enum update (lines 25, 30) + Cloud Functions enum update (`createTest.js`, `toggleResourceAccess.js`) + manual Firebase deploy to both staging-lockdown and lockdown-stb. Assigned to Phase 29. Phase 28 staged plumbing already supports the runtime suppression; this requirement is just the teacher-control surface area.
 
 ### PED (Pedagogy "Lær mer" UI)
 
@@ -123,14 +124,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXAM-05 | Phase 27 | Planned |
 | EXAM-06 | Phase 27 | Planned |
 | EXAM-07 | Phase 27 | Planned |
-| EXAM-08 | Phase 28 | Pending (gap closure — lockdown webapp sync) |
+| EXAM-08 | Phase 28 | Complete (plumbing) — staged on lockdown 2026-04-28 |
 | EXAM-09 | Phase 28.1 | Deferred (skriveokt-zero not yet shipped — not blocking v3.1; un-defer when zero ships to schools) |
+| EXAM-10 | Phase 29 | Pending (teacher-control UX + firestore deploy — split from EXAM-08 during Phase 28 execution) |
 
 **Coverage:**
-- v3.1 requirements: 29 total (4 COMP + 2 POPUP + 3 SPELL + 5 DEBT + 6 PED + 9 EXAM)
-- Mapped to phases: 29
+- v3.1 requirements: 30 total (4 COMP + 2 POPUP + 3 SPELL + 5 DEBT + 6 PED + 10 EXAM)
+- Mapped to phases: 30
 - Unmapped: 0
-- Pending (blocking): 1 (EXAM-08 → Phase 28)
+- Pending (active): 1 (EXAM-10 → Phase 29; teacher-control UX for lockdown exam-mode lock)
 - Deferred (not blocking v3.1): 1 (EXAM-09 → Phase 28.1; skriveokt-zero Tauri app not yet shipped to consumers)
 
 ---
