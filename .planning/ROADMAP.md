@@ -182,12 +182,14 @@ Plans:
 ### Phase 27: Exam Mode
 
 **Goal:** Make Leksihjelp installable on Norwegian school exam machines. Add a per-feature `examSafe` marker to every user-visible feature (spellcheck rules, dictionary popup, conjugation tables, TTS, word prediction, pedagogy panels, Fest/side-panel surfaces). Add a student-facing exam-mode toggle in the popup that disables every non-exam-safe feature so the extension behaves close to the browser's native spellcheck (which exam regulations permit). Add a teacher-controlled exam-mode lock in the lockdown variant so students cannot turn it off mid-exam. Add a release gate (`check-exam-marker`) that fails CI if any feature ships without an `examSafe` declaration. Cross-app: lockdown sibling project must consume the new marker via the existing sync pipeline.
-**Requirements**: TBD (run /gsd:plan-phase 27 to derive)
+**Requirements**: EXAM-01, EXAM-02, EXAM-03, EXAM-04, EXAM-05, EXAM-06, EXAM-07, EXAM-08
 **Depends on:** Phase 26
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 27 to break down)
+- [ ] 27-01-PLAN.md — Marker contract: exam:{safe,reason,category} on every spell-rule + new exam-registry.js for non-rule surfaces
+- [ ] 27-02-PLAN.md — check-exam-marker release gate + paired self-test + CLAUDE.md Release Workflow update
+- [ ] 27-03-PLAN.md — Runtime gating: popup toggle + lockdown lock + suppression in spell-check/widget/prediction + EKSAMENMODUS badge + amber widget border + i18n + version bump (human verify)
 
 ---
 *Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change)*
