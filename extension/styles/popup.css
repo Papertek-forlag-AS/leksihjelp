@@ -1133,12 +1133,20 @@ body {
   vertical-align: middle;
 }
 
+.exam-mode-badge[hidden] {
+  display: none;
+}
+
 .exam-mode-locked-caption {
   display: inline-block;
   margin-top: 4px;
   font-size: 12px;
   font-style: italic;
   color: var(--text-muted);
+}
+
+.exam-mode-locked-caption[hidden] {
+  display: none;
 }
 
 #exam-mode-toggle:disabled ~ .toggle-slider {
