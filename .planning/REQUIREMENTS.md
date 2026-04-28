@@ -42,7 +42,7 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 - [x] **EXAM-05**: When exam mode is ON, the popup shows a persistent "EKSAMENMODUS" badge near the logo and the floating widget gains an amber border tint — both visible at-a-glance for teacher walkthrough
 - [x] **EXAM-06**: A new release gate `check-exam-marker` (in `scripts/check-exam-marker.js`) hard-fails CI if any spell-rule file or registry entry is missing the `exam` marker, the marker is malformed (missing `safe` boolean or non-empty `reason` string), or category (when present) is not a recognized value; paired self-test `check-exam-marker.test.js` plants malformed and well-formed rules to prove the gate is not silently permissive
 - [x] **EXAM-07**: All exam-mode UI text (toggle label, EKSAMENMODUS badge, "Slått på av lærer" caption) reads from i18n strings with nb/nn/en variants matching the existing `chrome.storage.local.uiLanguage` mechanism
-- [x] **EXAM-08**: Cross-app contract: `extension/styles/content.css` and modified `extension/content/*.js` files (gating logic, widget border tint) propagate to lockdown via the existing `scripts/sync-leksihjelp.js` pipeline; CLAUDE.md Release Workflow documents the new `check-exam-marker` step and `package.json` version bump signals lockdown to re-pin
+- [ ] **EXAM-08**: Cross-app contract: `extension/styles/content.css` and modified `extension/content/*.js` files (gating logic, widget border tint) propagate to lockdown via the existing `scripts/sync-leksihjelp.js` pipeline; CLAUDE.md Release Workflow documents the new `check-exam-marker` step and `package.json` version bump signals lockdown to re-pin (reset 2026-04-28 — v3.1 audit found lockdown half incomplete: `extension/exam-registry.js` not synced, `LEKSI_BUNDLE` does not inject it, content scripts stale, teacher-lock writer missing → reassigned to Phase 28)
 
 ### PED (Pedagogy "Lær mer" UI)
 
@@ -122,12 +122,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXAM-05 | Phase 27 | Planned |
 | EXAM-06 | Phase 27 | Planned |
 | EXAM-07 | Phase 27 | Planned |
-| EXAM-08 | Phase 27 | Planned |
+| EXAM-08 | Phase 28 | Pending (gap closure — lockdown sync) |
 
 **Coverage:**
-- v3.1 requirements: 20 total (14 v3.1 polish + 6 pedagogy UI)
-- Mapped to phases: 20
+- v3.1 requirements: 28 total (4 COMP + 2 POPUP + 3 SPELL + 5 DEBT + 6 PED + 8 EXAM)
+- Mapped to phases: 28
 - Unmapped: 0
+- Pending (gap closure): 1 (EXAM-08 → Phase 28)
 
 ---
-*Requirements updated: 2026-04-28 — Phase 25 closed, Phase 26 (Lær mer pedagogy UI) added*
+*Requirements updated: 2026-04-28 — Phase 25 closed, Phase 26 (Lær mer pedagogy UI) added; v3.1 audit reset EXAM-08 → reassigned to Phase 28 (lockdown exam-mode sync)*

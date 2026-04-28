@@ -88,6 +88,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 24: Compound Word Intelligence** — Popup search suggests compounds, displays pedagogical notes, back-navigation, and qualified translation guesses (completed 2026-04-27)
 - [x] **Phase 25: UX Polish & Tech Debt** — Language buttons fixed, Side Panel hardened, spell-check Tab navigation + Aa threshold, prediction min-chars, version alignment, fixture triage (exit 0), schema-mismatch banner, BUNDLED_LANGS cleanup (completed 2026-04-28)
 - [x] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data (completed 2026-04-28)
+- [x] **Phase 27: Exam Mode** — Per-feature exam markers, popup toggle, lockdown teacher-lock, EKSAMENMODUS badge + amber widget border, check-exam-marker release gate (completed 2026-04-28)
+- [ ] **Phase 28: Lockdown Exam-Mode Sync (GAP CLOSURE)** — Close the cross-app half of EXAM-08: extend `lockdown/scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, prepend it to `LEKSI_BUNDLE` in `lockdown/public/js/leksihjelp-loader.js`, refresh stale content scripts, wire teacher-lock writer in lockdown's resource-profile resolver
 
 ## Phase Details
 
@@ -177,7 +179,9 @@ Plans:
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
 | 24. Compound Word Intelligence | 2/2 | Complete    | 2026-04-27 | - |
 | 25. UX Polish & Tech Debt | v3.1 | 5/5 | Complete | 2026-04-28 |
-| 26. "Lær mer" Pedagogy UI | 3/3 | Complete   | 2026-04-28 | - |
+| 26. "Lær mer" Pedagogy UI | v3.1 | 3/3 | Complete | 2026-04-28 |
+| 27. Exam Mode | v3.1 | 3/3 | Complete | 2026-04-28 |
+| 28. Lockdown Exam-Mode Sync (GAP) | v3.1 | 0/1 | Pending | - |
 
 ### Phase 27: Exam Mode
 
@@ -191,5 +195,21 @@ Plans:
 - [ ] 27-02-PLAN.md — check-exam-marker release gate + paired self-test + CLAUDE.md Release Workflow update
 - [ ] 27-03-PLAN.md — Runtime gating: popup toggle + lockdown lock + suppression in spell-check/widget/prediction + EKSAMENMODUS badge + amber widget border + i18n + version bump (human verify)
 
+### Phase 28: Lockdown Exam-Mode Sync (GAP CLOSURE)
+
+**Goal:** Close the lockdown-side half of EXAM-08 so exam mode actually deploys on stb-lockdown.app / papertek.app. The v3.1 audit found that `extension/exam-registry.js` is not in the sync pipeline, `LEKSI_BUNDLE` in lockdown's loader does not inject it, the synced content scripts predate Phase 27 (no `examMode` references), and no lockdown code writes `chrome.storage.local.examModeLocked` for teacher control.
+**Requirements**: EXAM-08
+**Depends on:** Phase 27
+**Gap Closure:** Closes the EXAM-08 partial from `.planning/v3.1-MILESTONE-AUDIT.md`
+**Cross-repo:** Modifies the lockdown sibling project at `/Users/geirforbord/Papertek/lockdown` (not the leksihjelp tree)
+
+**Success Criteria** (what must be TRUE):
+  1. `lockdown/scripts/sync-leksihjelp.js` copies `extension/exam-registry.js` into `lockdown/public/leksihjelp/exam-registry.js`
+  2. `lockdown/public/js/leksihjelp-loader.js` `LEKSI_BUNDLE` array includes `'leksihjelp/exam-registry.js'` ahead of `'leksihjelp/spell-check-core.js'` so `host.__lexiExamRegistry` is defined before any consumer initialises
+  3. After running the refreshed sync, `grep -l examMode lockdown/public/leksihjelp/*.js` returns matches in `floating-widget.js`, `word-prediction.js`, and `spell-check.js` (proving Phase 27 commits are present)
+  4. Lockdown's resource-profile / writing-test resolver writes `chrome.storage.local.set({ examModeLocked: true, examMode: true })` when the teacher selects an exam profile, so the popup's `Slått på av lærer` caption activates inside lockdown
+  5. End-to-end: load lockdown locally with exam profile selected → leksihjelp popup shows toggle ON + disabled + locked caption; floating widget shows amber border; word-prediction dropdown does not open; grammar-lookup dots are suppressed but typo dots and dictionary lookups remain
+**Plans:** 1 plan (estimated)
+
 ---
-*Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change)*
+*Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change); Phase 28 added (lockdown exam-mode sync — gap closure for EXAM-08 from v3.1 audit)*
