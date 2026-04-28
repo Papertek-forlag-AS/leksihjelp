@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Polish & Intelligence
-status: completed
-last_updated: "2026-04-27T22:37:08.187Z"
-last_activity: 2026-04-28 -- Plan 24-02 complete (compound popup UX)
+milestone: v3.2
+milestone_name: Lær mer Pedagogy UI
+status: in_progress
+last_updated: "2026-04-28T00:00:00.000Z"
+last_activity: 2026-04-28 -- Plan 26-02 complete (check-pedagogy-shape gate)
 progress:
   total_phases: 1
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
 ---
 
 # Session State
@@ -23,13 +23,13 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 ## Position
 
-**Milestone:** v3.1 Polish & Intelligence
-**Phase:** 24 of 25 (Compound Word Intelligence) -- COMPLETE
-**Plan:** 2 of 2 complete
-**Status:** Milestone complete
-**Last activity:** 2026-04-28 -- Plan 24-02 complete (compound popup UX)
+**Milestone:** v3.2 Lær mer Pedagogy UI
+**Phase:** 26 (Lær mer Pedagogy UI) -- IN PROGRESS
+**Plan:** 1 of 3 complete (26-02 done; 26-01 and 26-03 pending)
+**Status:** In progress
+**Last activity:** 2026-04-28 -- Plan 26-02 complete (check-pedagogy-shape gate landed informational, ready to flip green once 26-01 wires de-prep-case)
 
-Progress: [██████████] 100% (Phase 24)
+Progress: [███░░░░░░░] 33% (Phase 26)
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 24 = feature work (COMP), Phase 25 = polish + debt (POPUP + SPELL + DEBT)
 - 24-01: Simple filter scan over nounGenus keys for compound prediction
 - 24-02: Exact decomposition before fallback search; simple translation concatenation for guess; decomposeCompound as verification
+- 26-02: Use env-var injection (LEXI_PEDAGOGY_GATE_EXTRA_TARGETS) for self-test target injection instead of regex source mutation; gate stays informational pre-26-01
 
 ### Pending Todos
 
@@ -61,4 +62,4 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 24-02-PLAN.md (compound popup UX). Phase 24 complete. Ready for Phase 25.
+Stopped at: Completed 26-02-PLAN.md (check-pedagogy-shape release gate + paired self-test). Plans 26-01 (de-prep-case wiring) and 26-03 (Lær mer popover UI) remain.

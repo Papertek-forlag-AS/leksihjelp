@@ -40,7 +40,7 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 - [ ] **PED-03**: For Wechselpräpositionen the expanded panel additionally shows the motion (Akk) vs location (Dat) pair side-by-side or stacked, each with sentence + translation + note
 - [ ] **PED-04**: Where the lexicon entry has a `colloquial_note`, the expanded panel surfaces it as a friendly aside (italic / lighter visual treatment) — never as a correction
 - [ ] **PED-05**: All popover and panel text adapts to the user's chosen UI language (nb / nn / en) read from `chrome.storage.local.uiLanguage`, with `nb` fallback when missing
-- [ ] **PED-06**: Pedagogy data ships in the bundled `extension/data/de.json` (offline-first per SC-06) — `scripts/sync-vocab.js` copies the `pedagogy` field from generalbank, and `npm run check-bundle-size` continues to pass under the 20 MiB packaged-zip cap
+- [x] **PED-06**: Pedagogy data ships in the bundled `extension/data/de.json` (offline-first per SC-06) — `scripts/sync-vocab.js` copies the `pedagogy` field from generalbank, and `npm run check-bundle-size` continues to pass under the 20 MiB packaged-zip cap
 
 ## Future Requirements
 
@@ -103,7 +103,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PED-03 | Phase 26 | Pending |
 | PED-04 | Phase 26 | Pending |
 | PED-05 | Phase 26 | Pending |
-| PED-06 | Phase 26 | Pending |
+| PED-06 | Phase 26 | Complete |
 
 **Coverage:**
 - v3.1 requirements: 20 total (14 v3.1 polish + 6 pedagogy UI)
