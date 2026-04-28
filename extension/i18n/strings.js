@@ -273,6 +273,12 @@ const _STRINGS = {
     correct_label: 'Korrekt',
     incorrect_label: 'Feil',
     colloquial_aside_prefix: '💬 ',
+
+    // ── Exam mode (Phase 27) ──
+    examModeLabel: 'Eksamenmodus',
+    examModeBadge: 'EKSAMENMODUS',
+    examModeLockedCaption: 'Slått på av lærer',
+    examModeDescription: 'Skjuler funksjoner som går utover nettleserens innebygde stavekontroll. Bruk under eksamen.',
   },
 
   // ──────────────────────────────────────────────────────────
@@ -514,6 +520,12 @@ const _STRINGS = {
     correct_label: 'Korrekt',
     incorrect_label: 'Feil',
     colloquial_aside_prefix: '💬 ',
+
+    // ── Exam mode (Phase 27) ──
+    examModeLabel: 'Eksamensmodus',
+    examModeBadge: 'EKSAMENSMODUS',
+    examModeLockedCaption: 'Slått på av lærar',
+    examModeDescription: 'Gøymer funksjonar som går utover nettlesaren si innebygde stavekontroll. Bruk under eksamen.',
   },
 
   // ──────────────────────────────────────────────────────────
@@ -751,6 +763,12 @@ const _STRINGS = {
     correct_label: 'Correct',
     incorrect_label: 'Incorrect',
     colloquial_aside_prefix: '💬 ',
+
+    // ── Exam mode (Phase 27) ──
+    examModeLabel: 'Exam mode',
+    examModeBadge: 'EXAM MODE',
+    examModeLockedCaption: 'Locked by teacher',
+    examModeDescription: 'Hides features beyond the browser\'s built-in spell check. Use during exams.',
   }
 };
 

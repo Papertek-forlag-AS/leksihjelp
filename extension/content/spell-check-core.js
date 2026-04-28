@@ -474,4 +474,47 @@
   const host = typeof self !== 'undefined' ? self : globalThis;
   host.__lexiSpellCore = api;
   host.__lexiSpellRules = host.__lexiSpellRules || [];
+
+  // ── Phase 27: Exam-mode helper (single source of truth) ──
+  // Used by spell-check.js, floating-widget.js, word-prediction.js, popup.js
+  // to gate non-exam-safe surfaces and rules. Reads markers from rule objects
+  // and from host.__lexiExamRegistry (defined in extension/exam-registry.js).
+  // Fail-safe: unknown surface IDs return false (hidden) when exam mode is on.
+  host.__lexiExam = host.__lexiExam || {
+    isSurfaceSafe(surfaceId, examMode) {
+      if (!examMode) return true;
+      const reg = (host.__lexiExamRegistry) || [];
+      const e = reg.find(x => x && x.id === surfaceId);
+      return e ? e.exam && e.exam.safe === true : false; // unknown surface = fail-safe (hidden)
+    },
+    isRuleSafe(rule, examMode) {
+      if (!examMode) return true;
+      return !!(rule && rule.exam && rule.exam.safe === true);
+    },
+    isExplainSafe(rule, examMode) {
+      if (!examMode) return true;
+      if (!rule || !rule.explain || !rule.explain.exam) return this.isRuleSafe(rule, examMode);
+      return rule.explain.exam.safe === true;
+    },
+    /**
+     * Read chrome.storage.local.examMode (default false). Promise resolves
+     * to a boolean. Degrades gracefully when chrome.storage is unavailable
+     * (Node tests, some lockdown shim contexts) — defaults to false (off).
+     */
+    getExamMode() {
+      return new Promise(resolve => {
+        try {
+          if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) {
+            resolve(false);
+            return;
+          }
+          chrome.storage.local.get(['examMode'], (res) => {
+            resolve(!!(res && res.examMode));
+          });
+        } catch (_) {
+          resolve(false);
+        }
+      });
+    },
+  };
 })();

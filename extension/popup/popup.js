@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadGrammarFeatures(currentLang);
   initSearch();
   initSettings();
+  initExamMode();
   initUiLanguageSettings();
   initGrammarSettings();
   initNav();
@@ -2382,6 +2383,96 @@ function renderAdjectiveComparison(entry) {
 }
 
 // ── Settings ───────────────────────────────────────────────
+// ── Phase 27: Exam mode (toggle, badge, lockdown lock awareness) ───────────
+//
+// Storage keys:
+//   examMode (bool)        — student-controlled toggle, persisted across popup re-opens.
+//   examModeLocked (bool)  — set by lockdown loader when teacher mandates exam mode.
+//                           When true, the toggle renders ON + disabled, and the
+//                           "Slått på av lærer" caption is shown. We also force
+//                           examMode = true defensively in case lockdown set only
+//                           the lock flag.
+//
+// Surfaces hidden in popup when examMode = true (per exam-registry.js):
+//   popup.search           → #search-results (and the search input row)
+//   popup.conjugationTable → conjugation tables in rendered results
+//   popup.ttsButton        → in-result audio buttons
+//   popup.grammarFeaturesPopover → grammar customisation block
+//
+// Implementation choice: we don't tear down the search rendering pipeline; we
+// just hide the dictionary view's main containers via the [hidden] attribute
+// so toggling off restores cleanly without re-running the hydrate path.
+async function initExamMode() {
+  const toggle = document.getElementById('exam-mode-toggle');
+  const badge = document.getElementById('exam-mode-badge');
+  const lockedCaption = document.querySelector('#exam-mode-group .exam-mode-locked-caption');
+  if (!toggle || !badge) return;
+
+  const stored = await new Promise(resolve =>
+    chrome.storage.local.get(['examMode', 'examModeLocked'], resolve)
+  );
+  let examMode = !!stored.examMode;
+  let locked = !!stored.examModeLocked;
+
+  // If locked, force examMode on (defensive) and persist.
+  if (locked && !examMode) {
+    examMode = true;
+    await chromeStorageSet({ examMode: true });
+  }
+
+  applyExamModeUi();
+
+  toggle.addEventListener('change', async (e) => {
+    if (locked) {
+      e.preventDefault();
+      e.target.checked = true;
+      return;
+    }
+    examMode = !!e.target.checked;
+    await chromeStorageSet({ examMode });
+    applyExamModeUi();
+  });
+
+  // Stay in sync across multiple popup instances (e.g. side-panel + popup).
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== 'local') return;
+    if ('examMode' in changes) {
+      examMode = !!changes.examMode.newValue;
+      applyExamModeUi();
+    }
+    if ('examModeLocked' in changes) {
+      locked = !!changes.examModeLocked.newValue;
+      if (locked) examMode = true;
+      applyExamModeUi();
+    }
+  });
+
+  function applyExamModeUi() {
+    toggle.checked = examMode;
+    toggle.disabled = locked;
+    if (lockedCaption) lockedCaption.hidden = !locked;
+    badge.hidden = !examMode;
+
+    // Hide non-exam-safe popup surfaces when exam mode is on.
+    // Surface IDs map to DOM nodes here. We use [hidden] (display:none) so
+    // toggling restores cleanly without re-running expensive init paths.
+    const helper = (self.__lexiExam) || null;
+    function gateNode(node, surfaceId) {
+      if (!node) return;
+      const safe = helper ? helper.isSurfaceSafe(surfaceId, examMode) : !examMode;
+      node.hidden = !safe;
+    }
+    // popup.search → entire dictionary view (search input + results)
+    gateNode(document.getElementById('view-dictionary'), 'popup.search');
+    // popup.grammarFeaturesPopover → grammar settings block (within settings view)
+    const grammarBlock = document.querySelector('#grammar-features-container')?.closest('.settings-group');
+    gateNode(grammarBlock, 'popup.grammarFeaturesPopover');
+    // popup.ttsButton & popup.conjugationTable are rendered as part of search
+    // results, which are already hidden via #view-dictionary above. No-op here
+    // — kept as named gates for future granular control.
+  }
+}
+
 async function initSettings() {
   const codeInput = document.getElementById('setting-access-code');
   const verifyBtn = document.getElementById('verify-code-btn');
