@@ -36,10 +36,10 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 ### PED (Pedagogy "Lær mer" UI)
 
 - [x] **PED-01**: When the de-prep-case rule fires on a flagged preposition that has a `pedagogy` block in the lexicon, the spell-check popover shows a "Lær mer" button alongside the existing suggestion
-- [ ] **PED-02**: Clicking "Lær mer" expands a teaching panel inside the popover showing case label badge, summary, paragraph explanation, and a `correct ✓` / `incorrect ✗` example pair with student-facing note
-- [ ] **PED-03**: For Wechselpräpositionen the expanded panel additionally shows the motion (Akk) vs location (Dat) pair side-by-side or stacked, each with sentence + translation + note
-- [ ] **PED-04**: Where the lexicon entry has a `colloquial_note`, the expanded panel surfaces it as a friendly aside (italic / lighter visual treatment) — never as a correction
-- [ ] **PED-05**: All popover and panel text adapts to the user's chosen UI language (nb / nn / en) read from `chrome.storage.local.uiLanguage`, with `nb` fallback when missing
+- [x] **PED-02**: Clicking "Lær mer" expands a teaching panel inside the popover showing case label badge, summary, paragraph explanation, and a `correct ✓` / `incorrect ✗` example pair with student-facing note
+- [x] **PED-03**: For Wechselpräpositionen the expanded panel additionally shows the motion (Akk) vs location (Dat) pair side-by-side or stacked, each with sentence + translation + note
+- [x] **PED-04**: Where the lexicon entry has a `colloquial_note`, the expanded panel surfaces it as a friendly aside (italic / lighter visual treatment) — never as a correction
+- [x] **PED-05**: All popover and panel text adapts to the user's chosen UI language (nb / nn / en) read from `chrome.storage.local.uiLanguage`, with `nb` fallback when missing
 - [x] **PED-06**: Pedagogy data ships in the bundled `extension/data/de.json` (offline-first per SC-06) — `scripts/sync-vocab.js` copies the `pedagogy` field from generalbank, and `npm run check-bundle-size` continues to pass under the 20 MiB packaged-zip cap
 
 ## Future Requirements
@@ -99,10 +99,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEBT-04 | Phase 25 | Complete |
 | DEBT-05 | Phase 25 | Complete |
 | PED-01 | Phase 26 | Complete |
-| PED-02 | Phase 26 | Pending |
-| PED-03 | Phase 26 | Pending |
-| PED-04 | Phase 26 | Pending |
-| PED-05 | Phase 26 | Pending |
+| PED-02 | Phase 26 | Complete |
+| PED-03 | Phase 26 | Complete |
+| PED-04 | Phase 26 | Complete |
+| PED-05 | Phase 26 | Complete |
 | PED-06 | Phase 26 | Complete |
 
 **Coverage:**

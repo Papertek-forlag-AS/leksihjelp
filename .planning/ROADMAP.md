@@ -87,7 +87,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 
 - [x] **Phase 24: Compound Word Intelligence** — Popup search suggests compounds, displays pedagogical notes, back-navigation, and qualified translation guesses (completed 2026-04-27)
 - [x] **Phase 25: UX Polish & Tech Debt** — Language buttons fixed, Side Panel hardened, spell-check Tab navigation + Aa threshold, prediction min-chars, version alignment, fixture triage (exit 0), schema-mismatch banner, BUNDLED_LANGS cleanup (completed 2026-04-28)
-- [ ] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data
+- [x] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data (completed 2026-04-28)
 
 ## Phase Details
 
@@ -135,7 +135,7 @@ Plans:
   6. Pedagogy data ships in the bundled extension data (offline-first per SC-06) — sync-vocab.js copies the `pedagogy` field from generalbank into extension/data/de.json without bloating it past the 200 KB baseline cap or the 20 MiB packaged-zip cap
   7. A new gate `npm run check-pedagogy-shape` exits 0 when every rule that returns `pedagogy` from `explain()` returns the required fields (case, summary, explanation), and exits 1 otherwise — paired self-test included
   8. The existing `check-explain-contract` gate continues to pass (the optional `pedagogy` field is additive, the required `{nb, nn}` strings stay in place)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 26-01-PLAN.md — Sync-vocab audit + de.json refresh + prepPedagogy index in vocab-seam-core + de-prep-case finding hookup
 - [ ] 26-02-PLAN.md — New check-pedagogy-shape release gate + paired self-test, wired into package.json
@@ -177,7 +177,7 @@ Plans:
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
 | 24. Compound Word Intelligence | 2/2 | Complete    | 2026-04-27 | - |
 | 25. UX Polish & Tech Debt | v3.1 | 5/5 | Complete | 2026-04-28 |
-| 26. "Lær mer" Pedagogy UI | 2/3 | In Progress|  | - |
+| 26. "Lær mer" Pedagogy UI | 3/3 | Complete   | 2026-04-28 | - |
 
 ---
 *Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI)*
