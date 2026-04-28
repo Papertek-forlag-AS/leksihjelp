@@ -112,6 +112,13 @@
       if (!PREP_CASE || Object.keys(PREP_CASE).length === 0) return [];
 
       const nounGenus = (ctx.vocab && ctx.vocab.nounGenus) || new Map();
+      // Phase 26-01: pedagogy lookup is additive — when the lexicon carries
+      // a pedagogy block for the flagged preposition, attach it to the
+      // finding so spell-check-popover.js can render the "Lær mer" panel.
+      // Contract: explain(finding) still returns {nb, nn} unchanged
+      // (check-explain-contract gate). The pedagogy block rides on the
+      // finding object directly, NOT through explain().
+      const prepPedagogy = (ctx.vocab && ctx.vocab.prepPedagogy) || new Map();
       const findings = [];
 
       for (const sentence of ctx.sentences) {
@@ -180,7 +187,7 @@
 
               const caseDisplayMap = { akkusativ: 'akkusativ', dativ: 'dativ', genitiv: 'genitiv' };
               const caseNames = Array.from(requiredCases).map(function(c) { return caseDisplayMap[c] || c; });
-              findings.push({
+              const f1 = {
                 rule_id: 'de-prep-case',
                 start: ctx.tokens[j].start,
                 end: ctx.tokens[j].end,
@@ -190,7 +197,10 @@
                 requiredCase: caseNames.join('/'),
                 message: ctx.tokens[i].display + ' + ' + ctx.tokens[j].display + ' → ' + suggestion,
                 severity: 'warning',
-              });
+              };
+              const ped1 = prepPedagogy.get((ctx.tokens[i].word || '').toLowerCase());
+              if (ped1) f1.pedagogy = ped1;
+              findings.push(f1);
               break;
             }
 
@@ -203,7 +213,7 @@
                 const suggestion = matchCase(ctx.tokens[j].display, correct);
                 const caseDisplayMap = { akkusativ: 'akkusativ', dativ: 'dativ', genitiv: 'genitiv' };
                 const caseNames = Array.from(requiredCases).map(function(c) { return caseDisplayMap[c] || c; });
-                findings.push({
+                const f2 = {
                   rule_id: 'de-prep-case',
                   start: ctx.tokens[j].start,
                   end: ctx.tokens[j].end,
@@ -213,7 +223,10 @@
                   requiredCase: caseNames.join('/'),
                   message: ctx.tokens[i].display + ' + ' + ctx.tokens[j].display + ' → ' + suggestion,
                   severity: 'warning',
-                });
+                };
+                const ped2 = prepPedagogy.get((ctx.tokens[i].word || '').toLowerCase());
+                if (ped2) f2.pedagogy = ped2;
+                findings.push(f2);
               }
               break;
             }
