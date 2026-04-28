@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: completed
-last_updated: "2026-04-28T17:18:15.084Z"
-last_activity: 2026-04-28 -- Plan 27-03 complete (runtime suppression)
+last_updated: "2026-04-28T20:35:03.584Z"
+last_activity: 2026-04-28 -- Plan 29-01 complete (LEKSIHJELP_EXAM UX surface in lockdown)
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 13
-  completed_plans: 8
+  total_phases: 7
+  completed_phases: 4
+  total_plans: 17
+  completed_plans: 10
 ---
 
 # Session State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Position
 
 **Milestone:** v3.3 Exam Mode
-**Phase:** 27 (Exam Mode) -- COMPLETE
-**Plan:** 3 of 3 complete (27-01, 27-02, 27-03)
-**Status:** Milestone complete
-**Last activity:** 2026-04-28 -- Plan 27-03 complete (runtime suppression)
+**Phase:** 29 (Lockdown Teacher-Lock UX) -- IN PROGRESS
+**Plan:** 1 of 3 complete (29-01)
+**Status:** In progress
+**Last activity:** 2026-04-28 -- Plan 29-01 complete (LEKSIHJELP_EXAM UX surface in lockdown)
 
-Progress: [██████████] 100% (Phase 27)
+Progress: [███░░░░░░░] 33% (Phase 29)
 
 ## Performance Metrics
 
@@ -43,6 +43,7 @@ Progress: [██████████] 100% (Phase 27)
 | 27    | 01   | 18             | 2     | 62    |
 | 27    | 02   | 2              | 2     | 4     |
 | 27    | 03   | 22             | 3     | 12    |
+| 29    | 01   | 12             | 2     | 6     |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 27-03]: Lockdown lock defensively forces examMode=true if only examModeLocked set; toggle disabled+ON; "Slått på av lærer" caption shown
 - [Phase 27-03]: exam-registry.js registered in manifest BEFORE floating-widget/word-prediction/spell-check; without correct order the fail-safe path hides everything even when examMode is off
 - [Phase 27-03]: Version bumped to 2.7.0 (manifest + package + landing page) — signals lockdown to re-pin per CLAUDE.md
+- [Phase 29]: 29-01: Locked LEKSIHJELP_EXAM as fifth resource profile in lockdown — label 'Eksamen med Leksihjelp', envelope { leksihjelp:true, lexinIframe:false, spellEngineOptions:['off'] }; no dual-engine variant
+- [Phase 29]: 29-01: Promoted PROFILE_LABELS_NN and PROFILE_LABELS_EN to first-class exports from shared/resource-profile.js (deviation: plan's <interfaces> overclaimed they existed)
 
 ### Pending Todos
 
@@ -90,4 +93,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 27-03-PLAN.md (runtime suppression — popup toggle, EKSAMENMODUS badge, widget amber border, dual-marker gate for de-prep-case, manifest registration, version 2.7.0). Phase 27 Exam Mode is now complete (3/3 plans). Auto-approved Task 3 human-verify checkpoint per auto-mode policy. Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
+Stopped at: Completed 29-01-PLAN.md (LEKSIHJELP_EXAM resource-profile UX surface in lockdown sibling repo — enum + label maps NB/NN/EN + envelope branch + locale strings + question-builder picker option + classroom-illustrations entry; commit 612bcf1 in lockdown). 29-02 (firestore.rules + Cloud Functions enum + writing-environment writer) and 29-03 (verification) remaining.

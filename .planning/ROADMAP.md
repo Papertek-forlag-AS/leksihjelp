@@ -230,7 +230,7 @@ Plans:
   5. `lockdown/public/js/writing-test/student/writing-environment.js` (`applyExamModeLock`-style hook around the existing BSPC-01 wiring at ~line 953) calls `chrome.storage.local.set({ examModeLocked: true, examMode: true })` when the new profile is active, and clears both flags on profile transition away
   6. End-to-end on `stb-lockdown.app`: teacher selects the new profile → student writing environment loads → leksihjelp popup shows toggle ON + disabled + "Slått på av lærer" caption; floating widget gains amber border; word-prediction dropdown does not open; grammar-lookup dots suppressed; typo dots + dictionary lookups remain. Then teacher unselects → flags clear and surfaces re-enable
   7. Phase 28's dev-only "Simuler lærer-lås" button still works (no regression of the dev path)
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 29-01-PLAN.md — Add LEKSIHJELP_EXAM resource profile + locales + classroom illustration + teacher picker (UX decision checkpoint)
 - [ ] 29-02-PLAN.md — Backend enum (firestore.rules + Cloud Functions) + applyExamModeLock writer + Firebase deploy to staging-lockdown and lockdown-stb
