@@ -4,12 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Gratis nettleserutvidelse for norske elever som lærer tysk, spansk, fransk og engelsk. Ordbok, uttale og ordforslag rett i nettleseren.">
-  <meta property="og:title" content="Leksihjelp - Språkhjelp for elever">
-  <meta property="og:description" content="Gratis nettleserutvidelse med ordbok, uttale og ordforslag for norske elever som lærer fremmedspråk.">
+  <meta name="description" content="Gratis nettleserutvidelse med ordbok, stavekontroll og uttale for norske elever. Støtter tysk, spansk, fransk, engelsk, bokmål og nynorsk.">
+  <meta property="og:title" content="Leksihjelp - Ordbok og stavekontroll for elever">
+  <meta property="og:description" content="Gratis nettleserutvidelse med ordbok, stavekontroll og uttale for norske elever. 6 språk, 54+ grammatikkregler, fungerer offline.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://leksihjelp.no">
-  <title>Leksihjelp - Språkhjelp for elever</title>
+  <title>Leksihjelp - Ordbok og stavekontroll for elever</title>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -380,7 +380,7 @@
 
     .features-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 16px;
       margin-top: 24px;
     }
@@ -489,7 +489,7 @@
       transform: translateY(-2px);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .features-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -596,7 +596,12 @@
         <div class="feature">
           <div class="feature-icon" aria-hidden="true">📖</div>
           <div class="feature-title">Toveis ordbok</div>
-          <div class="feature-desc">Søk opp ord med bøyninger, kjønn og oversettelser. Søk begge veier mellom norsk og fremmedspråk</div>
+          <div class="feature-desc">Søk begge veier mellom alle seks språk. Bøyninger, kjønn, oversettelser og sammensatte ord</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" aria-hidden="true">✅</div>
+          <div class="feature-title">Stavekontroll</div>
+          <div class="feature-desc">54+ grammatikkregler med tydelige forklaringer. Fanger opp skrivefeil, ordstilling, å/og-forveksling og mye mer</div>
         </div>
         <div class="feature">
           <div class="feature-icon" aria-hidden="true">🔊</div>
@@ -604,29 +609,29 @@
           <div class="feature-desc">Hør naturlig uttale med AI-stemmer. Hvert ord utheves mens det leses opp</div>
         </div>
         <div class="feature">
-          <div class="feature-icon" aria-hidden="true">✅</div>
-          <div class="feature-title">Stavekontroll</div>
-          <div class="feature-desc">54+ grammatikkregler for alle seks språk. Fanger opp skrivefeil, ordstilling og grammatikk mens du skriver</div>
-        </div>
-        <div class="feature">
           <div class="feature-icon" aria-hidden="true">✨</div>
           <div class="feature-title">Ordforslag</div>
           <div class="feature-desc">Smart autofullfør som forstår kontekst — riktig verbform etter pronomen, kjønn etter artikkel</div>
         </div>
         <div class="feature">
-          <div class="feature-icon" aria-hidden="true">📝</div>
-          <div class="feature-title">Grammatikk</div>
-          <div class="feature-desc">Velg hvilke grammatiske former du vil se. Tilpass til ditt nivå</div>
+          <div class="feature-icon" aria-hidden="true">🇳🇴</div>
+          <div class="feature-title">Bokmål og nynorsk</div>
+          <div class="feature-desc">Slå opp mellom bokmål og nynorsk. Stavekontroll oppdager dialektblanding og feil målform</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon" aria-hidden="true">🔗</div>
+          <div class="feature-title">Sammensatte ord</div>
+          <div class="feature-desc">Forstår tyske og norske sammensetninger. Bryter dem ned, forklarer kjønn og foreslår oversettelse</div>
         </div>
         <div class="feature">
           <div class="feature-icon" aria-hidden="true">📦</div>
-          <div class="feature-title">Språkpakker</div>
-          <div class="feature-desc">Last ned ordbok og uttale-lyd for offline bruk. Fungerer uten nett</div>
+          <div class="feature-title">Fungerer offline</div>
+          <div class="feature-desc">Last ned språkpakker med ordbok og uttale. Alt fungerer uten nett etter nedlasting</div>
         </div>
         <div class="feature">
-          <div class="feature-icon" aria-hidden="true">⌨️</div>
-          <div class="feature-title">Hurtigtaster</div>
-          <div class="feature-desc">Slå opp ord og les tekst høyt med tastatursnarveier og høyreklikkmeny</div>
+          <div class="feature-icon" aria-hidden="true">📌</div>
+          <div class="feature-title">Sidepanel</div>
+          <div class="feature-desc">Fest ordboken som sidepanel i nettleseren. Alltid synlig mens du skriver</div>
         </div>
       </div>
     </div>
@@ -645,7 +650,7 @@
 
     <div class="card">
       <h2>Gratis og åpen kildekode</h2>
-      <p>Ordbok, ordforslag og grammatikk fungerer offline uten konto. For uttale kan
+      <p>Ordbok, stavekontroll, ordforslag og grammatikk fungerer offline uten konto. For uttale kan
         du velge mellom gratis nettleser-stemmer eller naturlige AI-stemmer via abonnement.</p>
 
       <div class="pricing-table">
@@ -723,18 +728,14 @@
 
     <div class="card"
       style="text-align: center; border: 1px solid rgba(59, 130, 246, 0.3); background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.03) 100%);">
-      <h2 style="justify-content:center;">Veien videre</h2>
-      <p style="margin-bottom: 24px;">Vi jobber med en utvidet ordbank som inkluderer vanlige skrivefeil og akseptable
-        alternative svar — spesielt nyttig for elever med dysleksi. Vi planlegger også anonyme databidrag
-        slik at Leksihjelp kan bli smartere over tid.</p>
-      <a href="/fremtidsplaner" class="github-link"
-        style="display: inline-flex; justify-content: center; background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
+      <h2 style="justify-content:center;">Nytt i versjon 2.5</h2>
+      <p style="margin-bottom: 24px;">Stavekontroll med 54+ regler for alle seks språk, toveis oppslag mellom alle språkpar inkludert bokmål↔nynorsk, sammensatt-ord-intelligens for tyske og norske sammensetninger, sidepanel for å holde ordboken synlig mens du skriver, og mye mer.</p>
+      <a href="https://github.com/Papertek-forlag-AS/leksihjelp" class="github-link"
+        style="display: inline-flex; justify-content: center; background: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600;" target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" style="margin-right: 6px;">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
         </svg>
-        Se våre fremtidsplaner
+        Se endringslogg på GitHub
       </a>
     </div>
 
