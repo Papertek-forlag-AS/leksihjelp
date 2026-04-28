@@ -100,11 +100,16 @@
       }
       if ('examMode' in changes) {
         examMode = !!changes.examMode.newValue;
-        // Hide any open popover and clear markers on toggle; next runCheck()
-        // pass will repaint with the filtered rule set.
+        // Hide any open popover and clear markers on toggle; the immediate
+        // runCheck() below repaints with the filtered rule set so the change
+        // is visually live (no perceptible lag, no reload).
         hideOverlay();
-        // Trigger a re-check so the dot/popover layer reflects the new flag.
-        if (activeEl) schedule();
+        // Cancel any pending debounce so we don't double-run.
+        if (debounceTimer) { clearTimeout(debounceTimer); debounceTimer = null; }
+        // Force lastCheckedText reset so runCheck doesn't short-circuit on
+        // "same text as last time" — the rule set changed, not the text.
+        lastCheckedText = '';
+        if (activeEl) runCheck();
       }
     });
 
