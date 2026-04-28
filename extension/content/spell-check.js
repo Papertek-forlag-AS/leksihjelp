@@ -205,8 +205,28 @@
   }
 
   function onKeyDown(e) {
+    // Phase 26: Esc on an open Lær mer panel collapses the panel without
+    // dismissing the popover. If the panel is closed (or absent), let the
+    // event propagate normally.
+    if (e.key === 'Escape' && popover) {
+      const panel = popover.querySelector('.lh-spell-pedagogy-panel');
+      const btn = popover.querySelector('.lh-spell-laer-mer-btn');
+      if (panel && !panel.hidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        panel.hidden = true;
+        if (btn) {
+          btn.setAttribute('aria-expanded', 'false');
+          btn.textContent = t('laer_mer_button');
+        }
+        if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
+        return;
+      }
+    }
     if (e.key !== 'Tab' || !popover || activePopoverIdx < 0) return;
     e.preventDefault();
+    // Tab advances to next marker — showPopover() rebuilds from scratch, so
+    // the pedagogy panel state resets cleanly. No explicit cleanup needed.
     if (e.shiftKey) navigateToPrevMarker();
     else navigateToNextMarker();
   }
@@ -493,6 +513,7 @@
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
           <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
         </div>
+        ${finding.pedagogy ? `<button type="button" class="lh-spell-laer-mer-btn" aria-expanded="false">${escapeHtml(t('laer_mer_button'))}</button><div class="lh-spell-pedagogy-panel" hidden></div>` : ''}
       `;
       popover.querySelectorAll('.lh-spell-sugg-row').forEach(row => {
         row.addEventListener('click', () => applyFix({ ...finding, fix: row.dataset.fix }));
@@ -536,8 +557,39 @@
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
           <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
         </div>
+        ${finding.pedagogy ? `<button type="button" class="lh-spell-laer-mer-btn" aria-expanded="false">${escapeHtml(t('laer_mer_button'))}</button><div class="lh-spell-pedagogy-panel" hidden></div>` : ''}
       `;
       popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
+    }
+
+    // Phase 26: L\u00e6r mer pedagogy panel \u2014 toggle handler. Builds panel content
+    // lazily on first expand, re-positions popover so the new height is
+    // accommodated, swaps button label between "L\u00e6r mer" and "Lukk".
+    if (finding.pedagogy) {
+      const laerMerBtn = popover.querySelector('.lh-spell-laer-mer-btn');
+      const panel = popover.querySelector('.lh-spell-pedagogy-panel');
+      if (laerMerBtn && panel) {
+        const uiLang = (self.__lexiI18n && typeof self.__lexiI18n.getUiLanguage === 'function')
+          ? self.__lexiI18n.getUiLanguage() : 'nb';
+        let built = false;
+        laerMerBtn.addEventListener('click', () => {
+          if (panel.hidden) {
+            if (!built) {
+              panel.innerHTML = renderPedagogyPanel(finding.pedagogy, uiLang);
+              built = true;
+            }
+            panel.hidden = false;
+            laerMerBtn.setAttribute('aria-expanded', 'true');
+            laerMerBtn.textContent = t('laer_mer_close');
+          } else {
+            panel.hidden = true;
+            laerMerBtn.setAttribute('aria-expanded', 'false');
+            laerMerBtn.textContent = t('laer_mer_button');
+          }
+          // Re-position popover since height changed.
+          if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
+        });
+      }
     }
 
     popover.querySelector('.lh-spell-decline').addEventListener('click', () => {
@@ -657,6 +709,91 @@
     if (result && typeof result[lang] === 'string') return result[lang];
     if (result && typeof result.nb === 'string') return result.nb;
     return escapeHtml(typeLabel(finding.type || finding.rule_id));
+  }
+
+  // Phase 26: render the Lær mer pedagogy panel from the finding.pedagogy
+  // block (DE preposition data sourced via plan 26-01). All text is
+  // student-friendly, resolved per-uiLang with nb fallback. Network-silent —
+  // every string is on the finding object.
+  function renderPedagogyPanel(pedagogy, uiLang) {
+    if (!pedagogy) return '';
+    const pick = (obj) => {
+      if (!obj) return '';
+      return (typeof obj[uiLang] === 'string' && obj[uiLang]) ||
+             (typeof obj.nb === 'string' && obj.nb) ||
+             (typeof obj.en === 'string' && obj.en) || '';
+    };
+    const parts = [];
+
+    // Case badge
+    const caseKey = pedagogy.case || 'akkusativ';
+    const badgeLabel = t('case_label_' + caseKey) || caseKey.toUpperCase();
+    parts.push(`<div class="lh-spell-pedagogy-header">
+      <span class="lh-spell-pedagogy-case-badge lh-spell-pedagogy-case-badge--${escapeAttr(caseKey)}">${escapeHtml(badgeLabel)}</span>`);
+
+    // Optional contraction annotation
+    if (pedagogy.contraction && pedagogy.contraction.from && pedagogy.contraction.article) {
+      parts.push(`<span class="lh-spell-pedagogy-contraction">= ${escapeHtml(pedagogy.contraction.from)} + ${escapeHtml(pedagogy.contraction.article)}</span>`);
+    }
+    parts.push(`</div>`);
+
+    // Summary + explanation paragraphs
+    const summary = pick(pedagogy.summary);
+    if (summary) parts.push(`<p class="lh-spell-pedagogy-summary">${escapeHtml(summary)}</p>`);
+    const explanation = pick(pedagogy.explanation);
+    if (explanation) parts.push(`<p class="lh-spell-pedagogy-explanation">${escapeHtml(explanation)}</p>`);
+
+    // Examples (correct ✓ + incorrect ✗)
+    const examples = Array.isArray(pedagogy.examples) ? pedagogy.examples : [];
+    for (const ex of examples) {
+      if (!ex) continue;
+      const xlate = pick(ex.translation);
+      const note = pick(ex.note);
+      parts.push(`<div class="lh-spell-pedagogy-example">`);
+      if (ex.correct) {
+        parts.push(`<div class="lh-spell-pedagogy-example-correct">✓ <strong>${escapeHtml(ex.correct)}</strong></div>`);
+      }
+      if (ex.incorrect) {
+        parts.push(`<div class="lh-spell-pedagogy-example-incorrect">✗ ${escapeHtml(ex.incorrect)}</div>`);
+      }
+      if (xlate) {
+        parts.push(`<div class="lh-spell-pedagogy-example-translation">${escapeHtml(xlate)}</div>`);
+      }
+      if (note) {
+        parts.push(`<div class="lh-spell-pedagogy-example-note"><em>${escapeHtml(note)}</em></div>`);
+      }
+      parts.push(`</div>`);
+    }
+
+    // Wechselpräposition motion vs location pair
+    if (pedagogy.case === 'wechsel' && pedagogy.wechsel_pair) {
+      const wp = pedagogy.wechsel_pair;
+      const renderSide = (side, cls, labelKey, glyph) => {
+        if (!side) return '';
+        const t1 = pick(side.translation);
+        const n1 = pick(side.note);
+        const out = [];
+        out.push(`<div class="${cls}">`);
+        out.push(`<div class="lh-spell-pedagogy-wechsel-label">${glyph} ${escapeHtml(t(labelKey))}</div>`);
+        if (side.sentence) out.push(`<div class="lh-spell-pedagogy-wechsel-sentence">${escapeHtml(side.sentence)}</div>`);
+        if (t1) out.push(`<div class="lh-spell-pedagogy-example-translation">${escapeHtml(t1)}</div>`);
+        if (n1) out.push(`<div class="lh-spell-pedagogy-example-note"><em>${escapeHtml(n1)}</em></div>`);
+        out.push(`</div>`);
+        return out.join('');
+      };
+      parts.push(`<div class="lh-spell-pedagogy-wechsel">`);
+      parts.push(renderSide(wp.motion,   'lh-spell-pedagogy-wechsel-motion',   'wechsel_motion_label',   '→'));
+      parts.push(renderSide(wp.location, 'lh-spell-pedagogy-wechsel-location', 'wechsel_location_label', '●'));
+      parts.push(`</div>`);
+    }
+
+    // Colloquial note (friendly aside, never warning-flavoured)
+    const colloq = pick(pedagogy.colloquial_note);
+    if (colloq) {
+      parts.push(`<aside class="lh-spell-pedagogy-colloquial">${escapeHtml(t('colloquial_aside_prefix'))}<em>${escapeHtml(colloq)}</em></aside>`);
+    }
+
+    return parts.join('');
   }
 
   function positionPopover(rect) {

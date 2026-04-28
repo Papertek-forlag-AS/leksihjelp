@@ -260,6 +260,19 @@ const _STRINGS = {
     // ── First-run UI language picker ──
     ui_picker_title: 'Velg språk / Choose language',
     ui_picker_note: 'Du kan endre dette senere i innstillinger',
+
+    // ── Lær mer (DE preposition pedagogy) ──
+    laer_mer_button: 'Lær mer',
+    laer_mer_close: 'Lukk',
+    case_label_akkusativ: 'AKKUSATIV',
+    case_label_dativ: 'DATIV',
+    case_label_wechsel: 'VEKSELPREP',
+    case_label_genitiv: 'GENITIV',
+    wechsel_motion_label: 'Bevegelse (akkusativ)',
+    wechsel_location_label: 'Plassering (dativ)',
+    correct_label: 'Korrekt',
+    incorrect_label: 'Feil',
+    colloquial_aside_prefix: '💬 ',
   },
 
   // ──────────────────────────────────────────────────────────
@@ -488,6 +501,19 @@ const _STRINGS = {
 
     ui_picker_title: 'Vel språk / Choose language',
     ui_picker_note: 'Du kan endre dette seinare i innstillingar',
+
+    // ── Lær mer (DE preposition pedagogy) ──
+    laer_mer_button: 'Lær meir',
+    laer_mer_close: 'Lukk',
+    case_label_akkusativ: 'AKKUSATIV',
+    case_label_dativ: 'DATIV',
+    case_label_wechsel: 'VEKSELPREP',
+    case_label_genitiv: 'GENITIV',
+    wechsel_motion_label: 'Rørsle (akkusativ)',
+    wechsel_location_label: 'Plassering (dativ)',
+    correct_label: 'Korrekt',
+    incorrect_label: 'Feil',
+    colloquial_aside_prefix: '💬 ',
   },
 
   // ──────────────────────────────────────────────────────────
@@ -712,6 +738,19 @@ const _STRINGS = {
 
     ui_picker_title: 'Velg språk / Choose language',
     ui_picker_note: 'You can change this later in settings',
+
+    // ── Lær mer (DE preposition pedagogy) ──
+    laer_mer_button: 'Learn more',
+    laer_mer_close: 'Close',
+    case_label_akkusativ: 'ACCUSATIVE',
+    case_label_dativ: 'DATIVE',
+    case_label_wechsel: 'TWO-WAY',
+    case_label_genitiv: 'GENITIVE',
+    wechsel_motion_label: 'Motion (accusative)',
+    wechsel_location_label: 'Location (dative)',
+    correct_label: 'Correct',
+    incorrect_label: 'Incorrect',
+    colloquial_aside_prefix: '💬 ',
   }
 };
 
