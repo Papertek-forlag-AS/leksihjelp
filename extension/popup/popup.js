@@ -2422,6 +2422,27 @@ async function initExamMode() {
 
   applyExamModeUi();
 
+  // Dev-only: simulate Skriveøkt / lockdown teacher-lock toggle.
+  const devBtn = document.getElementById('exam-mode-dev-simulate');
+  if (devBtn) {
+    const renderDevBtn = () => {
+      devBtn.textContent = locked
+        ? 'Fjern lærer-lås (dev)'
+        : 'Simuler lærer-lås (dev)';
+    };
+    renderDevBtn();
+    devBtn.addEventListener('click', async () => {
+      const next = !locked;
+      const patch = { examModeLocked: next };
+      if (!next) patch.examMode = false;
+      await chromeStorageSet(patch);
+      // onChanged listener will update local state + UI.
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && 'examModeLocked' in changes) renderDevBtn();
+    });
+  }
+
   toggle.addEventListener('change', async (e) => {
     if (locked) {
       e.preventDefault();
