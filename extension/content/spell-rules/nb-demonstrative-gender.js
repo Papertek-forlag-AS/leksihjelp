@@ -88,6 +88,9 @@
     check(ctx) {
       const { tokens, vocab, cursorPos, lang } = ctx;
       const nounGenus = vocab.nounGenus || new Map();
+      const verbInfinitive = vocab.verbInfinitive || new Map();
+      // Quantifiers/determiners that don't form a "Det <adj> N" chain.
+      const NON_BRIDGING = new Set(['kvar', 'kver', 'hver', 'hvert', 'kvart']);
       const demGenus = DEM_GENUS[lang];
       if (!demGenus) return [];
       const out = [];
@@ -103,8 +106,19 @@
         const twoAhead = tokens[i + 2];
 
         if (next && nounGenus.has(next.word)) {
+          // Skip when the candidate noun is also a known verb form — "Det
+          // skjer", "Det går", "Det blir" all have homograph noun entries
+          // but the verb reading is the only sensible one after a clausal
+          // "Det/det".
+          if (verbInfinitive.has(next.word)) continue;
           nounTok = next;
-        } else if (twoAhead && nounGenus.has(twoAhead.word)) {
+        } else if (twoAhead && nounGenus.has(twoAhead.word) && next) {
+          // 2-ahead is for adjective-gap ("Det store boka"). Reject when
+          // the intervening word is a verb form ("Det var natt luft") or a
+          // quantifier ("gjør det kvar dag") — the demonstrative isn't
+          // actually modifying the 2-ahead noun in those clauses.
+          if (verbInfinitive.has(next.word)) continue;
+          if (NON_BRIDGING.has(next.word)) continue;
           nounTok = twoAhead;
         }
 

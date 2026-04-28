@@ -12,6 +12,20 @@
   host.__lexiSpellRules = host.__lexiSpellRules || [];
   const { matchCase, escapeHtml } = host.__lexiSpellCore || {};
 
+  // Idiomatic predicate-noun phrases where lowercase is also accepted.
+  // "recht haben" (be right), "angst haben" (be afraid), "schuld sein" (be
+  // at fault), "leid tun" (feel sorry) are conventional fixed expressions
+  // — flagging them disrupts students. Both lowercase and capitalized are
+  // valid post-2006 reform. The auxiliary verb (haben/sein/tun) typically
+  // appears immediately before the noun in main clauses ("Du hast recht")
+  // and after it in subordinate clauses ("dass sie recht hat").
+  const IDIOM_NOUN_PARTNERS = {
+    recht:  new Set(['haben', 'hat', 'hatte', 'hatten', 'hattest', 'hattet', 'hast', 'habt', 'habe', 'hätte', 'hätten', 'hättest', 'hättet']),
+    angst:  new Set(['haben', 'hat', 'hatte', 'hatten', 'hattest', 'hattet', 'hast', 'habt', 'habe']),
+    schuld: new Set(['sein', 'ist', 'war', 'waren', 'bist', 'bin', 'sind']),
+    leid:   new Set(['tun', 'tut', 'tat', 'taten']),
+  };
+
   const rule = {
     id: 'de-capitalization',
     languages: ['de'],
@@ -26,7 +40,7 @@
       const { tokens, vocab, cursorPos, suppressed } = ctx;
       const nounGenus = vocab.nounGenus || new Map();
       const out = [];
-      
+
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
         if (cursorPos != null && cursorPos >= t.start && cursorPos <= t.end + 1) continue;
@@ -34,6 +48,13 @@
 
         // If it's in the noun dictionary and starts with a lowercase letter
         if (nounGenus.has(t.word)) {
+          // Skip idiomatic predicate-noun phrases where lowercase is conventional.
+          const partners = IDIOM_NOUN_PARTNERS[t.word];
+          if (partners) {
+            const prev = tokens[i - 1];
+            const next = tokens[i + 1];
+            if ((prev && partners.has(prev.word)) || (next && partners.has(next.word))) continue;
+          }
           const firstChar = t.display[0];
           if (firstChar && firstChar === firstChar.toLowerCase() && firstChar !== firstChar.toUpperCase()) {
             const capitalized = t.display[0].toUpperCase() + t.display.slice(1);
