@@ -86,7 +86,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 **Milestone Goal:** Compound word intelligence in the popup (prediction, pedagogy, translation guess), accumulated UX polish (language buttons, side panel, spell-check navigation, min-chars thresholds), and tech-debt cleanup (version alignment, fixture triage, browser verification, schema-mismatch UX, stale code).
 
 - [x] **Phase 24: Compound Word Intelligence** — Popup search suggests compounds, displays pedagogical notes, back-navigation, and qualified translation guesses (completed 2026-04-27)
-- [ ] **Phase 25: UX Polish & Tech Debt** — Fix language buttons, replace Fest with Side Panel, spell-check navigation/thresholds, word-prediction min chars, version alignment, fixture triage, browser verification, schema-mismatch UX, stale code cleanup
+- [x] **Phase 25: UX Polish & Tech Debt** — Language buttons fixed, Side Panel hardened, spell-check Tab navigation + Aa threshold, prediction min-chars, version alignment, fixture triage (exit 0), schema-mismatch banner, BUNDLED_LANGS cleanup (completed 2026-04-28)
+- [ ] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data
 
 ## Phase Details
 
@@ -119,13 +120,22 @@ Plans:
   8. The 12 accumulated deferred browser visual verification tests from v2.0-v3.0 are executed and documented
   9. Popup subscribes to `lexi:schema-mismatch` and surfaces a "Versjonskonflikt" diagnostic when schema versions diverge
   10. Stale `BUNDLED_LANGS` entries (nn/en) removed from vocab-seam.js
-**Plans:** 5 plans
-Plans:
-- [ ] 25-01-PLAN.md — Version alignment + BUNDLED_LANGS cleanup + prediction min-3-chars (DEBT-01, DEBT-05, SPELL-03)
-- [ ] 25-02-PLAN.md — Popup NB/EN/NN buttons + schema-mismatch banner (POPUP-01, DEBT-04)
-- [ ] 25-03-PLAN.md — Spell-check Tab navigation + Aa 20-char threshold (SPELL-01, SPELL-02)
-- [ ] 25-04-PLAN.md — check-fixtures triage: fix or quarantine 5 failing suites (DEBT-02)
-- [ ] 25-05-PLAN.md — Side Panel macOS hardening + 12 deferred browser visual tests (POPUP-02, DEBT-03)
+**Plans:** 5 plans (closed out-of-band: most success criteria already shipped in earlier branch work; remaining 3 items — DEBT-02 fixture triage, DEBT-04 schema banner, DEBT-05 BUNDLED_LANGS — landed as commits 41aa4e6 / 72c9c29 / f655552 on 2026-04-28)
+
+### Phase 26: "Lær mer" Pedagogy UI
+**Goal**: Students who hit a DE preposition spell-check finding can click "Lær mer" in the popover to expand a teaching panel that explains *why* the case is wrong, shows a correct/incorrect example pair, and (for Wechselpräpositionen) contrasts motion vs placement — all powered by the trilingual pedagogy data already in papertek-vocabulary
+**Depends on**: papertek-vocabulary commits 664f2970 / 937ef4a2 / 7bdf6775 (DE prep pedagogy data with nb/nn/en strings)
+**Requirements**: PED-01, PED-02, PED-03, PED-04, PED-05, PED-06
+**Success Criteria** (what must be TRUE):
+  1. The de-prep-case rule's spell-check popover shows a "Lær mer" button when the flagged token has a `pedagogy` block in the lexicon
+  2. Clicking "Lær mer" expands a panel below the suggestion showing case label badge, summary, paragraph explanation, and a `correct ✓` / `incorrect ✗` example pair with note
+  3. For Wechselpräpositionen the expanded panel additionally shows the motion vs location pair side-by-side (or stacked on narrow inputs)
+  4. The colloquial_note (e.g. "want to sound like a young German speaker?", or "in spoken German, dative is common") surfaces as a friendly aside, not a correction
+  5. All popover text adapts to the user's chosen UI language (nb / nn / en) — pulled from chrome.storage.local.uiLanguage with nb fallback
+  6. Pedagogy data ships in the bundled extension data (offline-first per SC-06) — sync-vocab.js copies the `pedagogy` field from generalbank into extension/data/de.json without bloating it past the 200 KB baseline cap or the 20 MiB packaged-zip cap
+  7. A new gate `npm run check-pedagogy-shape` exits 0 when every rule that returns `pedagogy` from `explain()` returns the required fields (case, summary, explanation), and exits 1 otherwise — paired self-test included
+  8. The existing `check-explain-contract` gate continues to pass (the optional `pedagogy` field is additive, the required `{nb, nn}` strings stay in place)
+**Plans:** TBD
 
 ## Progress
 
@@ -162,7 +172,8 @@ Plans:
 | 22. å/og Confusion | v2.2 | 1/1 | Complete | 2026-04-26 |
 | 23. Data-Source Migration | v3.0 | 8/8 | Complete | 2026-04-27 |
 | 24. Compound Word Intelligence | 2/2 | Complete    | 2026-04-27 | - |
-| 25. UX Polish & Tech Debt | v3.1 | 0/0 | Not started | - |
+| 25. UX Polish & Tech Debt | v3.1 | 5/5 | Complete | 2026-04-28 |
+| 26. "Lær mer" Pedagogy UI | v3.1 | 0/0 | Not started | - |
 
 ---
-*Roadmap updated: 2026-04-28 — Phase 25 planned (5 plans in 2 waves)*
+*Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI)*

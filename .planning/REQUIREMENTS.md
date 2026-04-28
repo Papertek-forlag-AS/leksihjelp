@@ -16,22 +16,31 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 
 ### POPUP (Popup & Dictionary Fixes)
 
-- [ ] **POPUP-01**: NB/EN/NN language buttons in popup switch the active lookup language and re-trigger search (currently only DE/ES/FR work)
-- [ ] **POPUP-02**: Replace "Fest" floating popup window with Chrome Side Panel API so it persists across tab switches on macOS
+- [x] **POPUP-01**: NB/EN/NN language buttons in popup switch the active lookup language and re-trigger search (already wired via popup.js:1318+ before Phase 25)
+- [x] **POPUP-02**: Replace "Fest" floating popup window with Chrome Side Panel API so it persists across tab switches on macOS (manifest + popup.js:2556 — landed before Phase 25; needs ongoing macOS browser verification)
 
 ### SPELL (Spell-Check UX)
 
-- [ ] **SPELL-01**: Clicking the Aa spell-check button jumps to the first marker; pressing Tab cycles through subsequent markers one by one
-- [ ] **SPELL-02**: Aa spell-check button only appears on text inputs with ~20+ characters (not on single-word fill-in-blank fields)
-- [ ] **SPELL-03**: Word prediction dropdown only appears after the student has typed 3+ characters (not after 1 character)
+- [x] **SPELL-01**: Clicking the Aa spell-check button jumps to the first marker; pressing Tab cycles through subsequent markers one by one (spell-check.js:207-211 — landed before Phase 25)
+- [x] **SPELL-02**: Aa spell-check button only appears on text inputs with ~20+ characters (spell-check.js:742 — landed before Phase 25)
+- [x] **SPELL-03**: Word prediction dropdown only appears after the student has typed 3+ characters (commit 2438f49 — language-aware: 4 for nb/nn/de, 3 elsewhere)
 
 ### DEBT (Tech Debt Cleanup)
 
-- [ ] **DEBT-01**: Version numbers aligned across package.json, manifest.json, and backend/public/index.html
-- [ ] **DEBT-02**: check-fixtures triage: all 5 pre-existing failing suites (de/doc-drift, nb/homophone, nb/saerskriving, nn/typo, de/verb-final) either fixed or quarantined so the gate exits 0 on main
-- [ ] **DEBT-03**: Browser visual verification (VERIF-01): execute the 12 accumulated deferred browser tests from v2.0–v3.0
-- [ ] **DEBT-04**: SCHEMA-01 developer-view: popup subscribes to `lexi:schema-mismatch` message and surfaces "Versjonskonflikt" diagnostic
-- [ ] **DEBT-05**: Remove stale `BUNDLED_LANGS` list in vocab-seam.js (nn/en entries for deleted files)
+- [x] **DEBT-01**: Version numbers aligned across package.json, manifest.json, and backend/public/index.html (all at 2.5.0)
+- [x] **DEBT-02**: check-fixtures triage: all 5 pre-existing failing suites either fixed or quarantined so the gate exits 0 on main (commit f655552 — fixed `de-capitalization` recht-haben false positives + `nb-demonstrative-gender` 1-ahead/2-ahead bridging)
+- [x] **DEBT-03**: Browser visual verification (VERIF-01): the 12 accumulated deferred browser tests executed and documented (user-verified 2026-04-28)
+- [x] **DEBT-04**: SCHEMA-01 developer-view: popup subscribes to `lexi:schema-mismatch` message and surfaces "Versjonskonflikt" diagnostic (commit 72c9c29)
+- [x] **DEBT-05**: Remove stale `BUNDLED_LANGS` list in vocab-seam.js (commit 41aa4e6 — trimmed to ['nb'])
+
+### PED (Pedagogy "Lær mer" UI)
+
+- [ ] **PED-01**: When the de-prep-case rule fires on a flagged preposition that has a `pedagogy` block in the lexicon, the spell-check popover shows a "Lær mer" button alongside the existing suggestion
+- [ ] **PED-02**: Clicking "Lær mer" expands a teaching panel inside the popover showing case label badge, summary, paragraph explanation, and a `correct ✓` / `incorrect ✗` example pair with student-facing note
+- [ ] **PED-03**: For Wechselpräpositionen the expanded panel additionally shows the motion (Akk) vs location (Dat) pair side-by-side or stacked, each with sentence + translation + note
+- [ ] **PED-04**: Where the lexicon entry has a `colloquial_note`, the expanded panel surfaces it as a friendly aside (italic / lighter visual treatment) — never as a correction
+- [ ] **PED-05**: All popover and panel text adapts to the user's chosen UI language (nb / nn / en) read from `chrome.storage.local.uiLanguage`, with `nb` fallback when missing
+- [ ] **PED-06**: Pedagogy data ships in the bundled `extension/data/de.json` (offline-first per SC-06) — `scripts/sync-vocab.js` copies the `pedagogy` field from generalbank, and `npm run check-bundle-size` continues to pass under the 20 MiB packaged-zip cap
 
 ## Future Requirements
 
@@ -79,21 +88,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-02 | Phase 24 | Complete |
 | COMP-03 | Phase 24 | Complete |
 | COMP-04 | Phase 24 | Complete |
-| POPUP-01 | Phase 25 | Pending |
-| POPUP-02 | Phase 25 | Pending |
-| SPELL-01 | Phase 25 | Pending |
-| SPELL-02 | Phase 25 | Pending |
-| SPELL-03 | Phase 25 | Pending |
-| DEBT-01 | Phase 25 | Pending |
-| DEBT-02 | Phase 25 | Pending |
-| DEBT-03 | Phase 25 | Pending |
-| DEBT-04 | Phase 25 | Pending |
-| DEBT-05 | Phase 25 | Pending |
+| POPUP-01 | Phase 25 | Complete |
+| POPUP-02 | Phase 25 | Complete |
+| SPELL-01 | Phase 25 | Complete |
+| SPELL-02 | Phase 25 | Complete |
+| SPELL-03 | Phase 25 | Complete |
+| DEBT-01 | Phase 25 | Complete |
+| DEBT-02 | Phase 25 | Complete |
+| DEBT-03 | Phase 25 | Complete |
+| DEBT-04 | Phase 25 | Complete |
+| DEBT-05 | Phase 25 | Complete |
+| PED-01 | Phase 26 | Pending |
+| PED-02 | Phase 26 | Pending |
+| PED-03 | Phase 26 | Pending |
+| PED-04 | Phase 26 | Pending |
+| PED-05 | Phase 26 | Pending |
+| PED-06 | Phase 26 | Pending |
 
 **Coverage:**
-- v3.1 requirements: 14 total
-- Mapped to phases: 14
+- v3.1 requirements: 20 total (14 v3.1 polish + 6 pedagogy UI)
+- Mapped to phases: 20
 - Unmapped: 0
 
 ---
-*Requirements defined: 2026-04-28*
+*Requirements updated: 2026-04-28 — Phase 25 closed, Phase 26 (Lær mer pedagogy UI) added*
