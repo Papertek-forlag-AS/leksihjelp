@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Polish & Intelligence
+milestone: v3.3
+milestone_name: Exam Mode
 status: executing
-last_updated: "2026-04-28T16:30:00.000Z"
-last_activity: 2026-04-28 -- Plan 26-03 complete (Lær mer popover UI shipped, v2.6.0); Phase 26 done
+last_updated: "2026-04-28T18:00:00.000Z"
+last_activity: 2026-04-28 -- Plan 27-01 complete (exam-mode markers contract scaffolding; registry + 62 rule markers)
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 2
-  total_plans: 10
-  completed_plans: 6
+  total_plans: 13
+  completed_plans: 7
 ---
 
 # Session State
@@ -23,13 +23,13 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 ## Position
 
-**Milestone:** v3.2 Lær mer Pedagogy UI
-**Phase:** 26 (Lær mer Pedagogy UI) -- COMPLETE
-**Plan:** 3 of 3 complete (26-01 + 26-02 + 26-03)
-**Status:** Phase complete
-**Last activity:** 2026-04-28 -- Plan 26-03 complete (Lær mer popover UI shipped, v2.6.0); Phase 26 done
+**Milestone:** v3.3 Exam Mode
+**Phase:** 27 (Exam Mode) -- in progress
+**Plan:** 1 of 3 complete (27-01)
+**Status:** Plan 02 (gate) ready to start
+**Last activity:** 2026-04-28 -- Plan 27-01 complete (markers contract scaffolding shipped)
 
-Progress: [██████████] 100% (Phase 26)
+Progress: [███░░░░░░░] 33% (Phase 27)
 
 ## Performance Metrics
 
@@ -40,6 +40,7 @@ Progress: [██████████] 100% (Phase 26)
 | Phase | Plan | Duration (min) | Tasks | Files |
 | ----- | ---- | -------------- | ----- | ----- |
 | 26    | 03   | 12             | 4     | 6     |
+| 27    | 01   | 18             | 2     | 62    |
 
 ## Accumulated Context
 
@@ -55,6 +56,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 26-laer-mer-pedagogy-ui]: 26-01: prepPedagogy Map keyed by ASCII+umlaut variants; pedagogy block rides on finding object, NOT through explain() (preserves contract)
 - [Phase 26]: Lær mer panel: stacked-only wechsel layout (no side-by-side variant) — popover fixed at ~320px makes container queries unnecessary
 - [Phase 26]: Confirmed uiLanguage storage key (not 'language') — strings.js _initI18n is canonical
+- [Phase 27-01]: exam marker shape `{ safe, reason, category }` lands on every rule + new exam-registry.js for non-rule surfaces
+- [Phase 27-01]: Default-conservative classification: lookup-shaped grammar rules safe=false pending browser-baseline research; collocation/quotation-suppression promoted to safe=true (lexical/scaffolding)
+- [Phase 27-01]: de-prep-case is the sole dual-marker case today (rule.exam grammar-lookup + rule.explain.exam pedagogy via Object.assign-wrapped explain)
 
 ### Pending Todos
 
@@ -74,4 +78,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 26-03-PLAN.md (Lær mer pedagogy UI shipped, v2.6.0). Phase 26 complete; lockdown sync needed downstream.
+Stopped at: Completed 27-01-PLAN.md (exam-mode markers contract scaffolding). Plan 02 (check-exam-marker gate) ready to start.

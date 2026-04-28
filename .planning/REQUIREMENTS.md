@@ -35,8 +35,8 @@ Requirements for v3.1 Polish & Intelligence. Each maps to a roadmap phase.
 
 ### EXAM (Exam Mode — Phase 27)
 
-- [ ] **EXAM-01**: Every spell-check rule file in `extension/content/spell-rules/*.js` declares an `exam: { safe: boolean, reason: string, category?: string }` marker on the rule object (and additionally on `rule.explain` where the popover surface is independently classifiable)
-- [ ] **EXAM-02**: A new `extension/exam-registry.js` enumerates every non-rule user-visible feature surface (dictionary popup, conjugation tables, TTS, word prediction, pedagogy panel, Fest/side-panel, grammar-features popover) with the same `exam: { safe, reason, category? }` marker shape; serves as the single source of truth for non-rule surfaces
+- [x] **EXAM-01**: Every spell-check rule file in `extension/content/spell-rules/*.js` declares an `exam: { safe: boolean, reason: string, category?: string }` marker on the rule object (and additionally on `rule.explain` where the popover surface is independently classifiable)
+- [x] **EXAM-02**: A new `extension/exam-registry.js` enumerates every non-rule user-visible feature surface (dictionary popup, conjugation tables, TTS, word prediction, pedagogy panel, Fest/side-panel, grammar-features popover) with the same `exam: { safe, reason, category? }` marker shape; serves as the single source of truth for non-rule surfaces
 - [ ] **EXAM-03**: Popup settings exposes a student-facing exam-mode toggle persisted in `chrome.storage.local.examMode`; toggle is shown disabled (greyed in ON state, caption "Slått på av lærer") when `chrome.storage.local.examModeLocked` is true (set by lockdown loader)
 - [ ] **EXAM-04**: When exam mode is ON, every feature surface with `exam.safe = false` is hidden entirely (no tooltip, no greyed placeholder) — spell-check rules are filtered, dictionary/conjugation/TTS/prediction surfaces are suppressed, Lær mer popovers are hidden
 - [ ] **EXAM-05**: When exam mode is ON, the popup shows a persistent "EKSAMENMODUS" badge near the logo and the floating widget gains an amber border tint — both visible at-a-glance for teacher walkthrough

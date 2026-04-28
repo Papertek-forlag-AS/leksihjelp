@@ -184,7 +184,7 @@ Plans:
 **Goal:** Make Leksihjelp installable on Norwegian school exam machines. Add a per-feature `examSafe` marker to every user-visible feature (spellcheck rules, dictionary popup, conjugation tables, TTS, word prediction, pedagogy panels, Fest/side-panel surfaces). Add a student-facing exam-mode toggle in the popup that disables every non-exam-safe feature so the extension behaves close to the browser's native spellcheck (which exam regulations permit). Add a teacher-controlled exam-mode lock in the lockdown variant so students cannot turn it off mid-exam. Add a release gate (`check-exam-marker`) that fails CI if any feature ships without an `examSafe` declaration. Cross-app: lockdown sibling project must consume the new marker via the existing sync pipeline.
 **Requirements**: EXAM-01, EXAM-02, EXAM-03, EXAM-04, EXAM-05, EXAM-06, EXAM-07, EXAM-08
 **Depends on:** Phase 26
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 27-01-PLAN.md — Marker contract: exam:{safe,reason,category} on every spell-rule + new exam-registry.js for non-rule surfaces
