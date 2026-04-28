@@ -126,13 +126,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXAM-07 | Phase 27 | Planned |
 | EXAM-08 | Phase 28 | Complete (plumbing) — staged on lockdown 2026-04-28 |
 | EXAM-09 | Phase 28.1 | Deferred (skriveokt-zero not yet shipped — not blocking v3.1; un-defer when zero ships to schools) |
-| EXAM-10 | Phase 29 | Pending (teacher-control UX + firestore deploy — split from EXAM-08 during Phase 28 execution) |
+| EXAM-10 | Phase 29 | Code Complete (29-01 UX surface + 29-02 firestore enum + writer landed; staging-lockdown deployed 2026-04-28; lockdown-stb prod deploy DEFERRED, browser verification 29-03 pending) |
 
 **Coverage:**
 - v3.1 requirements: 30 total (4 COMP + 2 POPUP + 3 SPELL + 5 DEBT + 6 PED + 10 EXAM)
 - Mapped to phases: 30
 - Unmapped: 0
-- Pending (active): 1 (EXAM-10 → Phase 29; teacher-control UX for lockdown exam-mode lock)
+- Pending (active): 0 — EXAM-10 code complete on staging; lockdown-stb prod deploy deferred (out-of-band manual step) + Plan 29-03 browser verification pending
 - Deferred (not blocking v3.1): 1 (EXAM-09 → Phase 28.1; skriveokt-zero Tauri app not yet shipped to consumers)
 
 ---

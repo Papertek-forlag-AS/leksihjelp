@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
-status: completed
-last_updated: "2026-04-28T20:35:03.584Z"
-last_activity: 2026-04-28 -- Plan 29-01 complete (LEKSIHJELP_EXAM UX surface in lockdown)
+status: executing
+last_updated: "2026-04-28T20:54:00.719Z"
+last_activity: 2026-04-28 -- Plan 29-02 complete (firestore enum + writer + staging deploy; prod deferred)
 progress:
   total_phases: 7
   completed_phases: 4
   total_plans: 17
-  completed_plans: 10
+  completed_plans: 11
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.3 Exam Mode
 **Phase:** 29 (Lockdown Teacher-Lock UX) -- IN PROGRESS
-**Plan:** 1 of 3 complete (29-01)
+**Plan:** 2 of 3 complete (29-01, 29-02)
 **Status:** In progress
-**Last activity:** 2026-04-28 -- Plan 29-01 complete (LEKSIHJELP_EXAM UX surface in lockdown)
+**Last activity:** 2026-04-28 -- Plan 29-02 complete (firestore enum + writing-environment writer + staging deploy; prod deploy deferred)
 
-Progress: [███░░░░░░░] 33% (Phase 29)
+Progress: [██████░░░░] 67% (Phase 29)
 
 ## Performance Metrics
 
@@ -44,6 +44,7 @@ Progress: [███░░░░░░░] 33% (Phase 29)
 | 27    | 02   | 2              | 2     | 4     |
 | 27    | 03   | 22             | 3     | 12    |
 | 29    | 01   | 12             | 2     | 6     |
+| 29    | 02   | 22             | 3     | 5     |
 
 ## Accumulated Context
 
@@ -70,6 +71,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 27-03]: Version bumped to 2.7.0 (manifest + package + landing page) — signals lockdown to re-pin per CLAUDE.md
 - [Phase 29]: 29-01: Locked LEKSIHJELP_EXAM as fifth resource profile in lockdown — label 'Eksamen med Leksihjelp', envelope { leksihjelp:true, lexinIframe:false, spellEngineOptions:['off'] }; no dual-engine variant
 - [Phase 29]: 29-01: Promoted PROFILE_LABELS_NN and PROFILE_LABELS_EN to first-class exports from shared/resource-profile.js (deviation: plan's <interfaces> overclaimed they existed)
+- [Phase 29]: 29-02: Five-value resourceProfile enum is now consistent across firestore.rules + createTest.js + toggleResourceAccess.js (+ test); lockdown commits d7825eb (enum) + b35b409 (writer)
+- [Phase 29]: 29-02: applyExamModeLock helper is module-level (not class method) and called twice — initial paint with prevProfile=null (clear branch is intentional no-op there) + on-change handler as sibling branch beside BSPC-01, sequenced AFTER applyEnvelopeToDOM so the leksihjelp bundle is alive when its examMode listener fires
+- [Phase 29]: 29-02: Production deploy (lockdown-stb) DEFERRED per user instruction; staging-lockdown deployed cleanly
 
 ### Pending Todos
 
@@ -79,6 +83,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Lockdown loader needs to either include the synced extension/exam-registry.js before leksihjelp scripts OR provide host.__lexiExamRegistry via shim — without either, fail-safe path hides every surface in lockdown context
 - Browser-baseline research: revisit lookup-shaped grammar rules currently classified exam.safe=false (Phase 27-01 default-conservative call) and flip to safe=true any rule that doesn't actually exceed Chrome native parity
 - Phase 27 release: bump done at 2.6.0 → 2.7.0; rebuild zip via `npm run package` and upload as GitHub Release asset (Release Workflow steps 11-13)
+- Phase 29-02 production deploy outstanding: run `firebase deploy --only firestore:rules,functions --project lockdown-stb` from /Users/geirforbord/Papertek/lockdown after Plan 29-03 staging browser verification passes (deferred per user instruction this run)
 
 ### Roadmap Evolution
 
@@ -93,4 +98,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 29-01-PLAN.md (LEKSIHJELP_EXAM resource-profile UX surface in lockdown sibling repo — enum + label maps NB/NN/EN + envelope branch + locale strings + question-builder picker option + classroom-illustrations entry; commit 612bcf1 in lockdown). 29-02 (firestore.rules + Cloud Functions enum + writing-environment writer) and 29-03 (verification) remaining.
+Stopped at: Completed 29-02-PLAN.md (firestore.rules + Cloud Functions five-value enum extension + writing-environment.js applyExamModeLock writer/clear-on-transition; lockdown commits d7825eb + b35b409; staging-lockdown Firebase deploy successful). 29-03 (browser verification) remaining. PROD DEPLOY DEFERRED to lockdown-stb per user instruction — re-run `firebase deploy --only firestore:rules,functions --project lockdown-stb` after staging browser verification passes.
