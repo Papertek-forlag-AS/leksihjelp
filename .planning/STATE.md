@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.3
 milestone_name: Exam Mode
-status: executing
-last_updated: "2026-04-28T18:00:00.000Z"
-last_activity: 2026-04-28 -- Plan 27-01 complete (exam-mode markers contract scaffolding; registry + 62 rule markers)
+status: Plan 03 (runtime suppression) ready to start
+last_updated: "2026-04-28T14:25:00.000Z"
+last_activity: 2026-04-28 -- Plan 27-02 complete (check-exam-marker release gate + self-test)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 13
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.3 Exam Mode
 **Phase:** 27 (Exam Mode) -- in progress
-**Plan:** 1 of 3 complete (27-01)
-**Status:** Plan 02 (gate) ready to start
-**Last activity:** 2026-04-28 -- Plan 27-01 complete (markers contract scaffolding shipped)
+**Plan:** 2 of 3 complete (27-01, 27-02)
+**Status:** Plan 03 (runtime suppression) ready to start
+**Last activity:** 2026-04-28 -- Plan 27-02 complete (check-exam-marker release gate + self-test)
 
-Progress: [███░░░░░░░] 33% (Phase 27)
+Progress: [███████░░░] 67% (Phase 27)
 
 ## Performance Metrics
 
@@ -41,6 +41,7 @@ Progress: [███░░░░░░░] 33% (Phase 27)
 | ----- | ---- | -------------- | ----- | ----- |
 | 26    | 03   | 12             | 4     | 6     |
 | 27    | 01   | 18             | 2     | 62    |
+| 27    | 02   | 2              | 2     | 4     |
 
 ## Accumulated Context
 
@@ -59,6 +60,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 27-01]: exam marker shape `{ safe, reason, category }` lands on every rule + new exam-registry.js for non-rule surfaces
 - [Phase 27-01]: Default-conservative classification: lookup-shaped grammar rules safe=false pending browser-baseline research; collocation/quotation-suppression promoted to safe=true (lexical/scaffolding)
 - [Phase 27-01]: de-prep-case is the sole dual-marker case today (rule.exam grammar-lookup + rule.explain.exam pedagogy via Object.assign-wrapped explain)
+- [Phase 27]: 27-02: check-exam-marker gate; registry entries require category (strict surface), rules accept it as optional but validate closed set when present; hard-fail by default per CONTEXT.md
 
 ### Pending Todos
 
@@ -78,4 +80,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 27-01-PLAN.md (exam-mode markers contract scaffolding). Plan 02 (check-exam-marker gate) ready to start.
+Stopped at: Completed 27-02-PLAN.md (check-exam-marker release gate + self-test, registered in CLAUDE.md Release Workflow). Plan 03 (runtime suppression) ready to start.
