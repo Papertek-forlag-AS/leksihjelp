@@ -215,6 +215,27 @@ Plans:
 Plans:
 - [ ] 28-01-PLAN.md — Lockdown webapp exam-mode integration: sync script + LEKSI_BUNDLE order + re-sync + teacher-lock writer + CLAUDE.md note + human verify
 
+### Phase 29: Lockdown Teacher-Lock UX (NEW — split from Phase 28)
+
+**Goal:** Wire the teacher-control surface for lockdown's exam-mode lock so a teacher can opt students into "leksihjelp + Phase 27 lock" — closing **EXAM-10**. Phase 28 staged the runtime suppression plumbing (`exam-registry.js` synced, `LEKSI_BUNDLE` order, refreshed content scripts), but no lockdown surface writes `chrome.storage.local.examModeLocked` yet, so today the lock is only triggerable via the dev-only "Simuler lærer-lås" button. This phase adds the production teacher-control path.
+**Requirements:** EXAM-10
+**Depends on:** Phase 28
+**Cross-repo:** Modifies the lockdown sibling project at `/Users/geirforbord/Papertek/lockdown` (not the leksihjelp tree). Requires `firestore.rules` deploy and Cloud Functions deploy to both `staging-lockdown` and `lockdown-stb` Firebase projects.
+
+**Success Criteria** (what must be TRUE):
+  1. A teacher-control UX is chosen and implemented — Phase 28 verification flagged Option B (new `RESOURCE_PROFILES.LEKSIHJELP_EXAM`) as the user-selected direction; final decision recorded in plan and CONTEXT
+  2. `lockdown/firestore.rules` enum (lines ~25, ~30 — the resource-profile allowlist) updated to include the new value, and rules deployed to both `staging-lockdown` and `lockdown-stb` Firebase projects
+  3. Cloud Functions enums updated — at minimum `createTest.js` and `toggleResourceAccess.js` — and deployed to both projects
+  4. Lockdown UI exposes the new option (teacher resource-profile picker / per-test toggle, whichever Option B variant lands), with `nb`/`nn`/`en` locale strings
+  5. `lockdown/public/js/writing-test/student/writing-environment.js` (`applyExamModeLock`-style hook around the existing BSPC-01 wiring at ~line 953) calls `chrome.storage.local.set({ examModeLocked: true, examMode: true })` when the new profile is active, and clears both flags on profile transition away
+  6. End-to-end on `stb-lockdown.app`: teacher selects the new profile → student writing environment loads → leksihjelp popup shows toggle ON + disabled + "Slått på av lærer" caption; floating widget gains amber border; word-prediction dropdown does not open; grammar-lookup dots suppressed; typo dots + dictionary lookups remain. Then teacher unselects → flags clear and surfaces re-enable
+  7. Phase 28's dev-only "Simuler lærer-lås" button still works (no regression of the dev path)
+**Plans:** 3 plans
+Plans:
+- [ ] 29-01-PLAN.md — Add LEKSIHJELP_EXAM resource profile + locales + classroom illustration + teacher picker (UX decision checkpoint)
+- [ ] 29-02-PLAN.md — Backend enum (firestore.rules + Cloud Functions) + applyExamModeLock writer + Firebase deploy to staging-lockdown and lockdown-stb
+- [ ] 29-03-PLAN.md — End-to-end browser verification (staging + dev-button regression + production)
+
 ### Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE — DEFERRED)
 
 **Status:** Deferred — papertek zero (skriveokt-zero Tauri app) is **not yet pushed to consumers**, so closing EXAM-09 is NOT blocking for v3.1. Tracked here so it isn't lost; will become must-have once skriveokt-zero ships to schools.
