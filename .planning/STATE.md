@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.2
-milestone_name: Lær mer Pedagogy UI
-status: in_progress
-last_updated: "2026-04-28T00:00:00.000Z"
-last_activity: 2026-04-28 -- Plan 26-02 complete (check-pedagogy-shape gate)
+milestone: v3.1
+milestone_name: Polish & Intelligence
+status: executing
+last_updated: "2026-04-28T15:25:00.000Z"
+last_activity: 2026-04-28 -- Plan 26-01 complete (DE preposition pedagogy data + prepPedagogy index + de-prep-case finding.pedagogy)
 progress:
-  total_phases: 1
-  completed_phases: 0
-  total_plans: 3
-  completed_plans: 1
+  total_phases: 3
+  completed_phases: 1
+  total_plans: 10
+  completed_plans: 5
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.2 Lær mer Pedagogy UI
 **Phase:** 26 (Lær mer Pedagogy UI) -- IN PROGRESS
-**Plan:** 1 of 3 complete (26-02 done; 26-01 and 26-03 pending)
+**Plan:** 2 of 3 complete (26-01 + 26-02 done; 26-03 pending)
 **Status:** In progress
-**Last activity:** 2026-04-28 -- Plan 26-02 complete (check-pedagogy-shape gate landed informational, ready to flip green once 26-01 wires de-prep-case)
+**Last activity:** 2026-04-28 -- Plan 26-01 complete (DE preposition pedagogy data + prepPedagogy index + de-prep-case finding.pedagogy)
 
-Progress: [███░░░░░░░] 33% (Phase 26)
+Progress: [███████░░░] 67% (Phase 26)
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - 24-01: Simple filter scan over nounGenus keys for compound prediction
 - 24-02: Exact decomposition before fallback search; simple translation concatenation for guess; decomposeCompound as verification
 - 26-02: Use env-var injection (LEXI_PEDAGOGY_GATE_EXTRA_TARGETS) for self-test target injection instead of regex source mutation; gate stays informational pre-26-01
+- [Phase 26-laer-mer-pedagogy-ui]: 26-01: prepPedagogy Map keyed by ASCII+umlaut variants; pedagogy block rides on finding object, NOT through explain() (preserves contract)
 
 ### Pending Todos
 
@@ -62,4 +63,4 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 26-02-PLAN.md (check-pedagogy-shape release gate + paired self-test). Plans 26-01 (de-prep-case wiring) and 26-03 (Lær mer popover UI) remain.
+Stopped at: Completed 26-01-PLAN.md (DE preposition pedagogy data wired through to de-prep-case findings). Plan 26-03 (Lær mer popover UI) remains.
