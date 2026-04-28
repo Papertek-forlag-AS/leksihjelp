@@ -161,6 +161,11 @@
     id: 'fr-etre-avoir',
     languages: ['fr'],
     priority: 70,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-etre-avoir); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: (finding) => {
       const participle = finding.participle || 'participe';

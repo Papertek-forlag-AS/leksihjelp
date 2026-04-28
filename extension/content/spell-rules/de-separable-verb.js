@@ -43,6 +43,11 @@
     id: 'de-separable-verb',
     languages: ['de'],
     priority: 69,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-separable-verb); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       const prefix = finding.prefix || '';

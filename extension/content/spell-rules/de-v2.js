@@ -66,6 +66,11 @@
     id: 'de-v2',
     languages: ['de'],
     priority: 66,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-v2); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

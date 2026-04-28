@@ -82,6 +82,11 @@
     id: 'es-imperfecto-hint',
     languages: ['es'],
     priority: 65,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-imperfecto-hint); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'hint',
     explain: function (finding) {
       const adverb = finding.adverb || '';

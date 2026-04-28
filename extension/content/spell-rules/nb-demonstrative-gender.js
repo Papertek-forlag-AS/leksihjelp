@@ -68,6 +68,11 @@
     id: 'nb-demonstrative-gender',
     languages: ['nb', 'nn'],
     priority: 12,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-demonstrative-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       const labelKey = GENUS_TO_LABEL_KEY[finding.actualGenus];

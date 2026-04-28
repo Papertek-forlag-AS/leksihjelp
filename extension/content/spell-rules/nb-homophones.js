@@ -29,6 +29,11 @@
     id: 'homophone',
     languages: ['nb', 'nn'],
     priority: 40,
+    exam: {
+      safe: true,
+      reason: "Token-level homophone correction correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'da-naar') {

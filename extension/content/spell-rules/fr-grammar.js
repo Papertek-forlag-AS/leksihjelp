@@ -24,6 +24,11 @@
     id: 'fr-grammar',
     languages: ['fr'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-grammar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Bruk <em>${escapeHtml(finding.fix)}</em> i stedet for <em>${escapeHtml(finding.original)}</em> foran ord som starter med vokal for å unngå vokalklasj.`,

@@ -39,6 +39,11 @@
     id: 'context-typo',
     languages: ['nb', 'nn', 'en'], // Enabled for languages with bigram data
     priority: 45, // Slightly higher priority than standard typo
+    exam: {
+      safe: true,
+      reason: "Token-level context typo correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Mente du <em>${escapeHtml(finding.fix)}</em>? Ordet <em>${escapeHtml(finding.original)}</em> passer sjelden etter "${escapeHtml(finding.prev)}".`,

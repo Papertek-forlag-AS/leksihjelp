@@ -16,6 +16,11 @@
     id: 'es-grammar',
     languages: ['es'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-grammar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'muy-mucho') {

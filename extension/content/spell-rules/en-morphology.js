@@ -37,6 +37,11 @@
     id: 'en-morphology',
     languages: ['en'],
     priority: 17,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (en-morphology); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: (finding) => {
       const fix = escapeHtml(finding.fix);

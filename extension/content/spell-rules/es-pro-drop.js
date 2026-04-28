@@ -49,6 +49,11 @@
     id: 'es-pro-drop',
     languages: ['es'],
     priority: 65,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-pro-drop); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'hint',
     explain: function (finding) {
       const pronoun = finding.pronoun || 'yo';

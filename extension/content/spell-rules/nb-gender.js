@@ -35,6 +35,11 @@
     id: 'gender',
     languages: ['nb', 'nn'],
     priority: 10,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     // Phase 05.1 Gap C: three-beat copy — names the target gender class
     // ("<em>by</em> er hankjønn") so the student learns the classification,

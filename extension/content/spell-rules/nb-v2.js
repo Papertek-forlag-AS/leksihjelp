@@ -48,6 +48,11 @@
     id: 'nb-v2',
     languages: ['nb', 'nn'],
     priority: 65,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-v2); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

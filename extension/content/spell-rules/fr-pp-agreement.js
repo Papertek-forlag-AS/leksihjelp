@@ -105,6 +105,11 @@
     id: 'fr-pp-agreement',
     languages: ['fr'],
     priority: 72,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-pp-agreement); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'hint',
     explain: (finding) => {
       const pp = finding.original || '';

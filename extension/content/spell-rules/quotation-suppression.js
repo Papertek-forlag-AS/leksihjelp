@@ -32,6 +32,11 @@
     id: 'quotation-suppression',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 3,
+    exam: {
+      safe: true,
+      reason: "Suppression scaffolding (no user-visible finding); inert in exam mode",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: () => ({ nb: 'Sitat-undertrykkelse.', nn: 'Sitat-undertrykkjing.' }),
     check(ctx) {

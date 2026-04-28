@@ -30,6 +30,11 @@
     id: 'fr-contraction',
     languages: ['fr'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-contraction); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Bruk samantrekning <em>${escapeHtml(finding.fix)}</em> i staden for <em>${escapeHtml(finding.original)}</em>.`,

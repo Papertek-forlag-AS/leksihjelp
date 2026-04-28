@@ -68,6 +68,11 @@
     id: 'de-compound-gender',
     languages: ['de'],
     priority: 71,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-compound-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: (finding) => {
       const suffix = finding.suffix || '';

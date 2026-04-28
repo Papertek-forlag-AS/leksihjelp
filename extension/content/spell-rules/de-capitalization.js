@@ -30,6 +30,11 @@
     id: 'de-capitalization',
     languages: ['de'],
     priority: 20,
+    exam: {
+      safe: true,
+      reason: "Token-level capitalization correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> er et substantiv. På tysk skal alle substantiv ha stor forbokstav — prøv <em>${escapeHtml(finding.fix)}</em>.`,

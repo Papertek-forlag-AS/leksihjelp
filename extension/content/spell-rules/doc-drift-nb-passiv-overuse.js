@@ -24,6 +24,11 @@
     kind: 'document',
     languages: ['nb'],
     priority: 205,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (doc-drift-nb-passiv-overuse); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'hint',
 
     explain(/* finding */) {

@@ -29,6 +29,11 @@
     id: 'modal_form',
     languages: ['de'],
     priority: 20,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-modal-verb); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Etter modalverb skal hovedverbet stå i infinitiv — bytt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,

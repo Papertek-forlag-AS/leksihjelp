@@ -95,15 +95,30 @@
     id: 'de-prep-case',
     languages: ['de'],
     priority: 68,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-prep-case); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
-    explain: function (finding) {
+    // Phase 27-01: dual exam marker — the dot/correction surface inherits
+    // rule.exam (grammar-lookup, safe=false), but the Lær mer pedagogy
+    // popover rendered via this explain() additionally exceeds browser
+    // native parity, so it carries its own marker on the function object.
+    explain: Object.assign(function explain(finding) {
       const prepDisplay = finding.prep || '';
       const caseLabel = finding.requiredCase || '';
       return {
         nb: 'Preposisjonen <em>' + escapeHtml(prepDisplay) + '</em> styrer ' + escapeHtml(caseLabel) + '. Bruk <em>' + escapeHtml(finding.fix) + '</em> i stedet for <em>' + escapeHtml(finding.original) + '</em>.',
         nn: 'Preposisjonen <em>' + escapeHtml(prepDisplay) + '</em> styrer ' + escapeHtml(caseLabel) + '. Bruk <em>' + escapeHtml(finding.fix) + '</em> i staden for <em>' + escapeHtml(finding.original) + '</em>.',
       };
-    },
+    }, {
+      exam: {
+        safe: false,
+        reason: 'Lær mer pedagogy popover; exceeds browser native parity',
+        category: 'pedagogy',
+      },
+    }),
     check(ctx) {
       if (ctx.lang !== 'de') return [];
       if (!ctx.sentences || !tokensInSentence) return [];

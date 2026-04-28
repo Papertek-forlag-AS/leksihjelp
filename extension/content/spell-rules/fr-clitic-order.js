@@ -76,6 +76,11 @@
     id: 'fr-clitic-order',
     languages: ['fr'],
     priority: 60,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-clitic-order); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       var original = finding.original || '';

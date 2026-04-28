@@ -133,6 +133,11 @@
     id: 'typo',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 50,
+    exam: {
+      safe: true,
+      reason: "Token-level fuzzy typo correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> står ikke i ordboken — kanskje du mente <em>${escapeHtml(finding.fix)}</em>?`,

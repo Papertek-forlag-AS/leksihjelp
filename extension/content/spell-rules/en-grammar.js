@@ -27,6 +27,11 @@
     id: 'en-grammar',
     languages: ['en'],
     priority: 20,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (en-grammar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'i-capitalization') {

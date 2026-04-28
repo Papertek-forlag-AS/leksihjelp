@@ -45,6 +45,11 @@
     id: 'nb-compound-gender',
     languages: ['nb', 'nn'],
     priority: 71,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-compound-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
 
     explain: (finding) => {

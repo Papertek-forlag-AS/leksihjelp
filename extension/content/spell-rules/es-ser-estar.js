@@ -81,6 +81,11 @@
     id: 'es-ser-estar',
     languages: ['es'],
     priority: 50,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-ser-estar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       const adj = finding.adj || '';

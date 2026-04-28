@@ -83,6 +83,11 @@
     id: 'es-personal-a',
     languages: ['es'],
     priority: 55,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-personal-a); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

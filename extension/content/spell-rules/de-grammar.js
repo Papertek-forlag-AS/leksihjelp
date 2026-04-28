@@ -16,6 +16,11 @@
     id: 'de-grammar',
     languages: ['de'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-grammar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'formal-informal') {

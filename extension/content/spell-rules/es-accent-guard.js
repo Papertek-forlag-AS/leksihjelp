@@ -25,6 +25,11 @@
     id: 'es-accent',
     languages: ['es'],
     priority: 15,
+    exam: {
+      safe: true,
+      reason: "Token-level accent-guard correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Mangler aksent eller spesialtegn. Bruk <em>${escapeHtml(finding.fix)}</em> her (verbform eller substantiv).`,

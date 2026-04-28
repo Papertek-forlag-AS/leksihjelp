@@ -151,6 +151,11 @@
     id: 'collocation',
     languages: ['en', 'nb', 'nn', 'de', 'es', 'fr'],
     priority: 65,
+    exam: {
+      safe: true,
+      reason: "Lexical collocation correction at lookup level; at-or-below browser native parity",
+      category: "spellcheck",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

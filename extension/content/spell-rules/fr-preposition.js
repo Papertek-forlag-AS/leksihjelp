@@ -25,6 +25,11 @@
     id: 'fr-preposition',
     languages: ['fr'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-preposition); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `På fransk skal <em>${escapeHtml(finding.prep)}</em> og <em>${escapeHtml(finding.art)}</em> trekkes sammen til <em>${escapeHtml(finding.fix)}</em>.`,

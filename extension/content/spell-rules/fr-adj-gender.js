@@ -132,6 +132,11 @@
     id: 'fr-adj-gender',
     languages: ['fr'],
     priority: 16,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-adj-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

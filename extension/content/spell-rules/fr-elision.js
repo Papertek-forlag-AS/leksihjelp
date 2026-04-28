@@ -50,6 +50,11 @@
     id: 'fr-elision',
     languages: ['fr'],
     priority: 14,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-elision); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `Bruk elisjon: skriv <em>${escapeHtml(finding.fix)}</em> i staden for <em>${escapeHtml(finding.original)}</em> framfor vokal eller stum h.`,

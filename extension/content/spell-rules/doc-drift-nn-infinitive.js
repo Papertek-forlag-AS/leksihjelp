@@ -33,6 +33,11 @@
     kind: 'document',
     languages: ['nn'],
     priority: 204,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (doc-drift-nn-infinitive); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
 
     explain(finding) {

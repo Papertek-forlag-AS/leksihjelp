@@ -85,6 +85,11 @@
     id: 'de-perfekt-aux',
     languages: ['de'],
     priority: 70,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-perfekt-aux); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: (finding) => {
       const participle = finding.participle || 'participle';

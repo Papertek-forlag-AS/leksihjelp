@@ -90,6 +90,11 @@
     kind: 'document',
     languages: ['fr'],
     priority: 202,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (doc-drift-fr-address); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
 
     explain(finding) {

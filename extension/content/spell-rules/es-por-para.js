@@ -92,6 +92,11 @@
     id: 'es-por-para',
     languages: ['es'],
     priority: 50,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-por-para); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       const wrong = finding.original || '';

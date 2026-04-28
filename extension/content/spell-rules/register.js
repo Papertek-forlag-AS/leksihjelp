@@ -71,6 +71,11 @@
     id: 'register',
     languages: ['nb', 'nn', 'en', 'fr'],
     priority: 60,
+    exam: {
+      safe: true,
+      reason: "Token-level token-level register correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

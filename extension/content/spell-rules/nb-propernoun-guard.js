@@ -121,6 +121,11 @@
     id: 'propernoun-guard',
     languages: ['nb', 'nn'],
     priority: 5,
+    exam: {
+      safe: true,
+      reason: "Token-level proper-noun guard correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: 'Egennavn eller lånord — stoppes fra å utløse skrivefeil.',
     check(ctx) {

@@ -46,6 +46,11 @@
     kind: 'document',
     languages: ['nb'],
     priority: 203,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (doc-drift-nb-register); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
 
     explain(finding) {

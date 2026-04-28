@@ -103,6 +103,11 @@
     id: 'dialect-mix',
     languages: ['nb', 'nn'],
     priority: 35,
+    exam: {
+      safe: true,
+      reason: "Token-level dialect-mix token correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => {
       const other = finding.lang === 'nn' ? 'bokmål' : 'nynorsk';

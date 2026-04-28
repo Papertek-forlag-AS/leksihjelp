@@ -63,6 +63,11 @@
     id: 'codeswitch',
     languages: ['nb', 'nn'],
     priority: 1,
+    exam: {
+      safe: true,
+      reason: "Token-level codeswitch token correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: 'Tett klynge av ord som ikke er norske — sannsynligvis sitat eller fremmedspråk.',
     check(ctx) {

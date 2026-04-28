@@ -52,6 +52,11 @@
     id: 'fr-bags',
     languages: ['fr'],
     priority: 68,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (fr-bags); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'hint',
     explain: function (finding) {
       return {

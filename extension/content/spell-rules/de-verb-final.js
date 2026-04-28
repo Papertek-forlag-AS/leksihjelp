@@ -44,6 +44,11 @@
     id: 'de-verb-final',
     languages: ['de'],
     priority: 67,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-verb-final); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       return {

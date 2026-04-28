@@ -83,6 +83,11 @@
     id: 'en-word-family',
     languages: ['en'],
     priority: 18,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (en-word-family); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: (finding) => {
       const fix = escapeHtml(finding.fix);

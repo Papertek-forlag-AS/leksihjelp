@@ -24,6 +24,11 @@
     id: 'typo',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 40,
+    exam: {
+      safe: true,
+      reason: "Token-level curated typo correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> er en vanlig skrivefeil — prøv <em>${escapeHtml(finding.fix)}</em>.`,

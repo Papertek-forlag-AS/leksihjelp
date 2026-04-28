@@ -28,6 +28,11 @@
     id: 'nb-triple-letter',
     languages: ['nb', 'nn'],
     priority: 45,
+    exam: {
+      safe: true,
+      reason: "Token-level triple-letter typo correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `<em>${escapeHtml(finding.original)}</em> har trippel bokstav — prov <em>${escapeHtml(finding.fix)}</em>.`,

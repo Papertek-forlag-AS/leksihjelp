@@ -33,6 +33,11 @@
     id: 'homophone',
     languages: ['en'],
     priority: 40,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (en-homophones); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'your-youre') {

@@ -34,6 +34,11 @@
     id: 'gender',
     languages: ['de'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (de-gender); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       const labelKey = GENUS_TO_LABEL_KEY[finding.actualGenus];

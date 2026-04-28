@@ -17,6 +17,11 @@
     id: 'es-coordination',
     languages: ['es'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-coordination); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (finding.subType === 'y-e') {

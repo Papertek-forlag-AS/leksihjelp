@@ -65,6 +65,11 @@
     id: 'redundancy',
     languages: ['nb', 'nn', 'en', 'de', 'es', 'fr'],
     priority: 70,
+    exam: {
+      safe: true,
+      reason: "Token-level phrase-level redundancy correction; at-or-below browser native spellcheck parity",
+      category: "spellcheck",
+    },
     severity: 'hint',
     explain: function (finding) {
       return {

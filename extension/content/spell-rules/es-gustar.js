@@ -69,6 +69,11 @@
     id: 'es-gustar',
     languages: ['es'],
     priority: 60,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (es-gustar); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
     explain: function (finding) {
       const original = finding.original || '';

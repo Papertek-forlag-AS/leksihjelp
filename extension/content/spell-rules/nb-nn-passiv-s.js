@@ -39,6 +39,11 @@
     id: 'nn_passiv_s',
     languages: ['nn'],
     priority: 25,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-nn-passiv-s); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
 
     explain(/* finding */) {

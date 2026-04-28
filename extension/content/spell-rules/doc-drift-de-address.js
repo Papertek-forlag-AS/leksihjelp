@@ -113,6 +113,11 @@
     kind: 'document',
     languages: ['de'],
     priority: 201,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (doc-drift-de-address); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'warning',
 
     explain(finding) {

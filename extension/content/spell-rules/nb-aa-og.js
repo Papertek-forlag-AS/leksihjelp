@@ -67,6 +67,11 @@
     id: 'aa_og',
     languages: ['nb', 'nn'],
     priority: 15,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-aa-og); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => ({
       nb: `<strong>Å</strong> er infinitivsmerke (foran verb). <strong>Og</strong> er bindeord (binder like ledd). Bytt <em>${escapeHtml(finding.original)}</em> med <em>${escapeHtml(finding.fix)}</em>.`,

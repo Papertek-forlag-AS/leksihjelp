@@ -61,6 +61,11 @@
     id: 'sarskriving',
     languages: ['nb', 'nn'],
     priority: 30,
+    exam: {
+      safe: false,
+      reason: "Lookup-shaped grammar rule (nb-sarskriving); pending browser-baseline research per CONTEXT.md",
+      category: "grammar-lookup",
+    },
     severity: 'error',
     explain: (finding) => {
       if (!finding.original || !finding.fix) {
