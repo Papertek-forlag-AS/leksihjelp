@@ -56,9 +56,9 @@
   // Per-language last-applied revision; gates idempotent swaps.
   const lastRevision = new Map();
 
-  // Languages with bundled JSON in extension/data/. NB is the baseline; others
-  // are kept bundled today and trimmed by plan 23-03.
-  const BUNDLED_LANGS = ['nb', 'nn', 'en'];
+  // Languages with bundled JSON in extension/data/. Only NB ships in the
+  // packaged zip post-Phase 23; other languages hydrate via IndexedDB/API.
+  const BUNDLED_LANGS = ['nb'];
   const BASELINE_LANG = 'nb';
 
   // ── Hydration progress emitter ──
