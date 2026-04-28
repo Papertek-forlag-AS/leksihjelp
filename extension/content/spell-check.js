@@ -866,7 +866,9 @@
 
   let btnFixedPos = null; // {x, y} when user drags; null = auto-position
 
-  // Languages the spell-check pipeline supports (matches popup language picker).
+  // Languages the spell-check pipeline supports.
+  // nb/nn/en are bundled (always available); de/es/fr require download
+  // via the popup language picker before they can be selected here.
   const SUPPORTED_LANGS = [
     { code: 'nb', label: 'Bokmål' },
     { code: 'nn', label: 'Nynorsk' },
@@ -875,6 +877,25 @@
     { code: 'es', label: 'Español' },
     { code: 'fr', label: 'Français' },
   ];
+  const BUNDLED_LANGS_SET = new Set(['nb', 'nn', 'en']);
+
+  async function getActivatedLangs() {
+    const set = new Set(BUNDLED_LANGS_SET);
+    try {
+      if (window.__lexiVocabStore && typeof window.__lexiVocabStore.listCachedLanguages === 'function') {
+        const cached = await window.__lexiVocabStore.listCachedLanguages();
+        for (const c of (cached || [])) {
+          if (c && c.language) set.add(c.language);
+        }
+      }
+    } catch (_) { /* fall through to bundled-only */ }
+    // Always include the currently-selected language so the user can see
+    // which lang spell-check is on, even in the unlikely case it's not in
+    // the cached list (e.g. mid-download race).
+    const cur = currentLangCode();
+    if (cur) set.add(cur);
+    return set;
+  }
 
   let langFlyout = null;
   let langBadgeEl = null;
@@ -909,13 +930,15 @@
     }
   }
 
-  function showLangFlyout() {
+  async function showLangFlyout() {
     hideLangFlyout();
     if (!spellCheckBtn) return;
     const cur = currentLangCode();
+    const activated = await getActivatedLangs();
     langFlyout = document.createElement('div');
     langFlyout.className = 'lh-spell-lang-flyout';
-    for (const { code, label } of SUPPORTED_LANGS) {
+    const visible = SUPPORTED_LANGS.filter(l => activated.has(l.code));
+    for (const { code, label } of visible) {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = 'lh-spell-lang-item' + (code === cur ? ' is-active' : '');
@@ -923,6 +946,14 @@
       item.innerHTML = `<span class="lh-spell-lang-code">${code.toUpperCase()}</span><span class="lh-spell-lang-label">${label}</span>`;
       item.addEventListener('click', (e) => { e.stopPropagation(); switchSpellLanguage(code); });
       langFlyout.appendChild(item);
+    }
+    // Hint at how to enable the missing langs.
+    const missing = SUPPORTED_LANGS.filter(l => !activated.has(l.code));
+    if (missing.length > 0) {
+      const hint = document.createElement('div');
+      hint.className = 'lh-spell-lang-hint';
+      hint.textContent = 'Last ned flere språk i popup-vinduet';
+      langFlyout.appendChild(hint);
     }
     (document.fullscreenElement || document.body).appendChild(langFlyout);
     // Position above-or-below the Aa button, mirroring popover logic.
