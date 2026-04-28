@@ -135,7 +135,11 @@ Plans:
   6. Pedagogy data ships in the bundled extension data (offline-first per SC-06) — sync-vocab.js copies the `pedagogy` field from generalbank into extension/data/de.json without bloating it past the 200 KB baseline cap or the 20 MiB packaged-zip cap
   7. A new gate `npm run check-pedagogy-shape` exits 0 when every rule that returns `pedagogy` from `explain()` returns the required fields (case, summary, explanation), and exits 1 otherwise — paired self-test included
   8. The existing `check-explain-contract` gate continues to pass (the optional `pedagogy` field is additive, the required `{nb, nn}` strings stay in place)
-**Plans:** TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 26-01-PLAN.md — Sync-vocab audit + de.json refresh + prepPedagogy index in vocab-seam-core + de-prep-case finding hookup
+- [ ] 26-02-PLAN.md — New check-pedagogy-shape release gate + paired self-test, wired into package.json
+- [ ] 26-03-PLAN.md — i18n strings, popover Lær mer button + expandable panel, CSS for case badges / examples / wechsel / colloquial aside, version bump, full gate sweep + human verify
 
 ## Progress
 
