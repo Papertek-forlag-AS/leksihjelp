@@ -184,7 +184,8 @@
     if (!el) return;
     activeEl = el;
     updateButtonVisibility();
-    schedule();
+    // Don't reset the fast recheck timer when auto-advancing
+    if (pendingAdvanceIdx < 0) schedule();
   }
 
   function onBlur() {
@@ -789,7 +790,12 @@
     }
     pendingAdvanceIdx = activePopoverIdx;
     hidePopover();
-    schedule();
+    // Short delay for DOM to settle, then re-check and auto-advance
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      debounceTimer = null;
+      runCheck();
+    }, 150);
   }
 
   function applyFixTextarea(finding) {
