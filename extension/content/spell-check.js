@@ -866,19 +866,121 @@
 
   let btnFixedPos = null; // {x, y} when user drags; null = auto-position
 
+  // Languages the spell-check pipeline supports (matches popup language picker).
+  const SUPPORTED_LANGS = [
+    { code: 'nb', label: 'Bokmål' },
+    { code: 'nn', label: 'Nynorsk' },
+    { code: 'en', label: 'English' },
+    { code: 'de', label: 'Deutsch' },
+    { code: 'es', label: 'Español' },
+    { code: 'fr', label: 'Français' },
+  ];
+
+  let langFlyout = null;
+  let langBadgeEl = null;
+  let longPressTimer = null;
+
+  function currentLangCode() {
+    try { return (VOCAB && VOCAB.getLanguage && VOCAB.getLanguage()) || ''; } catch (_) { return ''; }
+  }
+
+  function refreshLangBadge() {
+    if (!langBadgeEl) return;
+    langBadgeEl.textContent = (currentLangCode() || '').toUpperCase();
+  }
+
+  async function switchSpellLanguage(lang) {
+    if (!lang || lang === currentLangCode()) { hideLangFlyout(); return; }
+    try {
+      if (window.__lexiVocabStore && typeof window.__lexiVocabStore.downloadLanguage === 'function') {
+        await window.__lexiVocabStore.downloadLanguage(lang).catch(() => {});
+      }
+    } catch (_) { /* offline / fetch failed — vocab-seam will keep baseline */ }
+    try {
+      await new Promise(resolve => chrome.storage.local.set({ language: lang }, resolve));
+    } catch (_) {}
+    try { chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang }); } catch (_) {}
+    refreshLangBadge();
+    hideLangFlyout();
+    // Re-run check against the freshly switched language.
+    if (activeEl) {
+      lastCheckedText = ''; // force re-check
+      manualCheck();
+    }
+  }
+
+  function showLangFlyout() {
+    hideLangFlyout();
+    if (!spellCheckBtn) return;
+    const cur = currentLangCode();
+    langFlyout = document.createElement('div');
+    langFlyout.className = 'lh-spell-lang-flyout';
+    for (const { code, label } of SUPPORTED_LANGS) {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'lh-spell-lang-item' + (code === cur ? ' is-active' : '');
+      item.dataset.lang = code;
+      item.innerHTML = `<span class="lh-spell-lang-code">${code.toUpperCase()}</span><span class="lh-spell-lang-label">${label}</span>`;
+      item.addEventListener('click', (e) => { e.stopPropagation(); switchSpellLanguage(code); });
+      langFlyout.appendChild(item);
+    }
+    (document.fullscreenElement || document.body).appendChild(langFlyout);
+    // Position above-or-below the Aa button, mirroring popover logic.
+    const br = spellCheckBtn.getBoundingClientRect();
+    const fw = langFlyout.offsetWidth || 160;
+    const fh = langFlyout.offsetHeight || 200;
+    let top = br.top - fh - 6;
+    if (top < 6) top = br.bottom + 6;
+    let left = br.left;
+    if (left + fw > window.innerWidth - 6) left = window.innerWidth - fw - 6;
+    if (left < 6) left = 6;
+    langFlyout.style.top = top + 'px';
+    langFlyout.style.left = left + 'px';
+
+    const onDocClick = (ev) => {
+      if (langFlyout && !langFlyout.contains(ev.target) && ev.target !== spellCheckBtn) {
+        hideLangFlyout();
+      }
+    };
+    setTimeout(() => document.addEventListener('mousedown', onDocClick, { once: true }), 0);
+  }
+
+  function hideLangFlyout() {
+    if (langFlyout) { langFlyout.remove(); langFlyout = null; }
+  }
+
   function ensureButton() {
     if (spellCheckBtn) return;
     spellCheckBtn = document.createElement('button');
     spellCheckBtn.type = 'button';
     spellCheckBtn.className = 'lh-spell-check-btn';
-    spellCheckBtn.textContent = 'Aa';
     spellCheckBtn.title = t('spell_check_btn_title');
+
+    const aa = document.createElement('span');
+    aa.className = 'lh-spell-check-btn-aa';
+    aa.textContent = 'Aa';
+    langBadgeEl = document.createElement('span');
+    langBadgeEl.className = 'lh-spell-check-btn-lang';
+    langBadgeEl.setAttribute('aria-label', 'Bytt språk');
+    spellCheckBtn.appendChild(aa);
+    spellCheckBtn.appendChild(langBadgeEl);
+    refreshLangBadge();
 
     let dragState = null;
     spellCheckBtn.addEventListener('pointerdown', e => {
       e.preventDefault();
-      dragState = { startX: e.clientX, startY: e.clientY, moved: false };
+      dragState = { startX: e.clientX, startY: e.clientY, moved: false, button: e.button };
       spellCheckBtn.setPointerCapture(e.pointerId);
+      // Touch / pen long-press → language flyout.
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+        longPressTimer = setTimeout(() => {
+          longPressTimer = null;
+          if (dragState && !dragState.moved) {
+            dragState.longPressed = true;
+            showLangFlyout();
+          }
+        }, 500);
+      }
     });
     spellCheckBtn.addEventListener('pointermove', e => {
       if (!dragState) return;
@@ -886,6 +988,7 @@
       const dy = e.clientY - dragState.startY;
       if (!dragState.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
       dragState.moved = true;
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
       const x = clampX(e.clientX - 20);
       const y = clampY(e.clientY - 14);
       spellCheckBtn.style.left = x + 'px';
@@ -893,9 +996,17 @@
       btnFixedPos = { x, y };
     });
     spellCheckBtn.addEventListener('pointerup', e => {
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
       const wasDrag = dragState && dragState.moved;
+      const wasLongPress = dragState && dragState.longPressed;
       dragState = null;
-      if (!wasDrag) manualCheck();
+      if (!wasDrag && !wasLongPress) manualCheck();
+    });
+    spellCheckBtn.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      if (dragState) dragState.longPressed = true;
+      showLangFlyout();
     });
 
     (document.fullscreenElement || document.body).appendChild(spellCheckBtn);
@@ -938,8 +1049,18 @@
     if (spellCheckBtn) {
       spellCheckBtn.remove();
       spellCheckBtn = null;
+      langBadgeEl = null;
     }
+    hideLangFlyout();
   }
+
+  // Keep the language badge in sync when language changes from elsewhere
+  // (popup picker, lockdown loader, etc.).
+  try {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && 'language' in changes) refreshLangBadge();
+    });
+  } catch (_) { /* no-op outside extension context */ }
 
   function manualCheck() {
     if (!activeEl) return;
