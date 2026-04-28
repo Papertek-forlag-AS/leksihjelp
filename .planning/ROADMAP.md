@@ -209,7 +209,9 @@ Plans:
   3. After running the refreshed sync, `grep -l examMode lockdown/public/leksihjelp/*.js` returns matches in `floating-widget.js`, `word-prediction.js`, and `spell-check.js` (proving Phase 27 commits are present)
   4. Lockdown's resource-profile / writing-test resolver writes `chrome.storage.local.set({ examModeLocked: true, examMode: true })` when the teacher selects an exam profile, so the popup's `Slått på av lærer` caption activates inside lockdown
   5. End-to-end: load lockdown locally with exam profile selected → leksihjelp popup shows toggle ON + disabled + locked caption; floating widget shows amber border; word-prediction dropdown does not open; grammar-lookup dots are suppressed but typo dots and dictionary lookups remain
-**Plans:** 1 plan (estimated)
+**Plans:** 1 plan
+Plans:
+- [ ] 28-01-PLAN.md — Lockdown exam-mode integration: sync script + LEKSI_BUNDLE order + re-sync + teacher-lock writer + CLAUDE.md note + human verify
 
 ---
 *Roadmap updated: 2026-04-28 — Phase 25 closed (out-of-band commits); Phase 26 added (Lær mer pedagogy UI); Phase 27 added (Exam Mode — major architecture change); Phase 28 added (lockdown exam-mode sync — gap closure for EXAM-08 from v3.1 audit)*
