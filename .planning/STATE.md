@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.3
-milestone_name: Exam Mode
-status: Plan 03 (runtime suppression) ready to start
-last_updated: "2026-04-28T14:25:00.000Z"
-last_activity: 2026-04-28 -- Plan 27-02 complete (check-exam-marker release gate + self-test)
+milestone: v3.1
+milestone_name: Polish & Intelligence
+status: Phase 27 Exam Mode complete (3/3 plans). Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
+last_updated: "2026-04-28T15:30:00.000Z"
+last_activity: 2026-04-28 -- Plan 27-03 complete (runtime suppression: popup toggle, EKSAMENMODUS badge, widget amber border, dual-marker gate, version 2.7.0)
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Session State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Position
 
 **Milestone:** v3.3 Exam Mode
-**Phase:** 27 (Exam Mode) -- in progress
-**Plan:** 2 of 3 complete (27-01, 27-02)
-**Status:** Plan 03 (runtime suppression) ready to start
-**Last activity:** 2026-04-28 -- Plan 27-02 complete (check-exam-marker release gate + self-test)
+**Phase:** 27 (Exam Mode) -- COMPLETE
+**Plan:** 3 of 3 complete (27-01, 27-02, 27-03)
+**Status:** Phase 27 done. Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
+**Last activity:** 2026-04-28 -- Plan 27-03 complete (runtime suppression)
 
-Progress: [███████░░░] 67% (Phase 27)
+Progress: [██████████] 100% (Phase 27)
 
 ## Performance Metrics
 
@@ -42,6 +42,7 @@ Progress: [███████░░░] 67% (Phase 27)
 | 26    | 03   | 12             | 4     | 6     |
 | 27    | 01   | 18             | 2     | 62    |
 | 27    | 02   | 2              | 2     | 4     |
+| 27    | 03   | 22             | 3     | 12    |
 
 ## Accumulated Context
 
@@ -61,11 +62,20 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 27-01]: Default-conservative classification: lookup-shaped grammar rules safe=false pending browser-baseline research; collocation/quotation-suppression promoted to safe=true (lexical/scaffolding)
 - [Phase 27-01]: de-prep-case is the sole dual-marker case today (rule.exam grammar-lookup + rule.explain.exam pedagogy via Object.assign-wrapped explain)
 - [Phase 27]: 27-02: check-exam-marker gate; registry entries require category (strict surface), rules accept it as optional but validate closed set when present; hard-fail by default per CONTEXT.md
+- [Phase 27-03]: Filter findings post-CORE.check rather than pre-iteration — keeps spell-check-core pure; functionally identical effect (dot + popover both suppressed because finding is dropped before render)
+- [Phase 27-03]: Cached examMode + onChanged listener per content script — avoids per-keystroke storage reads; live toggle handled by hideOverlay + reschedule
+- [Phase 27-03]: Lockdown lock defensively forces examMode=true if only examModeLocked set; toggle disabled+ON; "Slått på av lærer" caption shown
+- [Phase 27-03]: exam-registry.js registered in manifest BEFORE floating-widget/word-prediction/spell-check; without correct order the fail-safe path hides everything even when examMode is off
+- [Phase 27-03]: Version bumped to 2.7.0 (manifest + package + landing page) — signals lockdown to re-pin per CLAUDE.md
 
 ### Pending Todos
 
 - Phase 26 human verification deferred (6 browser walkthroughs in 26-VERIFICATION.md) — approve in a later session
-- Lockdown sync needed: run `node scripts/sync-leksihjelp.js` from /Users/geirforbord/Papertek/lockdown to mirror Phase 26 spell-check.js/content.css changes downstream
+- Phase 27 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 27-03-PLAN.md `<how-to-verify>` block) — approve in a later session
+- Lockdown sync needed: run `node scripts/sync-leksihjelp.js` from /Users/geirforbord/Papertek/lockdown to mirror Phase 26 + Phase 27 spell-check.js/content.css/i18n/strings.js/exam-registry.js changes downstream
+- Lockdown loader needs to either include the synced extension/exam-registry.js before leksihjelp scripts OR provide host.__lexiExamRegistry via shim — without either, fail-safe path hides every surface in lockdown context
+- Browser-baseline research: revisit lookup-shaped grammar rules currently classified exam.safe=false (Phase 27-01 default-conservative call) and flip to safe=true any rule that doesn't actually exceed Chrome native parity
+- Phase 27 release: bump done at 2.6.0 → 2.7.0; rebuild zip via `npm run package` and upload as GitHub Release asset (Release Workflow steps 11-13)
 
 ### Roadmap Evolution
 
@@ -80,4 +90,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-28
-Stopped at: Completed 27-02-PLAN.md (check-exam-marker release gate + self-test, registered in CLAUDE.md Release Workflow). Plan 03 (runtime suppression) ready to start.
+Stopped at: Completed 27-03-PLAN.md (runtime suppression — popup toggle, EKSAMENMODUS badge, widget amber border, dual-marker gate for de-prep-case, manifest registration, version 2.7.0). Phase 27 Exam Mode is now complete (3/3 plans). Auto-approved Task 3 human-verify checkpoint per auto-mode policy. Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
