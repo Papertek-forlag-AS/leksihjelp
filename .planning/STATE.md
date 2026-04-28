@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
-status: Phase 27 Exam Mode complete (3/3 plans). Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
-last_updated: "2026-04-28T15:30:00.000Z"
-last_activity: 2026-04-28 -- Plan 27-03 complete (runtime suppression: popup toggle, EKSAMENMODUS badge, widget amber border, dual-marker gate, version 2.7.0)
+status: completed
+last_updated: "2026-04-28T17:18:15.084Z"
+last_activity: 2026-04-28 -- Plan 27-03 complete (runtime suppression)
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 13
-  completed_plans: 9
+  completed_plans: 8
 ---
 
 # Session State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 **Milestone:** v3.3 Exam Mode
 **Phase:** 27 (Exam Mode) -- COMPLETE
 **Plan:** 3 of 3 complete (27-01, 27-02, 27-03)
-**Status:** Phase 27 done. Lockdown sync + browser-baseline research are pending follow-ups; v2.7.0 ready to package + release.
+**Status:** Milestone complete
 **Last activity:** 2026-04-28 -- Plan 27-03 complete (runtime suppression)
 
 Progress: [██████████] 100% (Phase 27)
