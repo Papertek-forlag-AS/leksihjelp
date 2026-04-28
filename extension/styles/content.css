@@ -1279,3 +1279,179 @@
   padding: 4px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
+
+/* ── Lær mer pedagogy panel (Phase 26) ──
+   Inline teaching panel rendered below the spell-check popover's actions row
+   when a finding carries a `pedagogy` block (DE preposition rule, sourced via
+   plan 26-01). Stays inside the popover surface — no modal, no overlay — so
+   drag/Tab navigation continues to work. Colour + icon combo on correct/
+   incorrect rows preserves access for colour-blind users (Phase 05.1 lesson).
+   Note: this CSS file is sync'd into the lockdown webapp, so styles must
+   degrade gracefully outside the extension context. */
+
+#lexi-spell-overlay .lh-spell-laer-mer-btn {
+  display: inline-block;
+  margin: 6px 8px 0 8px;
+  padding: 4px 10px;
+  background: #F4F1EE;
+  border: 1px solid #DCD5CC;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #3A3A3A;
+  cursor: pointer;
+  font-family: inherit;
+}
+#lexi-spell-overlay .lh-spell-laer-mer-btn:hover {
+  background: #ECE6DC;
+}
+#lexi-spell-overlay .lh-spell-laer-mer-btn[aria-expanded="true"] {
+  background: #E6E0D5;
+  border-color: #C9C0B2;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-panel {
+  margin: 8px 0 0 0;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-panel[hidden] {
+  display: none !important;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-case-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  background: #888;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-case-badge--akkusativ { background: #E08828; }
+#lexi-spell-overlay .lh-spell-pedagogy-case-badge--dativ     { background: #2E74B5; }
+#lexi-spell-overlay .lh-spell-pedagogy-case-badge--wechsel   { background: #8E5BCC; }
+#lexi-spell-overlay .lh-spell-pedagogy-case-badge--genitiv   { background: #11B49A; }
+
+#lexi-spell-overlay .lh-spell-pedagogy-contraction {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  color: #666;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-summary,
+#lexi-spell-overlay .lh-spell-pedagogy-explanation {
+  margin: 0 0 6px 0;
+  line-height: 1.4;
+  color: #2A2A2A;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-explanation {
+  color: #4A4A4A;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-example {
+  margin: 6px 0;
+  padding: 6px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.015);
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-example-correct {
+  color: #1F7A3A;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-example-correct strong {
+  font-weight: 700;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-example-incorrect {
+  color: #C0392B;
+  text-decoration: line-through;
+  text-decoration-color: rgba(192, 57, 43, 0.4);
+  margin-bottom: 4px;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-example-translation {
+  font-style: italic;
+  font-size: 0.92em;
+  color: #555;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-example-note {
+  margin-top: 2px;
+  font-size: 0.88em;
+  color: #777;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-example-note em {
+  font-style: italic;
+}
+
+/* Wechselpräposition motion vs location pair — stacked layout for narrow
+   popovers (the spell-check popover is ~320px wide; flex-column avoids the
+   awkward container-query / media-query dance). */
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-motion,
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-location {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-motion {
+  background: #FFF4E6;
+  border-left-color: #E08828;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-location {
+  background: #E6F0FA;
+  border-left-color: #2E74B5;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-label {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+  color: #2A2A2A;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-wechsel-sentence {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-colloquial {
+  display: block;
+  margin: 8px 0 0 0;
+  padding: 8px 10px;
+  background: #F4F1EE;
+  border-radius: 6px;
+  font-size: 0.92em;
+  font-style: italic;
+  color: #4A4A4A;
+}
+#lexi-spell-overlay .lh-spell-pedagogy-colloquial em {
+  font-style: italic;
+}
