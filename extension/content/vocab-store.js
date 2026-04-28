@@ -225,6 +225,28 @@
   const _isExtensionOrigin = (typeof location !== 'undefined' && location.protocol === 'chrome-extension:');
   const _proxyCache = new Map();
 
+  // Invalidate cached proxy responses when a language finishes hydrating
+  // so newly-downloaded bundles surface to long-lived pages (the Aa-button
+  // language flyout, lockdown shim consumers, etc.) without a page reload.
+  // The vocab-seam emits state='ready' via chrome.runtime.sendMessage when
+  // a target bundle is cached and live in __lexiVocab.
+  if (!_isExtensionOrigin) {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener((msg) => {
+          if (!msg || msg.type !== 'lexi:hydration') return;
+          if (msg.state === 'ready' || msg.state === 'baseline') {
+            _proxyCache.delete('list');
+            if (msg.lang) {
+              _proxyCache.delete(`lang:${msg.lang}`);
+              _proxyCache.delete(`grammar:${msg.lang}`);
+            }
+          }
+        });
+      }
+    } catch (_) { /* no chrome.runtime — non-extension test sandbox */ }
+  }
+
   function _sendMessageAsync(msg) {
     return new Promise((resolve) => {
       try {

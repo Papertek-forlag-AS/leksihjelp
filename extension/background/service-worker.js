@@ -238,33 +238,35 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // async
   }
 
-  // Vocab data proxy — content scripts can't access extension-origin IndexedDB
+  // Vocab data proxy — content scripts can't access extension-origin IndexedDB.
+  // All three handlers go through self.__lexiVocabStore (DB 'lex-vocab').
+  // The legacy openVocabDB / getVocabRecord / listVocabLanguages helpers
+  // below were left over from the pre-rename 'leksihjelp-vocab' DB and have
+  // been removed; nothing in the codebase wrote to that DB after the rename.
   if (msg.type === 'VOCAB_GET_CACHED') {
-    getVocabRecord(msg.language).then(record => {
-      sendResponse(record?.data || null);
-    }).catch(() => sendResponse(null));
+    const store = self.__lexiVocabStore;
+    if (!store) { sendResponse(null); return; }
+    store.getCachedLanguage(msg.language)
+      .then(payload => sendResponse(payload || null))
+      .catch(() => sendResponse(null));
     return true; // async
   }
 
   if (msg.type === 'VOCAB_GET_GRAMMAR') {
-    getVocabRecord(msg.language).then(record => {
-      sendResponse(record?.grammarFeatures || null);
-    }).catch(() => sendResponse(null));
+    const store = self.__lexiVocabStore;
+    if (!store) { sendResponse(null); return; }
+    store.getCachedGrammarFeatures(msg.language)
+      .then(grammar => sendResponse(grammar || null))
+      .catch(() => sendResponse(null));
     return true; // async
   }
 
   if (msg.type === 'VOCAB_LIST_CACHED') {
-    // Route through __lexiVocabStore (DB name 'lex-vocab') instead of the
-    // legacy listVocabLanguages() reader below, which still points at the
-    // pre-rename 'leksihjelp-vocab' DB and would always answer []. The
-    // legacy reader is kept for VOCAB_GET_CACHED / VOCAB_GET_GRAMMAR until
-    // those are migrated too.
     const store = self.__lexiVocabStore;
-    if (store && typeof store.listCachedLanguages === 'function') {
-      store.listCachedLanguages().then(sendResponse).catch(() => sendResponse([]));
-    } else {
-      listVocabLanguages().then(sendResponse).catch(() => sendResponse([]));
-    }
+    if (!store) { sendResponse([]); return; }
+    store.listCachedLanguages()
+      .then(sendResponse)
+      .catch(() => sendResponse([]));
     return true; // async
   }
 
@@ -313,55 +315,6 @@ async function verifyCode(code) {
     // Server unreachable — no offline fallback
     return { valid: false, offline: true };
   }
-}
-
-// ── Vocab data proxy (content scripts can't access extension-origin IndexedDB) ──
-const VOCAB_DB_NAME = 'leksihjelp-vocab';
-const VOCAB_DB_VERSION = 2;
-
-function openVocabDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(VOCAB_DB_NAME, VOCAB_DB_VERSION);
-    req.onupgradeneeded = () => {
-      const db = req.result;
-      if (!db.objectStoreNames.contains('languages')) {
-        db.createObjectStore('languages', { keyPath: 'language' });
-      }
-      if (!db.objectStoreNames.contains('audio')) {
-        db.createObjectStore('audio');
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function getVocabRecord(lang) {
-  const db = await openVocabDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('languages', 'readonly');
-    const req = tx.objectStore('languages').get(lang);
-    req.onsuccess = () => { db.close(); resolve(req.result || null); };
-    req.onerror = () => { db.close(); reject(req.error); };
-  });
-}
-
-async function listVocabLanguages() {
-  const db = await openVocabDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('languages', 'readonly');
-    const req = tx.objectStore('languages').getAll();
-    req.onsuccess = () => {
-      db.close();
-      resolve((req.result || []).map(r => ({
-        language: r.language,
-        version: r.version,
-        totalWords: r.data?._metadata?.totalWords || 0,
-        cachedAt: r.cachedAt
-      })));
-    };
-    req.onerror = () => { db.close(); reject(req.error); };
-  });
 }
 
 // ── TTS fetch (routes through service worker to avoid content script CORS) ──
