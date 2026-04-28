@@ -38,6 +38,7 @@ const _STRINGS = {
     picker_failed_offline: 'Ingen internettilkobling. Koble til nettet og prøv igjen.',
     hydration_error_offline: 'Ingen internettilkobling — ordlister lastes ned når du er på nett',
     hydration_error_generic: 'Ordlister utilgjengelig — prøv igjen senere',
+    hydration_error_schema_mismatch: 'Versjonskonflikt — oppdater utvidelsen for å hente nye ordlister',
 
     // ── Language names ──
     lang_de: 'Tysk',
@@ -284,6 +285,7 @@ const _STRINGS = {
     picker_failed_offline: 'Inga internettilkopling. Kopla til nettet og prøv igjen.',
     hydration_error_offline: 'Inga internettilkopling — ordlister vert lasta ned når du er på nett',
     hydration_error_generic: 'Ordlister utilgjengelege — prøv igjen seinare',
+    hydration_error_schema_mismatch: 'Versjonskonflikt — oppdater utvidinga for å hente nye ordlister',
 
     lang_de: 'Tysk',
     lang_es: 'Spansk',
@@ -511,6 +513,7 @@ const _STRINGS = {
     picker_failed_offline: 'No internet connection. Connect to the internet and try again.',
     hydration_error_offline: 'No internet connection — dictionaries will download when you are online',
     hydration_error_generic: 'Dictionaries unavailable — try again later',
+    hydration_error_schema_mismatch: 'Version mismatch — update the extension to fetch new dictionaries',
 
     lang_de: 'German',
     lang_es: 'Spanish',

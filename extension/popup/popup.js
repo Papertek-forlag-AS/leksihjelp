@@ -230,6 +230,9 @@ function initVocabStatus() {
     if (state === 'fetching') return `Laster ned ${name}…`;
     if (state === 'ready')    return `${name} klar`;
     if (state === 'error') {
+      if (reason === 'schema-mismatch') {
+        return t('hydration_error_schema_mismatch');
+      }
       if (reason === 'timeout-or-network' && !navigator.onLine) {
         return t('hydration_error_offline');
       }
@@ -288,9 +291,18 @@ function initVocabStatus() {
 
   // Live updates from bootstrap + content seam.
   chrome.runtime.onMessage.addListener((m) => {
-    if (!m || m.type !== 'lexi:hydration' || !m.lang || !m.state) return;
-    if (m.lang === 'nb' && m.state === 'baseline') return; // implicit
-    setPill(m.lang, m.state, m.reason);
+    if (!m || !m.lang) return;
+    if (m.type === 'lexi:hydration' && m.state) {
+      if (m.lang === 'nb' && m.state === 'baseline') return; // implicit
+      setPill(m.lang, m.state, m.reason);
+      return;
+    }
+    // DEBT-04: vocab-store emits this when cached schema differs from
+    // server schema. Surface as an error pill with the Versjonskonflikt
+    // diagnostic regardless of whether bootstrap has emitted yet.
+    if (m.type === 'lexi:schema-mismatch') {
+      setPill(m.lang, 'error', 'schema-mismatch');
+    }
   });
 }
 
