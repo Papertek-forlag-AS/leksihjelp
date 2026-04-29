@@ -80,6 +80,12 @@ End-to-end on `staging-lockdown.web.app`:
 8. Phase 28's dev-only "Simuler lærer-lås" button still works (regression).
 9. Production deploy + papertek.app verification still deferred — explicitly out of scope this phase.
 
+### Three sidepanel composition decisions (locked 2026-04-29 by user)
+
+- **UI-language picker:** SKIP in lockdown sidepanel. Lockdown has its own i18n system; the leksihjelp settings view's language section is hidden via `showSection.language: false`.
+- **EKSAMENMODUS badge:** KEEP in lockdown sidepanel. Reads `chrome.storage.local.examMode` (set by Phase 29-02's `applyExamModeLock`); subscribes to `onChanged` so it flips live with profile changes. Visible reinforcement that the dictionary is exam-restricted.
+- **Settings navigation:** INLINE (no two-view dictionary/settings toggle). Implemented as a `<details>` collapsible right below the dictionary in the same scroll column — counts as inline since it's the same view, the `<details>` is just a vertical-space saver for the narrow sidepanel.
+
 ### Claude's Discretion
 
 - Specific module file layout under `extension/popup/views/` (subfolders, naming).
