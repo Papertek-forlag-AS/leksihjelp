@@ -1,10 +1,15 @@
 /**
  * Leksihjelp — Settings View Module (Phase 30-01)
  *
- * Mountable settings view: UI language picker, target-language list, grammar
- * preset + features, dark mode, prediction toggle, spellcheck-alternates
- * toggle. Account/auth, exam mode, and access-code remain in popup.js — they
- * live inside the same `#view-settings` DOM section but are owned by the host.
+ * Mountable settings view: UI language picker, dark mode, prediction toggle,
+ * spellcheck-alternates toggle.
+ *
+ * Account/auth, exam mode, access-code, target-language download list, and
+ * grammar features remain owned by the host (popup.js) — they live inside the
+ * same `#view-settings` DOM section but their wiring is extension-specific
+ * (calls into vocab-store download paths, access-code verify endpoint, exam
+ * registry). Lockdown's sidepanel will pass `showSection: { uiLanguage: true,
+ * darkmode: true }` and skip the rest.
  *
  * @typedef {Object} SettingsViewDeps
  * @property {Object} storage      - { get(key), set(obj) }
@@ -12,13 +17,11 @@
  * @property {Function} t          - i18n resolver
  * @property {Function} getUiLanguage
  * @property {Function} setUiLanguage
- * @property {Function} langName
- * @property {Function} loadGrammarFeatures - async (lang) => void
- * @property {Function} saveAndNotifyGrammarChange - () => void
- * @property {Object}  [showSection] - { language, grammar, darkmode, prediction,
+ * @property {Function} applyTranslations - re-paint i18n strings on UI lang change
+ * @property {Function} [onUiLanguageChange] - host hook to refresh dynamic UI
+ * @property {Object}  [showSection] - { uiLanguage, darkmode, prediction,
  *                                       spellcheckAlternates } booleans
- *                                     (default all true). When false, the view
- *                                     does NOT bind handlers for that section.
+ *                                     (default all true).
  *
  * @returns {{ destroy(): void }}
  */
@@ -29,9 +32,118 @@
     if (!container) throw new Error('mountSettingsView: container required');
     if (!deps) throw new Error('mountSettingsView: deps required');
 
-    // TODO Plan 30-01 Task 2: move logic from popup.js — currently a no-op.
+    const {
+      storage, runtime, t,
+      getUiLanguage, setUiLanguage, applyTranslations,
+      onUiLanguageChange,
+    } = deps;
+    const showSection = deps.showSection || {
+      uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true,
+    };
+
+    const cleanups = [];
+    function bind(el, ev, handler) {
+      if (!el) return;
+      el.addEventListener(ev, handler);
+      cleanups.push(() => el.removeEventListener(ev, handler));
+    }
+
+    // ── UI language picker ─────────────────────────────
+    if (showSection.uiLanguage !== false) {
+      const uiSelector = container.querySelector('#ui-language-selector');
+      if (uiSelector) {
+        const currentUi = getUiLanguage();
+        uiSelector.querySelectorAll('.ui-lang-option').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.uiLang === currentUi);
+          const onClick = async () => {
+            const lang = btn.dataset.uiLang;
+            if (lang === getUiLanguage()) return;
+            uiSelector.querySelectorAll('.ui-lang-option').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            setUiLanguage(lang);
+            await storage.set({ uiLanguage: lang });
+            if (typeof applyTranslations === 'function') applyTranslations();
+            if (typeof onUiLanguageChange === 'function') onUiLanguageChange(lang);
+            runtime.sendMessage({ type: 'UI_LANGUAGE_CHANGED', uiLanguage: lang });
+          };
+          btn.addEventListener('click', onClick);
+          cleanups.push(() => btn.removeEventListener('click', onClick));
+        });
+      }
+    }
+
+    // ── Dark mode toggle ───────────────────────────────
+    if (showSection.darkmode !== false) {
+      (async () => {
+        const toggle = container.querySelector('#setting-darkmode');
+        if (!toggle) return;
+        const stored = await storage.get('darkMode');
+        const docEl = container.ownerDocument.documentElement;
+
+        if (stored === true) {
+          docEl.setAttribute('data-theme', 'dark');
+          toggle.checked = true;
+        } else if (stored === false) {
+          docEl.removeAttribute('data-theme');
+          toggle.checked = false;
+        } else {
+          const win = container.ownerDocument.defaultView;
+          if (win && win.matchMedia && win.matchMedia('(prefers-color-scheme: dark)').matches) {
+            docEl.setAttribute('data-theme', 'dark');
+            toggle.checked = true;
+          }
+        }
+
+        bind(toggle, 'change', async () => {
+          if (toggle.checked) {
+            docEl.setAttribute('data-theme', 'dark');
+            await storage.set({ darkMode: true });
+          } else {
+            docEl.removeAttribute('data-theme');
+            await storage.set({ darkMode: false });
+          }
+        });
+      })();
+    }
+
+    // ── Word-prediction toggle ─────────────────────────
+    if (showSection.prediction !== false) {
+      (async () => {
+        const toggle = container.querySelector('#setting-prediction');
+        if (!toggle) return;
+        const enabled = await storage.get('predictionEnabled');
+        toggle.checked = enabled === true;
+        bind(toggle, 'change', async () => {
+          await storage.set({ predictionEnabled: toggle.checked });
+          runtime.sendMessage({ type: 'PREDICTION_TOGGLED', enabled: toggle.checked });
+        });
+      })();
+    }
+
+    // ── Spellcheck-alternates toggle ───────────────────
+    if (showSection.spellcheckAlternates !== false) {
+      (async () => {
+        const toggle = container.querySelector('#setting-spellcheck-alternates');
+        if (!toggle) return;
+        const stored = await storage.get('spellCheckAlternatesVisible');
+        toggle.checked = stored === true;
+        bind(toggle, 'change', async () => {
+          await storage.set({ spellCheckAlternatesVisible: toggle.checked });
+        });
+      })();
+    }
+
+    // Suppress unused warning for `t` — kept as a dep for future i18n strings
+    // the view may render directly (today the labels are static via data-i18n).
+    void t;
+
     return {
-      destroy() { /* no-op until Task 2 */ },
+      destroy() {
+        for (const fn of cleanups) {
+          try { fn(); } catch (_) { /* best-effort */ }
+        }
+        cleanups.length = 0;
+      },
     };
   }
 

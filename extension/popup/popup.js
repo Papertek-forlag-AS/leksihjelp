@@ -200,14 +200,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadGrammarFeatures(viewState.currentLang);
   initSearch();
   initSettings();
+  initSettingsView(); // Phase 30-01: mounts settings-view.js (UI lang, darkmode, prediction, spellcheck-alternates)
   initExamMode();
-  initUiLanguageSettings();
   initGrammarSettings();
   initNav();
   initPinButton();
   initSkrivButton();
   initPauseButton();
-  initDarkMode();
   initAuth();
   initReportForm();
   initVocabUpdateNotice();
@@ -500,46 +499,46 @@ async function initUiLanguagePicker() {
   });
 }
 
-/**
- * Wire up the UI language selector in settings.
- * Changing the display language re-renders all UI text.
- */
-function initUiLanguageSettings() {
-  const container = document.getElementById('ui-language-selector');
+// Phase 30-01: initUiLanguageSettings + initDarkMode + prediction/spellcheck-alternates
+// toggles moved into extension/popup/views/settings-view.js. The wrapper below
+// mounts the settings view module against #view-settings and wires the
+// onUiLanguageChange hook so host-side dynamic sections (lang switcher, lang
+// list, grammar settings, auth UI, search re-run) refresh when the user
+// changes their display language.
+let settingsViewHandle = null;
+function initSettingsView() {
+  const container = document.getElementById('view-settings');
   if (!container) return;
 
-  // Highlight the active UI language
-  const currentUi = getUiLanguage();
-  container.querySelectorAll('.ui-lang-option').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.uiLang === currentUi);
+  if (settingsViewHandle && typeof settingsViewHandle.destroy === 'function') {
+    settingsViewHandle.destroy();
+    settingsViewHandle = null;
+  }
 
-    btn.addEventListener('click', async () => {
-      const lang = btn.dataset.uiLang;
-      if (lang === getUiLanguage()) return;
+  const view = self.__lexiSettingsView;
+  if (!view || typeof view.mount !== 'function') {
+    console.error('Leksihjelp: settings-view.js failed to load');
+    return;
+  }
 
-      // Update active state
-      container.querySelectorAll('.ui-lang-option').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Apply new UI language
-      setUiLanguage(lang);
-      await chromeStorageSet({ uiLanguage: lang });
-      applyTranslations();
-
-      // Re-render dynamic sections
+  settingsViewHandle = view.mount(container, {
+    storage: chromeStorageAdapter,
+    runtime: chrome.runtime,
+    t,
+    getUiLanguage,
+    setUiLanguage,
+    applyTranslations,
+    onUiLanguageChange() {
+      // Re-render dynamic UI that depends on the active display language.
       updateLangLabels();
       buildLangSwitcher();
       updateLanguageListStatus();
       initGrammarSettings();
       updateAuthUI();
-
-      // Re-run search if there's a query
       const input = document.getElementById('search-input');
       if (input?.value.trim()) performSearch(input.value.trim());
-
-      // Broadcast to content scripts and service worker
-      chrome.runtime.sendMessage({ type: 'UI_LANGUAGE_CHANGED', uiLanguage: lang });
-    });
+    },
+    showSection: { uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true },
   });
 }
 
@@ -1485,14 +1484,9 @@ async function initSettings() {
   const codeInput = document.getElementById('setting-access-code');
   const verifyBtn = document.getElementById('verify-code-btn');
   const codeStatus = document.getElementById('code-status');
-  const predictionToggle = document.getElementById('setting-prediction');
-  const alternatesToggle = document.getElementById('setting-spellcheck-alternates');
   const savedCode = await chromeStorageGet('accessCode');
   if (savedCode) codeInput.value = savedCode;
-  const predEnabled = await chromeStorageGet('predictionEnabled');
-  predictionToggle.checked = predEnabled === true;
-  const altStored = await chromeStorageGet('spellCheckAlternatesVisible');
-  alternatesToggle.checked = altStored === true;  // default false when unset
+  // Phase 30-01: prediction + spellcheck-alternates toggles moved into settings-view.js
 
   // Initialize language list with download status
   await updateLanguageListStatus();
@@ -1592,20 +1586,7 @@ async function initSettings() {
     verifyBtn.textContent = t('settings_code_verify');
   });
 
-  // Prediction toggle
-  predictionToggle.addEventListener('change', async () => {
-    await chromeStorageSet({ predictionEnabled: predictionToggle.checked });
-    chrome.runtime.sendMessage({
-      type: 'PREDICTION_TOGGLED',
-      enabled: predictionToggle.checked
-    });
-  });
-
-  // Spell-check multi-suggest alternates toggle — Plan 05 consumer reads
-  // via chrome.storage.onChanged in spell-check.js. No runtime message needed.
-  alternatesToggle.addEventListener('change', async () => {
-    await chromeStorageSet({ spellCheckAlternatesVisible: alternatesToggle.checked });
-  });
+  // Phase 30-01: prediction + spellcheck-alternates toggles now owned by settings-view.js
 }
 
 // ── Navigation ─────────────────────────────────────────────
@@ -1719,36 +1700,7 @@ async function initPauseButton() {
   });
 }
 
-// ── Dark Mode ──────────────────────────────────────────────
-async function initDarkMode() {
-  const toggle = document.getElementById('setting-darkmode');
-  const stored = await chromeStorageGet('darkMode');
-
-  // Determine initial state: manual override or system preference
-  if (stored === true) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    toggle.checked = true;
-  } else if (stored === false) {
-    document.documentElement.removeAttribute('data-theme');
-    toggle.checked = false;
-  } else {
-    // No manual setting — follow system preference
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      toggle.checked = true;
-    }
-  }
-
-  toggle.addEventListener('change', async () => {
-    if (toggle.checked) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      await chromeStorageSet({ darkMode: true });
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-      await chromeStorageSet({ darkMode: false });
-    }
-  });
-}
+// Phase 30-01: initDarkMode moved into extension/popup/views/settings-view.js
 
 // ── Vipps Login & Account ─────────────────────────────────
 async function initAuth() {
