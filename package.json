@@ -9,6 +9,7 @@
     "extension/styles/",
     "extension/popup/views/",
     "extension/popup/dict-state-builder.js",
+    "extension/popup/grammar-features-section.js",
     "extension/exam-registry.js"
   ],
   "exports": {
