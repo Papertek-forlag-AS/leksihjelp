@@ -7,23 +7,32 @@
 const BACKEND_URL = 'https://leksihjelp.no';
 const { t, initI18n, setUiLanguage, getUiLanguage, langName } = self.__lexiI18n;
 
-let dictionary = null;
-let noDictionary = null; // Norwegian dictionary for two-way lookups (nb or nn based on UI)
-let currentAudio = null; // Currently playing audio
-let allWords = []; // Flattened array of all words from all banks
-let noWords = []; // Flattened Norwegian words (nb or nn)
-let inflectionIndex = null; // Map: lowercased inflected form -> [{ entry, matchType, matchDetail }]
-let currentLang = 'es';
-let searchDirection = 'no-target'; // 'no-target' or 'target-no'
-let grammarFeatures = null; // Grammar features metadata
-let enabledFeatures = new Set(); // Set of enabled feature IDs
-let nounGenusMap = new Map(); // Phase 17: noun genus map for compound decomposition
-let nbEnrichmentIndex = new Map(); // Phase 21.1: NB entry ID → {falseFriends, senses} for target enrichment
-let nbTranslationIndex = new Map(); // target entry ID → Norwegian word (via _generatedFrom)
-let nbIdToTargetIndex = new Map(); // NB entry ID → target entry ID (for nb-fr style reverse links)
-let noNounGenusMap = new Map(); // Phase 17: Norwegian noun genus map for compound decomposition when foreign lang selected
-let currentIndexes = null; // Phase 24: indexes from buildIndexes for predictCompound
-let compoundNavStack = []; // Phase 24 COMP-03: navigation stack for compound back-navigation
+// Phase 30-01: Single source of truth — view state shared with dictionary-view
+// module by reference. The view reads + mutates these properties; the host
+// also reads + mutates them via the const-bound aliases below.
+const viewState = {
+  dictionary: null,
+  noDictionary: null,
+  allWords: [],
+  noWords: [],
+  inflectionIndex: null,
+  currentLang: 'es',
+  searchDirection: 'no-target',
+  nounGenusMap: new Map(),
+  nbEnrichmentIndex: new Map(),
+  nbTranslationIndex: new Map(),
+  nbIdToTargetIndex: new Map(),
+  noNounGenusMap: new Map(),
+  currentIndexes: null,
+  compoundNavStack: [],
+};
+
+let currentAudio = null; // Legacy — dictionary view also tracks its own playback.
+let grammarFeatures = null;
+let enabledFeatures = new Set();
+
+// Mounted dictionary view handle — populated in initSearch().
+let dictionaryViewHandle = null;
 
 /**
  * Get the appropriate Norwegian translation for an entry,
@@ -42,15 +51,15 @@ function getTranslation(entry) {
   if (entry.translation) return entry.translation;
   // Resolve linkedTo primary ID via the loaded Norwegian dictionary
   const link = entry.linkedTo?.[ui] || entry.linkedTo?.nb || entry.linkedTo?.nn;
-  if (link?.primary && noDictionary) {
+  if (link?.primary && viewState.noDictionary) {
     for (const bank of Object.keys(BANK_TO_POS)) {
-      const resolved = noDictionary[bank]?.[link.primary];
+      const resolved = viewState.noDictionary[bank]?.[link.primary];
       if (resolved?.word) return resolved.word;
     }
   }
   // Resolve via nbTranslationIndex (built from NB _generatedFrom)
-  if (entry._wordId && nbTranslationIndex.size > 0) {
-    const nbWord = nbTranslationIndex.get(entry._wordId);
+  if (entry._wordId && viewState.nbTranslationIndex.size > 0) {
+    const nbWord = viewState.nbTranslationIndex.get(entry._wordId);
     if (nbWord) return nbWord;
   }
   return '';
@@ -172,7 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   applyTranslations();
 
-  currentLang = (await chromeStorageGet('language')) || null;
+  viewState.currentLang = (await chromeStorageGet('language')) || null;
 
   // Step 2: Show the learning-language picker on first popup open.
   // Gated on a dedicated flag rather than the presence of `language` —
@@ -185,10 +194,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // If still no language after picker (skipped), default to English
-  if (!currentLang) currentLang = 'en';
+  if (!viewState.currentLang) viewState.currentLang = 'en';
 
-  await loadDictionary(currentLang);
-  await loadGrammarFeatures(currentLang);
+  await loadDictionary(viewState.currentLang);
+  await loadGrammarFeatures(viewState.currentLang);
   initSearch();
   initSettings();
   initExamMode();
@@ -443,7 +452,7 @@ async function initFirstRunPicker() {
           }
 
           // Save selection
-          currentLang = lang;
+          viewState.currentLang = lang;
           await chromeStorageSet({ language: lang });
           chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
 
@@ -550,18 +559,18 @@ function chromeStorageSet(obj) {
 async function loadDictionary(lang) {
   try {
     // Try vocab store (IndexedDB) first, fall back to bundled file
-    dictionary = await loadLanguageData(lang);
-    if (!dictionary) throw new Error('No dictionary data');
+    viewState.dictionary = await loadLanguageData(lang);
+    if (!viewState.dictionary) throw new Error('No dictionary data');
 
-    allWords = flattenBanks(dictionary);
-    inflectionIndex = buildInflectionIndex(allWords);
+    viewState.allWords = flattenBanks(viewState.dictionary);
+    viewState.inflectionIndex = buildInflectionIndex(viewState.allWords);
 
     // Phase 17 COMP-01: build nounGenus for compound decomposition
     const vocabCore = self.__lexiVocabCore;
     if (vocabCore && vocabCore.buildIndexes) {
-      const indexes = vocabCore.buildIndexes({ raw: dictionary, lang: currentLang });
-      nounGenusMap = indexes.nounGenus || new Map();
-      currentIndexes = indexes; // Phase 24: capture for predictCompound
+      const indexes = vocabCore.buildIndexes({ raw: viewState.dictionary, lang: viewState.currentLang });
+      viewState.nounGenusMap = indexes.nounGenus || new Map();
+      viewState.currentIndexes = indexes; // Phase 24: capture for predictCompound
     }
 
     updateLangLabels();
@@ -570,25 +579,25 @@ async function loadDictionary(lang) {
     const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
     if (lang !== noLang) {
       try {
-        noDictionary = await loadLanguageData(noLang);
-        noWords = noDictionary ? flattenBanks(noDictionary) : [];
+        viewState.noDictionary = await loadLanguageData(noLang);
+        viewState.noWords = viewState.noDictionary ? flattenBanks(viewState.noDictionary) : [];
         // Build reverse indexes from NB dictionary
-        nbEnrichmentIndex = new Map();
-        nbTranslationIndex = new Map();
+        viewState.nbEnrichmentIndex = new Map();
+        viewState.nbTranslationIndex = new Map();
         const langPrefix = `${currentLang}-nb/`;
         const nbIdToWord = new Map();
-        if (noDictionary) {
-          for (const bank of Object.keys(noDictionary)) {
-            const bankData = noDictionary[bank];
+        if (viewState.noDictionary) {
+          for (const bank of Object.keys(viewState.noDictionary)) {
+            const bankData = viewState.noDictionary[bank];
             if (!bankData || typeof bankData !== 'object') continue;
             for (const [id, entry] of Object.entries(bankData)) {
               if (id.startsWith('_')) continue;
               if (entry.word) nbIdToWord.set(id, entry.word);
               // Enrichment index (falseFriends/senses via linkedTo)
-              if ((entry.falseFriends || entry.senses) && entry.linkedTo?.[currentLang]?.primary) {
-                const linkId = entry.linkedTo[currentLang].primary;
-                const existing = nbEnrichmentIndex.get(linkId);
-                nbEnrichmentIndex.set(linkId, {
+              if ((entry.falseFriends || entry.senses) && entry.linkedTo?.[viewState.currentLang]?.primary) {
+                const linkId = entry.linkedTo[viewState.currentLang].primary;
+                const existing = viewState.nbEnrichmentIndex.get(linkId);
+                viewState.nbEnrichmentIndex.set(linkId, {
                   falseFriends: [...(existing?.falseFriends || []), ...(entry.falseFriends || [])],
                   senses: [...(existing?.senses || []), ...(entry.senses || [])]
                 });
@@ -600,8 +609,8 @@ async function loadDictionary(lang) {
                     const colonIdx = trimmed.indexOf(':');
                     if (colonIdx !== -1) {
                       const targetId = trimmed.substring(colonIdx + 1);
-                      if (!nbTranslationIndex.has(targetId)) {
-                        nbTranslationIndex.set(targetId, entry.word);
+                      if (!viewState.nbTranslationIndex.has(targetId)) {
+                        viewState.nbTranslationIndex.set(targetId, entry.word);
                       }
                     }
                   }
@@ -612,10 +621,10 @@ async function loadDictionary(lang) {
         }
         // Direction 2: target→NB (e.g. FR _generatedFrom "nb-fr/bank:skole_noun")
         const revPrefix = `nb-${currentLang}/`;
-        nbIdToTargetIndex = new Map();
-        if (dictionary) {
-          for (const bank of Object.keys(dictionary)) {
-            const bankData = dictionary[bank];
+        viewState.nbIdToTargetIndex = new Map();
+        if (viewState.dictionary) {
+          for (const bank of Object.keys(viewState.dictionary)) {
+            const bankData = viewState.dictionary[bank];
             if (!bankData || typeof bankData !== 'object') continue;
             for (const [id, entry] of Object.entries(bankData)) {
               if (id.startsWith('_') || !entry._generatedFrom) continue;
@@ -626,8 +635,8 @@ async function loadDictionary(lang) {
                     const nbId = trimmed.substring(colonIdx + 1);
                     const nbWord = nbIdToWord.get(nbId);
                     if (nbWord) {
-                      if (!nbTranslationIndex.has(id)) nbTranslationIndex.set(id, nbWord);
-                      if (!nbIdToTargetIndex.has(nbId)) nbIdToTargetIndex.set(nbId, id);
+                      if (!viewState.nbTranslationIndex.has(id)) viewState.nbTranslationIndex.set(id, nbWord);
+                      if (!viewState.nbIdToTargetIndex.has(nbId)) viewState.nbIdToTargetIndex.set(nbId, id);
                     }
                   }
                 }
@@ -635,25 +644,25 @@ async function loadDictionary(lang) {
             }
           }
         }
-        if (noDictionary && vocabCore && vocabCore.buildIndexes) {
-          const noIndexes = vocabCore.buildIndexes({ raw: noDictionary, lang: noLang });
-          noNounGenusMap = noIndexes.nounGenus || new Map();
+        if (viewState.noDictionary && vocabCore && vocabCore.buildIndexes) {
+          const noIndexes = vocabCore.buildIndexes({ raw: viewState.noDictionary, lang: noLang });
+          viewState.noNounGenusMap = noIndexes.nounGenus || new Map();
         }
       } catch {
-        noDictionary = null;
-        noWords = [];
-        noNounGenusMap = new Map();
-        nbEnrichmentIndex = new Map();
-        nbTranslationIndex = new Map();
-        nbIdToTargetIndex = new Map();
+        viewState.noDictionary = null;
+        viewState.noWords = [];
+        viewState.noNounGenusMap = new Map();
+        viewState.nbEnrichmentIndex = new Map();
+        viewState.nbTranslationIndex = new Map();
+        viewState.nbIdToTargetIndex = new Map();
       }
     } else {
-      noDictionary = null;
-      noWords = [];
-      noNounGenusMap = new Map();
-      nbEnrichmentIndex = new Map();
-      nbTranslationIndex = new Map();
-      nbIdToTargetIndex = new Map();
+      viewState.noDictionary = null;
+      viewState.noWords = [];
+      viewState.noNounGenusMap = new Map();
+      viewState.nbEnrichmentIndex = new Map();
+      viewState.nbTranslationIndex = new Map();
+      viewState.nbIdToTargetIndex = new Map();
     }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
@@ -736,7 +745,7 @@ async function updateLanguageListStatus() {
     const lang = btn.dataset.lang;
     const statusEl = btn.querySelector('.lang-option-status');
     const isBundled = BUNDLED_LANGUAGES.has(lang);
-    const isActive = lang === currentLang;
+    const isActive = lang === viewState.currentLang;
 
     btn.classList.toggle('active', isActive);
 
@@ -810,13 +819,13 @@ async function updateLanguageListStatus() {
       await window.__lexiVocabStore?.deleteLanguage(lang);
 
       // If this was the active language, switch to English
-      if (currentLang === lang) {
-        currentLang = 'en';
-        await chromeStorageSet({ language: currentLang });
-        await loadDictionary(currentLang);
-        await loadGrammarFeatures(currentLang);
+      if (viewState.currentLang === lang) {
+        viewState.currentLang = 'en';
+        await chromeStorageSet({ language: viewState.currentLang });
+        await loadDictionary(viewState.currentLang);
+        await loadGrammarFeatures(viewState.currentLang);
         initGrammarSettings();
-        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: viewState.currentLang });
       }
 
       await updateLanguageListStatus();
@@ -961,32 +970,8 @@ function buildInflectionIndex(words) {
   return index;
 }
 
-function updateLangLabels() {
-  if (!dictionary || !dictionary._metadata) return;
-  const code = dictionary._metadata.language.toUpperCase();
-  const uiCode = getUiLanguage().toUpperCase();
-  const isMonolingual = getUiLanguage() === currentLang;
-
-  document.querySelectorAll('.target-lang-code').forEach(el => {
-    el.textContent = code;
-  });
-
-  // Update direction button labels
-  const dirNoTarget = document.getElementById('dir-no-target');
-  const dirTargetNo = document.getElementById('dir-target-no');
-  if (dirNoTarget && dirTargetNo) {
-    if (isMonolingual) {
-      // Monolingual mode — hide direction toggle
-      dirNoTarget.innerHTML = `<span class="target-lang-code">${code}</span> ${t('search_monolingual')}`;
-      dirTargetNo.style.display = 'none';
-      dirNoTarget.classList.add('active');
-    } else {
-      dirTargetNo.style.display = '';
-      dirNoTarget.innerHTML = `${uiCode} → <span class="target-lang-code">${code}</span>`;
-      dirTargetNo.innerHTML = `<span class="target-lang-code">${code}</span> → ${uiCode}`;
-    }
-  }
-}
+// Phase 30-01: legacy updateLangLabels removed — dictionary-view owns it now;
+// the delegator after initSearch routes calls into the mounted view.
 
 // ── Grammar Features ────────────────────────────────────────
 function getPresetFeatures(preset) {
@@ -1031,7 +1016,7 @@ async function applyPreset(presetId) {
 
 async function saveAndNotifyGrammarChange() {
   const stored = (await chromeStorageGet('enabledGrammarFeatures')) || {};
-  stored[currentLang] = Array.from(enabledFeatures);
+  stored[viewState.currentLang] = Array.from(enabledFeatures);
   await chromeStorageSet({ enabledGrammarFeatures: stored });
 
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -1232,7 +1217,7 @@ function getAllowedPronouns() {
     ]
   };
 
-  const features = langPronouns[currentLang];
+  const features = langPronouns[viewState.currentLang];
   if (features) {
     for (const pf of features) {
       if (enabledFeatures.has(pf.id)) {
@@ -1247,1140 +1232,122 @@ function getAllowedPronouns() {
   return null;
 }
 
-// ── Search ─────────────────────────────────────────────────
-function initSearch() {
-  const input = document.getElementById('search-input');
-  const clearBtn = document.getElementById('search-clear');
-  const dirNoTarget = document.getElementById('dir-no-target');
-  const dirTargetNo = document.getElementById('dir-target-no');
-
-  let searchDebounceTimer;
-  input.addEventListener('input', () => {
-    clearBtn.classList.toggle('hidden', !input.value);
-    compoundNavStack = []; // Phase 24 COMP-03: clear back-nav on new input
-    clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(() => performSearch(input.value.trim()), 150);
-  });
-
-  clearBtn.addEventListener('click', () => {
-    input.value = '';
-    clearBtn.classList.add('hidden');
-    showPlaceholder();
-  });
-
-  dirNoTarget.addEventListener('click', () => {
-    searchDirection = 'no-target';
-    dirNoTarget.classList.add('active');
-    dirTargetNo.classList.remove('active');
-    if (input.value.trim()) performSearch(input.value.trim());
-  });
-
-  dirTargetNo.addEventListener('click', () => {
-    searchDirection = 'target-no';
-    dirTargetNo.classList.add('active');
-    dirNoTarget.classList.remove('active');
-    if (input.value.trim()) performSearch(input.value.trim());
-  });
-
-  // Focus search on open
-  input.focus();
-
-  // Build language switcher
-  buildLangSwitcher();
-}
-
-const LANG_FLAGS = { de: '🇩🇪', es: '🇪🇸', fr: '🇫🇷', en: '🇬🇧', nn: '🇳🇴', nb: '🇳🇴' };
-
-async function buildLangSwitcher() {
-  const container = document.getElementById('lang-switcher');
-  if (!container) return;
-
-  // Collect available languages: bundled + downloaded
-  const available = [];
-
-  // Bundled languages are always available
-  for (const lang of BUNDLED_LANGUAGES) {
-    available.push(lang);
-  }
-
-  // Check IndexedDB for downloaded languages
-  if (window.__lexiVocabStore) {
-    const cached = await window.__lexiVocabStore.listCachedLanguages();
-    for (const c of cached) {
-      if (!available.includes(c.language)) {
-        available.push(c.language);
-      }
-    }
-  }
-
-  // Sort: current language first, then alphabetically
-  available.sort((a, b) => {
-    if (a === currentLang) return -1;
-    if (b === currentLang) return 1;
-    return langName(a).localeCompare(langName(b));
-  });
-
-  container.innerHTML = available.map(lang => `
-    <button class="lang-switch-btn ${lang === currentLang ? 'active' : ''}" data-lang="${lang}">
-      <span class="lang-switch-flag">${LANG_FLAGS[lang] || ''}</span>
-      ${langName(lang)}
-    </button>
-  `).join('');
-
-  // Click handlers
-  container.querySelectorAll('.lang-switch-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const lang = btn.dataset.lang;
-      if (lang === currentLang) return;
-
-      // Update active state
-      container.querySelectorAll('.lang-switch-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      // Switch language
-      currentLang = lang;
-      await chromeStorageSet({ language: currentLang });
-      await loadDictionary(currentLang);
-      await loadGrammarFeatures(currentLang);
-      initGrammarSettings();
-      updateLangLabels();
-      chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
-
-      // Re-run search if there's a query
-      const input = document.getElementById('search-input');
-      if (input?.value.trim()) performSearch(input.value.trim());
-
-      updateLanguageListStatus();
-    });
-  });
-}
-
-// Phase 17 COMP-01: attempt compound decomposition for unknown words
-function tryDecomposeQuery(query) {
-  const vocabCore = self.__lexiVocabCore;
-  if (!vocabCore || !vocabCore.decomposeCompound) return null;
-  const q = query.toLowerCase();
-  if (nounGenusMap.size > 0) {
-    const result = vocabCore.decomposeCompound(q, nounGenusMap, currentLang);
-    if (result) return result;
-  }
-  if (noNounGenusMap.size > 0) {
-    const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
-    return vocabCore.decomposeCompound(q, noNounGenusMap, noLang);
-  }
-  return null;
-}
-
-function performSearch(query) {
-  if (!query || !allWords.length) {
-    showPlaceholder();
-    return;
-  }
-
-  const q = query.toLowerCase();
-
-  // Monolingual mode: when UI language matches dictionary language (e.g., NB dict with NB UI)
-  const isMonolingual = getUiLanguage() === currentLang;
-
-  // Phase 1: Direct matches on base forms
-  const directResults = [];
-  for (const entry of allWords) {
-    if (isMonolingual) {
-      // Monolingual: always search by word
-      if (entry.word && entry.word.toLowerCase().includes(q)) {
-        directResults.push({ entry, inflectionHint: null });
-      }
-    } else if (searchDirection === 'no-target') {
-      const trans = getTranslation(entry);
-      if (trans && trans.toLowerCase().includes(q)) {
-        directResults.push({ entry, inflectionHint: null });
-      }
-    } else {
-      if (entry.word && entry.word.toLowerCase().includes(q)) {
-        directResults.push({ entry, inflectionHint: null });
-      }
-    }
-  }
-
-  // Phase 1b: Two-way lookup via Norwegian dictionary
-  // When searching no→target, search nb words and follow links to target language
-  if (searchDirection === 'no-target' && noWords.length > 0) {
-    const directEntryWords = new Set(directResults.map(r => r.entry.word?.toLowerCase()));
-    const langPrefix = `${currentLang}-nb/`;
-
-    for (const noEntry of noWords) {
-      if (!noEntry.word || !noEntry.word.toLowerCase().includes(q)) continue;
-
-      // Try linkedTo first
-      let targetWordId = noEntry.linkedTo?.[currentLang]?.primary || null;
-
-      // Direction 1: NB _generatedFrom has {currentLang}-nb/ (DE, ES)
-      if (!targetWordId && noEntry._generatedFrom) {
-        for (const trimmed of generatedFromRefs(noEntry)) {
-          if (trimmed.startsWith(langPrefix)) {
-            const colonIdx = trimmed.indexOf(':');
-            if (colonIdx !== -1) {
-              targetWordId = trimmed.substring(colonIdx + 1);
-              break;
-            }
-          }
-        }
-      }
-
-      // Direction 2: target _generatedFrom has nb-{currentLang}/ (FR)
-      if (!targetWordId && noEntry._wordId && nbIdToTargetIndex.size > 0) {
-        targetWordId = nbIdToTargetIndex.get(noEntry._wordId);
-      }
-
-      if (!targetWordId) continue;
-
-      for (const bank of Object.keys(BANK_TO_POS)) {
-        const targetEntry = dictionary[bank]?.[targetWordId];
-        if (targetEntry && !directEntryWords.has(targetEntry.word?.toLowerCase())) {
-          const flatEntry = allWords.find(w => w.word === targetEntry.word);
-          if (flatEntry) {
-            directResults.push({
-              entry: flatEntry,
-              inflectionHint: `«${noEntry.word}» → ${flatEntry.word}`
-            });
-            directEntryWords.add(flatEntry.word?.toLowerCase());
-          }
-        }
-      }
-    }
-  }
-
-  // Phase 2: Inflection matches (deduplicated against direct)
-  const inflectionResults = [];
-  const directEntrySet = new Set(directResults.map(r => r.entry));
-
-  if (searchDirection === 'target-no') {
-    if (inflectionIndex) {
-      const matches = inflectionIndex.get(q) || [];
-      for (const match of matches) {
-        if (directEntrySet.has(match.entry)) continue;
-        const hint = match.matchType === 'conjugation'
-          ? t('result_inflection_conjugation', { query, word: match.entry.word })
-          : match.matchType === 'typo'
-            ? t('result_inflection_typo', { query, word: match.entry.word })
-            : t('result_inflection_plural', { query, word: match.entry.word });
-        inflectionResults.push({ entry: match.entry, inflectionHint: hint });
-      }
-    }
-  } else {
-    const infinitive = norwegianInfinitive(q);
-    if (infinitive) {
-      for (const entry of allWords) {
-        if (directEntrySet.has(entry)) continue;
-        const entryTrans = getTranslation(entry);
-        if (!entryTrans) continue;
-        const trans = entryTrans.toLowerCase();
-        const stripped = trans.startsWith('å ') ? trans.slice(2) : trans;
-        if (stripped === infinitive || stripped.startsWith(infinitive + ' ')
-            || stripped.startsWith(infinitive + ',') || stripped.includes(', ' + infinitive)) {
-          inflectionResults.push({
-            entry,
-            inflectionHint: t('result_inflection_conjugation', { query, word: infinitive })
-          });
-        }
-      }
-    }
-  }
-
-  // Phase 3: Sort direct results, split into starts-with vs contains
-  const useWord = isMonolingual || searchDirection === 'target-no';
-  directResults.sort((a, b) => {
-    const fieldA = useWord ? a.entry.word : getTranslation(a.entry);
-    const fieldB = useWord ? b.entry.word : getTranslation(b.entry);
-    const la = fieldA.toLowerCase();
-    const lb = fieldB.toLowerCase();
-    if (la === q && lb !== q) return -1;
-    if (lb === q && la !== q) return 1;
-    if (la.startsWith(q) && !lb.startsWith(q)) return -1;
-    if (lb.startsWith(q) && !la.startsWith(q)) return 1;
-    return la.localeCompare(lb);
-  });
-
-  const directStartsWith = [];
-  const directContains = [];
-  for (const r of directResults) {
-    const field = (useWord ? r.entry.word : getTranslation(r.entry)).toLowerCase();
-    if (field === q || field.startsWith(q)) {
-      directStartsWith.push(r);
-    } else {
-      directContains.push(r);
-    }
-  }
-
-  inflectionResults.sort((a, b) => a.entry.word.localeCompare(b.entry.word));
-
-  // Final order: exact/starts-with → inflection matches → contains
-  const combined = [...directStartsWith, ...inflectionResults, ...directContains];
-
-  // Phase 24: try exact compound decomposition BEFORE fallback direction
-  if (combined.length === 0) {
-    const decomp = tryDecomposeQuery(q);
-    if (decomp) {
-      renderCompoundCard(q, decomp);
-      return;
-    }
-  }
-
-  // Fallback: if no results and not monolingual, try the opposite direction
-  if (combined.length === 0 && !isMonolingual) {
-    const fallbackResults = [];
-    if (searchDirection === 'no-target') {
-      // Was searching Norwegian translations, try matching target-language words instead
-      for (const entry of allWords) {
-        if (entry.word && entry.word.toLowerCase().includes(q)) {
-          fallbackResults.push({ entry, inflectionHint: null });
-        }
-      }
-      // Also try inflection index
-      if (inflectionIndex) {
-        const fallbackSet = new Set(fallbackResults.map(r => r.entry));
-        const matches = inflectionIndex.get(q) || [];
-        for (const match of matches) {
-          if (fallbackSet.has(match.entry)) continue;
-          const hint = match.matchType === 'conjugation'
-            ? t('result_inflection_conjugation', { query, word: match.entry.word })
-            : t('result_inflection_plural', { query, word: match.entry.word });
-          fallbackResults.push({ entry: match.entry, inflectionHint: hint });
-        }
-      }
-    } else {
-      // Was searching target-language words, try matching Norwegian translations instead
-      for (const entry of allWords) {
-        const trans = getTranslation(entry);
-        if (trans && trans.toLowerCase().includes(q)) {
-          fallbackResults.push({ entry, inflectionHint: null });
-        }
-      }
-    }
-
-    if (fallbackResults.length > 0) {
-      const fbUseWord = searchDirection === 'no-target';
-      fallbackResults.sort((a, b) => {
-        const fieldA = (fbUseWord ? a.entry.word : getTranslation(a.entry)).toLowerCase();
-        const fieldB = (fbUseWord ? b.entry.word : getTranslation(b.entry)).toLowerCase();
-        if (fieldA.startsWith(q) && !fieldB.startsWith(q)) return -1;
-        if (fieldB.startsWith(q) && !fieldA.startsWith(q)) return 1;
-        return fieldA.localeCompare(fieldB);
-      });
-      const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
-      const searchLang = searchDirection === 'no-target' ? langName(noLang) : langName(currentLang);
-      const resultLang = searchDirection === 'no-target' ? langName(currentLang) : langName(noLang);
-      renderResults(fallbackResults.slice(0, 50), { fallbackHint: true, searchLang, resultLang });
-      return;
-    }
-  }
-
-  // Phase 24 COMP-01: try compound prediction for partial input (no direct or fallback results)
-  if (combined.length === 0 && currentIndexes && currentIndexes.predictCompound) {
-    const predictions = currentIndexes.predictCompound(q);
-    if (predictions.length > 0) {
-      renderCompoundSuggestions(query, predictions);
-      return;
-    }
-  }
-
-  renderResults(combined.slice(0, 50));
-}
-
-// Phase 24 COMP-01: render compound suggestions from predictCompound
-function renderCompoundSuggestions(query, predictions) {
-  const container = document.getElementById('search-results');
-
-  const heading = `<div class="compound-suggestions-heading">${t('compound_suggestions_heading')}</div>`;
-
-  const cards = predictions.map(pred => {
-    const { parts, gender } = pred.decomposition;
-    const breakdownParts = [];
-    for (const part of parts) {
-      breakdownParts.push(escapeHtml(part.word));
-      if (part.linker) breakdownParts.push(escapeHtml(part.linker));
-    }
-    const breakdownHtml = breakdownParts.map(p =>
-      `<span class="compound-breakdown-part">${p}</span>`
-    ).join('<span class="compound-breakdown-sep"> + </span>');
-
-    const genderBadge = gender
-      ? `<span class="result-gender">${genusToGender(gender)}</span>`
-      : '';
-
-    return `
-      <div class="result-card compound-suggestion glass" data-compound-word="${escapeHtml(pred.word)}">
-        <div class="result-basic">
-          <div class="result-word-row">
-            <span class="result-word">${escapeHtml(pred.word)}</span>
-          </div>
-          <div class="result-meta">
-            <span class="compound-badge">${t('compound_label')}</span>
-            <span class="result-pos">${t('pos_noun')}</span>
-            ${genderBadge}
-          </div>
-        </div>
-        <div class="compound-breakdown compound-breakdown-compact">${breakdownHtml}</div>
-      </div>
-    `;
-  }).join('');
-
-  container.innerHTML = heading + cards;
-
-  // Wire click handlers: clicking a suggestion searches for the full compound word
-  container.querySelectorAll('.compound-suggestion').forEach(card => {
-    card.addEventListener('click', () => {
-      const word = card.dataset.compoundWord;
-      const input = document.getElementById('search-input');
-      if (input) input.value = word;
-      performSearch(word);
-    });
-  });
-}
-
-function getComponentTranslation(word) {
-  const lw = word.toLowerCase();
-  for (const entry of allWords) {
-    if (entry.word && entry.word.toLowerCase() === lw) {
-      const trans = getTranslation(entry);
-      if (trans) return trans;
-    }
-  }
-  return null;
-}
-
-// Phase 17 COMP-01/02 + Phase 24 COMP-02/03/04: render compound decomposition card
-function renderCompoundCard(query, decomposition) {
-  const container = document.getElementById('search-results');
-  const { parts, gender } = decomposition;
-
-  // Build breakdown string: "hverdag + s + mas"
-  const breakdownParts = [];
-  for (const part of parts) {
-    breakdownParts.push(escapeHtml(part.word));
-    if (part.linker) {
-      breakdownParts.push(escapeHtml(part.linker));
-    }
-  }
-  const breakdownHtml = breakdownParts.map((p, i) =>
-    `<span class="compound-breakdown-part">${p}</span>`
-  ).join('<span class="compound-breakdown-sep"> + </span>');
-
-  // Build clickable component buttons (skip linkers)
-  const componentBtns = parts.map(part =>
-    `<button class="compound-component-btn" data-word="${escapeHtml(part.word)}">${escapeHtml(part.word)}</button>`
-  ).join('');
-
-  // Gender badge
-  const genderBadge = gender
-    ? `<span class="result-gender">${genusToGender(gender)}</span>`
-    : '';
-
-  // Phase 24 COMP-02: Pedagogical note about last component
-  const lastComponent = parts[parts.length - 1];
-  const lastComponentWord = lastComponent ? lastComponent.word : '';
-  const pedagogyNote = lastComponentWord
-    ? `<div class="compound-pedagogy">${t('compound_pedagogy', { lastComponent: `<a class="compound-pedagogy-link" data-word="${escapeHtml(lastComponentWord)}">${escapeHtml(lastComponentWord)}</a>` })}</div>`
-    : '';
-
-  // Phase 24 COMP-04: Translation guess from component translations
-  const guessSegments = parts.map(part => {
-    const trans = getComponentTranslation(part.word);
-    return trans || `(${part.word})`;
-  });
-  const guessHtml = `
-    <div class="compound-guess">
-      <span class="compound-guess-label">${t('compound_translation_guess')}:</span>
-      <span class="compound-guess-text">${escapeHtml(guessSegments.join(' + '))}</span>
-    </div>
-  `;
-
-  // Phase 24 COMP-03: Back-navigation link
-  const backLinkHtml = compoundNavStack.length > 0
-    ? `<a class="compound-back-link" href="#">${t('compound_back_link', { word: compoundNavStack[compoundNavStack.length - 1].query })}</a>`
-    : '';
-
-  container.innerHTML = `
-    ${backLinkHtml}
-    <div class="result-card compound-card glass">
-      <div class="result-basic">
-        <div class="result-word-row">
-          <span class="result-word">${escapeHtml(query)}</span>
-        </div>
-        <div class="result-meta">
-          <span class="compound-badge">${t('compound_label')}</span>
-          <span class="result-pos">${t('pos_noun')}</span>
-          ${genderBadge}
-        </div>
-      </div>
-      <div class="compound-breakdown">${breakdownHtml}</div>
-      <div class="compound-components">${componentBtns}</div>
-      ${pedagogyNote}
-      ${guessHtml}
-    </div>
-  `;
-
-  // Wire up clickable component buttons
-  container.querySelectorAll('.compound-component-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const word = btn.dataset.word;
-      // Phase 24 COMP-03: push current state to nav stack before navigating
-      compoundNavStack.push({ query, decomposition });
-      const input = document.getElementById('search-input');
-      if (input) input.value = word;
-      performSearch(word);
-    });
-  });
-
-  // Wire up pedagogy link
-  container.querySelectorAll('.compound-pedagogy-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const word = link.dataset.word;
-      compoundNavStack.push({ query, decomposition });
-      const input = document.getElementById('search-input');
-      if (input) input.value = word;
-      performSearch(word);
-    });
-  });
-
-  // Wire up back-link
-  const backLink = container.querySelector('.compound-back-link');
-  if (backLink) {
-    backLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      const prev = compoundNavStack.pop();
-      if (prev) {
-        const input = document.getElementById('search-input');
-        if (input) input.value = prev.query;
-        renderCompoundCard(prev.query, prev.decomposition);
-      }
-    });
-  }
-}
-
-function renderResults(results, options = {}) {
-  const container = document.getElementById('search-results');
-  if (!results.length) {
-    container.innerHTML = `<div class="results-placeholder"><p>${t('search_no_results')}</p></div>`;
-    return;
-  }
-
-  // Phase 24 COMP-03: back-link when navigating from compound card
-  const backLinkHtml = compoundNavStack.length > 0
-    ? `<a class="compound-back-link" href="#">${t('compound_back_link', { word: compoundNavStack[compoundNavStack.length - 1].query })}</a>`
-    : '';
-
-  const hintHtml = options.fallbackHint
-    ? `<div class="fallback-hint">${t('search_fallback_hint', { searchLang: options.searchLang || '', resultLang: options.resultLang || '' })}</div>`
-    : '';
-
-  container.innerHTML = backLinkHtml + hintHtml + results.map(({ entry, inflectionHint }) => {
-    // Enrich with NB falseFriends/senses via reverse linkedTo index
-    const enrichment = entry._wordId ? nbEnrichmentIndex.get(entry._wordId) : null;
-    const enrichedEntry = enrichment ? {
-      ...entry,
-      falseFriends: [...(entry.falseFriends || []), ...(enrichment.falseFriends || [])],
-      senses: [...(entry.senses || []), ...(enrichment.senses || [])]
-    } : entry;
-    return `
-    <div class="result-card glass" data-id="${entry._id || ''}">
-      <div class="result-basic">
-        <div class="result-word-row">
-          <span class="result-word">${escapeHtml(entry.word || '')}</span>
-          ${entry.audio ? `<button class="audio-btn" data-audio="${escapeHtml(entry.audio)}" title="${t('widget_play')}">${getPlayIcon()}</button>` : ''}
-        </div>
-        ${renderFalseFriends(enrichedEntry)}
-        ${renderSenses(enrichedEntry) || `<div class="result-translation">${escapeHtml(getTranslation(entry))}</div>`}
-        ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
-        <div class="result-meta">
-          <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
-          ${entry.gender && isFeatureEnabled('grammar_articles') ? `<span class="result-gender">${escapeHtml(entry.gender)}</span>` : ''}
-          ${entry.plural && isFeatureEnabled('grammar_plural') ? `<span class="result-plural">${escapeHtml(entry.plural)}</span>` : ''}
-          ${entry.cefr ? `<span class="result-cefr">${escapeHtml(entry.cefr)}</span>` : ''}
-        </div>
-      </div>
-      <button class="explore-btn">${t('result_explore')}</button>
-      <div class="result-expanded hidden">
-        ${renderVerbConjugations(entry)}
-        ${renderNounCases(entry)}
-        ${renderNounForms(entry)}
-        ${renderAdjectiveComparison(entry)}
-        ${entry.synonyms && entry.synonyms.length ? `
-          <div class="expanded-section">
-            <h4>${t('result_synonyms')}</h4>
-            <p>${entry.synonyms.map(s => escapeHtml(s)).join(', ')}</p>
-          </div>
-        ` : ''}
-        ${entry.grammar ? `
-          <div class="expanded-section">
-            <h4>${t('result_grammar')}</h4>
-            <p>${escapeHtml(entry.grammar)}</p>
-          </div>
-        ` : ''}
-        ${renderExamples(entry)}
-      </div>
-    </div>
-  `}).join('');
-
-  // Attach expand listeners
-  container.querySelectorAll('.explore-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const expanded = btn.nextElementSibling;
-      const isHidden = expanded.classList.contains('hidden');
-      expanded.classList.toggle('hidden');
-      btn.textContent = isHidden ? t('result_collapse') : t('result_explore');
-    });
-  });
-
-  // Attach audio button listeners
-  container.querySelectorAll('.audio-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const audioFile = btn.dataset.audio;
-      if (audioFile) {
-        playAudio(audioFile, btn);
-      }
-    });
-  });
-
-  // Phase 24 COMP-03: wire back-link in regular results view
-  const backLink = container.querySelector('.compound-back-link');
-  if (backLink) {
-    backLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      const prev = compoundNavStack.pop();
-      if (prev) {
-        const input = document.getElementById('search-input');
-        if (input) input.value = prev.query;
-        renderCompoundCard(prev.query, prev.decomposition);
-      }
-    });
-  }
-}
-
-function showPlaceholder() {
-  document.getElementById('search-results').innerHTML =
-    `<div class="results-placeholder"><p>${t('search_placeholder_text')}</p></div>`;
-}
-
+// ── Search / Dictionary view (Phase 30-01: extracted to dictionary-view.js) ──
+// initSearch mounts the dictionary view module against #view-dictionary and
+// stores the handle so legacy call-sites (buildLangSwitcher, updateLangLabels,
+// performSearch) can delegate. The view owns its own search input wiring,
+// rendering pipeline, audio playback, and compound-card UI; popup.js owns
+// state mutations and re-mounting on language switch.
+
+const LANG_FLAGS = { de: '\ud83c\udde9\ud83c\uddea', es: '\ud83c\uddea\ud83c\uddf8', fr: '\ud83c\uddeb\ud83c\uddf7', en: '\ud83c\uddec\ud83c\udde7', nn: '\ud83c\uddf3\ud83c\uddf4', nb: '\ud83c\uddf3\ud83c\uddf4' };
+
+// HTML-escape helper — kept in popup.js because initGrammarSettings still uses
+// it for the preset/feature labels. Dictionary view has its own copy.
 function escapeHtml(str) {
   const d = document.createElement('div');
-  d.textContent = str;
+  d.textContent = str == null ? '' : str;
   return d.innerHTML;
 }
 
-// Sanitize pedagogical warning HTML — allow only <em> and <strong> tags.
-// Curator data from papertek is trusted, but belt-and-braces: escape the
-// string then re-enable just the two whitelisted tags.
-function sanitizeWarning(html) {
-  return escapeHtml(html)
-    .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>');
+// Vocab adapter mirrors lockdown's host.__lexiVocab shape so the dictionary
+// view module is portable. The adapter delegates to popup.js's own bundled
+// vocab-store + helpers.
+function buildVocabAdapter() {
+  return {
+    BUNDLED_LANGUAGES,
+    LANG_FLAGS,
+    listCachedLanguages: () => window.__lexiVocabStore
+      ? window.__lexiVocabStore.listCachedLanguages()
+      : Promise.resolve([]),
+    getCachedLanguage: (lang) => window.__lexiVocabStore
+      ? window.__lexiVocabStore.getCachedLanguage(lang)
+      : Promise.resolve(null),
+    hasAudioCached: (lang) => window.__lexiVocabStore
+      ? window.__lexiVocabStore.hasAudioCached(lang)
+      : Promise.resolve(false),
+    getAudioFile: (lang, filename) => window.__lexiVocabStore
+      ? window.__lexiVocabStore.getAudioFile(lang, filename)
+      : Promise.resolve(null),
+    decomposeCompound: (q, genusMap, lang) => self.__lexiVocabCore && self.__lexiVocabCore.decomposeCompound
+      ? self.__lexiVocabCore.decomposeCompound(q, genusMap, lang)
+      : null,
+    norwegianInfinitive,
+    generatedFromRefs,
+    // getTranslation defers to popup's getTranslation, which already honors
+    // viewState.noDictionary / nbTranslationIndex.
+    getTranslation: (entry, _state, _uiLang) => getTranslation(entry),
+  };
 }
 
-// Sense-grouped translations (Level A polysemy).
-// Schema: entry.senses = [{ trigger: "...", translations: { <lang>: { forms: [...], example: { sentence, translation } } } }]
-// Rendered in place of the flat translation when the entry has senses for
-// the current target language — student can't grab "index 0" because there
-// is no flat list. See project_preposition_polysemy_feature memory.
-function renderSenses(entry) {
-  if (!entry.senses || !entry.senses.length) return null;
-  const relevant = entry.senses.filter(s => s.translations && s.translations[currentLang]);
-  if (!relevant.length) return null;
-  const items = relevant.map(s => {
-    const tr = s.translations[currentLang];
-    const forms = Array.isArray(tr.forms) ? tr.forms : (tr.form ? [tr.form] : []);
-    const ex = tr.example || {};
-    return `
-      <div class="sense-item">
-        <div class="sense-trigger">${escapeHtml(s.trigger || '')}</div>
-        <div class="sense-forms">${forms.map(escapeHtml).join(', ')}</div>
-        ${ex.sentence ? `
-          <div class="sense-example">
-            <span class="sense-example-src">${escapeHtml(ex.sentence)}</span>
-            ${ex.translation ? `<span class="sense-example-tr"> — ${escapeHtml(ex.translation)}</span>` : ''}
-          </div>
-        ` : ''}
-      </div>
-    `;
-  }).join('');
-  return `<div class="senses-block">${items}</div>`;
-}
+const chromeStorageAdapter = {
+  get: chromeStorageGet,
+  set: chromeStorageSet,
+};
 
-function renderFalseFriends(entry) {
-  if (!entry.falseFriends || !entry.falseFriends.length) return '';
-  const pairs = entry.falseFriends.filter(f => f.lang === currentLang);
-  if (!pairs.length) return '';
-  const items = pairs.map(f => `
-    <div class="false-friend-item">
-      <span class="false-friend-form">${escapeHtml(f.form)}</span>
-      <span class="false-friend-meaning">${escapeHtml(f.meaning || '')}</span>
-      <p class="false-friend-warning">${sanitizeWarning(f.warning || '')}</p>
-    </div>
-  `).join('');
-  return `
-    <div class="false-friend-banner" role="note">
-      <span class="false-friend-heading">⚠ ${t('result_false_friend_heading')}</span>
-      ${items}
-    </div>
-  `;
-}
+function initSearch() {
+  const container = document.getElementById('view-dictionary');
+  if (!container) return;
 
-// ── Audio Playback ─────────────────────────────────────────
-let currentAudioBlobUrl = null;
-
-function cleanupAudio() {
-  if (currentAudioBlobUrl) {
-    URL.revokeObjectURL(currentAudioBlobUrl);
-    currentAudioBlobUrl = null;
-  }
-}
-
-/**
- * Play audio for a word — tries IndexedDB cache first, then bundled files
- */
-async function playAudio(audioFilename, button) {
-  // Stop any currently playing audio
-  if (currentAudio) {
-    currentAudio.pause();
-    cleanupAudio();
-    currentAudio = null;
-    document.querySelectorAll('.audio-btn.playing').forEach(btn => {
-      btn.classList.remove('playing');
-      btn.innerHTML = getPlayIcon();
-    });
+  // Tear down any prior mount (e.g. on hot-reload / settings change re-mount)
+  if (dictionaryViewHandle && typeof dictionaryViewHandle.destroy === 'function') {
+    dictionaryViewHandle.destroy();
+    dictionaryViewHandle = null;
   }
 
-  if (!audioFilename || !dictionary?._metadata) return;
-  const lang = dictionary._metadata.language;
-  // NN and NB share pronunciation — try both
-  const langsToTry = lang === 'nn' ? ['nn', 'nb'] : lang === 'nb' ? ['nb', 'nn'] : [lang];
-
-  // Try IndexedDB first (check each language variant)
-  let audioUrl = null;
-  if (window.__lexiVocabStore) {
-    for (const tryLang of langsToTry) {
-      const blob = await window.__lexiVocabStore.getAudioFile(tryLang, audioFilename);
-      if (blob) {
-        audioUrl = URL.createObjectURL(blob);
-        currentAudioBlobUrl = audioUrl;
-        break;
-      }
-    }
-  }
-
-  // Fall back to bundled file — verify it exists before playing
-  if (!audioUrl) {
-    for (const tryLang of langsToTry) {
-      try {
-        const url = chrome.runtime.getURL(`audio/${tryLang}/${audioFilename}`);
-        const check = await fetch(url, { method: 'HEAD' });
-        if (check.ok) {
-          audioUrl = url;
-          break;
-        }
-      } catch {
-        // Not found, try next
-      }
-    }
-  }
-
-  // No file audio — fall back to browser TTS
-  if (!audioUrl) {
-    const wordEl = button.closest('.result-word-row')?.querySelector('.result-word');
-    const word = wordEl?.textContent?.trim();
-    if (word && window.speechSynthesis) {
-      const VOICE_LANGS = { de: 'de', es: 'es', fr: 'fr', en: 'en', nb: 'nb', nn: 'nb', no: 'nb' };
-      const synth = window.speechSynthesis;
-      synth.cancel();
-      const utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = VOICE_LANGS[lang] || 'nb';
-      const voices = synth.getVoices();
-      const match = voices.find(v => v.lang.startsWith(utterance.lang));
-      if (match) utterance.voice = match;
-      button.classList.add('playing');
-      button.innerHTML = getPauseIcon();
-      utterance.onend = () => { button.classList.remove('playing'); button.innerHTML = getPlayIcon(); };
-      utterance.onerror = () => { button.classList.remove('playing'); button.innerHTML = getPlayIcon(); };
-      synth.speak(utterance);
-    }
+  const view = self.__lexiDictionaryView;
+  if (!view || typeof view.mount !== 'function') {
+    console.error('Leksihjelp: dictionary-view.js failed to load');
     return;
   }
 
-  currentAudio = new Audio(audioUrl);
-
-  button.classList.add('playing');
-  button.innerHTML = getPauseIcon();
-
-  currentAudio.play().catch(err => {
-    console.warn('Audio playback failed:', err);
-    button.classList.remove('playing');
-    button.innerHTML = getPlayIcon();
-    cleanupAudio();
-    currentAudio = null;
+  dictionaryViewHandle = view.mount(container, {
+    state: viewState,
+    vocab: buildVocabAdapter(),
+    storage: chromeStorageAdapter,
+    runtime: chrome.runtime,
+    t,
+    getUiLanguage,
+    langName,
+    isFeatureEnabled,
+    getAllowedPronouns,
+    loadDictionary,
+    loadGrammarFeatures,
+    initGrammarSettings,
+    audioEnabled: true,
+    BACKEND_URL,
+    onLanguageChanged: () => {
+      // Lang switcher mutated viewState.currentLang — keep settings list in
+      // sync (active highlight + audio-cache pill).
+      updateLanguageListStatus();
+    },
   });
 
-  currentAudio.addEventListener('ended', () => {
-    button.classList.remove('playing');
-    button.innerHTML = getPlayIcon();
-    cleanupAudio();
-    currentAudio = null;
-  });
-
-  currentAudio.addEventListener('error', () => {
-    button.classList.remove('playing');
-    button.innerHTML = getPlayIcon();
-    cleanupAudio();
-    currentAudio = null;
-  });
-}
-
-function getPlayIcon() {
-  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
-}
-
-function getPauseIcon() {
-  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
-}
-
-/**
- * Render verb conjugations based on enabled features
- */
-function renderExamples(entry) {
-  // Collect examples from entry directly and from linkedTo
-  const examples = [];
-  // For Norwegian dictionaries, hide foreign-language translations in examples
-  // Hide foreign-language example translations when in monolingual mode
-  const uiLang = getUiLanguage();
-  const hideExampleTranslations = (uiLang === 'nb' || uiLang === 'nn') && (currentLang === 'nb' || currentLang === 'nn');
-
-  if (entry.examples && entry.examples.length) {
-    for (const ex of entry.examples) {
-      if (!hideExampleTranslations || !ex.lang || ex.lang === currentLang) {
-        examples.push({
-          sentence: ex.sentence || ex.source || '',
-          translation: (!hideExampleTranslations) ? (ex.translation || ex.target || '') : '',
-          lang: ex.lang
-        });
-      } else if (hideExampleTranslations && ex.lang) {
-        // Norwegian mode: show the Norwegian sentence but hide foreign translation
-        const sentence = ex.sentence || ex.source || '';
-        if (sentence) {
-          examples.push({ sentence, translation: '', lang: ex.lang });
-        }
-      }
-    }
+  // Initial label paint (in case dictionary already loaded before mount).
+  if (dictionaryViewHandle && typeof dictionaryViewHandle.updateLangLabels === 'function') {
+    dictionaryViewHandle.updateLangLabels();
   }
-
-  // Also check linkedTo for additional examples (for target language)
-  if (entry.linkedTo && !hideExampleTranslations) {
-    const link = entry.linkedTo.nb || entry.linkedTo.nn;
-    if (link?.examples) {
-      for (const ex of link.examples) {
-        const sentence = ex.source || ex.sentence || '';
-        const translation = ex.target || ex.translation || '';
-        // Avoid duplicates
-        if (sentence && !examples.some(e => e.sentence === sentence)) {
-          examples.push({ sentence, translation });
-        }
-      }
-    }
-  }
-
-  if (examples.length === 0) return '';
-
-  return `
-    <div class="expanded-section">
-      <h4>${t('result_examples')}</h4>
-      ${examples.map(ex => `
-        <div class="example">
-          <p class="example-sentence">"${escapeHtml(ex.sentence)}"</p>
-          ${ex.translation ? `<p class="example-translation">${escapeHtml(ex.translation)}</p>` : ''}
-        </div>
-      `).join('')}
-    </div>
-  `;
 }
 
-function renderVerbConjugations(entry) {
-  if (!entry.conjugations) return '';
-
-  const allowedPronouns = getAllowedPronouns();
-  const sections = [];
-
-  // NB/NN verbs: all forms are under conjugations.presens.former as a flat object
-  // (infinitiv, presens, preteritum, perfektum_partisipp, imperativ)
-  const presensData = entry.conjugations.presens;
-  if (presensData?.former?.infinitiv !== undefined) {
-    // This is an NB/NN-style flat verb entry
-    const forms = presensData.former;
-    const labels = {
-      infinitiv: t('tense_infinitive'),
-      presens: t('tense_presens'),
-      preteritum: t('tense_preteritum'),
-      perfektum_partisipp: t('tense_past_participle'),
-      imperativ: t('tense_imperative')
-    };
-    const rows = Object.entries(labels)
-      .filter(([key]) => forms[key] !== undefined)
-      .map(([key, label]) => `<tr><td>${label}</td><td>${escapeHtml(forms[key])}</td></tr>`)
-      .join('');
-    if (rows) {
-      sections.push(`
-        <div class="expanded-section">
-          <h4>${t('result_conjugation')}</h4>
-          <table class="conjugation-table">${rows}</table>
-        </div>
-      `);
-    }
-    return sections.join('');
+// Legacy delegators — still called from initVocabUpdateNotice, initSettings,
+// updateLanguageListStatus, etc. They now route through the mounted view.
+async function buildLangSwitcher() {
+  if (dictionaryViewHandle && typeof dictionaryViewHandle.rebuildLangSwitcher === 'function') {
+    await dictionaryViewHandle.rebuildLangSwitcher();
   }
-
-  // EN verbs: uses present, past, perfect tense keys
-  if (entry.conjugations.present || entry.conjugations.past || entry.conjugations.perfect) {
-    const enTenses = [
-      { key: 'present', featureIds: ['grammar_present', 'grammar_en_present'], nameKey: 'tense_presens' },
-      { key: 'past', featureIds: ['grammar_preteritum', 'grammar_en_past'], nameKey: 'tense_preteritum' },
-      { key: 'perfect', featureIds: ['grammar_perfektum', 'grammar_en_perfect'], nameKey: 'tense_perfektum' }
-    ];
-
-    for (const config of enTenses) {
-      const isEnabled = config.featureIds.some(id => isFeatureEnabled(id));
-      if (!isEnabled) continue;
-
-      const tenseData = entry.conjugations[config.key];
-      if (!tenseData) continue;
-
-      if (tenseData.former) {
-        const rows = Object.entries(tenseData.former)
-          .map(([pronoun, form]) => `<tr><td>${escapeHtml(pronoun)}</td><td>${escapeHtml(form)}</td></tr>`)
-          .join('');
-        if (rows) {
-          sections.push(`
-            <div class="expanded-section">
-              <h4>${t(config.nameKey)}</h4>
-              <table class="conjugation-table">${rows}</table>
-            </div>
-          `);
-        }
-      } else if (tenseData.participle || tenseData.present_participle) {
-        const parts = [];
-        if (tenseData.participle) parts.push(`${t('tense_past_participle')}: ${escapeHtml(tenseData.participle)}`);
-        if (tenseData.present_participle) parts.push(`Present participle: ${escapeHtml(tenseData.present_participle)}`);
-        sections.push(`
-          <div class="expanded-section">
-            <h4>${t(config.nameKey)}</h4>
-            <p>${parts.join('<br>')}</p>
-          </div>
-        `);
-      }
-    }
-    return sections.join('');
-  }
-
-  // DE/ES/FR verbs: tense-based with pronoun conjugations
-  const tenseConfig = [
-    { keys: ['presens', 'presente'], featureIds: ['grammar_present', 'grammar_de_presens', 'grammar_es_presente', 'grammar_fr_present', 'grammar_nb_presens', 'grammar_nn_presens', 'grammar_presens'], nameKey: 'tense_presens' },
-    { keys: ['preteritum', 'preterito'], featureIds: ['grammar_preteritum', 'grammar_de_preteritum', 'grammar_es_preterito', 'grammar_preterito', 'grammar_nb_preteritum', 'grammar_nn_preteritum'], nameKey: 'tense_preteritum' },
-    { keys: ['perfektum', 'perfecto', 'passe_compose'], featureIds: ['grammar_perfektum', 'grammar_de_perfektum', 'grammar_es_perfecto', 'grammar_fr_passe_compose', 'grammar_perfecto', 'grammar_nb_perfektum', 'grammar_nn_perfektum'], nameKey: 'tense_perfektum' }
-  ];
-
-  for (const config of tenseConfig) {
-    const isEnabled = config.featureIds.some(id => isFeatureEnabled(id));
-    if (!isEnabled) continue;
-
-    let tenseData = null;
-    for (const key of config.keys) {
-      if (entry.conjugations[key]) {
-        tenseData = entry.conjugations[key];
-        break;
-      }
-    }
-
-    if (!tenseData) continue;
-
-    if (tenseData.former) {
-      const filtered = filterPronouns(tenseData.former, allowedPronouns);
-      if (Object.keys(filtered).length > 0) {
-        sections.push(`
-          <div class="expanded-section">
-            <h4>${t(config.nameKey)}</h4>
-            ${renderConjugationTable(filtered)}
-          </div>
-        `);
-      }
-    } else if (tenseData.auxiliary || tenseData.participle) {
-      sections.push(`
-        <div class="expanded-section">
-          <h4>${t(config.nameKey)}</h4>
-          <p>${escapeHtml(tenseData.auxiliary || '')} + ${escapeHtml(tenseData.participle || '')}</p>
-        </div>
-      `);
-    }
-  }
-
-  return sections.join('');
 }
 
-/**
- * Filter conjugation forms by allowed pronouns.
- * Handles both object (DE) and array (ES/FR) formats.
- * Returns null-safe: if allowedPronouns is null, returns all forms.
- */
-function filterPronouns(forms, allowedPronouns) {
-  const pronounLabels = { es: ['yo', 'tú', 'él/ella/usted', 'nosotros', 'vosotros', 'ellos/ellas/ustedes'], fr: ['je', 'tu', 'il/elle/on', 'nous', 'vous', 'ils/elles'] };
-
-  if (Array.isArray(forms)) {
-    // ES/FR: convert array to pronoun-keyed object, optionally filtering
-    const labels = pronounLabels[currentLang] || [];
-    const result = {};
-    forms.forEach((form, i) => {
-      if (!form) return;
-      const pronoun = labels[i] || `${i}`;
-      if (!allowedPronouns || allowedPronouns.has(pronoun)) {
-        result[pronoun] = form;
-      }
-    });
-    return result;
+function updateLangLabels() {
+  if (dictionaryViewHandle && typeof dictionaryViewHandle.updateLangLabels === 'function') {
+    dictionaryViewHandle.updateLangLabels();
   }
+}
 
-  // Object (DE/EN): filter by allowed pronouns if set
-  if (!allowedPronouns) return forms;
-  const filtered = {};
-  for (const [pronoun, form] of Object.entries(forms)) {
-    if (allowedPronouns.has(pronoun)) {
-      filtered[pronoun] = form;
-    }
+function performSearch(query) {
+  if (dictionaryViewHandle && typeof dictionaryViewHandle.refresh === 'function') {
+    dictionaryViewHandle.refresh(query);
   }
-  return filtered;
 }
 
-/**
- * Render a conjugation table
- */
-function renderConjugationTable(forms) {
-  return `<table class="conjugation-table">
-    ${Object.entries(forms).map(([pronoun, form]) =>
-      `<tr><td>${escapeHtml(pronoun)}</td><td>${escapeHtml(form)}</td></tr>`
-    ).join('')}
-  </table>`;
-}
-
-/**
- * Render noun cases based on enabled features (v2.0 format)
- */
-function renderNounCases(entry) {
-  if (!entry.cases) return '';
-
-  const caseConfig = [
-    { key: 'nominativ', label: 'Nominativ', feature: null },
-    { key: 'akkusativ', label: 'Akkusativ', feature: ['grammar_accusative_indefinite', 'grammar_accusative_definite', 'grammar_accusative_nouns'] },
-    { key: 'dativ', label: 'Dativ', feature: ['grammar_dative'] },
-    { key: 'genitiv', label: 'Genitiv', feature: ['grammar_genitiv'] }
-  ];
-
-  // Filter to enabled cases
-  const enabledCases = caseConfig.filter(c => {
-    if (!c.feature) return true; // nominativ always shown
-    return c.feature.some(f => isFeatureEnabled(f));
-  });
-
-  if (enabledCases.length <= 1) return ''; // Only nominativ — no table needed
-
-  const rows = enabledCases.map(c => {
-    const caseData = entry.cases[c.key];
-    const singular = caseData?.forms?.singular || {};
-    const plural = caseData?.forms?.plural || {};
-    return `<tr>
-      <td><strong>${c.label}</strong></td>
-      <td>${escapeHtml(singular.definite || '-')}</td>
-      <td>${escapeHtml(singular.indefinite || '-')}</td>
-      <td>${escapeHtml(plural.definite || '-')}</td>
-      <td>${escapeHtml(plural.indefinite || '-')}</td>
-    </tr>`;
-  }).join('');
-
-  return `
-    <div class="expanded-section">
-      <h4>${t('result_cases')}</h4>
-      <table class="conjugation-table declension-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>${t('decl_def_sg')}</th>
-            <th>${t('decl_indef_sg')}</th>
-            <th>${t('decl_def_pl')}</th>
-            <th>${t('decl_indef_pl')}</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  `;
-}
-
-/**
- * Render NB/NN noun forms (ubestemt/bestemt × entall/flertall) as a 2×2 table
- */
-function fmtForm(val) {
-  if (!val) return '-';
-  return Array.isArray(val) ? val.join(' / ') : val;
-}
-
-function renderNounForms(entry) {
-  if (!entry.forms) return '';
-  const ub = entry.forms.ubestemt;
-  const be = entry.forms.bestemt;
-  if (!ub && !be) return '';
-
-  return `
-    <div class="expanded-section">
-      <h4>${t('result_conjugation')}</h4>
-      <table class="conjugation-table declension-table">
-        <thead>
-          <tr><th></th><th>${t('decl_singular')}</th><th>${t('decl_plural')}</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><strong>${t('decl_indefinite')}</strong></td><td>${escapeHtml(fmtForm(ub?.entall))}</td><td>${escapeHtml(fmtForm(ub?.flertall))}</td></tr>
-          <tr><td><strong>${t('decl_definite')}</strong></td><td>${escapeHtml(fmtForm(be?.entall))}</td><td>${escapeHtml(fmtForm(be?.flertall))}</td></tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-/**
- * Render adjective comparison forms based on enabled features
- */
-function renderAdjectiveComparison(entry) {
-  if (!entry.comparison) return '';
-
-  const sections = [];
-
-  // Komparativ (German: komparativ, Spanish: comparativo, English: comparative)
-  const komparativ = entry.comparison.komparativ || entry.comparison.comparativo || entry.comparison.comparative;
-  if (isFeatureEnabled('grammar_comparative') && komparativ) {
-    sections.push(`
-      <div class="expanded-section">
-        <h4>${t('tense_comparative')}</h4>
-        <p>${escapeHtml(komparativ)}</p>
-      </div>
-    `);
-  }
-
-  // Superlativ (German: superlativ, Spanish: superlativo, English: superlative)
-  const superlativ = entry.comparison.superlativ || entry.comparison.superlativo || entry.comparison.superlative;
-  if (isFeatureEnabled('grammar_superlative') && superlativ) {
-    sections.push(`
-      <div class="expanded-section">
-        <h4>${t('tense_superlative')}</h4>
-        <p>${escapeHtml(superlativ)}</p>
-      </div>
-    `);
-  }
-
-  return sections.join('');
-}
 
 // ── Settings ───────────────────────────────────────────────
 // ── Phase 27: Exam mode (toggle, badge, lockdown lock awareness) ───────────
@@ -2564,13 +1531,13 @@ async function initSettings() {
       }
 
       // Switch language
-      currentLang = lang;
-      await chromeStorageSet({ language: currentLang });
+      viewState.currentLang = lang;
+      await chromeStorageSet({ language: viewState.currentLang });
       try {
-        await loadDictionary(currentLang);
-        await loadGrammarFeatures(currentLang);
+        await loadDictionary(viewState.currentLang);
+        await loadGrammarFeatures(viewState.currentLang);
         initGrammarSettings();
-        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: currentLang });
+        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: viewState.currentLang });
       } catch (e) {
         console.error('Language switch failed:', e);
       }
