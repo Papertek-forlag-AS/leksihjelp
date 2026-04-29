@@ -52,8 +52,11 @@
     "check-governance-data:test": "node scripts/check-governance-data.test.js",
     "check-stateful-rule-invalidation": "node scripts/check-stateful-rule-invalidation.js",
     "check-stateful-rule-invalidation:test": "node scripts/check-stateful-rule-invalidation.test.js",
+    "check-popup-deps": "node scripts/check-popup-deps.js",
+    "check-popup-deps:test": "node scripts/check-popup-deps.test.js",
     "test:vocab-store": "node --test extension/content/vocab-store.test.js",
-    "test:vocab-seam": "node --test extension/content/vocab-seam.test.js"
+    "test:vocab-seam": "node --test extension/content/vocab-seam.test.js",
+    "test:popup-views": "node --test extension/popup/views/dictionary-view.test.js extension/popup/views/settings-view.test.js"
   },
   "repository": {
     "type": "git",
