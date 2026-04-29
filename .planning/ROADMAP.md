@@ -253,7 +253,7 @@ Plans:
   6. End-to-end on `stb-lockdown.app` (Phase 29 + Phase 30 rolled-up UAT): teacher creates LEKSIHJELP_EXAM test → student opens → EKSAMENMODUS badge + locked toggle → leksihjelp engine running → dictionary panel shows full conjugations/declensions, language switcher works, direction toggle works, no audio buttons; profile transition clears lock flags; Phase 28 dev-button regression still passes.
   7. CLAUDE.md "Downstream consumer" section names the new synced surface (`extension/popup/views/`) so a future popup.js change knows it must keep the views' dep contracts stable.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 - [ ] 30-01-PLAN.md — Refactor `extension/popup/popup.js` into mountable view modules with dep injection. Tests for each view module. No behavior change in extension popup.
 - [ ] 30-02-PLAN.md — Extend lockdown sync; build `leksihjelp-sidepanel-host.js`; replace stub panel; wire deps with no-audio + no-auth flags; CLAUDE.md update for the new synced surface.
 - [ ] 30-03-PLAN.md — Rolled-up E2E browser verification (Phase 29 + Phase 30 UAT): lock mechanism + dictionary parity + audio-suppression + Phase 28 regression. Staging only; production deploy still user-driven.
