@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: executing
-last_updated: "2026-04-29T07:00:43.363Z"
-last_activity: "2026-04-29 -- Plan 30-01 complete: dictionary view fully extracted (~1100 lines moved), settings view partially extracted (UI lang + darkmode + 2 toggles), pause + report kept inline per plan, CSS extraction deferred. Audio gated behind deps.audioEnabled. Task 3 human-verify auto-approved per workflow.auto_advance=true."
+last_updated: "2026-04-29T11:45:00.000Z"
+last_activity: "2026-04-29 -- Plan 30-03 complete: staging UAT pass on stb-lockdown.app. Plan 30-01 deferred sub-step E shipped (popup-views.css generator + scoped CSS). Five tactical fixes during UAT (state population via inline flattenBanks, vocab-adapter wrap with norwegianInfinitive/getTranslation, dark-mode dropped, settings drawer hidden, freq-en 404 silenced, searchDirection enum fix). Plan 30-04 filed (lockdown sidepanel UX integration). Phase 31 filed (FR rule suite). Production deploy still deferred. Versions bumped 2.8.0 -> 2.8.1 -> 2.8.2."
 progress:
   total_phases: 8
   completed_phases: 5
-  total_plans: 20
-  completed_plans: 14
+  total_plans: 21       # +1: 30-04 filed mid-UAT
+  completed_plans: 17   # +3: 30-01, 30-02, 30-03
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.3 Exam Mode
 **Phase:** 30 (Shared Popup Views) -- IN PROGRESS
-**Plan:** 3 of 3 (30-01 + 30-02 complete; 30-03 skriveokt-zero parity remains, deferred Phase 28.1)
-**Status:** In progress (30-02 satisfied; staging-lockdown sidepanel now mounts the synced popup views with audioEnabled:false)
-**Last activity:** 2026-04-29 -- Plan 30-02 complete: lockdown sidepanel host file replaces the writing-environment.js stub; sync script extended to cover popup/views/ + popup-views.css; CLAUDE.md downstream-consumers + Release Workflow updated; version bumped 2.7.0 -> 2.8.0; cross-repo commits leksihjelp 98f4a9a + lockdown 1193e56; staging-lockdown branch pushed; production papertek.app deploy explicitly deferred.
+**Plan:** 30-04 next (30-01 + 30-02 + 30-03 complete; 30-04 lockdown sidepanel UX integration filed)
+**Status:** Staging UAT passed; ready to plan/execute 30-04
+**Last activity:** 2026-04-29 -- Plan 30-03 staging UAT complete (stb-lockdown.app). Five tactical UAT fixes shipped via cross-repo commits (popup-views.css generator, dictionary state population, vocab-adapter wrap, dark-mode dropped, freq-en silence). Plan 30-04 filed for shared-helper extraction + UX integration (single-source language picker, pinned Aa, click-rebind). Phase 31 filed (FR rule suite). Production deploy to papertek.app still deferred per user instruction. skriveokt-zero parity stays at deferred Phase 28.1, ordered AFTER Phase 31.
 
-Progress: [██████░░░░] 67% (Phase 30 — 2 of 3 plans complete)
+Progress: [████████░░] 75% (Phase 30 — 3 of 4 plans complete; 30-04 next)
 
 ## Performance Metrics
 
