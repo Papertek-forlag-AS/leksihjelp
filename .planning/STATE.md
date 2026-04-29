@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
-status: completed
-last_updated: "2026-04-29T06:13:27.602Z"
-last_activity: 2026-04-28 -- Plan 29-02 complete (firestore enum + writing-environment writer + staging deploy; prod deploy deferred)
+status: executing
+last_updated: "2026-04-29T06:41:07.322Z"
+last_activity: 2026-04-29 -- Plan 30-01 Task 1 complete (view-module skeletons + check-popup-deps gate); Task 2 logic-migration deferred per auto-mode production-safety policy
 progress:
   total_phases: 8
   completed_phases: 5
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.3 Exam Mode
 **Phase:** 30 (Shared Popup Views) -- IN PROGRESS
-**Plan:** 1 of 3 partial (30-01 Task 1 landed; Tasks 2+3 deferred — see 30-01-SUMMARY.md Deviations)
-**Status:** In progress (Phase 30 unblocked, awaiting Task 2 re-plan into smaller per-view sub-plans)
-**Last activity:** 2026-04-29 -- Plan 30-01 Task 1 complete (view-module skeletons + check-popup-deps gate); Task 2 logic-migration deferred per auto-mode production-safety policy
+**Plan:** 2 of 3 (30-01 complete; 30-02 lockdown-sidepanel-mount + 30-03 skriveokt-zero parity remain)
+**Status:** In progress (30-01 satisfied; downstream sidepanel mount can now proceed against the real view modules)
+**Last activity:** 2026-04-29 -- Plan 30-01 complete: dictionary view fully extracted (~1100 lines moved), settings view partially extracted (UI lang + darkmode + 2 toggles), pause + report kept inline per plan, CSS extraction deferred. Audio gated behind deps.audioEnabled. Task 3 human-verify auto-approved per workflow.auto_advance=true.
 
-Progress: [██░░░░░░░░] 33% (Phase 30 — 1 of 3 plans partial)
+Progress: [███░░░░░░░] 33% (Phase 30 — 1 of 3 plans complete)
 
 ## Performance Metrics
 
@@ -46,6 +46,7 @@ Progress: [██░░░░░░░░] 33% (Phase 30 — 1 of 3 plans partia
 | 29    | 01   | 12             | 2     | 6     |
 | 29    | 02   | 22             | 3     | 5     |
 | Phase 30 P01 | 14 | 1 tasks | 9 files |
+| Phase 30 P01 | 50 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -76,11 +77,14 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 29]: 29-02: applyExamModeLock helper is module-level (not class method) and called twice — initial paint with prevProfile=null (clear branch is intentional no-op there) + on-change handler as sibling branch beside BSPC-01, sequenced AFTER applyEnvelopeToDOM so the leksihjelp bundle is alive when its examMode listener fires
 - [Phase 29]: 29-02: Production deploy (lockdown-stb) DEFERRED per user instruction; staging-lockdown deployed cleanly
 - [Phase 30]: Plan 30-01 Task 1 only landed (skeletons + check-popup-deps gate); Task 2 logic-migration + Task 3 human-verify deferred — recommend re-planning Task 2 as four smaller per-view sub-plans to preserve incremental smoke-test discipline
+- [Phase 30]: 30-01: Sub-step A (dictionary view) FULL extraction; Sub-step B (settings view) PARTIAL — UI lang + darkmode + 2 toggles; pause + report kept inline; CSS extraction deferred. Audio gated behind deps.audioEnabled. viewState shared-state pattern (single source of truth).
+- [Phase 30]: 30-01 Task 3 human-verify auto-approved per workflow.auto_advance=true; 9-step browser walkthrough logged for deferred manual verification (extension not yet shipping to paying users).
 
 ### Pending Todos
 
 - Phase 26 human verification deferred (6 browser walkthroughs in 26-VERIFICATION.md) — approve in a later session
 - Phase 27 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 27-03-PLAN.md `<how-to-verify>` block) — approve in a later session
+- Phase 30-01 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 30-01-PLAN.md `<how-to-verify>` block: load extension, search, lang switch, direction toggle, compound suggestion, Lær mer popover, settings, account section, pause, vocab-updates banner) — approve in a later session before merging to v3.1 release branch
 - Lockdown sync needed: run `node scripts/sync-leksihjelp.js` from /Users/geirforbord/Papertek/lockdown to mirror Phase 26 + Phase 27 spell-check.js/content.css/i18n/strings.js/exam-registry.js changes downstream
 - Lockdown loader needs to either include the synced extension/exam-registry.js before leksihjelp scripts OR provide host.__lexiExamRegistry via shim — without either, fail-safe path hides every surface in lockdown context
 - Browser-baseline research: revisit lookup-shaped grammar rules currently classified exam.safe=false (Phase 27-01 default-conservative call) and flip to safe=true any rule that doesn't actually exceed Chrome native parity
@@ -100,4 +104,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Completed 30-01-PLAN.md Task 1 (four view-module skeletons under extension/popup/views/ with documented mount(container, deps) contracts; check-popup-deps release gate + paired self-test; Node --test scaffolds). Task 2 (logic migration from popup.js, ~1500+ lines, production-popup risk) and Task 3 (human-verify checkpoint) DEFERRED per auto-mode production-safety policy. Recommended next step: re-plan Task 2 as four smaller per-view sub-plans (30-01a dictionary, 30-01b settings, 30-01c pause, 30-01d report), each carrying its own `checkpoint:human-verify`. Plan 30-02 (lockdown sidepanel mount) should NOT start until those sub-plans land — view modules are empty shells today.
+Stopped at: Completed 30-01-PLAN.md (all three tasks). Task 1 skeletons + check-popup-deps gate landed earlier. Task 2 this session: Sub-step A extracted ~1100 lines of dictionary view logic (search, render, audio, compound cards) into dictionary-view.js with audio gated behind deps.audioEnabled; Sub-step B extracted UI lang + darkmode + prediction + spellcheck-alternates toggles into settings-view.js; Sub-steps C (pause), D (report), E (CSS) deferred per plan carve-out. viewState shared-state pattern introduced as single source of truth. Task 3 human-verify auto-approved per workflow.auto_advance=true. All release gates pass (check-popup-deps, check-fixtures, check-network-silence, check-explain-contract, check-rule-css-wiring, check-exam-marker, check-spellcheck-features, check-bundle-size). Plan 30-02 (lockdown sidepanel mount) can now proceed against the real consumable view modules.
