@@ -362,25 +362,29 @@ After making changes to files under `extension/`:
    - `npm run check-exam-marker` — must exit 0. Loads every rule under `extension/content/spell-rules/` and every entry in `extension/exam-registry.js` and asserts each carries a well-formed `exam: { safe: boolean, reason: string, category?: string }` marker (registry entries require `category`; rules accept it as optional but validate the closed set when present). Exits 1 with a per-rule diagnostic on any deviation.
    - Paired self-test: `npm run check-exam-marker:test` — belt-and-braces against the gate going silently permissive. Plants malformed/missing/invalid-category scratch rules (gate must fire on each) and a well-formed scratch rule (gate must pass).
    - Why this gate exists: Phase 27 ships exam-mode as a school-deployment feature. A new feature added without an exam marker would silently default to "unclassified" — the worst failure mode for an exam-compliance feature, since teachers couldn't trust that the extension is in fact suppressing every non-exam-safe surface. This gate ensures every shipped feature is explicitly classified.
-7. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
+7. Verify every popup view module honours its dep contract (Phase 30 GATES-03):
+   - `npm run check-popup-deps` — must exit 0. Scans `extension/popup/views/*.js` for forbidden tokens (`chrome.`, `window.__lexi`, `document.getElementById` outside the container scope). Whitelists deps-provided wrappers. Exits 1 with file:line on any deviation.
+   - Paired self-test: `npm run check-popup-deps:test` — plants a view that imports `chrome.storage.local.get` directly (gate must fire) and a well-formed dep-injected view (gate must pass).
+   - Why this gate exists: Phase 30 made the view modules a synced surface for the lockdown webapp. A regression that adds an implicit global breaks lockdown silently because lockdown's chrome shim has limited support. This gate enforces the dep-injection contract.
+8. Verify the packaged extension stays under the 20 MiB internal engineering ceiling:
    - `npm run check-bundle-size` — must exit 0. The script runs `npm run package` (which minifies `data/*.json` on the way into the zip), measures the resulting zip, and prints a per-directory byte breakdown.
    - If it exits 1 (zip over cap), stop and investigate the breakdown. The fix is almost always a data-file growth regression; do NOT bypass the cap by silently editing `CEILING_BYTES`. The 20 MiB number is our own (not Chrome Web Store's — they accept up to 2 GB) and exists to catch accidental growth. If the growth is intentional, raise the cap in a new phase with explicit sign-off.
-8. Verify the bundled NB baseline stays under its 200 KB cap (GATES-02):
+9. Verify the bundled NB baseline stays under its 200 KB cap (GATES-02):
    - `npm run check-baseline-bundle-size` — must exit 0. Measures `extension/data/nb-baseline.json` (the source pretty-printed file). If it exceeds 200 KB, exits 1 with a fix hint. If the file does not exist yet (pre-plan-23-03 state), exits 0 with a "skipped — informational" message; the gate becomes meaningful once the baseline builder ships.
    - Paired self-test: `npm run check-baseline-bundle-size:test` — plants an oversized (250 KB) baseline → gate fires; plants a 5 KB well-formed baseline → gate passes; removes the file → gate skips. Backs up and restores any real baseline in try/finally.
-   - Why this gate exists: Phase 23 removed bundled language data from the extension zip (data is now fetched at runtime via the sanctioned bootstrap path — see step 5 carve-out). The NB baseline is the only data file that ships in the zip going forward, so a regression that bloats it directly affects install footprint. This gate catches that class of regression early, before the packaged-zip gate (step 6) would.
-9. Validate benchmark flip-rate expectations (INFRA-08):
+   - Why this gate exists: Phase 23 removed bundled language data from the extension zip (data is now fetched at runtime via the sanctioned bootstrap path — see step 5 carve-out). The NB baseline is the only data file that ships in the zip going forward, so a regression that bloats it directly affects install footprint. This gate catches that class of regression early, before the packaged-zip gate (step 8) would.
+10. Validate benchmark flip-rate expectations (INFRA-08):
    - `npm run check-benchmark-coverage` — must exit 0. Reads `benchmark-texts/expectations.json` and validates that each expected rule fires on the corresponding benchmark line. Prints per-priority-band (P1/P2/P3) flip-rate percentages. Passes when expectations are empty (nothing to check) or all expectations are met.
    - Paired self-test: `npm run check-benchmark-coverage:test` — plants a broken expectation (nonexistent rule on a benchmark line), confirms the gate fires; restores the empty (valid) manifest, confirms the gate passes.
-10. Validate governance data bank presence and shape (INFRA-09):
+11. Validate governance data bank presence and shape (INFRA-09):
    - `npm run check-governance-data` — must exit 0. Checks that governance data banks (`registerbank`, `collocationbank`, `phrasebank`) in bundled vocab have correct structural shape when present. Passes when no governance banks exist yet (pre-data-sync state).
    - Paired self-test: `npm run check-governance-data:test` — plants a data file with a broken registerbank (missing required fields), confirms the gate fires; plants a well-formed data file, confirms the gate passes; verifies baseline (no governance data) also passes.
-11. Update the version in all three places:
+12. Update the version in all three places:
     - `extension/manifest.json` (the Chrome extension version)
     - `package.json` (the project version)
     - `backend/public/index.html` (the landing page display version)
-12. Rebuild the zip: `npm run package`
-13. Upload the zip as a GitHub Release asset
+13. Rebuild the zip: `npm run package`
+14. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 
@@ -417,6 +421,8 @@ There are TWO downstream consumers re-using this extension's content scripts, st
 - `extension/content/*.js` → `lockdown/public/leksihjelp/*.js`
 - `extension/exam-registry.js` → `lockdown/public/leksihjelp/exam-registry.js` (Phase 28 / EXAM-08 — must be loaded BEFORE `spell-check-core.js` so `__lexiExamRegistry` exists when consumers initialise; the loader's `LEKSI_BUNDLE` array enforces this order)
 - `extension/styles/content.css` → `lockdown/public/leksihjelp/styles/leksihjelp.css` (renamed)
+- `extension/popup/views/*.js` → `lockdown/public/leksihjelp/popup/views/*.js` (Phase 30 — synced view modules with explicit dep contracts; bug fixes go upstream and the webapp re-syncs)
+- `extension/styles/popup-views.css` → `lockdown/public/leksihjelp/styles/popup-views.css` (Phase 30 — view-relevant CSS extracted from popup.css; not yet present, see Plan 30-01 deferred sub-step E)
 - `extension/data/*` → `lockdown/public/leksihjelp/data/`
 - `extension/i18n/*` → `lockdown/public/leksihjelp/i18n/`
 
@@ -426,6 +432,9 @@ Lockdown copies these via `node scripts/sync-leksihjelp.js` (postinstall hook). 
 
 `/Users/geirforbord/Papertek/lockdown/skriveokt-zero/` — a Tauri desktop sibling that consumes leksihjelp through its own `scripts/sync-leksihjelp.js` (different from the webapp's — it pulls from `node_modules/@papertek/leksihjelp` and renames `spell-rules/` → `rules/`). Synced files land in `src/leksihjelp/`. Phase 27 exam-mode parity (EXAM-09) is tracked as **deferred Phase 28.1** in the leksihjelp roadmap; un-defer when skriveokt-zero starts shipping to schools.
 
+When EXAM-09 lands:
+- `extension/popup/views/` will also be a future synced surface for skriveokt-zero. Plan 30 chose dep-injection for views deliberately so that adoption is a sync-script-extension change, not a logic change.
+
 ### Implications for changes here
 
 - **CSS in `extension/styles/content.css`** also ships to both consumers. Don't assume "extension only" — selectors that don't match in the extension context (e.g. `.pdf-text-layer`, used by lockdown's PDF viewer) belong here too if a downstream consumer needs them, since the file is sync'd whole.
@@ -433,6 +442,8 @@ Lockdown copies these via `node scripts/sync-leksihjelp.js` (postinstall hook). 
 - **`extension/exam-registry.js`** is also a synced surface (webapp today; zero when EXAM-09 lands). Adding a new entry — i.e. a new non-rule UI surface getting an exam marker — requires re-running each downstream consumer's sync so the registry stays in step.
 - **Bumping `package.json` version** signals a downstream sync is needed. After a change that affects shared files, bump the version (matches the rule for `manifest.json` in the Release Workflow above) so consumers can pin and audit it.
 - **Downstream-only quick fixes** to synced trees over there are fine for testing, but the canonical change still belongs *here*. The downstream CLAUDE.md documents the agreement: ports fixes upstream before merging.
+- **Popup view modules** at `extension/popup/views/` are a synced surface (Phase 30). They are scaffolded with explicit dep injection: each `mountXView(container, deps)` accepts an explicit deps object (vocab, storage, runtime, t, audioEnabled, …). Changing a view's dep contract is a breaking change for the lockdown sidepanel host (`/Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js`) — keep contracts additive, default new fields, and re-run the lockdown sidepanel's manual UAT (Plan 30-03 / future) when shipping. The release-gate `npm run check-popup-deps` enforces that view modules don't use implicit globals (`chrome.*`, `window.__lexi*`, `document.getElementById` outside container scope).
+- **Audio is suppressed in lockdown by passing `audioEnabled: false`** to `mountDictionaryView`. The `extension/audio/` tree is also explicitly NOT in `lockdown/scripts/sync-leksihjelp.js`. Both safeguards must remain — adding audio to lockdown without explicit user sign-off violates the "school deployment, no MB-level downloads" constraint.
 
 ### When a fix arrives via lockdown's PR
 
