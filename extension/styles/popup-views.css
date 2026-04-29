@@ -503,7 +503,7 @@
   margin-top: 2px;
 }#leksihjelp-sidepanel-root .sense-example-src {
   font-style: italic;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .sense-item {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .sense-item {
   background: rgba(255, 255, 255, 0.04);
 }#leksihjelp-sidepanel-root .false-friend-banner {
   margin: 6px 0 4px;
@@ -532,10 +532,10 @@
 }#leksihjelp-sidepanel-root .false-friend-warning {
   margin: 4px 0 0;
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .false-friend-banner {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .false-friend-banner {
   background: rgba(224, 168, 0, 0.12);
   border-left-color: #e0a800;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .false-friend-heading {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .false-friend-heading {
   color: #ffcf55;
 }#leksihjelp-sidepanel-root .inflection-hint {
   font-size: 11px;
@@ -648,10 +648,10 @@
   background: var(--accent);
   color: white;
   border-color: var(--accent);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .compound-badge {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .compound-badge {
   background: rgba(124, 58, 237, 0.15);
   color: #a78bfa;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .compound-component-btn {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .compound-component-btn {
   background: rgba(17, 180, 154, 0.1);
   border-color: rgba(17, 180, 154, 0.3);
 }
@@ -718,7 +718,7 @@
   content: "\2190 ";
 }#leksihjelp-sidepanel-root .compound-back-link:hover {
   text-decoration: underline;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .compound-guess {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .compound-guess {
   background: rgba(124, 58, 237, 0.08);
   border-left-color: rgba(124, 58, 237, 0.4);
 }
@@ -1264,7 +1264,7 @@
   background: rgba(17, 180, 154, 0.55);
 }
 
-/* ── Dark Mode ── */#leksihjelp-sidepanel-root[data-theme="dark"] {
+/* ── Dark Mode ── */[data-theme="dark"] #leksihjelp-sidepanel-root {
   --bg: #1a1b2e;
   --glass-bg: rgba(30, 32, 55, 0.75);
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -1273,93 +1273,93 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --accent-bg: rgba(17, 180, 154, 0.15);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .glass {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .glass {
   background: var(--glass-bg);
   border-color: var(--glass-border);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .glass-subtle {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .glass-subtle {
   background: rgba(30, 32, 55, 0.5);
   border-color: rgba(255, 255, 255, 0.06);
-}#leksihjelp-sidepanel-root[data-theme="dark"] #search-input {
+}[data-theme="dark"] #leksihjelp-sidepanel-root #search-input {
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] #search-input::placeholder {
+}[data-theme="dark"] #leksihjelp-sidepanel-root #search-input::placeholder {
   color: var(--text-muted);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .glass-input {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .glass-input {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.1);
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .result-translation {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .result-translation {
   color: var(--text-secondary);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .result-expanded {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .result-expanded {
   border-top-color: rgba(17, 180, 154, 0.2);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .conjugation-table td:first-child {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .conjugation-table td:first-child {
   color: var(--text-muted);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .grammar-preset-pill {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .grammar-preset-pill {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--text-secondary);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .grammar-preset-pill:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .grammar-preset-pill:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .grammar-preset-pill.active {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .grammar-preset-pill.active {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .grammar-feature-item {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .grammar-feature-item {
   background: rgba(255, 255, 255, 0.06);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .grammar-feature-item:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .grammar-feature-item:hover {
   background: rgba(255, 255, 255, 0.1);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .result-plural {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .result-plural {
   background: rgba(34, 197, 94, 0.12);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .bottom-nav {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .bottom-nav {
   background: rgba(30, 32, 55, 0.85);
   border-top-color: rgba(255, 255, 255, 0.08);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .btn-secondary {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .btn-secondary {
   background: var(--accent-bg);
   border-color: rgba(17, 180, 154, 0.3);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .shortcut-row kbd {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .shortcut-row kbd {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.12);
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .pin-overlay {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .pin-overlay {
   background: rgba(0, 0, 0, 0.6);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .toggle-slider {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .toggle-slider {
   background: #475569;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .usage-bar {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .usage-bar {
   background: rgba(255, 255, 255, 0.08);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .legacy-code-toggle {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .legacy-code-toggle {
   color: var(--text-muted);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .legacy-code-toggle:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .legacy-code-toggle:hover {
   color: var(--text-secondary);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .result-card:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .result-card:hover {
   background: rgba(255, 255, 255, 0.04);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .audio-btn {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .audio-btn {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .audio-btn:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .audio-btn:hover {
   background: var(--accent);
   color: white;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .result-word {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .result-word {
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .explore-btn {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .explore-btn {
   color: var(--accent);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .search-direction button {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .search-direction button {
   color: var(--text-muted);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .search-direction button.active {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .search-direction button.active {
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lang-switcher button {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lang-switcher button {
   color: var(--text-secondary);
   border-color: rgba(255, 255, 255, 0.1);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lang-switcher button.active {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lang-switcher button.active {
   background: var(--accent-bg);
   border-color: var(--accent);
   color: var(--accent);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .settings-group h3 {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .settings-group h3 {
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lang-option {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lang-option {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
   color: var(--text);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lang-option:hover {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lang-option:hover {
   background: rgba(255, 255, 255, 0.08);
 }
 
@@ -1398,7 +1398,7 @@
 }#leksihjelp-sidepanel-root .lexi-updates-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lexi-updates-notice {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lexi-updates-notice {
   background: rgba(99, 102, 241, 0.18);
   border-color: rgba(99, 102, 241, 0.40);
 }
@@ -1435,13 +1435,13 @@
   background: rgba(239, 68, 68, 0.10);
   border-color: rgba(239, 68, 68, 0.30);
   color: #b91c1c;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lexi-vocab-pill.is-fetching {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lexi-vocab-pill.is-fetching {
   background: rgba(99, 102, 241, 0.20);
   border-color: rgba(99, 102, 241, 0.40);
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lexi-vocab-pill.is-ready {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lexi-vocab-pill.is-ready {
   background: rgba(34, 197, 94, 0.20);
   color: #86efac;
-}#leksihjelp-sidepanel-root[data-theme="dark"] .lexi-vocab-pill.is-error {
+}[data-theme="dark"] #leksihjelp-sidepanel-root .lexi-vocab-pill.is-error {
   background: rgba(239, 68, 68, 0.20);
   color: #fca5a5;
 }

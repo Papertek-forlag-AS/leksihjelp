@@ -31,12 +31,18 @@ function transformSelector(sel) {
   if (sel === ':root') return PREFIX;
   if (sel === '*') return `${PREFIX} *`;
   if (sel === ':focus-visible') return `${PREFIX} :focus-visible`;
-  if (sel === '[data-theme="dark"]') return `${PREFIX}[data-theme="dark"]`;
+  // Dark-mode rules: settings-view.js sets data-theme="dark" on the host
+  // document's <html> element (container.ownerDocument.documentElement). Our
+  // CSS is scoped under #leksihjelp-sidepanel-root, which is a descendant of
+  // <html>, so we put [data-theme="dark"] BEFORE the prefix as an ancestor —
+  // not on the prefix itself. This makes dark mode activate from anywhere
+  // up-tree, which is exactly what settings-view.js produces.
+  if (sel === '[data-theme="dark"]') return `[data-theme="dark"] ${PREFIX}`;
   const dm = sel.match(/^\[data-theme="dark"\]\s+(.+)$/s);
   if (dm) {
     const rest = dm[1].trim();
     if (DROP_SELECTORS_EXACT.has(rest)) return null;
-    return `${PREFIX}[data-theme="dark"] ${rest}`;
+    return `[data-theme="dark"] ${PREFIX} ${rest}`;
   }
   if (DROP_SELECTORS_EXACT.has(sel)) return null;
   return `${PREFIX} ${sel}`;
