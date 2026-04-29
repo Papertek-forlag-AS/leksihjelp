@@ -399,9 +399,14 @@
         // Update active state
         toggle.querySelectorAll('.lh-lang-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        // Persist and broadcast
-        chrome.storage.local.set({ language: lang });
-        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
+        // Phase 30-04 Task 6: floating-widget language is now LOCAL state.
+        // Do NOT write to shared `language` storage and do NOT broadcast
+        // LANGUAGE_CHANGED. The widget's lang controls TTS voice + the lookup
+        // card's source-language reading, not the student's spellcheck/dict
+        // global state. Decouples "I'm peeking at an EN PDF" from "I'm
+        // writing in NB". The incoming LANGUAGE_CHANGED listener at line 148
+        // still pulls global lang INTO the widget when the popup or
+        // lockdown's Aa pill changes the writing language.
         updateVoiceOptions();
       });
     });
