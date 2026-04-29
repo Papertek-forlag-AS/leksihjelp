@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: executing
-last_updated: "2026-04-29T06:41:07.322Z"
-last_activity: 2026-04-29 -- Plan 30-01 Task 1 complete (view-module skeletons + check-popup-deps gate); Task 2 logic-migration deferred per auto-mode production-safety policy
+last_updated: "2026-04-29T07:00:43.363Z"
+last_activity: "2026-04-29 -- Plan 30-01 complete: dictionary view fully extracted (~1100 lines moved), settings view partially extracted (UI lang + darkmode + 2 toggles), pause + report kept inline per plan, CSS extraction deferred. Audio gated behind deps.audioEnabled. Task 3 human-verify auto-approved per workflow.auto_advance=true."
 progress:
   total_phases: 8
   completed_phases: 5
   total_plans: 20
-  completed_plans: 13
+  completed_plans: 14
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.3 Exam Mode
 **Phase:** 30 (Shared Popup Views) -- IN PROGRESS
-**Plan:** 2 of 3 (30-01 complete; 30-02 lockdown-sidepanel-mount + 30-03 skriveokt-zero parity remain)
-**Status:** In progress (30-01 satisfied; downstream sidepanel mount can now proceed against the real view modules)
-**Last activity:** 2026-04-29 -- Plan 30-01 complete: dictionary view fully extracted (~1100 lines moved), settings view partially extracted (UI lang + darkmode + 2 toggles), pause + report kept inline per plan, CSS extraction deferred. Audio gated behind deps.audioEnabled. Task 3 human-verify auto-approved per workflow.auto_advance=true.
+**Plan:** 3 of 3 (30-01 + 30-02 complete; 30-03 skriveokt-zero parity remains, deferred Phase 28.1)
+**Status:** In progress (30-02 satisfied; staging-lockdown sidepanel now mounts the synced popup views with audioEnabled:false)
+**Last activity:** 2026-04-29 -- Plan 30-02 complete: lockdown sidepanel host file replaces the writing-environment.js stub; sync script extended to cover popup/views/ + popup-views.css; CLAUDE.md downstream-consumers + Release Workflow updated; version bumped 2.7.0 -> 2.8.0; cross-repo commits leksihjelp 98f4a9a + lockdown 1193e56; staging-lockdown branch pushed; production papertek.app deploy explicitly deferred.
 
-Progress: [███░░░░░░░] 33% (Phase 30 — 1 of 3 plans complete)
+Progress: [██████░░░░] 67% (Phase 30 — 2 of 3 plans complete)
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Progress: [███░░░░░░░] 33% (Phase 30 — 1 of 3 plans comple
 | 29    | 02   | 22             | 3     | 5     |
 | Phase 30 P01 | 14 | 1 tasks | 9 files |
 | Phase 30 P01 | 50 | 3 tasks | 11 files |
+| Phase 30 P02 | 10 | 4 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -79,12 +80,20 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 30]: Plan 30-01 Task 1 only landed (skeletons + check-popup-deps gate); Task 2 logic-migration + Task 3 human-verify deferred — recommend re-planning Task 2 as four smaller per-view sub-plans to preserve incremental smoke-test discipline
 - [Phase 30]: 30-01: Sub-step A (dictionary view) FULL extraction; Sub-step B (settings view) PARTIAL — UI lang + darkmode + 2 toggles; pause + report kept inline; CSS extraction deferred. Audio gated behind deps.audioEnabled. viewState shared-state pattern (single source of truth).
 - [Phase 30]: 30-01 Task 3 human-verify auto-approved per workflow.auto_advance=true; 9-step browser walkthrough logged for deferred manual verification (extension not yet shipping to paying users).
+- [Phase 30]: 30-02: lockdown sidepanel-host as the lockdown-only inclusion contract (declares what to mount with what deps; bug fixes go upstream and re-sync); audioEnabled:false hardcoded with three independent safeguards (renderResults gate + host never passes real playAudio + extension/audio/ NOT in sync); showSection in lockdown surfaces only grammar+darkmode (uiLanguage:false explicit deviation from plan-text spirit since plan text omitted it).
+- [Phase 30]: 30-02: deleted ~150-line stub search implementation in writing-environment.js (LEKSI_BANKS, leksiRenderCard, leksiTranslation, leksihjelpPerformSearch, search input listener) — that logic now lives upstream in dictionary-view.js and is sync'd in.
+- [Phase 30]: 30-02: static <script src> for view modules in elev.html (not LEKSI_BUNDLE) since views have no chrome.* / __lexi* implicit deps (enforced by check-popup-deps); decouples view loading from bootLeksihjelp lifecycle.
+- [Phase 30]: 30-02: check-popup-deps inserted as numbered Release Workflow step 7 in CLAUDE.md (between exam-marker step 6 and bundle-size now step 8); subsequent steps renumbered 7-13 -> 8-14.
+- [Phase 30]: 30-02: version bumped 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html — signals lockdown to re-pin.
+- [Phase 30]: 30-02: production deploy to papertek.app explicitly NOT done (staging-lockdown branch pushed only); user takes the production deploy decision separately per auto-mode-but-no-prod-deploy rule.
 
 ### Pending Todos
 
 - Phase 26 human verification deferred (6 browser walkthroughs in 26-VERIFICATION.md) — approve in a later session
 - Phase 27 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 27-03-PLAN.md `<how-to-verify>` block) — approve in a later session
 - Phase 30-01 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 30-01-PLAN.md `<how-to-verify>` block: load extension, search, lang switch, direction toggle, compound suggestion, Lær mer popover, settings, account section, pause, vocab-updates banner) — approve in a later session before merging to v3.1 release branch
+- Phase 30-02 staging-lockdown UAT deferred (8-step walkthrough captured in 30-02-SUMMARY.md "User Setup Required" section: create leksihjelp-enabled test, join as student, switch to Leksihjelp tab, verify dictionary view renders without audio buttons, verify EKSAMENMODUS badge under LEKSIHJELP_EXAM profile, verify settings shows only grammar+darkmode, verify dark mode toggle scoped to sidepanel) — approve before production papertek.app deploy
+- Phase 30-02 production papertek.app deploy outstanding: run `firebase deploy --only hosting --project lockdown-stb` from /Users/geirforbord/Papertek/lockdown after staging UAT passes (deferred per user instruction this run)
 - Lockdown sync needed: run `node scripts/sync-leksihjelp.js` from /Users/geirforbord/Papertek/lockdown to mirror Phase 26 + Phase 27 spell-check.js/content.css/i18n/strings.js/exam-registry.js changes downstream
 - Lockdown loader needs to either include the synced extension/exam-registry.js before leksihjelp scripts OR provide host.__lexiExamRegistry via shim — without either, fail-safe path hides every surface in lockdown context
 - Browser-baseline research: revisit lookup-shaped grammar rules currently classified exam.safe=false (Phase 27-01 default-conservative call) and flip to safe=true any rule that doesn't actually exceed Chrome native parity
@@ -104,4 +113,4 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-04-29
-Stopped at: Completed 30-01-PLAN.md (all three tasks). Task 1 skeletons + check-popup-deps gate landed earlier. Task 2 this session: Sub-step A extracted ~1100 lines of dictionary view logic (search, render, audio, compound cards) into dictionary-view.js with audio gated behind deps.audioEnabled; Sub-step B extracted UI lang + darkmode + prediction + spellcheck-alternates toggles into settings-view.js; Sub-steps C (pause), D (report), E (CSS) deferred per plan carve-out. viewState shared-state pattern introduced as single source of truth. Task 3 human-verify auto-approved per workflow.auto_advance=true. All release gates pass (check-popup-deps, check-fixtures, check-network-silence, check-explain-contract, check-rule-css-wiring, check-exam-marker, check-spellcheck-features, check-bundle-size). Plan 30-02 (lockdown sidepanel mount) can now proceed against the real consumable view modules.
+Stopped at: Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
