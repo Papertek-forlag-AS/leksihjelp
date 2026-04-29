@@ -90,7 +90,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 26: "Lær mer" Pedagogy UI** — Spell-check popover gets a "Lær mer" button that expands a teaching panel with explanations, contrastive examples, and Wechselpräposition pairs sourced from papertek-vocabulary pedagogy data (completed 2026-04-28)
 - [x] **Phase 27: Exam Mode** — Per-feature exam markers, popup toggle, lockdown teacher-lock, EKSAMENMODUS badge + amber widget border, check-exam-marker release gate (completed 2026-04-28)
 - [x] **Phase 28: Lockdown Webapp Exam-Mode Sync (GAP CLOSURE — plumbing only)** — Closed EXAM-08 plumbing 2026-04-28 (lockdown b7a92b4 staging; leksihjelp c6aff0f). Teacher-lock writer split off to Phase 29 (now EXAM-10) because Option B requires a `firestore.rules` deploy + new resource profile UX
-- [ ] **Phase 29: Lockdown Teacher-Lock UX (NEW — split from Phase 28)** — Wire the teacher-control surface for lockdown's exam-mode lock (EXAM-10): pick UX (new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` vs per-test toggle), update `firestore.rules` + Cloud Functions enums, add UI option + locales, wire `applyExamModeLock` in `writing-environment.js`, manual Firebase deploy to staging-lockdown then lockdown-stb
+- [x] **Phase 29: Lockdown Teacher-Lock UX (NEW — split from Phase 28)** — Wire the teacher-control surface for lockdown's exam-mode lock (EXAM-10): pick UX (new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` vs per-test toggle), update `firestore.rules` + Cloud Functions enums, add UI option + locales, wire `applyExamModeLock` in `writing-environment.js`, manual Firebase deploy to staging-lockdown then lockdown-stb (completed 2026-04-29; 29-03 UAT deferred → Phase 30)
+- [ ] **Phase 30: Shared Popup View Modules** — Eliminate drift between leksihjelp's extension popup and lockdown's stub sidepanel. Refactor extension popup into mountable view modules (dictionary/settings/pause/report) with explicit dep injection. Sync into lockdown. Replace stub sidepanel with thin host that excludes auth/payment/audio. Single source of truth in extension repo. Rolls up Phase 29-03 verification.
 - [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
 
 ## Phase Details
@@ -230,11 +231,32 @@ Plans:
   5. `lockdown/public/js/writing-test/student/writing-environment.js` (`applyExamModeLock`-style hook around the existing BSPC-01 wiring at ~line 953) calls `chrome.storage.local.set({ examModeLocked: true, examMode: true })` when the new profile is active, and clears both flags on profile transition away
   6. End-to-end on `stb-lockdown.app`: teacher selects the new profile → student writing environment loads → leksihjelp popup shows toggle ON + disabled + "Slått på av lærer" caption; floating widget gains amber border; word-prediction dropdown does not open; grammar-lookup dots suppressed; typo dots + dictionary lookups remain. Then teacher unselects → flags clear and surfaces re-enable
   7. Phase 28's dev-only "Simuler lærer-lås" button still works (no regression of the dev path)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 29-01-PLAN.md — Add LEKSIHJELP_EXAM resource profile + locales + classroom illustration + teacher picker (UX decision checkpoint) — Complete 2026-04-28 (lockdown 612bcf1)
 - [x] 29-02-PLAN.md — Backend enum (firestore.rules + Cloud Functions) + applyExamModeLock writer + Firebase deploy to staging-lockdown and lockdown-stb — Code Complete 2026-04-28 (lockdown d7825eb + b35b409); staging-lockdown DEPLOYED; **lockdown-stb prod deploy DEFERRED per user instruction**
-- [ ] 29-03-PLAN.md — End-to-end browser verification (staging + dev-button regression + production)
+- [⤓] 29-03-PLAN.md — End-to-end browser verification — DEFERRED to Phase 30. UAT surfaced that lockdown's leksihjelp dictionary panel is a stub; verifying the lock surface in isolation without the dictionary parity in place would be misleading. In-flight fixes during UAT shipped (45df438, 5144f24, a856f43). See 29-03-SUMMARY.md.
+
+### Phase 30: Shared Popup View Modules (lockdown sidepanel parity)
+
+**Goal:** Eliminate drift between leksihjelp's extension popup and lockdown's stub sidepanel by extracting the popup's user-facing views (dictionary, settings, pause, report) into mountable modules with explicit dependency injection. Sync those modules into lockdown via the existing sync script. Replace lockdown's stub `<input>+<div>` panel with a thin host that mounts the synced modules with limited deps (no audio, no auth/payment, no exam-toggle). Single source of truth lives in the extension repo; lockdown holds only the host file declaring what it includes/excludes.
+**Requirements:** Closes 29-03 verification scope as a side-effect.
+**Depends on:** Phase 29 code (which is deployed on staging-lockdown).
+**Cross-repo:** Refactors `extension/popup/popup.js` (no behavior change for extension users); modifies lockdown's `scripts/sync-leksihjelp.js`, `public/js/writing-test/student/writing-environment.js`, and adds `public/js/writing-test/student/leksihjelp-sidepanel-host.js`.
+
+**Success Criteria** (what must be TRUE):
+  1. Extension popup behavior unchanged — every existing popup feature still works (auth, payments, dictionary, settings, exam-toggle, etc.). Verified via existing extension manual test pass.
+  2. `extension/popup/views/{dictionary,settings,pause,report}-view.js` exist and export `mount{Name}View(container, deps)` functions with no implicit globals — all chrome.storage / chrome.runtime / vocab access via deps.
+  3. `lockdown/scripts/sync-leksihjelp.js` copies `extension/popup/views/` → `lockdown/public/leksihjelp/popup/views/` (and any extracted CSS) on next sync.
+  4. Lockdown's writing-environment leksihjelp-panel mounts a sidepanel host (new file, lockdown-only) that calls `mountDictionaryView` + `mountSettingsView` + `mountPauseView` + `mountReportView` with limited deps. Vipps login/logout, subscribe/yearly/top-up, quota usage bar, access-code field, "Skriv" button, "Pin" button, vocab refresh, exam-toggle, and "Simuler lærer-lås" are NOT mounted.
+  5. **No vocab audio in lockdown.** Dictionary view's audio-play buttons render only when `deps.audioEnabled === true`. Extension passes true; lockdown host passes false. The `extension/audio/` tree is already excluded from sync (verified 2026-04-29) so no MB-level downloads land in lockdown.
+  6. End-to-end on `stb-lockdown.app` (Phase 29 + Phase 30 rolled-up UAT): teacher creates LEKSIHJELP_EXAM test → student opens → EKSAMENMODUS badge + locked toggle → leksihjelp engine running → dictionary panel shows full conjugations/declensions, language switcher works, direction toggle works, no audio buttons; profile transition clears lock flags; Phase 28 dev-button regression still passes.
+  7. CLAUDE.md "Downstream consumer" section names the new synced surface (`extension/popup/views/`) so a future popup.js change knows it must keep the views' dep contracts stable.
+
+**Plans:** 3 estimated
+- [ ] 30-01-PLAN.md — Refactor `extension/popup/popup.js` into mountable view modules with dep injection. Tests for each view module. No behavior change in extension popup.
+- [ ] 30-02-PLAN.md — Extend lockdown sync; build `leksihjelp-sidepanel-host.js`; replace stub panel; wire deps with no-audio + no-auth flags; CLAUDE.md update for the new synced surface.
+- [ ] 30-03-PLAN.md — Rolled-up E2E browser verification (Phase 29 + Phase 30 UAT): lock mechanism + dictionary parity + audio-suppression + Phase 28 regression. Staging only; production deploy still user-driven.
 
 ### Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE — DEFERRED)
 
