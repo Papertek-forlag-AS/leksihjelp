@@ -1048,12 +1048,26 @@
           btn.classList.add('active');
 
           state.currentLang = lang;
-          await deps.storage.set({ language: state.currentLang });
+          // deps.broadcastLanguageChange (default true): when true, the
+          // pill click is a SSO write — sets shared `language` storage and
+          // broadcasts LANGUAGE_CHANGED so floating-widget, spell-check, and
+          // editor.lang follow. Default for the extension popup (the popup
+          // IS the writing surface so the user expects it to drive everything).
+          //
+          // Lockdown opts out (false): the sidepanel pills are dictionary-
+          // scoped only — switching to NB to look up a Norwegian word doesn't
+          // disrupt a student writing German. The bottom-right Aa picker
+          // (and leksihjelp's green Aa in leksihjelp mode) remain the SSO.
+          if (deps.broadcastLanguageChange !== false) {
+              await deps.storage.set({ language: state.currentLang });
+          }
           await loadDictionary(state.currentLang);
           await loadGrammarFeatures(state.currentLang);
           if (initGrammarSettings) initGrammarSettings();
           updateLangLabels();
-          runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: state.currentLang });
+          if (deps.broadcastLanguageChange !== false) {
+              runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: state.currentLang });
+          }
 
           if (input?.value.trim()) performSearch(input.value.trim());
 
