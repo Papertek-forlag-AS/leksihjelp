@@ -1019,6 +1019,10 @@
 #lexi-spell-overlay .lh-spell-popover {
   position: fixed;
   pointer-events: auto;
+  /* Stack above .lh-spell-dot (z-index 2147483645). Without an explicit
+     z-index here, dots paint through the popover background — visible as
+     amber bars cutting across the popover content. */
+  z-index: 2147483646;
   min-width: 200px;
   max-width: 280px;
   background: rgba(255, 255, 255, 0.98);
