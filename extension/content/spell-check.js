@@ -1151,6 +1151,18 @@
 
   function updateButtonVisibility() {
     if (!activeEl) return;
+    // Downstream consumers (lockdown webapp, future skriveokt-zero) set
+    // host.__lexiSpellBtnAlwaysVisible = true so the green Aa appears as
+    // soon as the editor is focused — useful when the editor is the page's
+    // primary surface and the button is the student's only language picker.
+    // The extension keeps the 20-char gate so the button doesn't clutter
+    // every textarea on every page on the web.
+    const host = typeof self !== 'undefined' ? self : globalThis;
+    if (host.__lexiSpellBtnAlwaysVisible) {
+      ensureButton();
+      positionButton();
+      return;
+    }
     const { text } = readInput(activeEl);
     if (text.length >= MIN_TEXT_LENGTH_FOR_BUTTON) {
       ensureButton();
