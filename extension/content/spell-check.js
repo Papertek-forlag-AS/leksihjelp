@@ -662,33 +662,63 @@
       hidePopover();
       runCheck();
     });
-    const reportBtn = popover.querySelector('.lh-spell-report');
-    if (reportBtn) {
-      reportBtn.addEventListener('click', () => {
-        reportBtn.textContent = '…';
-        reportBtn.disabled = true;
-        const surrounding = activeEl ? (activeEl.value || activeEl.textContent || '').slice(
-          Math.max(0, finding.start - 40), finding.end + 40
-        ) : '';
-        sendReport({
-          type: 'spell',
-          ruleId: finding.rule_id || finding.type,
-          original: finding.original,
-          suggestion: finding.fix || (finding.suggestions && finding.suggestions[0]) || '',
-          context: surrounding,
-          language: lang,
-          url: window.location.href,
-        }).then(ok => {
-          reportBtn.textContent = ok ? '✓ Sendt — takk!' : '✗ Kunne ikke sendes';
-          setTimeout(() => {
-            dismissed.add(dismissKey(finding));
-            pendingAdvanceIdx = activePopoverIdx;
-            hidePopover();
-            runCheck();
-          }, 1200);
+    // Two-step click on "Rapporter feil": first click swaps the action row
+    // with a confirm + cancel UI explaining the report is anonymous and sent
+    // to leksihjelp to improve the spellcheck. Second click on "Send rapport"
+    // transmits. Cancel restores the original action row. Goal: avoid
+    // students clicking "Rapporter feil" without realising it's a feedback
+    // channel back to us.
+    function attachReportHandler(btn, originalActionsHtml) {
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        const actionsRow = btn.closest('.lh-spell-actions');
+        if (!actionsRow) return;
+        const restoreHtml = originalActionsHtml || actionsRow.innerHTML;
+        actionsRow.innerHTML = `
+          <div class="lh-spell-report-confirm">
+            <p class="lh-spell-report-confirm-text">Vil du sende en anonym rapport til Leksihjelp om at denne påvisningen er feil? Vi bruker rapportene til å forbedre stavekontrollen.</p>
+            <div class="lh-spell-report-confirm-actions">
+              <button type="button" class="lh-spell-btn lh-spell-report-send">✓ Send rapport</button>
+              <button type="button" class="lh-spell-btn lh-spell-report-cancel">✕ Avbryt</button>
+            </div>
+          </div>
+        `;
+        if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
+        const sendBtn = actionsRow.querySelector('.lh-spell-report-send');
+        const cancelBtn = actionsRow.querySelector('.lh-spell-report-cancel');
+        cancelBtn?.addEventListener('click', () => {
+          actionsRow.innerHTML = restoreHtml;
+          attachReportHandler(actionsRow.querySelector('.lh-spell-report'), restoreHtml);
+          if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
+        });
+        sendBtn?.addEventListener('click', () => {
+          sendBtn.textContent = '…';
+          sendBtn.disabled = true;
+          if (cancelBtn) cancelBtn.disabled = true;
+          const surrounding = activeEl ? (activeEl.value || activeEl.textContent || '').slice(
+            Math.max(0, finding.start - 40), finding.end + 40
+          ) : '';
+          sendReport({
+            type: 'spell',
+            ruleId: finding.rule_id || finding.type,
+            original: finding.original,
+            suggestion: finding.fix || (finding.suggestions && finding.suggestions[0]) || '',
+            context: surrounding,
+            language: lang,
+            url: window.location.href,
+          }).then(ok => {
+            sendBtn.textContent = ok ? '✓ Sendt — takk!' : '✗ Kunne ikke sendes';
+            setTimeout(() => {
+              dismissed.add(dismissKey(finding));
+              pendingAdvanceIdx = activePopoverIdx;
+              hidePopover();
+              runCheck();
+            }, 1200);
+          });
         });
       });
     }
+    attachReportHandler(popover.querySelector('.lh-spell-report'));
     overlay.appendChild(popover);
     positionPopover(markers[idx]?.rect);
   }
