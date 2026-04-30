@@ -662,33 +662,44 @@
       hidePopover();
       runCheck();
     });
-    // Two-step click on "Rapporter feil": first click swaps the action row
-    // with a confirm + cancel UI explaining the report is anonymous and sent
-    // to leksihjelp to improve the spellcheck. Second click on "Send rapport"
-    // transmits. Cancel restores the original action row. Goal: avoid
-    // students clicking "Rapporter feil" without realising it's a feedback
-    // channel back to us.
-    function attachReportHandler(btn, originalActionsHtml) {
+    // Two-step click on "Rapporter feil": first click REPLACES the entire
+    // popover body with a confirm + cancel UI explaining the report is
+    // anonymous and sent to leksihjelp to improve the spellcheck. Second
+    // click on "Send rapport" transmits. Cancel restores the original
+    // popover body. Goal: avoid students clicking "Rapporter feil" without
+    // realising it's a feedback channel back to us, AND make the confirm
+    // visually distinct from the original feedback (no overlap).
+    function attachReportHandler(btn, savedPopoverHtml) {
       if (!btn) return;
       btn.addEventListener('click', () => {
-        const actionsRow = btn.closest('.lh-spell-actions');
-        if (!actionsRow) return;
-        const restoreHtml = originalActionsHtml || actionsRow.innerHTML;
-        actionsRow.innerHTML = `
+        const restoreHtml = savedPopoverHtml || popover.innerHTML;
+        popover.innerHTML = `
           <div class="lh-spell-report-confirm">
             <p class="lh-spell-report-confirm-text">Vil du sende en anonym rapport til Leksihjelp om at denne påvisningen er feil? Vi bruker rapportene til å forbedre stavekontrollen.</p>
-            <div class="lh-spell-report-confirm-actions">
+            <div class="lh-spell-report-confirm-actions lh-spell-actions">
               <button type="button" class="lh-spell-btn lh-spell-report-send">✓ Send rapport</button>
               <button type="button" class="lh-spell-btn lh-spell-report-cancel">✕ Avbryt</button>
             </div>
           </div>
         `;
         if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
-        const sendBtn = actionsRow.querySelector('.lh-spell-report-send');
-        const cancelBtn = actionsRow.querySelector('.lh-spell-report-cancel');
+        const sendBtn = popover.querySelector('.lh-spell-report-send');
+        const cancelBtn = popover.querySelector('.lh-spell-report-cancel');
         cancelBtn?.addEventListener('click', () => {
-          actionsRow.innerHTML = restoreHtml;
-          attachReportHandler(actionsRow.querySelector('.lh-spell-report'), restoreHtml);
+          popover.innerHTML = restoreHtml;
+          // Re-attach all popover button listeners on the restored DOM nodes.
+          // Decline = Avvis: dismiss this finding and re-run.
+          popover.querySelector('.lh-spell-decline')?.addEventListener('click', () => {
+            dismissed.add(dismissKey(finding));
+            pendingAdvanceIdx = activePopoverIdx;
+            hidePopover();
+            runCheck();
+          });
+          // Accept = Fiks (only present when !noAutoFix).
+          popover.querySelector('.lh-spell-accept')?.addEventListener('click', () => applyFix(finding));
+          // Re-attach Rapporter feil with the saved HTML so a second cancel
+          // works too.
+          attachReportHandler(popover.querySelector('.lh-spell-report'), restoreHtml);
           if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
         });
         sendBtn?.addEventListener('click', () => {
@@ -1075,16 +1086,40 @@
       spellCheckBtn.style.top = y + 'px';
       btnFixedPos = { x, y };
     });
+    // Click semantics on the green Aa button:
+    //   single left-click  → open language picker (showLangFlyout)
+    //   double left-click  → run a manual spell-check pass (manualCheck)
+    //   touch long-press   → open language picker (existing pointerdown branch)
+    //   right-click        → kept as a fallback for muscle memory
+    //
+    // Single-click is the primary student affordance because picking the
+    // working language is the action they take 10x more often than forcing
+    // a re-check. The single-click action is delayed 280ms so a double-click
+    // can pre-empt it. Adjust DBLCLICK_GAP_MS if the delay feels sluggish.
+    const DBLCLICK_GAP_MS = 280;
+    let pendingClickTimer = null;
     spellCheckBtn.addEventListener('pointerup', e => {
       if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
       const wasDrag = dragState && dragState.moved;
       const wasLongPress = dragState && dragState.longPressed;
       dragState = null;
-      if (!wasDrag && !wasLongPress) manualCheck();
+      if (wasDrag || wasLongPress) return;
+      if (pendingClickTimer) {
+        // Second click within the gap → treat as double-click.
+        clearTimeout(pendingClickTimer);
+        pendingClickTimer = null;
+        manualCheck();
+        return;
+      }
+      pendingClickTimer = setTimeout(() => {
+        pendingClickTimer = null;
+        showLangFlyout();
+      }, DBLCLICK_GAP_MS);
     });
     spellCheckBtn.addEventListener('contextmenu', e => {
       e.preventDefault();
       if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      if (pendingClickTimer) { clearTimeout(pendingClickTimer); pendingClickTimer = null; }
       if (dragState) dragState.longPressed = true;
       showLangFlyout();
     });
