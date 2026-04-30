@@ -63,8 +63,8 @@
 
   // ── Hydration progress emitter ──
   const hydrationListeners = new Set();
-  function emitHydration(lang, hydrationState) {
-    const msg = { type: 'lexi:hydration', lang, state: hydrationState };
+  function emitHydration(lang, hydrationState, extra) {
+    const msg = Object.assign({ type: 'lexi:hydration', lang, state: hydrationState }, extra || {});
     for (const l of hydrationListeners) {
       try { l(msg); } catch (_) { /* swallow */ }
     }
@@ -276,7 +276,10 @@
         if (built) {
           lastRevision.set(lang, cached.revision);
           currentLang = lang;
-          emitHydration(lang, 'ready');
+          // Tag with fromCache so the popup pill UI can suppress it. Downstream
+          // listeners (proxy-cache invalidation in vocab-store) still fire on
+          // any 'ready' regardless of source.
+          emitHydration(lang, 'ready', { fromCache: true });
         } else {
           emitHydration(lang, 'error');
         }

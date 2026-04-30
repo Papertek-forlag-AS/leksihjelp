@@ -1088,13 +1088,23 @@
     // Phase 27: inline dictionary is non-exam-safe (widget.dictionary). Bail
     // before any DOM/network work so the lookup never appears during exams.
     if (!isSurfaceAllowed('widget.dictionary')) return;
-    // Load dictionary from vocab store or bundled file
+    // Load dictionary. Bundled langs (nb/nn/en) read from the shipped JSON
+    // first — bundled data is source of truth and refreshed by sync-vocab.
+    // Cache-first would serve stale data after a sync.
+    const isBundled = currentLang === 'nb' || currentLang === 'nn' || currentLang === 'en';
     let dict = null;
     try {
-      if (window.__lexiVocabStore) {
+      if (isBundled) {
+        try {
+          const url = chrome.runtime.getURL(`data/${currentLang}.json`);
+          const res = await fetch(url);
+          if (res.ok) dict = await res.json();
+        } catch { /* fall through to cache */ }
+      }
+      if (!dict && window.__lexiVocabStore) {
         dict = await window.__lexiVocabStore.getCachedLanguage(currentLang);
       }
-      if (!dict) {
+      if (!dict && !isBundled) {
         try {
           const url = chrome.runtime.getURL(`data/${currentLang}.json`);
           const res = await fetch(url);
@@ -1110,15 +1120,13 @@
     let nbDict = null;
     if (currentLang !== 'nb' && currentLang !== 'nn') {
       try {
-        if (window.__lexiVocabStore) {
+        try {
+          const nbUrl = chrome.runtime.getURL('data/nb.json');
+          const nbRes = await fetch(nbUrl);
+          if (nbRes.ok) nbDict = await nbRes.json();
+        } catch { /* fall through to cache */ }
+        if (!nbDict && window.__lexiVocabStore) {
           nbDict = await window.__lexiVocabStore.getCachedLanguage('nb');
-        }
-        if (!nbDict) {
-          try {
-            const nbUrl = chrome.runtime.getURL('data/nb.json');
-            const nbRes = await fetch(nbUrl);
-            if (nbRes.ok) nbDict = await nbRes.json();
-          } catch { /* bundled file missing */ }
         }
         if (!nbDict && window.__lexiVocabStore) {
           try { nbDict = await window.__lexiVocabStore.downloadLanguage('nb', () => {}); } catch { /* */ }
@@ -1170,6 +1178,64 @@
       }
     }
 
+    // NB-side fallback: when reading a Norwegian page with a foreign target
+    // language (de/es/fr/en) selected, the user double-clicks an NB word
+    // ("opplevde"). It won't be in the foreign dict directly, but it IS in the
+    // NB dict — and the NB entry's linkedTo[currentLang].primary points us to
+    // the right foreign entry. Without this fallback the popover just says
+    // "not found" even though both the NB entry and the foreign translation
+    // exist. Bokmål/Nynorsk users hit `currentLang === nb/nn`, so dict IS the
+    // NB/NN dict and this branch is skipped.
+    if (!match && nbDict && currentLang !== 'nb' && currentLang !== 'nn') {
+      let nbHit = null;
+      let nbConjugatedFrom = null;
+      // Direct NB-word match.
+      for (const bank of Object.keys(nbDict)) {
+        const bankData = nbDict[bank];
+        if (!bankData || typeof bankData !== 'object') continue;
+        for (const [, nbEntry] of Object.entries(bankData)) {
+          if (nbEntry.word && nbEntry.word.toLowerCase() === q) { nbHit = nbEntry; break; }
+        }
+        if (nbHit) break;
+      }
+      // NB conjugation fallback ("opplevde" → "oppleve") via the seam's index.
+      if (!nbHit) {
+        const vocab = self.__lexiVocab;
+        const inf = vocab?.getVerbInfinitive?.()?.get?.(q);
+        if (inf) {
+          for (const bank of Object.keys(nbDict)) {
+            const bankData = nbDict[bank];
+            if (!bankData || typeof bankData !== 'object') continue;
+            for (const [, nbEntry] of Object.entries(bankData)) {
+              const w = (nbEntry.word || '').toLowerCase().replace(/^å\s+/, '');
+              if (w === inf) { nbHit = nbEntry; nbConjugatedFrom = word; break; }
+            }
+            if (nbHit) break;
+          }
+        }
+      }
+      // Resolve NB hit → foreign entry via linkedTo.
+      const targetId = nbHit?.linkedTo?.[currentLang]?.primary;
+      if (targetId) {
+        for (const bank of Object.keys(BANK_TO_POS_KEY)) {
+          const targetEntry = dict[bank]?.[targetId];
+          if (targetEntry) {
+            match = {
+              ...targetEntry,
+              _wordId: targetId,
+              translation: nbHit.word,
+              partOfSpeech: bankToPos(bank),
+              gender: targetEntry.genus ? genusToGender(targetEntry.genus) : null,
+              grammar: targetEntry.explanation?._description || null,
+              examples: targetEntry.examples || nbHit.examples || [],
+            };
+            if (nbConjugatedFrom) conjugatedFrom = nbConjugatedFrom;
+            break;
+          }
+        }
+      }
+    }
+
     // Enrich match with NB falseFriends/senses via reverse linkedTo scan
     if (match && nbDict && match._wordId) {
       for (const bank of Object.keys(nbDict)) {
@@ -1192,11 +1258,28 @@
     const old = document.getElementById('lexi-lookup-card');
     if (old) old.remove();
 
+    // Restore saved position if any. Stored as { left, top } in viewport coords.
+    let savedPos = null;
+    try {
+      const stored = await new Promise(resolve => {
+        chrome.storage.local.get('lookupCardPos', r => resolve(r.lookupCardPos || null));
+      });
+      // Validate the saved position is still on-screen (window may have resized
+      // since last drag). If off-screen, fall back to centred default.
+      if (stored && typeof stored.left === 'number' && typeof stored.top === 'number'
+          && stored.left >= 0 && stored.top >= 0
+          && stored.left < window.innerWidth - 80 && stored.top < window.innerHeight - 80) {
+        savedPos = stored;
+      }
+    } catch (_) { /* storage unavailable in some test contexts */ }
+
     const card = document.createElement('div');
     card.id = 'lexi-lookup-card';
+    const positionCss = savedPos
+      ? `top: ${savedPos.top}px; left: ${savedPos.left}px;`
+      : `top: 50%; left: 50%; transform: translate(-50%, -50%);`;
     card.style.cssText = `
-      position: fixed; z-index: 2147483647; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+      position: fixed; z-index: 2147483647; ${positionCss}
       min-width: 280px; max-width: 360px; padding: 18px;
       background: rgba(255,255,255,0.88); backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
@@ -1257,7 +1340,7 @@
       }
 
       card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="lh-lookup-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:move;user-select:none;">
           <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
           <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
         </div>
@@ -1291,7 +1374,7 @@
         const breakdownStr = breakdownParts.join(' + ');
         const genderStr = decompResult.gender ? ` (${genusToGender(decompResult.gender)})` : '';
         card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="lh-lookup-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:move;user-select:none;">
             <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
             <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
           </div>
@@ -1304,7 +1387,7 @@
         `;
       } else {
         card.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div class="lh-lookup-drag" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;cursor:move;user-select:none;">
             <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#11B49A;">${t('widget_lookup_header')}</span>
             <button id="lh-lookup-close" style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;">&times;</button>
           </div>
@@ -1321,6 +1404,55 @@
     document.addEventListener('keydown', function esc(e) {
       if (e.key === 'Escape') { card.remove(); document.removeEventListener('keydown', esc); }
     });
+
+    // Make the card draggable by its header. On drag-end the position is
+    // persisted to chrome.storage so the next lookup opens at the same spot.
+    const dragHandle = card.querySelector('.lh-lookup-drag');
+    if (dragHandle) {
+      let dragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+      dragHandle.addEventListener('mousedown', (e) => {
+        if (e.target.closest('#lh-lookup-close')) return;
+        const rect = card.getBoundingClientRect();
+        // Drop the centring transform once the user takes manual control.
+        card.style.transform = 'none';
+        card.style.left = rect.left + 'px';
+        card.style.top = rect.top + 'px';
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        dragging = true;
+        e.preventDefault();
+      });
+      const onMove = (e) => {
+        if (!dragging) return;
+        const x = Math.max(0, Math.min(e.clientX - offsetX, window.innerWidth - card.offsetWidth));
+        const y = Math.max(0, Math.min(e.clientY - offsetY, window.innerHeight - card.offsetHeight));
+        card.style.left = x + 'px';
+        card.style.top = y + 'px';
+      };
+      const onUp = () => {
+        if (!dragging) return;
+        dragging = false;
+        const left = parseFloat(card.style.left);
+        const top = parseFloat(card.style.top);
+        if (Number.isFinite(left) && Number.isFinite(top)) {
+          try { chrome.storage.local.set({ lookupCardPos: { left, top } }); } catch (_) { /* */ }
+        }
+      };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      // Clean up listeners when the card goes away.
+      const cleanup = () => {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      };
+      // Observe removal so we don't leak listeners across multiple lookups.
+      const obs = new MutationObserver(() => {
+        if (!card.isConnected) { cleanup(); obs.disconnect(); }
+      });
+      obs.observe(card.parentNode, { childList: true });
+    }
   }
 
   function escapeHtml(str) {

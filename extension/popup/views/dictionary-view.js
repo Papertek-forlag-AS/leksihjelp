@@ -731,6 +731,7 @@
           if (!tenseData) continue;
           if (tenseData.former) {
             const rows = Object.entries(tenseData.former)
+              .filter(([pronoun, form]) => !pronoun.startsWith('_') && typeof form === 'string')
               .map(([pronoun, form]) => `<tr><td>${escapeHtml(pronoun)}</td><td>${escapeHtml(form)}</td></tr>`)
               .join('');
             if (rows) {
@@ -809,10 +810,11 @@
         });
         return result;
       }
-      if (!allowedPronouns) return forms;
       const filtered = {};
       for (const [pronoun, form] of Object.entries(forms)) {
-        if (allowedPronouns.has(pronoun)) filtered[pronoun] = form;
+        if (pronoun.startsWith('_')) continue;
+        if (allowedPronouns && !allowedPronouns.has(pronoun)) continue;
+        filtered[pronoun] = form;
       }
       return filtered;
     }
