@@ -25,3 +25,9 @@ corpus/*
 
 # Claude Code settings
 .claude/
+
+# graphify knowledge-graph build output (run `graphify update .` to regenerate)
+graphify-out/
+
+# Local screenshots dir — user workflow, not shipped artefacts
+screenshots/
