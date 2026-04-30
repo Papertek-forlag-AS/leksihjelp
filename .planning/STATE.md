@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: completed
-last_updated: "2026-04-30T19:23:48.142Z"
+last_updated: "2026-04-30T19:49:10.983Z"
 last_activity: "2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11."
 progress:
   total_phases: 10
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 **Milestone:** v3.3 Exam Mode
 **Phase:** 32 (FR/ES pedagogy) -- IN PROGRESS
 **Plan:** 32-03 next (32-01 + 32-02 complete; 32-03 ES gustar pedagogy migration + class extension)
-**Status:** Plan 32-01 complete (first FR pedagogy block + check-explain-contract pedagogy branch); ready to execute 32-03
+**Status:** Milestone complete
 **Last activity:** 2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11.
 
 Progress: [████████░░] 79% (Plan 19 of 24 complete; Phase 32 — 2 of 3 plans complete; 32-03 next)
