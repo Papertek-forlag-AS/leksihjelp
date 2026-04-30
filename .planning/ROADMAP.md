@@ -92,7 +92,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 28: Lockdown Webapp Exam-Mode Sync (GAP CLOSURE — plumbing only)** — Closed EXAM-08 plumbing 2026-04-28 (lockdown b7a92b4 staging; leksihjelp c6aff0f). Teacher-lock writer split off to Phase 29 (now EXAM-10) because Option B requires a `firestore.rules` deploy + new resource profile UX
 - [x] **Phase 29: Lockdown Teacher-Lock UX (NEW — split from Phase 28)** — Wire the teacher-control surface for lockdown's exam-mode lock (EXAM-10): pick UX (new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` vs per-test toggle), update `firestore.rules` + Cloud Functions enums, add UI option + locales, wire `applyExamModeLock` in `writing-environment.js`, manual Firebase deploy to staging-lockdown then lockdown-stb (completed 2026-04-29; 29-03 UAT deferred → Phase 30)
 - [ ] **Phase 30: Shared Popup View Modules** — Eliminate drift between leksihjelp's extension popup and lockdown's stub sidepanel. Refactor extension popup into mountable view modules (dictionary/settings/pause/report) with explicit dep injection. Sync into lockdown. Replace stub sidepanel with thin host that excludes auth/payment/audio. Single source of truth in extension repo. Rolls up Phase 29-03 verification.
-- [ ] **Phase 32: FR/ES Pedagogy (Lær mer)** — First cross-repo data-led pedagogy enrichment for non-DE languages. Three independent rule-units: (A) NEW FR `fr-aspect-hint` rule with passé-composé vs imparfait soft-hint + first FR pedagogy block; (B) ES `por`/`para` pedagogy migration from inline strings to data; (C) ES `gustar`-class pedagogy migration + extension from 1 verb to 10 verbs. Extends `check-explain-contract` with additive pedagogy-shape branch. All data lives in papertek-vocabulary; rules read structured pedagogy from synced JSON.
+- [x] **Phase 32: FR/ES Pedagogy (Lær mer)** — First cross-repo data-led pedagogy enrichment for non-DE languages. Three independent rule-units: (A) NEW FR `fr-aspect-hint` rule with passé-composé vs imparfait soft-hint + first FR pedagogy block; (B) ES `por`/`para` pedagogy migration from inline strings to data; (C) ES `gustar`-class pedagogy migration + extension from 1 verb to 10 verbs. Extends `check-explain-contract` with additive pedagogy-shape branch. All data lives in papertek-vocabulary; rules read structured pedagogy from synced JSON. (completed 2026-04-30)
 - [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
 
 ## Phase Details
@@ -292,7 +292,7 @@ Plans:
   5. All 15 release-workflow gates exit 0.
   6. Three independent version bumps (one per plan) signal lockdown + skriveokt-zero downstream consumers to re-pin.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 32-01-PLAN.md — FR aspect-hint rule + first FR pedagogy block + check-explain-contract pedagogy branch
 - [ ] 32-02-PLAN.md — ES por/para pedagogy migration (inline strings → data)
