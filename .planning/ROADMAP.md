@@ -94,6 +94,8 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [ ] **Phase 30: Shared Popup View Modules** — Eliminate drift between leksihjelp's extension popup and lockdown's stub sidepanel. Refactor extension popup into mountable view modules (dictionary/settings/pause/report) with explicit dep injection. Sync into lockdown. Replace stub sidepanel with thin host that excludes auth/payment/audio. Single source of truth in extension repo. Rolls up Phase 29-03 verification.
 - [x] **Phase 32: FR/ES Pedagogy (Lær mer)** — First cross-repo data-led pedagogy enrichment for non-DE languages. Three independent rule-units: (A) NEW FR `fr-aspect-hint` rule with passé-composé vs imparfait soft-hint + first FR pedagogy block; (B) ES `por`/`para` pedagogy migration from inline strings to data; (C) ES `gustar`-class pedagogy migration + extension from 1 verb to 10 verbs. Extends `check-explain-contract` with additive pedagogy-shape branch. All data lives in papertek-vocabulary; rules read structured pedagogy from synced JSON. (completed 2026-04-30)
 - [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
+- [ ] **Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)** — Close the v3.1 audit's integration gap and cross-phase tech debt: complete Phase 30-04 dict-state-builder extraction (lift sidepanel host's stub flattenBanks/BANK_TO_POS/genusToGender into a shared module, populate full inflection index + NB enrichment + language-switcher state-on-first-paint, fix direction toggle hardcoded to ES, fix B-blocker where exam profile hides ordbok tab); re-run lockdown `sync-leksihjelp.js` to mirror Phase 26/27 surfaces; browser-baseline research to flip `exam.safe=true` on lookup-shaped grammar rules that don't exceed Chrome native parity (Phase 27-01 default-conservative call)
+- [ ] **Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)** — Close all v3.1 deferred manual browser walkthroughs in one consolidated session: Phase 29-03/30 lockdown exam-mode E2E on staging-lockdown (lock mechanism + dictionary parity + audio-suppression + Phase 28 dev-button regression), 6 Phase 26 Lær mer DE walkthroughs (dativ badge colour, Wechsel pair rendering, Esc collapse, NN locale, EN locale, Tab nav state reset), 3 Phase 32 walkthroughs (FR aspect_choice / ES por-para / extended ES gustar-class verbs render correctly in the Lær mer panel)
 
 ## Phase Details
 
@@ -275,6 +277,52 @@ Plans:
   5. End-to-end: launch the skriveokt-zero desktop app with exam mode enabled → toggle disabled with lock caption, badge visible, widget amber border, prediction suppressed, grammar-lookup dots suppressed, typo dots + dictionary lookups remain
   6. Leksihjelp `CLAUDE.md` "Downstream consumer" section is updated to document BOTH consumers (the webapp + skriveokt-zero), with each consumer's sync path and loader contract listed
 **Plans:** 1 plan (estimated, deferred)
+
+### Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)
+
+**Goal:** Close the v3.1 audit's integration gap and accumulated cross-phase tech debt so v3.1 can be archived cleanly. Three independent work-units:
+  - **(A) Phase 30-04 completion** — finish dict-state-builder extraction so the lockdown sidepanel host has full vocab state (full inflection index, NB enrichment, language-switcher state-on-first-paint), fix sidepanel direction toggle currently hardcoded to ES, and fix the B-blocker where the exam profile hides the ordbok tab. Unblocks lockdown prod-merge.
+  - **(B) Lockdown sync hygiene** — run `node scripts/sync-leksihjelp.js` from `/Users/geirforbord/Papertek/lockdown` to mirror Phase 26 + Phase 27 surfaces (`spell-check.js`, `content.css`, `i18n/strings.js`, `exam-registry.js`).
+  - **(C) exam.safe browser-baseline audit** — revisit lookup-shaped grammar rules currently classified `exam.safe=false` (Phase 27-01 default-conservative call) and flip to `safe=true` any rule that doesn't actually exceed Chrome native parity.
+
+**Requirements:** None new (closes integration gap on EXAM-10 surfaces + Phase 30-04 dict-state-builder)
+**Depends on:** Phase 30 (sidepanel host scaffolding), Phase 27 (exam-marker contract)
+**Cross-repo:** Touches both `extension/popup/views/` (dict-state-builder lift) and `lockdown/` (sync re-run + sidepanel host integration)
+**Gap Closure:** Closes the integration partial from `.planning/v3.1-MILESTONE-AUDIT.md` (Phase 30-04 unshipped, lockdown sync stale, exam.safe over-conservative)
+
+**Success Criteria** (what must be TRUE):
+  1. A shared `dict-state-builder` module is exported from the extension popup views surface; lockdown's sidepanel host imports it instead of inlining stubs of `flattenBanks` / `BANK_TO_POS` / `genusToGender`.
+  2. Lockdown's sidepanel populates the full vocab state on first paint: language switcher works (no hardcoded direction), direction toggle reflects the actual selected pair (not stuck on ES), and the inflection index + NB enrichment match the extension popup's behaviour.
+  3. The exam profile no longer hides the ordbok tab in the lockdown sidepanel — the dictionary view renders inside the EKSAMENMODUS envelope, gated only by per-feature exam markers (audio off, conjugation tables on, etc.).
+  4. After running lockdown's `node scripts/sync-leksihjelp.js`, `git status` in lockdown shows the Phase 26 + Phase 27 surfaces refreshed (or no diff if already in sync); `npm run check-popup-deps` and `npm run check-explain-contract` still exit 0 in leksihjelp.
+  5. Each rule under `extension/content/spell-rules/` whose work is purely lookup (no algorithmic generation beyond Chrome native spellcheck) and is currently `exam.safe=false` is either flipped to `safe=true` with an updated `reason` string, or has a one-line note in the rule file documenting why it stays conservative. `check-exam-marker` exits 0.
+  6. Version bumped (`extension/manifest.json` + `package.json` + `backend/public/index.html` aligned per the Release Workflow). Downstream consumers re-pin.
+  7. All 15 release-workflow gates exit 0.
+
+**Plans:** 0/3 plans (planned)
+Plans:
+- [ ] 33-01-PLAN.md — Lift dict-state-builder into a shared module + remove sidepanel host stubs + fix direction toggle + fix exam-profile ordbok hide
+- [ ] 33-02-PLAN.md — Lockdown sync re-run + verify Phase 26/27 surfaces refreshed; document any diffs that need upstream fix
+- [ ] 33-03-PLAN.md — exam.safe browser-baseline audit + flip lookup-shaped rules + version bump + full gate sweep
+
+### Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)
+
+**Goal:** Close all v3.1 deferred manual browser walkthroughs in one consolidated session so v3.1 can be archived without `human_needed` items rolling forward indefinitely. Single phase, single plan, single QA day.
+**Requirements:** None new (closes flow gap from v3.1 audit + tech debt walkthrough backlog)
+**Depends on:** Phase 33 (Phase 30-04 prod-blocker fixes need to be in place before lockdown UAT is meaningful)
+**Gap Closure:** Closes the flow gap (Phase 29-03/30 lockdown exam-mode UAT) and tech-debt browser walkthroughs from Phase 26 + Phase 32
+
+**Success Criteria** (what must be TRUE):
+  1. **Lockdown exam-mode E2E (Phase 29-03 + Phase 30 rolled-up UAT, on staging-lockdown):** teacher creates a LEKSIHJELP_EXAM test → student loads writing environment → leksihjelp popup shows toggle ON + disabled + "Slått på av lærer" caption; floating widget gains amber border; word-prediction dropdown does not open; grammar-lookup dots are suppressed; typo dots + dictionary lookups remain. Profile transition clears `examModeLocked` + `examMode`. Phase 28's dev-only "Simuler lærer-lås" button still works.
+  2. **Lockdown sidepanel dictionary parity:** ordbok tab visible inside EKSAMENMODUS, full conjugations/declensions render, language switcher works, direction toggle works, no audio buttons render.
+  3. **Phase 26 Lær mer DE walkthroughs (6/6):** dativ case badge colour matches the case colour token; Wechselpräposition pair renders side-by-side on wide inputs and stacked on narrow; Esc collapses the panel; NN locale strings render correctly when `uiLanguage=nn`; EN locale strings render when `uiLanguage=en`; Tab navigation between markers resets panel state.
+  4. **Phase 32 walkthroughs (3/3):** FR `fr-aspect-hint` rule → Lær mer panel renders `pedagogy.aspect_choice` from synced `fr.json`; ES `es-por-para` rule → Lær mer panel renders por/para pedagogy from data (not inline strings); ES `es-gustar` rule → Lær mer panel renders extended gustar-class pedagogy on the new verbs (encantar/interesar/doler/etc).
+  5. UAT findings either land as in-flight fixes during the session or are filed as discrete follow-up phases — no `human_needed` deferrals roll forward.
+  6. VERIFICATION.md authored summarising the walk, with screenshots/notes per surface and a clear pass/fail per criterion.
+
+**Plans:** 0/1 plan (planned)
+Plans:
+- [ ] 34-01-PLAN.md — Consolidated browser UAT walkthrough script + VERIFICATION.md authoring
 
 ### Phase 32: FR/ES Pedagogy (Lær mer)
 
