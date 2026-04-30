@@ -35,6 +35,10 @@
  * @property {Function} initGrammarSettings - () => void; refresh grammar UI in settings
  * @property {boolean}  audioEnabled       - when false, audio buttons NOT rendered
  * @property {string}   [BACKEND_URL]      - used for audio TTS endpoint
+ * @property {Function} [getAllowedLanguages] - optional fn returning array of
+ *   lang codes to limit which language pills are rendered. Returning null /
+ *   undefined / empty array means no filter (show all). Used by lockdown to
+ *   scope sidepanel pills to NB + active foreign language.
  *
  * @returns {{ destroy(): void, refresh(query?: string): void,
  *             rebuildLangSwitcher(): void, updateLangLabels(): void }}
@@ -1024,7 +1028,22 @@
         }
       }
 
-      available.sort((a, b) => {
+      // deps.getAllowedLanguages (optional fn): return an array of lang
+      // codes to limit which pills render. Used by lockdown to scope the
+      // sidepanel to NB + the active foreign language — Norwegian
+      // students study one foreign language at a time, so French and
+      // Spanish pills in a German test are noise. Returning null/undefined
+      // means no filter (show all). The extension popup leaves it unset.
+      let filtered = available;
+      if (typeof deps.getAllowedLanguages === 'function') {
+        const allowed = deps.getAllowedLanguages();
+        if (Array.isArray(allowed) && allowed.length > 0) {
+          const allowSet = new Set(allowed);
+          filtered = available.filter(l => allowSet.has(l));
+        }
+      }
+
+      filtered.sort((a, b) => {
         if (a === state.currentLang) return -1;
         if (b === state.currentLang) return 1;
         return langName(a).localeCompare(langName(b));
@@ -1032,7 +1051,7 @@
 
       const flags = vocab.LANG_FLAGS || { de: '🇩🇪', es: '🇪🇸', fr: '🇫🇷', en: '🇬🇧', nn: '🇳🇴', nb: '🇳🇴' };
 
-      langSwitcher.innerHTML = available.map(lang => `
+      langSwitcher.innerHTML = filtered.map(lang => `
         <button class="lang-switch-btn ${lang === state.currentLang ? 'active' : ''}" data-lang="${lang}">
           <span class="lang-switch-flag">${flags[lang] || ''}</span>
           ${langName(lang)}
