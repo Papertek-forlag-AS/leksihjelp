@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: executing
-last_updated: "2026-04-29T11:45:00.000Z"
-last_activity: "2026-04-29 -- Plan 30-03 complete: staging UAT pass on stb-lockdown.app. Plan 30-01 deferred sub-step E shipped (popup-views.css generator + scoped CSS). Five tactical fixes during UAT (state population via inline flattenBanks, vocab-adapter wrap with norwegianInfinitive/getTranslation, dark-mode dropped, settings drawer hidden, freq-en 404 silenced, searchDirection enum fix). Plan 30-04 filed (lockdown sidepanel UX integration). Phase 31 filed (FR rule suite). Production deploy still deferred. Versions bumped 2.8.0 -> 2.8.1 -> 2.8.2."
+last_updated: "2026-04-30T19:10:00.000Z"
+last_activity: "2026-04-30 -- Plan 32-02 complete: ES por/para pedagogy migration to papertek-vocabulary lexicon. Cross-repo: papertek-vocabulary 84111f5c + leksihjelp 04e0573 (Task 1, data) + 279059f (Task 2, rule refactor + version bump 2.9.9 → 2.9.10). 50-case fixture lock held at P=R=F1=1.000. Plan-text deviation: followed Phase 26 finding.pedagogy contract over plan's <interfaces> proposal of explain()-returns-pedagogy. Pre-existing in-flight failures from sibling 32-01 / 32-03 work in es-gustar fixture + benchmark-coverage logged to deferred-items.md (out of scope for 32-02)."
 progress:
-  total_phases: 8
+  total_phases: 10
   completed_phases: 5
-  total_plans: 21       # +1: 30-04 filed mid-UAT
-  completed_plans: 17   # +3: 30-01, 30-02, 30-03
+  total_plans: 24
+  completed_plans: 17
 ---
 
 # Session State
@@ -48,6 +48,7 @@ Progress: [████████░░] 75% (Phase 30 — 3 of 4 plans comple
 | Phase 30 P01 | 14 | 1 tasks | 9 files |
 | Phase 30 P01 | 50 | 3 tasks | 11 files |
 | Phase 30 P02 | 10 | 4 tasks | 8 files |
+| Phase 32-fr-es-pedagogy P02 | 12 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +87,10 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 30]: 30-02: check-popup-deps inserted as numbered Release Workflow step 7 in CLAUDE.md (between exam-marker step 6 and bundle-size now step 8); subsequent steps renumbered 7-13 -> 8-14.
 - [Phase 30]: 30-02: version bumped 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html — signals lockdown to re-pin.
 - [Phase 30]: 30-02: production deploy to papertek.app explicitly NOT done (staging-lockdown branch pushed only); user takes the production deploy decision separately per auto-mode-but-no-prod-deploy rule.
+- [Phase 32-02]: Followed Phase 26 finding.pedagogy contract over plan <interfaces> proposal — pedagogy rides on the finding object (not via explain() return); explain() pre-templates {nb,nn} from pedagogy.subtypes[patternType] with {fix}/{wrong} substitution. Avoids breaking check-explain-contract while still surfacing the rich Lær mer panel.
+- [Phase 32-02]: ES pedagogy uses semantic_category: 'preposition' (no DE-style 'case' field); check-pedagogy-shape's case-validator doesn't reject because synthetic ctx ('durch die Schule') doesn't trigger es-por-para patterns. Gate exits informational-PASS.
+- [Phase 32-02]: Subtype keys mirror the rule's existing patternType discriminators verbatim (purpose / beneficiary / deadline / duration). Pedagogy lives on the *suggested-fix* preposition (para_prep carries purpose+beneficiary+deadline; por_prep carries duration).
+- [Phase 32-02]: Side-patched extension/data/es.json directly because deployed papertek-vocabulary Vercel API hadn't picked up the lexicon edit; documented as recognised future-sync no-op (same pattern as 32-03 chore commit b2a4be2).
 
 ### Pending Todos
 

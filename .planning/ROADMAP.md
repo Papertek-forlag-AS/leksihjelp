@@ -292,7 +292,7 @@ Plans:
   5. All 15 release-workflow gates exit 0.
   6. Three independent version bumps (one per plan) signal lockdown + skriveokt-zero downstream consumers to re-pin.
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 32-01-PLAN.md — FR aspect-hint rule + first FR pedagogy block + check-explain-contract pedagogy branch
 - [ ] 32-02-PLAN.md — ES por/para pedagogy migration (inline strings → data)
