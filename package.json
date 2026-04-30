@@ -61,7 +61,8 @@
     "build-popup-views-css": "node scripts/build-popup-views-css.js",
     "test:vocab-store": "node --test extension/content/vocab-store.test.js",
     "test:vocab-seam": "node --test extension/content/vocab-seam.test.js",
-    "test:popup-views": "node --test extension/popup/views/dictionary-view.test.js extension/popup/views/settings-view.test.js"
+    "test:popup-views": "node --test extension/popup/views/dictionary-view.test.js extension/popup/views/settings-view.test.js",
+    "test:dict-state-builder": "node --test extension/popup/dict-state-builder.test.js"
   },
   "repository": {
     "type": "git",

@@ -146,6 +146,230 @@
     return null;
   }
 
+  /**
+   * Build an inflection index keyed by inflected forms (lowercased) → entries.
+   * Lifted verbatim from popup.js's buildInflectionIndex (Phase 33-01) so the
+   * lockdown sidepanel can reuse it without depending on vocab-seam-core.
+   */
+  function buildInflectionIndex(words) {
+    const index = new Map();
+
+    function addToIndex(key, entry, matchType, matchDetail) {
+      if (!key || key === (entry.word || '').toLowerCase()) return;
+      if (!index.has(key)) index.set(key, []);
+      index.get(key).push({ entry, matchType, matchDetail });
+    }
+
+    if (!Array.isArray(words)) return index;
+    for (const entry of words) {
+      // Verb conjugations
+      if (entry.conjugations) {
+        for (const [tenseName, tenseData] of Object.entries(entry.conjugations)) {
+          if (!tenseData || !tenseData.former) continue;
+          const former = tenseData.former;
+          if (Array.isArray(former)) {
+            for (const form of former) {
+              if (form) addToIndex(form.toLowerCase(), entry, 'conjugation', tenseName);
+            }
+          } else if (typeof former === 'object') {
+            for (const [pronoun, form] of Object.entries(former)) {
+              if (!form || pronoun.startsWith('_')) continue;
+              if (Array.isArray(form)) {
+                for (const f of form) {
+                  if (typeof f === 'string' && f) addToIndex(f.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
+                }
+              } else if (typeof form === 'string') {
+                addToIndex(form.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
+              }
+            }
+          }
+        }
+      }
+
+      // Noun plurals
+      if (entry._bank === 'nounbank') {
+        if (entry.plural) {
+          const plurals = Array.isArray(entry.plural) ? entry.plural : [entry.plural];
+          for (let p of plurals) {
+            if (!p || typeof p !== 'string') continue;
+            if (p.startsWith('die ')) p = p.slice(4);
+            addToIndex(p.toLowerCase(), entry, 'plural', null);
+          }
+        }
+        if (entry.declension && entry.declension.flertall) {
+          for (const variant of [entry.declension.flertall.ubestemt, entry.declension.flertall.bestemt]) {
+            if (!variant || !variant.form) continue;
+            let f = variant.form;
+            if (f.startsWith('die ')) f = f.slice(4);
+            addToIndex(f.toLowerCase(), entry, 'plural', null);
+          }
+        }
+      }
+
+      // Noun case forms (v2.0: cases.{case}.forms.{number}.{article})
+      if (entry._bank === 'nounbank' && entry.cases) {
+        for (const [caseName, caseData] of Object.entries(entry.cases)) {
+          if (!caseData || !caseData.forms) continue;
+          for (const [number, numberForms] of Object.entries(caseData.forms)) {
+            if (!numberForms) continue; // plurale tantum: singular is null
+            for (const [article, form] of Object.entries(numberForms)) {
+              if (!form) continue;
+              const fullForm = form.toLowerCase();
+              addToIndex(fullForm, entry, 'case', `${caseName} ${number} ${article}`);
+              const parts = form.split(' ');
+              if (parts.length > 1) {
+                addToIndex(parts[parts.length - 1].toLowerCase(), entry, 'case', `${caseName} ${number} ${article}`);
+              }
+            }
+          }
+        }
+      }
+
+      if (entry.typos && Array.isArray(entry.typos)) {
+        for (const typo of entry.typos) {
+          addToIndex(typo.toLowerCase(), entry, 'typo', null);
+        }
+      }
+
+      if (entry.acceptedForms && Array.isArray(entry.acceptedForms)) {
+        for (const form of entry.acceptedForms) {
+          addToIndex(form.toLowerCase(), entry, 'typo', null);
+        }
+      }
+    }
+
+    return index;
+  }
+
+  /**
+   * buildDictState({ raw, sisterRaw, lang, noLang, vocabCore })
+   *
+   * Pure function that builds the full dictionary view state from raw bank
+   * dicts. Mirrors what popup.js's loadDictionary used to do inline (lifted
+   * in Phase 33-01) so the lockdown sidepanel host can populate the same
+   * state set on first paint and on language switch.
+   *
+   * Returns: {
+   *   allWords, inflectionIndex, nounGenusMap, currentIndexes,
+   *   noWords, noNounGenusMap,
+   *   nbEnrichmentIndex, nbTranslationIndex, nbIdToTargetIndex
+   * }
+   */
+  function buildDictState(opts) {
+    const o = opts || {};
+    const raw = o.raw || null;
+    const sisterRaw = o.sisterRaw || null;
+    const lang = o.lang || null;
+    const noLang = o.noLang || 'nb';
+    const vocabCore = o.vocabCore || null;
+
+    const allWords = flattenBanks(raw);
+
+    // Inflection index — prefer this module's own builder; vocabCore may
+    // optionally override (none ships today, but the contract is open).
+    let inflectionIndex;
+    if (vocabCore && typeof vocabCore.buildInflectionIndex === 'function') {
+      inflectionIndex = vocabCore.buildInflectionIndex(allWords);
+    } else {
+      inflectionIndex = buildInflectionIndex(allWords);
+    }
+
+    // Compound-decomposition indexes (vocab-seam-core owns these — needs lang).
+    let currentIndexes = null;
+    let nounGenusMap = new Map();
+    if (raw && lang && vocabCore && typeof vocabCore.buildIndexes === 'function') {
+      currentIndexes = vocabCore.buildIndexes({ raw, lang });
+      nounGenusMap = (currentIndexes && currentIndexes.nounGenus) || new Map();
+    }
+
+    // Sister (NB/NN) dict — only when caller passes one.
+    let noWords = [];
+    let noNounGenusMap = new Map();
+    let nbEnrichmentIndex = new Map();
+    let nbTranslationIndex = new Map();
+    let nbIdToTargetIndex = new Map();
+
+    if (sisterRaw) {
+      noWords = flattenBanks(sisterRaw);
+      if (vocabCore && typeof vocabCore.buildIndexes === 'function') {
+        const noIdx = vocabCore.buildIndexes({ raw: sisterRaw, lang: noLang });
+        noNounGenusMap = (noIdx && noIdx.nounGenus) || new Map();
+      }
+
+      // Walk sister bank dict to build:
+      //   - nbEnrichmentIndex (linkedTo with falseFriends/senses)
+      //   - nbTranslationIndex (Direction 1: NB→target via sister _generatedFrom)
+      const langPrefix = `${lang}-${noLang}/`;
+      const nbIdToWord = new Map();
+      for (const bank of Object.keys(sisterRaw)) {
+        const bankData = sisterRaw[bank];
+        if (!bankData || typeof bankData !== 'object') continue;
+        for (const [id, entry] of Object.entries(bankData)) {
+          if (id.startsWith('_')) continue;
+          if (entry && entry.word) nbIdToWord.set(id, entry.word);
+          if (entry && (entry.falseFriends || entry.senses) && entry.linkedTo && entry.linkedTo[lang] && entry.linkedTo[lang].primary) {
+            const linkId = entry.linkedTo[lang].primary;
+            const existing = nbEnrichmentIndex.get(linkId);
+            nbEnrichmentIndex.set(linkId, {
+              falseFriends: [...((existing && existing.falseFriends) || []), ...((entry.falseFriends) || [])],
+              senses: [...((existing && existing.senses) || []), ...((entry.senses) || [])],
+            });
+          }
+          if (entry && entry._generatedFrom && entry.word) {
+            for (const trimmed of generatedFromRefs(entry)) {
+              if (trimmed.startsWith(langPrefix)) {
+                const colonIdx = trimmed.indexOf(':');
+                if (colonIdx !== -1) {
+                  const targetId = trimmed.substring(colonIdx + 1);
+                  if (!nbTranslationIndex.has(targetId)) {
+                    nbTranslationIndex.set(targetId, entry.word);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Direction 2: target→NB via target _generatedFrom
+      const revPrefix = `${noLang}-${lang}/`;
+      if (raw) {
+        for (const bank of Object.keys(raw)) {
+          const bankData = raw[bank];
+          if (!bankData || typeof bankData !== 'object') continue;
+          for (const [id, entry] of Object.entries(bankData)) {
+            if (id.startsWith('_') || !entry || !entry._generatedFrom) continue;
+            for (const trimmed of generatedFromRefs(entry)) {
+              if (trimmed.startsWith(revPrefix)) {
+                const colonIdx = trimmed.indexOf(':');
+                if (colonIdx !== -1) {
+                  const nbId = trimmed.substring(colonIdx + 1);
+                  const nbWord = nbIdToWord.get(nbId);
+                  if (nbWord) {
+                    if (!nbTranslationIndex.has(id)) nbTranslationIndex.set(id, nbWord);
+                    if (!nbIdToTargetIndex.has(nbId)) nbIdToTargetIndex.set(nbId, id);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      allWords,
+      inflectionIndex,
+      nounGenusMap,
+      currentIndexes,
+      noWords,
+      noNounGenusMap,
+      nbEnrichmentIndex,
+      nbTranslationIndex,
+      nbIdToTargetIndex,
+    };
+  }
+
   const exports = {
     BANK_TO_POS,
     NORWEGIAN_IRREGULAR_VERBS,
@@ -153,6 +377,8 @@
     getTranslation,
     generatedFromRefs,
     norwegianInfinitive,
+    buildInflectionIndex,
+    buildDictState,
   };
 
   const host = typeof self !== 'undefined' ? self : globalThis;
