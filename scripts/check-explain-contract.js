@@ -94,6 +94,7 @@ const TARGETS = [
   'extension/content/spell-rules/es-subjuntivo.js',
   'extension/content/spell-rules/es-imperfecto-hint.js',
   'extension/content/spell-rules/fr-subjonctif.js',
+  'extension/content/spell-rules/fr-aspect-hint.js',
   'extension/content/spell-rules/es-pro-drop.js',
   'extension/content/spell-rules/es-gustar.js',
   'extension/content/spell-rules/fr-clitic-order.js',
@@ -220,7 +221,116 @@ function validateRule(rule, file) {
     };
   }
 
+  // Phase 32-01: optional pedagogy-shape validation.
+  //
+  // When a rule's explain() returns a `pedagogy` field, validate its shape.
+  // This is additive — rules that don't return pedagogy (the legacy { nb, nn }
+  // contract) continue to pass unchanged. The shape mirrors the JSON authored
+  // in papertek-vocabulary (DE preposition pedagogy + FR aspect_choice).
+  //
+  // Required fields when `pedagogy` is present:
+  //   - pedagogy.summary.nb     non-empty string
+  //   - pedagogy.summary.en     non-empty string
+  //   - pedagogy.explanation.nb non-empty string
+  //
+  // Optional sub-shapes that get validated when present:
+  //   - pedagogy.examples       must be array; each entry must have non-empty
+  //                             `sentence` string
+  //   - pedagogy.common_error   must have non-empty `wrong` AND `correct`
+  //                             strings
+  //
+  // To exercise the pedagogy branch the validator may need a finding that
+  // carries pedagogy. Most pedagogy-bearing rules attach the pedagogy block
+  // either through `finding.pedagogy` (de-prep-case convention) or by
+  // returning it from explain() directly (fr-aspect-hint convention). We
+  // always look at result.pedagogy (the explain() return) AND, as a
+  // fallback, retry explain() with a `pedagogy` field on the fakeFinding —
+  // this exercises the de-prep-case-style pass-through code path too.
+  let pedagogy = result && result.pedagogy;
+  if (!pedagogy) {
+    // Re-invoke explain() with a synthetic pedagogy block on the finding so
+    // rules that pass-through (rather than load from data) get a chance to
+    // expose their pedagogy shape via explain(). This is a no-op for rules
+    // that don't reference finding.pedagogy.
+    const synthetic = {
+      summary: { nb: 'x', nn: 'x', en: 'x' },
+      explanation: { nb: 'x', nn: 'x', en: 'x' },
+    };
+    let retryResult;
+    try {
+      retryResult = rule.explain(Object.assign({}, fakeFinding, { pedagogy: synthetic }));
+    } catch (_) {
+      retryResult = null;
+    }
+    if (retryResult && retryResult.pedagogy && retryResult.pedagogy !== synthetic) {
+      pedagogy = retryResult.pedagogy;
+    }
+  }
+  if (pedagogy) {
+    const pedErr = validatePedagogy(pedagogy);
+    if (pedErr) {
+      return {
+        ok: false,
+        code: 'PEDAGOGY_MALFORMED',
+        ruleId: rule.id || ruleId,
+        detail: pedErr,
+      };
+    }
+  }
+
   return { ok: true, ruleId };
+}
+
+// Phase 32-01: pedagogy-shape validator. Returns null if the pedagogy block
+// is well-formed, otherwise a string naming the malformed field path.
+function validatePedagogy(pedagogy) {
+  if (!pedagogy || typeof pedagogy !== 'object' || Array.isArray(pedagogy)) {
+    return 'pedagogy is not a non-array object';
+  }
+  if (!pedagogy.summary || typeof pedagogy.summary !== 'object') {
+    return 'pedagogy.summary is missing or not an object';
+  }
+  if (typeof pedagogy.summary.nb !== 'string' || pedagogy.summary.nb.length === 0) {
+    return 'pedagogy.summary.nb is missing or empty';
+  }
+  if (typeof pedagogy.summary.en !== 'string' || pedagogy.summary.en.length === 0) {
+    return 'pedagogy.summary.en is missing or empty';
+  }
+  if (!pedagogy.explanation || typeof pedagogy.explanation !== 'object') {
+    return 'pedagogy.explanation is missing or not an object';
+  }
+  if (typeof pedagogy.explanation.nb !== 'string' || pedagogy.explanation.nb.length === 0) {
+    return 'pedagogy.explanation.nb is missing or empty';
+  }
+  // Optional examples: if present, must be array of objects with non-empty `sentence`.
+  if (pedagogy.examples !== undefined) {
+    if (!Array.isArray(pedagogy.examples)) {
+      return 'pedagogy.examples is present but not an array';
+    }
+    for (let i = 0; i < pedagogy.examples.length; i++) {
+      const ex = pedagogy.examples[i];
+      if (!ex || typeof ex !== 'object') {
+        return 'pedagogy.examples[' + i + '] is not an object';
+      }
+      if (typeof ex.sentence !== 'string' || ex.sentence.length === 0) {
+        return 'pedagogy.examples[' + i + '].sentence is missing or empty';
+      }
+    }
+  }
+  // Optional common_error: if present, must have non-empty wrong + correct.
+  if (pedagogy.common_error !== undefined) {
+    const ce = pedagogy.common_error;
+    if (!ce || typeof ce !== 'object') {
+      return 'pedagogy.common_error is present but not an object';
+    }
+    if (typeof ce.wrong !== 'string' || ce.wrong.length === 0) {
+      return 'pedagogy.common_error.wrong is missing or empty';
+    }
+    if (typeof ce.correct !== 'string' || ce.correct.length === 0) {
+      return 'pedagogy.common_error.correct is missing or empty';
+    }
+  }
+  return null;
 }
 
 function main() {

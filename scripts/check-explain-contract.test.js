@@ -254,13 +254,157 @@ if (!severityDetected) {
   process.exit(1);
 }
 
+// Phase 32-01: pedagogy-shape scratch scenarios.
+//
+// (a) Well-formed pedagogy block — gate must pass.
+const SCRATCH_BODY_PEDAGOGY_OK = `'use strict';
+// Test scratch — DO NOT SHIP. Used by check-explain-contract.test.js to
+// confirm the gate accepts a well-formed pedagogy block (Phase 32-01).
+const rule = {
+  id: 'scratch',
+  languages: ['fr'],
+  priority: 99,
+  severity: 'hint',
+  explain: (f) => ({
+    nb: 'NB ' + (f && f.original || 'x'),
+    nn: 'NN ' + (f && f.original || 'x'),
+    pedagogy: {
+      summary:     { nb: 'Bruk imparfait for vane.', nn: 'Bruk imparfait for vane.', en: 'Use imparfait for habit.' },
+      explanation: { nb: 'Forklaring NB.', nn: 'Forklaring NN.', en: 'English explanation.' },
+      examples: [
+        { sentence: "Tous les jours je mangeais.", translation: { nb: 'Hver dag spiste jeg.', en: 'Every day I used to eat.' } }
+      ],
+      common_error: { wrong: 'Hier je mangeais', correct: "Hier j'ai mangé", explanation: { nb: 'x', en: 'x' } }
+    },
+  }),
+  check() { return []; },
+};
+const host = typeof self !== 'undefined' ? self : globalThis;
+host.__lexiSpellRules = host.__lexiSpellRules || [];
+host.__lexiSpellRules.push(rule);
+if (typeof module !== 'undefined' && module.exports) module.exports = rule;
+`;
+
+// (b) Empty pedagogy.summary.en — gate must fire PEDAGOGY_MALFORMED.
+const SCRATCH_BODY_PEDAGOGY_EMPTY_EN = `'use strict';
+// Test scratch — DO NOT SHIP. Phase 32-01 negative case.
+const rule = {
+  id: 'scratch',
+  languages: ['fr'],
+  priority: 99,
+  severity: 'hint',
+  explain: (f) => ({
+    nb: 'x', nn: 'x',
+    pedagogy: {
+      summary:     { nb: 'NB summary', en: '' },
+      explanation: { nb: 'NB explanation', en: 'EN explanation' }
+    }
+  }),
+  check() { return []; },
+};
+const host = typeof self !== 'undefined' ? self : globalThis;
+host.__lexiSpellRules = host.__lexiSpellRules || [];
+host.__lexiSpellRules.push(rule);
+if (typeof module !== 'undefined' && module.exports) module.exports = rule;
+`;
+
+// (c) pedagogy.examples[0] missing `sentence` — gate must fire PEDAGOGY_MALFORMED.
+const SCRATCH_BODY_PEDAGOGY_BAD_EXAMPLE = `'use strict';
+// Test scratch — DO NOT SHIP. Phase 32-01 negative case.
+const rule = {
+  id: 'scratch',
+  languages: ['fr'],
+  priority: 99,
+  severity: 'hint',
+  explain: (f) => ({
+    nb: 'x', nn: 'x',
+    pedagogy: {
+      summary:     { nb: 'NB', en: 'EN' },
+      explanation: { nb: 'NB explanation' },
+      examples: [
+        { translation: { nb: 'x', en: 'x' } }
+      ]
+    }
+  }),
+  check() { return []; },
+};
+const host = typeof self !== 'undefined' ? self : globalThis;
+host.__lexiSpellRules = host.__lexiSpellRules || [];
+host.__lexiSpellRules.push(rule);
+if (typeof module !== 'undefined' && module.exports) module.exports = rule;
+`;
+
+function runGateWithScratchGeneric() {
+  const gateSrc = fs.readFileSync(GATE, 'utf8');
+  const scratchRel = path.relative(ROOT, SCRATCH);
+  const injected = gateSrc.replace(
+    /const TARGETS = \[[\s\S]*?\];/,
+    "const TARGETS = ['" + scratchRel + "'];"
+  );
+  const pinned = injected.replace(
+    /const ROOT = path\.join\(__dirname, '\.\.'\);/,
+    "const ROOT = " + JSON.stringify(ROOT) + ";"
+  );
+  const res = spawnSync(process.execPath, ['-e', pinned], { cwd: ROOT, encoding: 'utf8' });
+  return { status: res.status, stderr: res.stderr, stdout: res.stdout };
+}
+
+// Step 4: Plant a well-formed pedagogy block. Gate MUST pass.
+if (fs.existsSync(SCRATCH)) fs.unlinkSync(SCRATCH);
+fs.writeFileSync(SCRATCH, SCRATCH_BODY_PEDAGOGY_OK, 'utf8');
+const pedagogyOkRun = runGateWithScratchGeneric();
+if (pedagogyOkRun.status !== 0) {
+  console.error('FAIL: gate flagged a well-formed pedagogy scratch — gate is too strict for Phase 32-01.');
+  console.error('  exit status:', pedagogyOkRun.status);
+  console.error('  stderr:', pedagogyOkRun.stderr.slice(0, 600));
+  console.error('  stdout:', pedagogyOkRun.stdout.slice(0, 600));
+  cleanup();
+  process.exit(1);
+}
+
+// Step 5: Plant an empty pedagogy.summary.en. Gate MUST fire PEDAGOGY_MALFORMED.
+if (fs.existsSync(SCRATCH)) fs.unlinkSync(SCRATCH);
+fs.writeFileSync(SCRATCH, SCRATCH_BODY_PEDAGOGY_EMPTY_EN, 'utf8');
+const pedagogyEmptyRun = runGateWithScratchGeneric();
+const emptyEnDetected = (pedagogyEmptyRun.status === 1) && (
+  pedagogyEmptyRun.stderr.includes('PEDAGOGY_MALFORMED') &&
+  pedagogyEmptyRun.stderr.includes('summary.en')
+);
+if (!emptyEnDetected) {
+  console.error('FAIL: gate did not flag the empty pedagogy.summary.en scratch.');
+  console.error('  exit status:', pedagogyEmptyRun.status);
+  console.error('  stderr:', pedagogyEmptyRun.stderr.slice(0, 600));
+  console.error('  stdout:', pedagogyEmptyRun.stdout.slice(0, 600));
+  console.error('  Gate may be missing pedagogy.summary.en validation.');
+  cleanup();
+  process.exit(1);
+}
+
+// Step 6: Plant pedagogy.examples[0] missing `sentence`. Gate MUST fire PEDAGOGY_MALFORMED.
+if (fs.existsSync(SCRATCH)) fs.unlinkSync(SCRATCH);
+fs.writeFileSync(SCRATCH, SCRATCH_BODY_PEDAGOGY_BAD_EXAMPLE, 'utf8');
+const pedagogyExRun = runGateWithScratchGeneric();
+const badExDetected = (pedagogyExRun.status === 1) && (
+  pedagogyExRun.stderr.includes('PEDAGOGY_MALFORMED') &&
+  pedagogyExRun.stderr.includes('sentence')
+);
+if (!badExDetected) {
+  console.error('FAIL: gate did not flag the malformed pedagogy.examples[0] scratch.');
+  console.error('  exit status:', pedagogyExRun.status);
+  console.error('  stderr:', pedagogyExRun.stderr.slice(0, 600));
+  console.error('  stdout:', pedagogyExRun.stdout.slice(0, 600));
+  console.error('  Gate may be missing pedagogy.examples[i].sentence validation.');
+  cleanup();
+  process.exit(1);
+}
+
 cleanup(); // Always clean up before the final assertion.
 
-// Step 4: Confirm scratch is gone on disk.
+// Step 7: Confirm scratch is gone on disk.
 if (fs.existsSync(SCRATCH)) {
   console.error('FAIL: scratch file still on disk after cleanup');
   process.exit(1);
 }
 
-console.log('PASS: self-test confirms gate correctly distinguishes broken-explain (exit 1), severity-missing (exit 1), and well-formed (exit 0) shapes.');
+console.log('PASS: self-test confirms gate correctly distinguishes broken-explain (exit 1), severity-missing (exit 1), well-formed (exit 0), well-formed-pedagogy (exit 0), empty-pedagogy.summary.en (exit 1), and malformed-example (exit 1).');
 process.exit(0);
