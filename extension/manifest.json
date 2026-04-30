@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Leksihjelp",
-  "version": "2.9.3",
+  "version": "2.9.4",
   "description": "Ordbok, stavekontroll og uttale for norske elever — tysk, spansk, fransk, engelsk, bokmål og nynorsk.",
   "permissions": [
     "contextMenus",

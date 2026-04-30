@@ -51,9 +51,11 @@
     severity: 'warning',
     explain: function (finding) {
       const prefix = finding.prefix || '';
+      const stem = finding.stem || '';
+      const split = stem + ' … ' + prefix;
       return {
-        nb: 'I tyske hovedsetninger skal delbare verb splittes. Skriv <em>' + escapeHtml(finding.fix) + '</em> — prefikset <em>' + escapeHtml(prefix) + '</em> flyttes til slutten av setningen.',
-        nn: 'I tyske hovudsetningar skal delbare verb splittast. Skriv <em>' + escapeHtml(finding.fix) + '</em> — prefikset <em>' + escapeHtml(prefix) + '</em> flyttast til slutten av setninga.',
+        nb: 'I tyske hovedsetninger skal delbare verb splittes. Vurder å skille <em>' + escapeHtml(finding.original) + '</em> i <em>' + escapeHtml(split) + '</em> — prefikset <em>' + escapeHtml(prefix) + '</em> hører til slutten av setningen.',
+        nn: 'I tyske hovudsetningar skal delbare verb splittast. Vurder å skilje <em>' + escapeHtml(finding.original) + '</em> i <em>' + escapeHtml(split) + '</em> — prefikset <em>' + escapeHtml(prefix) + '</em> høyrer til slutten av setninga.',
       };
     },
     check(ctx) {

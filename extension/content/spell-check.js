@@ -561,7 +561,7 @@
         <div class="lh-spell-suggestions">${rowsHtml}${visFlereHtml}</div>
         <div class="lh-spell-actions">
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
-          <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
+          <button type="button" class="lh-spell-btn lh-spell-report" title="Send beskjed til oss om at Leksihjelp tar feil her \u2014 vi bruker rapportene til \u00e5 forbedre stavekontrollen.">\u26a0 Rapporter feil</button>
         </div>
         ${finding.pedagogy ? `<button type="button" class="lh-spell-laer-mer-btn" aria-expanded="false">${escapeHtml(t('laer_mer_button'))}</button><div class="lh-spell-pedagogy-panel" hidden></div>` : ''}
       `;
@@ -618,7 +618,7 @@
         <div class="lh-spell-actions">
           ${fixBtnHtml}
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
-          <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
+          <button type="button" class="lh-spell-btn lh-spell-report" title="Send beskjed til oss om at Leksihjelp tar feil her \u2014 vi bruker rapportene til \u00e5 forbedre stavekontrollen.">\u26a0 Rapporter feil</button>
         </div>
         ${finding.pedagogy ? `<button type="button" class="lh-spell-laer-mer-btn" aria-expanded="false">${escapeHtml(t('laer_mer_button'))}</button><div class="lh-spell-pedagogy-panel" hidden></div>` : ''}
       `;
@@ -679,7 +679,7 @@
           language: lang,
           url: window.location.href,
         }).then(ok => {
-          reportBtn.textContent = ok ? '✓ Sendt' : '✗ Feil';
+          reportBtn.textContent = ok ? '✓ Sendt — takk!' : '✗ Kunne ikke sendes';
           setTimeout(() => {
             dismissed.add(dismissKey(finding));
             pendingAdvanceIdx = activePopoverIdx;

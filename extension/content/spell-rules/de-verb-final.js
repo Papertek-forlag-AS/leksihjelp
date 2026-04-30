@@ -52,8 +52,8 @@
     severity: 'warning',
     explain: function (finding) {
       return {
-        nb: 'I tyske bisetninger skal det bøyde verbet stå til slutt — flytt <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetningen.',
-        nn: 'I tyske bisetningar skal det bøygde verbet stå til slutt — flytt <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetningen.',
+        nb: 'I tyske bisetninger skal det bøyde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetningen.',
+        nn: 'I tyske bisetningar skal det bøygde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetninga.',
       };
     },
     check(ctx) {
