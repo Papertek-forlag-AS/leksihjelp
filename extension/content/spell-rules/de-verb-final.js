@@ -52,8 +52,8 @@
     severity: 'warning',
     explain: function (finding) {
       return {
-        nb: 'I tyske bisetninger skal det bøyde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetningen.',
-        nn: 'I tyske bisetningar skal det bøygde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av bisetninga.',
+        nb: 'I tyske leddsetninger skal det bøyde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av leddsetningen.',
+        nn: 'I tyske leddsetningar skal det bøygde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av leddsetninga.',
       };
     },
     check(ctx) {
@@ -154,7 +154,7 @@
             // only and edits manually.
             fix: verbTok.display,
             noAutoFix: true,
-            message: 'Verbet skal stå til slutt i bisetningen: "' + verbTok.display + '"',
+            message: 'Verbet skal stå til slutt i leddsetningen: "' + verbTok.display + '"',
             severity: 'warning',
           });
 

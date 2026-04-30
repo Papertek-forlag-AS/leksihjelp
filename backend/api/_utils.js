@@ -5,13 +5,17 @@
 
 // ── CORS ──
 // Chrome extensions send Origin: chrome-extension://<id>
-// We allow extension origins + localhost for dev.
+// We allow extension origins + localhost for dev + downstream embedded
+// consumers (lockdown webapp, future skriveokt-zero) so their chrome shims
+// can route /api/report (and any future cross-origin endpoint) through.
 const ALLOWED_ORIGIN_PATTERNS = [
   /^chrome-extension:\/\//,
   /^moz-extension:\/\//,         // Firefox (future-proofing)
   /^http:\/\/localhost(:\d+)?$/,  // Local development
   /^https:\/\/leksihjelp\.vercel\.app$/,  // Vercel deployment
-  /^https:\/\/leksihjelp\.no$/            // Production domain
+  /^https:\/\/leksihjelp\.no$/,           // Production domain
+  /^https:\/\/stb-lockdown\.app$/,        // Lockdown staging (downstream consumer)
+  /^https:\/\/papertek\.app$/             // Lockdown production (downstream consumer)
 ];
 
 export function getAllowedOrigin(req) {
