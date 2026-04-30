@@ -39,9 +39,10 @@
     id: 'nn_passiv_s',
     languages: ['nn'],
     priority: 25,
+    // exam-audit 33-03: stays safe=false — Cross-token passive-s detection; multi-token reasoning, not single-form lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (nb-nn-passiv-s); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (nb-nn-passiv-s) — Cross-token passive-s detection; multi-token reasoning, not single-form lookup",
       category: "grammar-lookup",
     },
     severity: 'error',

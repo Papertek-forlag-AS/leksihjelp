@@ -25,8 +25,8 @@
     languages: ['fr'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (fr-grammar); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (fr-grammar) — Chrome native parity confirmed in 33-03 audit: FR grammar typo bank — single-token lookup against curated form list",
       category: "grammar-lookup",
     },
     severity: 'error',

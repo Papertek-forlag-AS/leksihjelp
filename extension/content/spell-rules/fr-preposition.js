@@ -26,8 +26,8 @@
     languages: ['fr'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (fr-preposition); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (fr-preposition) — Chrome native parity confirmed in 33-03 audit: FR preposition swap is single-token lookup; no multi-token edit",
       category: "grammar-lookup",
     },
     severity: 'error',

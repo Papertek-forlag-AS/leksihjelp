@@ -25,8 +25,8 @@
     languages: ['fr', 'es', 'de'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (universal-agreement); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (universal-agreement) — Chrome native parity confirmed in 33-03 audit: Universal agreement check is lookup against agreement maps; single-token suggestion",
       category: "grammar-lookup",
     },
     severity: 'error',

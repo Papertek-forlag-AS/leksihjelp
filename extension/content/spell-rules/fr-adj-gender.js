@@ -133,8 +133,8 @@
     languages: ['fr'],
     priority: 16,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (fr-adj-gender); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (fr-adj-gender) — Chrome native parity confirmed in 33-03 audit: FR adjective gender lookup; single-token feminine/masculine form swap",
       category: "grammar-lookup",
     },
     severity: 'warning',

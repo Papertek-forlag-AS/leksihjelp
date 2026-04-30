@@ -105,9 +105,10 @@
     id: 'fr-pp-agreement',
     languages: ['fr'],
     priority: 72,
+    // exam-audit 33-03: stays safe=false — Past-participle agreement requires multi-token + gender/number context; not single-token lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (fr-pp-agreement); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (fr-pp-agreement) — Past-participle agreement requires multi-token + gender/number context; not single-token lookup",
       category: "grammar-lookup",
     },
     severity: 'hint',

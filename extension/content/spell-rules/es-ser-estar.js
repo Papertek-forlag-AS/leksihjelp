@@ -81,9 +81,10 @@
     id: 'es-ser-estar',
     languages: ['es'],
     priority: 50,
+    // exam-audit 33-03: stays safe=false — Ser/estar choice is semantic + context dependent; not single-token lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-ser-estar); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-ser-estar) — Ser/estar choice is semantic + context dependent; not single-token lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

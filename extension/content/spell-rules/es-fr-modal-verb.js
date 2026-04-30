@@ -31,9 +31,10 @@
     id: 'modal_form',
     languages: ['es', 'fr'],
     priority: 20,
+    // exam-audit 33-03: stays safe=false — Multi-token modal+infinitive rewrite across ES/FR; syntactic
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-fr-modal-verb); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-fr-modal-verb) — Multi-token modal+infinitive rewrite across ES/FR; syntactic",
       category: "grammar-lookup",
     },
     severity: 'error',

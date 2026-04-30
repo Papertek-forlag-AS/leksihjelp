@@ -43,9 +43,10 @@
     id: 'de-separable-verb',
     languages: ['de'],
     priority: 69,
+    // exam-audit 33-03: stays safe=false — Multi-token separable-prefix reattachment; syntactic edit beyond Chrome parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (de-separable-verb); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (de-separable-verb) — Multi-token separable-prefix reattachment; syntactic edit beyond Chrome parity",
       category: "grammar-lookup",
     },
     severity: 'warning',

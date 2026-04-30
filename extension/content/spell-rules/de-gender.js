@@ -35,8 +35,8 @@
     languages: ['de'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (de-gender); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (de-gender) — Chrome native parity confirmed in 33-03 audit: DE gender lookup against noun gender map; single-token article suggestion",
       category: "grammar-lookup",
     },
     severity: 'error',

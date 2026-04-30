@@ -48,9 +48,10 @@
     id: 'nb-v2',
     languages: ['nb', 'nn'],
     priority: 65,
+    // exam-audit 33-03: stays safe=false — Multi-token V2 word-order analysis; syntactic, not lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (nb-v2); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (nb-v2) — Multi-token V2 word-order analysis; syntactic, not lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

@@ -90,9 +90,10 @@
     kind: 'document',
     languages: ['fr'],
     priority: 202,
+    // exam-audit 33-03: stays safe=false — Doc-drift detection: cross-sentence tu/vous register consistency; multi-sentence reasoning
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (doc-drift-fr-address); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (doc-drift-fr-address) — Doc-drift detection: cross-sentence tu/vous register consistency; multi-sentence reasoning",
       category: "grammar-lookup",
     },
     severity: 'warning',

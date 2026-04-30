@@ -82,9 +82,10 @@
     id: 'es-imperfecto-hint',
     languages: ['es'],
     priority: 65,
+    // exam-audit 33-03: stays safe=false — Pedagogy hint that teaches imperfecto vs preterito aspect; not a single-token correction
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-imperfecto-hint); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-imperfecto-hint) — Pedagogy hint that teaches imperfecto vs preterito aspect; not a single-token correction",
       category: "grammar-lookup",
     },
     severity: 'hint',

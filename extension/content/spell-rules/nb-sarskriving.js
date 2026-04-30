@@ -62,8 +62,8 @@
     languages: ['nb', 'nn'],
     priority: 30,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (nb-sarskriving); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (nb-sarskriving) — Chrome native parity confirmed in 33-03 audit: NB särskrivning split-compound lookup; single-token rejoin suggestion",
       category: "grammar-lookup",
     },
     severity: 'error',

@@ -50,6 +50,7 @@
     languages: ['fr'],
     priority: 65,                   // P3 hint band (mirrors es-imperfecto-hint)
     severity: 'hint',
+    // exam-audit 33-03: stays safe=false — Lær mer pedagogy popover (aspect_choice) — teaches rather than corrects; exceeds Chrome parity
     exam: {
       safe: false,
       reason:

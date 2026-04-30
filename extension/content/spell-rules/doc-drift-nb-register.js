@@ -46,9 +46,10 @@
     kind: 'document',
     languages: ['nb'],
     priority: 203,
+    // exam-audit 33-03: stays safe=false — Doc-drift detection: register-consistency across whole document
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (doc-drift-nb-register); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (doc-drift-nb-register) — Doc-drift detection: register-consistency across whole document",
       category: "grammar-lookup",
     },
     severity: 'warning',

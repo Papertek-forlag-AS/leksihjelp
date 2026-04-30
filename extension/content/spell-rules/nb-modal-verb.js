@@ -34,8 +34,8 @@
     languages: ['nb', 'nn'],
     priority: 20,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (nb-modal-verb); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (nb-modal-verb) — Chrome native parity confirmed in 33-03 audit: NB modal verb form lookup against irregular-form list; single-token replacement",
       category: "grammar-lookup",
     },
     severity: 'error',

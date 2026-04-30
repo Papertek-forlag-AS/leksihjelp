@@ -83,9 +83,10 @@
     id: 'es-personal-a',
     languages: ['es'],
     priority: 55,
+    // exam-audit 33-03: stays safe=false — Insertion of "a" before animate direct object; multi-token edit beyond Chrome parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-personal-a); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-personal-a) — Insertion of personal 'a' before animate direct object; multi-token edit beyond Chrome parity",
       category: "grammar-lookup",
     },
     severity: 'warning',

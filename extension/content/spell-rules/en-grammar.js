@@ -28,8 +28,8 @@
     languages: ['en'],
     priority: 20,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (en-grammar); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (en-grammar) — Chrome native parity confirmed in 33-03 audit: EN grammar typo bank — single-token lookup against curated form list",
       category: "grammar-lookup",
     },
     severity: 'error',

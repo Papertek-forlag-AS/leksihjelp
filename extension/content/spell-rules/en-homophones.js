@@ -34,8 +34,8 @@
     languages: ['en'],
     priority: 40,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (en-homophones); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (en-homophones) — Chrome native parity confirmed in 33-03 audit: EN homophone bank — single-token lookup; suggestion is one-word swap",
       category: "grammar-lookup",
     },
     severity: 'error',

@@ -51,8 +51,8 @@
     languages: ['fr'],
     priority: 14,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (fr-elision); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (fr-elision) — Chrome native parity confirmed in 33-03 audit: FR elision (le→l') is single-token lookup against vowel-initial words",
       category: "grammar-lookup",
     },
     severity: 'error',

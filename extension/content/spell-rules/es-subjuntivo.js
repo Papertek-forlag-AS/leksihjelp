@@ -70,9 +70,10 @@
     id: 'es-subjuntivo',
     languages: ['es'],
     priority: 60,
+    // exam-audit 33-03: stays safe=false — Subjuntivo mood selection requires trigger-clause analysis; multi-token reasoning
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-subjuntivo); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-subjuntivo) — Subjuntivo mood selection requires trigger-clause analysis; multi-token reasoning",
       category: "grammar-lookup",
     },
     severity: 'warning',

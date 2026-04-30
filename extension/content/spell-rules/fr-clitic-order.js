@@ -76,9 +76,10 @@
     id: 'fr-clitic-order',
     languages: ['fr'],
     priority: 60,
+    // exam-audit 33-03: stays safe=false — Multi-token clitic-pronoun reorder; syntactic, not lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (fr-clitic-order); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (fr-clitic-order) — Multi-token clitic-pronoun reorder; syntactic, not lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

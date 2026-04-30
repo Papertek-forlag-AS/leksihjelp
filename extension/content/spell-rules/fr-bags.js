@@ -52,9 +52,10 @@
     id: 'fr-bags',
     languages: ['fr'],
     priority: 68,
+    // exam-audit 33-03: stays safe=false — Multi-token BAGS adjective placement (before/after noun); syntactic edit
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (fr-bags); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (fr-bags) — Multi-token BAGS adjective placement (before/after noun); syntactic edit",
       category: "grammar-lookup",
     },
     severity: 'hint',

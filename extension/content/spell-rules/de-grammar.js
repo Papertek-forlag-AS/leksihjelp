@@ -17,8 +17,8 @@
     languages: ['de'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (de-grammar); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (de-grammar) — Chrome native parity confirmed in 33-03 audit: DE grammar typo bank — single-token lookup against curated form list",
       category: "grammar-lookup",
     },
     severity: 'error',

@@ -46,8 +46,8 @@
     languages: ['nb', 'nn'],
     priority: 71,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (nb-compound-gender); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (nb-compound-gender) — Chrome native parity confirmed in 33-03 audit: NB compound gender derived via lookup against gender map; single-token suggestion",
       category: "grammar-lookup",
     },
     severity: 'warning',

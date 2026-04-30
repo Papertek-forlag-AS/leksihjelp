@@ -95,9 +95,10 @@
     id: 'de-prep-case',
     languages: ['de'],
     priority: 68,
+    // exam-audit 33-03: stays safe=false — Lær mer pedagogy popover (case explanation) exceeds Chrome native parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (de-prep-case); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (de-prep-case) — Lær mer pedagogy popover (case explanation) exceeds Chrome native parity",
       category: "grammar-lookup",
     },
     severity: 'warning',

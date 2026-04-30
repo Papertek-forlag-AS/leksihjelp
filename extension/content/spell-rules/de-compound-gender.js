@@ -69,8 +69,8 @@
     languages: ['de'],
     priority: 71,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (de-compound-gender); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (de-compound-gender) — Chrome native parity confirmed in 33-03 audit: DE compound gender derived via head-noun lookup; single-token article suggestion",
       category: "grammar-lookup",
     },
     severity: 'warning',

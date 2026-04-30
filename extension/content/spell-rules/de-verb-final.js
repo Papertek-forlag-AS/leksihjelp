@@ -44,9 +44,10 @@
     id: 'de-verb-final',
     languages: ['de'],
     priority: 67,
+    // exam-audit 33-03: stays safe=false — Multi-token subordinate-clause verb-final rewrite; syntactic, not lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (de-verb-final); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (de-verb-final) — Multi-token subordinate-clause verb-final rewrite; syntactic, not lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

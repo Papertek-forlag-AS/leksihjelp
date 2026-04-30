@@ -113,9 +113,10 @@
     kind: 'document',
     languages: ['de'],
     priority: 201,
+    // exam-audit 33-03: stays safe=false — Doc-drift detection: cross-sentence du/Sie register consistency; multi-sentence reasoning
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (doc-drift-de-address); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (doc-drift-de-address) — Doc-drift detection: cross-sentence du/Sie register consistency; multi-sentence reasoning",
       category: "grammar-lookup",
     },
     severity: 'warning',

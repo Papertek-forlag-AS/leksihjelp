@@ -85,9 +85,10 @@
     id: 'de-perfekt-aux',
     languages: ['de'],
     priority: 70,
+    // exam-audit 33-03: stays safe=false — Auxiliary selection (haben/sein) is verb-class + context dependent; not lookup-shaped
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (de-perfekt-aux); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (de-perfekt-aux) — Auxiliary selection (haben/sein) is verb-class + context dependent; not lookup-shaped",
       category: "grammar-lookup",
     },
     severity: 'warning',

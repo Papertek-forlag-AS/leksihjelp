@@ -18,8 +18,8 @@
     languages: ['es'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (es-coordination); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (es-coordination) — Chrome native parity confirmed in 33-03 audit: ES y/e o/u coordinator swap by next-word phonology; single-token lookup",
       category: "grammar-lookup",
     },
     severity: 'error',

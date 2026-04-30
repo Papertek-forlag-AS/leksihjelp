@@ -84,8 +84,8 @@
     languages: ['en'],
     priority: 18,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (en-word-family); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (en-word-family) — Chrome native parity confirmed in 33-03 audit: EN word-family typo bank — single-token lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

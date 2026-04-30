@@ -134,9 +134,10 @@
     id: 'es-por-para',
     languages: ['es'],
     priority: 50,
+    // exam-audit 33-03: stays safe=false — Lær mer pedagogy popover (por/para semantic categories) exceeds Chrome native parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-por-para); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-por-para) — Lær mer pedagogy popover (por/para semantic categories) exceeds Chrome native parity",
       category: "grammar-lookup",
     },
     severity: 'warning',

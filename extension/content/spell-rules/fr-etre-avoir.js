@@ -161,9 +161,10 @@
     id: 'fr-etre-avoir',
     languages: ['fr'],
     priority: 70,
+    // exam-audit 33-03: stays safe=false — Auxiliary selection (être/avoir) is verb-class + context dependent; not single-token lookup
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (fr-etre-avoir); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (fr-etre-avoir) — Auxiliary selection (être/avoir) is verb-class + context dependent; not single-token lookup",
       category: "grammar-lookup",
     },
     severity: 'warning',

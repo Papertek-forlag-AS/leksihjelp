@@ -38,8 +38,8 @@
     languages: ['en'],
     priority: 17,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (en-morphology); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (en-morphology) — Chrome native parity confirmed in 33-03 audit: EN morphology typo bank — single-token lookup against irregular forms",
       category: "grammar-lookup",
     },
     severity: 'warning',

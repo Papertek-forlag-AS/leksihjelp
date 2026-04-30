@@ -68,8 +68,8 @@
     languages: ['nb', 'nn'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (nb-aa-og); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (nb-aa-og) — Chrome native parity confirmed in 33-03 audit: NB å/og confusion is single-token typo lookup; Chrome native flags neither but fix is single-token",
       category: "grammar-lookup",
     },
     severity: 'error',

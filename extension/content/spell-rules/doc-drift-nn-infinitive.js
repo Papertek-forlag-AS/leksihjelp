@@ -33,9 +33,10 @@
     kind: 'document',
     languages: ['nn'],
     priority: 204,
+    // exam-audit 33-03: stays safe=false — Doc-drift detection: e/a-infinitive consistency across whole document
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (doc-drift-nn-infinitive); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (doc-drift-nn-infinitive) — Doc-drift detection: e/a-infinitive consistency across whole document",
       category: "grammar-lookup",
     },
     severity: 'warning',

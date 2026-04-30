@@ -66,9 +66,10 @@
     id: 'de-v2',
     languages: ['de'],
     priority: 66,
+    // exam-audit 33-03: stays safe=false — Multi-token V2 word-order rewrite; Chrome native spellcheck does not analyse syntax
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (de-v2); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (de-v2) — Multi-token V2 word-order rewrite; Chrome native spellcheck does not analyse syntax",
       category: "grammar-lookup",
     },
     severity: 'warning',

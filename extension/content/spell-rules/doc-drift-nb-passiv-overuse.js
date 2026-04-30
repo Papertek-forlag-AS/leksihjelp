@@ -24,9 +24,10 @@
     kind: 'document',
     languages: ['nb'],
     priority: 205,
+    // exam-audit 33-03: stays safe=false — Doc-drift detection: passive-overuse heuristic across whole document
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (doc-drift-nb-passiv-overuse); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (doc-drift-nb-passiv-overuse) — Doc-drift detection: passive-overuse heuristic across whole document",
       category: "grammar-lookup",
     },
     severity: 'hint',

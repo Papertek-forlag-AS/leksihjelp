@@ -71,9 +71,10 @@
     id: 'fr-subjonctif',
     languages: ['fr'],
     priority: 60,
+    // exam-audit 33-03: stays safe=false — Subjonctif mood selection requires trigger-clause analysis; multi-token reasoning
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (fr-subjonctif); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (fr-subjonctif) — Subjonctif mood selection requires trigger-clause analysis; multi-token reasoning",
       category: "grammar-lookup",
     },
     severity: 'warning',

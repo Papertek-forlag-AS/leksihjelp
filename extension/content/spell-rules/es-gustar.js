@@ -90,9 +90,10 @@
     id: 'es-gustar',
     languages: ['es'],
     priority: 60,
+    // exam-audit 33-03: stays safe=false — Lær mer pedagogy popover (gustar-class verb_class) exceeds Chrome native parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-gustar); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-gustar) — Lær mer pedagogy popover (gustar-class verb_class) exceeds Chrome native parity",
       category: "grammar-lookup",
     },
     severity: 'warning',

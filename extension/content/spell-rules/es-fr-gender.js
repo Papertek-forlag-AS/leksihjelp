@@ -31,8 +31,8 @@
     languages: ['es', 'fr'],
     priority: 15,
     exam: {
-      safe: false,
-      reason: "Lookup-shaped grammar rule (es-fr-gender); pending browser-baseline research per CONTEXT.md",
+      safe: true,
+      reason: "Lookup-shaped grammar rule (es-fr-gender) — Chrome native parity confirmed in 33-03 audit: ES/FR article gender lookup against noun gender map; single-token article swap",
       category: "grammar-lookup",
     },
     severity: 'error',

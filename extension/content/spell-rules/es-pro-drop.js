@@ -49,9 +49,10 @@
     id: 'es-pro-drop',
     languages: ['es'],
     priority: 65,
+    // exam-audit 33-03: stays safe=false — Stateful cross-sentence pro-drop reasoning; exceeds Chrome native parity
     exam: {
       safe: false,
-      reason: "Lookup-shaped grammar rule (es-pro-drop); pending browser-baseline research per CONTEXT.md",
+      reason: "Stays safe=false (es-pro-drop) — Stateful cross-sentence pro-drop reasoning; exceeds Chrome native parity",
       category: "grammar-lookup",
     },
     severity: 'hint',
