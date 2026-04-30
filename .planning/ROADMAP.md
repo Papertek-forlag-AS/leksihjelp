@@ -94,7 +94,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [ ] **Phase 30: Shared Popup View Modules** — Eliminate drift between leksihjelp's extension popup and lockdown's stub sidepanel. Refactor extension popup into mountable view modules (dictionary/settings/pause/report) with explicit dep injection. Sync into lockdown. Replace stub sidepanel with thin host that excludes auth/payment/audio. Single source of truth in extension repo. Rolls up Phase 29-03 verification.
 - [x] **Phase 32: FR/ES Pedagogy (Lær mer)** — First cross-repo data-led pedagogy enrichment for non-DE languages. Three independent rule-units: (A) NEW FR `fr-aspect-hint` rule with passé-composé vs imparfait soft-hint + first FR pedagogy block; (B) ES `por`/`para` pedagogy migration from inline strings to data; (C) ES `gustar`-class pedagogy migration + extension from 1 verb to 10 verbs. Extends `check-explain-contract` with additive pedagogy-shape branch. All data lives in papertek-vocabulary; rules read structured pedagogy from synced JSON. (completed 2026-04-30)
 - [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
-- [ ] **Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)** — Close the v3.1 audit's integration gap and cross-phase tech debt: complete Phase 30-04 dict-state-builder extraction (lift sidepanel host's stub flattenBanks/BANK_TO_POS/genusToGender into a shared module, populate full inflection index + NB enrichment + language-switcher state-on-first-paint, fix direction toggle hardcoded to ES, fix B-blocker where exam profile hides ordbok tab); re-run lockdown `sync-leksihjelp.js` to mirror Phase 26/27 surfaces; browser-baseline research to flip `exam.safe=true` on lookup-shaped grammar rules that don't exceed Chrome native parity (Phase 27-01 default-conservative call)
+- [x] **Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)** — Close the v3.1 audit's integration gap and cross-phase tech debt: complete Phase 30-04 dict-state-builder extraction (lift sidepanel host's stub flattenBanks/BANK_TO_POS/genusToGender into a shared module, populate full inflection index + NB enrichment + language-switcher state-on-first-paint, fix direction toggle hardcoded to ES, fix B-blocker where exam profile hides ordbok tab); re-run lockdown `sync-leksihjelp.js` to mirror Phase 26/27 surfaces; browser-baseline research to flip `exam.safe=true` on lookup-shaped grammar rules that don't exceed Chrome native parity (Phase 27-01 default-conservative call)
 - [ ] **Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)** — Close all v3.1 deferred manual browser walkthroughs in one consolidated session: Phase 29-03/30 lockdown exam-mode E2E on staging-lockdown (lock mechanism + dictionary parity + audio-suppression + Phase 28 dev-button regression), 6 Phase 26 Lær mer DE walkthroughs (dativ badge colour, Wechsel pair rendering, Esc collapse, NN locale, EN locale, Tab nav state reset), 3 Phase 32 walkthroughs (FR aspect_choice / ES por-para / extended ES gustar-class verbs render correctly in the Lær mer panel)
 
 ## Phase Details
@@ -299,11 +299,11 @@ Plans:
   6. Version bumped (`extension/manifest.json` + `package.json` + `backend/public/index.html` aligned per the Release Workflow). Downstream consumers re-pin.
   7. All 15 release-workflow gates exit 0.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
-- [ ] 33-01-PLAN.md — Lift dict-state-builder into a shared module + remove sidepanel host stubs + fix direction toggle + fix exam-profile ordbok hide
-- [ ] 33-02-PLAN.md — Lockdown sync re-run + verify Phase 26/27 surfaces refreshed; document any diffs that need upstream fix
-- [ ] 33-03-PLAN.md — exam.safe browser-baseline audit + flip lookup-shaped rules + version bump + full gate sweep
+- [x] 33-01-PLAN.md — Lift dict-state-builder into a shared module + remove sidepanel host stubs + fix direction toggle + fix exam-profile ordbok hide
+- [x] 33-02-PLAN.md — Lockdown sync re-run + verify Phase 26/27 surfaces refreshed; document any diffs that need upstream fix
+- [x] 33-03-PLAN.md — exam.safe browser-baseline audit + flip lookup-shaped rules + version bump + full gate sweep
 
 ### Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)
 
