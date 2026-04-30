@@ -80,6 +80,7 @@
         "content/spell-rules/es-subjuntivo.js",
         "content/spell-rules/es-imperfecto-hint.js",
         "content/spell-rules/fr-subjonctif.js",
+        "content/spell-rules/fr-aspect-hint.js",
         "content/spell-rules/es-pro-drop.js",
         "content/spell-rules/es-gustar.js",
         "content/spell-rules/fr-clitic-order.js",

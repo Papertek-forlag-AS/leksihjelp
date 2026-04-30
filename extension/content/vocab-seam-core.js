@@ -423,6 +423,7 @@
                 // NB/NN uses form labels (infinitiv, presens, ...),
                 // EN uses English pronouns (I, you, he/she, ...)
                 for (const [key, form] of Object.entries(tenseData.former)) {
+                  if (key.startsWith('_')) continue;
                   // Only apply pronoun filtering for German/English if allowedPronouns is set
                   if ((lang === 'de' || lang === 'en') && allowedPronouns && !allowedPronouns.has(key)) continue;
 
@@ -438,6 +439,7 @@
                     : (TENSE_GROUP[tense] || null);
                   const formValues = Array.isArray(form) ? form : [form];
                   for (const formStr of formValues) {
+                    if (typeof formStr !== 'string' || !formStr) continue;
                     const formLower = formStr.toLowerCase();
                     wordList.push({
                       word: formLower,
@@ -942,10 +944,15 @@
     const frPresensToVerb = new Map();
     const frSubjonctifForms = new Map();
     const frSubjonctifDiffers = new Map();
+    // Phase 32-01: FR aspect indexes for fr-aspect-hint rule.
+    const frImparfaitToVerb = new Map();        // form (lc) → { inf, person }
+    const frPasseComposeParticiples = new Map(); // participle (lc) → { inf, aux }
+    const frAuxPresensForms = new Set();         // ai/as/a/avons/.../suis/...
 
     if (!raw || !raw.verbbank) {
       return { esPresensToVerb, esSubjuntivoForms, esImperfectoForms, esPreteritumToVerb,
-               frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers };
+               frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers,
+               frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms };
     }
 
     // Helper: strip accents for fuzzy matching (students often omit accents)
@@ -1035,11 +1042,58 @@
             frSubjonctifDiffers.set(inf + '|' + person, lc !== presForm);
           }
         }
+
+        // Phase 32-01: imparfait → frImparfaitToVerb
+        const imp = conj.imparfait;
+        if (imp && imp.former) {
+          for (const [person, form] of Object.entries(imp.former)) {
+            if (!form) continue;
+            const lc = form.toLowerCase();
+            if (!frImparfaitToVerb.has(lc)) frImparfaitToVerb.set(lc, { inf, person });
+            const stripped = stripAccents(lc);
+            if (stripped !== lc && !frImparfaitToVerb.has(stripped)) {
+              frImparfaitToVerb.set(stripped, { inf, person });
+            }
+          }
+        }
+
+        // Phase 32-01: passé composé → frPasseComposeParticiples + frAuxPresensForms
+        const pc = conj.passe_compose;
+        if (pc && pc.participle) {
+          const part = String(pc.participle).toLowerCase();
+          const aux = String(pc.auxiliary || 'avoir').toLowerCase();
+          if (!frPasseComposeParticiples.has(part)) {
+            frPasseComposeParticiples.set(part, { inf, aux });
+          }
+        }
+        // Pull avoir/être present-tense forms out of their passé-composé
+        // `former` map (which is "j'ai mangé" / "as mangé" / "a mangé" /
+        // "avons mangé" — the leading token is the auxiliary in present
+        // tense). Only do this for the avoir / être verbs themselves.
+        if (inf === 'avoir' || inf === 'être' || inf === 'etre') {
+          if (pres && pres.former) {
+            for (const form of Object.values(pres.former)) {
+              if (!form) continue;
+              const lc = String(form).toLowerCase();
+              frAuxPresensForms.add(lc);
+              const stripped = stripAccents(lc);
+              if (stripped !== lc) frAuxPresensForms.add(stripped);
+            }
+          }
+        }
       }
+      // Defensive fallback: avoir/être present-tense surface forms a student
+      // is likely to type. If the verbbank above already populated the Set,
+      // these are no-ops; if avoir/être entries are missing or shaped
+      // differently, the rule still fires.
+      const FR_AUX_DEFAULTS = ['ai', 'as', 'a', 'avons', 'avez', 'ont',
+                                'suis', 'es', 'est', 'sommes', 'êtes', 'etes', 'sont'];
+      for (const f of FR_AUX_DEFAULTS) frAuxPresensForms.add(f);
     }
 
     return { esPresensToVerb, esSubjuntivoForms, esImperfectoForms, esPreteritumToVerb,
-             frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers };
+             frPresensToVerb, frSubjonctifForms, frSubjonctifDiffers,
+             frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms };
   }
 
   // ── Phase 13: Build NN infinitive classification map from raw verbbank ──
@@ -1506,6 +1560,50 @@
       }
     }
 
+    // Phase 32-03: gustar-class membership read from verbbank verb_class
+    // markers (lexical-entry-driven). Empty Set for non-ES languages.
+    // Pedagogy block read from the shared grammarbank.pedagogy.gustar_class
+    // entry — rendered by the es-gustar rule's "Lær mer" surface.
+    const gustarClassVerbs = new Set();
+    let gustarPedagogy = null;
+    if (lang === 'es' && raw && raw.verbbank) {
+      for (const entry of Object.values(raw.verbbank)) {
+        if (entry && entry.verb_class === 'gustar-class' && entry.word) {
+          gustarClassVerbs.add(String(entry.word).toLowerCase());
+        }
+      }
+    }
+    if (lang === 'es' && raw && raw.grammarbank && raw.grammarbank.pedagogy) {
+      gustarPedagogy = raw.grammarbank.pedagogy.gustar_class || null;
+    }
+
+    // Phase 32-01: FR aspect-hint banks + shared pedagogy entry. Read from
+    // generalbank's three meta entries authored in papertek-vocabulary:
+    //   - aspect_passe_compose_adverbs (.values: array)
+    //   - aspect_imparfait_adverbs (.values: array)
+    //   - aspect_choice_pedagogy (.pedagogy: shared block)
+    // Empty / null for non-FR languages.
+    const frAspectAdverbs = { passeCompose: { single: new Set(), phrases: [] },
+                               imparfait:    { single: new Set(), phrases: [] } };
+    let frAspectPedagogy = null;
+    if (lang === 'fr' && raw && raw.generalbank) {
+      const pcEntry = raw.generalbank.aspect_passe_compose_adverbs;
+      const ipEntry = raw.generalbank.aspect_imparfait_adverbs;
+      const pdEntry = raw.generalbank.aspect_choice_pedagogy;
+      const collectAdverbs = (entry, dest) => {
+        if (!entry || !Array.isArray(entry.values)) return;
+        for (const v of entry.values) {
+          const s = String(v || '').toLowerCase().trim();
+          if (!s) continue;
+          if (s.includes(' ')) dest.phrases.push(s);
+          else dest.single.add(s);
+        }
+      };
+      collectAdverbs(pcEntry, frAspectAdverbs.passeCompose);
+      collectAdverbs(ipEntry, frAspectAdverbs.imparfait);
+      if (pdEntry && pdEntry.pedagogy) frAspectPedagogy = pdEntry.pedagogy;
+    }
+
     return {
       wordList,
       nounGenus,
@@ -1556,6 +1654,16 @@
       // surfaced by the de-prep-case rule. Empty Map for non-DE languages
       // (or when the bundled vocab pre-dates the pedagogy authoring pass).
       prepPedagogy,
+      // Phase 32-03: gustar-class membership + shared pedagogy entry.
+      // Empty Set / null for non-ES languages.
+      gustarClassVerbs,
+      gustarPedagogy,
+      // Phase 32-01: FR aspect-hint adverb banks + shared pedagogy block.
+      // Consumed by fr-aspect-hint rule. frAspectAdverbs has shape
+      // { passeCompose: { single: Set, phrases: Array }, imparfait: same }.
+      // Empty / null for non-FR languages.
+      frAspectAdverbs,
+      frAspectPedagogy,
       // Phase 16: compound decomposition bound to this index's nounGenus and lang.
       decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
       // Phase 17-05: strict decomposition using lemma-only genus map (no inflected forms).

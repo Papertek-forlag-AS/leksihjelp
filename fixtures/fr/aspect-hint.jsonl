@@ -1,0 +1,96 @@
+// FR aspect-hint fixtures (Phase 32-01).
+// Rule id: "fr-aspect-hint" — soft P3 hint that fires when a French past-tense
+// temporal adverb pairs with a verb in the wrong aspect (passé composé vs imparfait).
+// Adverb sets and pedagogy live in fr/generalbank.json (papertek-vocabulary).
+//
+// Generated alongside the rule; spans + suggestions captured directly from rule output.
+// Hand-curated corpus avoids tokens that trigger pre-existing FR typo-rule false-positives
+// (vos / leurs / ses / Autrefois / midi / mangions / mangiez / mangerai / mangeras).
+// Each line is filtered to be clean across ALL active rules — fixture is fully clean-corpus
+// for the negative cases and exact-match for the positive cases.
+{"id":"fr-aspect-pos-001","text":"Hier tu mangeais une pomme","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":16,"suggestion":"mangeais"}]}
+{"id":"fr-aspect-pos-002","text":"Hier il mangeait une pomme","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":16,"suggestion":"mangeait"}]}
+{"id":"fr-aspect-pos-003","text":"Hier ils mangeaient une pomme","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":9,"end":19,"suggestion":"mangeaient"}]}
+{"id":"fr-aspect-pos-004","text":"Soudain tu parlais doucement","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":18,"suggestion":"parlais"}]}
+{"id":"fr-aspect-pos-005","text":"Soudain il parlait doucement","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":18,"suggestion":"parlait"}]}
+{"id":"fr-aspect-pos-006","text":"Avant-hier nous regardions un film","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":26,"suggestion":"regardions"}]}
+{"id":"fr-aspect-pos-007","text":"Avant-hier vous regardiez un film","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":25,"suggestion":"regardiez"}]}
+{"id":"fr-aspect-pos-008","text":"Lundi dernier ils travaillaient ensemble","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":18,"end":31,"suggestion":"travaillaient"}]}
+{"id":"fr-aspect-pos-009","text":"Mardi dernier elle travaillait à la maison","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":19,"end":30,"suggestion":"travaillait"}]}
+{"id":"fr-aspect-pos-010","text":"Le mois dernier nous habitions à Paris","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":21,"end":30,"suggestion":"habitions"}]}
+{"id":"fr-aspect-pos-011","text":"Puis tu finissais ton repas","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":17,"suggestion":"finissais"}]}
+{"id":"fr-aspect-pos-012","text":"Ensuite il finissait son repas","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":20,"suggestion":"finissait"}]}
+{"id":"fr-aspect-pos-013","text":"Enfin elle dormait calmement","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":18,"suggestion":"dormait"}]}
+{"id":"fr-aspect-pos-014","text":"D'abord nous parlions de l'école","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":13,"end":21,"suggestion":"parlions"}]}
+{"id":"fr-aspect-pos-015","text":"Après tu écrivais une lettre","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":9,"end":17,"suggestion":"écrivais"}]}
+{"id":"fr-aspect-pos-016","text":"Pendant deux ans nous travaillions ensemble","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":22,"end":34,"suggestion":"travaillions"}]}
+{"id":"fr-aspect-pos-017","text":"Il y a trois jours il dormait chez nous","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":22,"end":29,"suggestion":"dormait"}]}
+{"id":"fr-aspect-pos-018","text":"Hier elle parlait avec son ami","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":10,"end":17,"suggestion":"parlait"}]}
+{"id":"fr-aspect-pos-019","text":"Hier il dormait sur le canapé","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":15,"suggestion":"dormait"}]}
+{"id":"fr-aspect-pos-020","text":"Soudain elle pleurait","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":13,"end":21,"suggestion":"pleurait"}]}
+{"id":"fr-aspect-pos-021","text":"Soudain ils riaient ensemble","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":12,"end":19,"suggestion":"riaient"}]}
+{"id":"fr-aspect-pos-022","text":"Avant-hier tu travaillais à la maison","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":14,"end":25,"suggestion":"travaillais"}]}
+{"id":"fr-aspect-pos-023","text":"Lundi dernier elle dormait chez nous","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":19,"end":26,"suggestion":"dormait"}]}
+{"id":"fr-aspect-pos-024","text":"Souvent tu as oublié ton livre","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":20,"suggestion":"as oublié"}]}
+{"id":"fr-aspect-pos-025","text":"Souvent il a oublié son livre","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":19,"suggestion":"a oublié"}]}
+{"id":"fr-aspect-pos-026","text":"Souvent nous avons oublié nos clés","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":13,"end":25,"suggestion":"avons oublié"}]}
+{"id":"fr-aspect-pos-027","text":"Souvent elle a oublié son sac","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":13,"end":21,"suggestion":"a oublié"}]}
+{"id":"fr-aspect-pos-028","text":"Tous les jours nous avons mangé une pomme","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":20,"end":31,"suggestion":"avons mangé"}]}
+{"id":"fr-aspect-pos-029","text":"Tous les jours il a mangé du pain","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":18,"end":25,"suggestion":"a mangé"}]}
+{"id":"fr-aspect-pos-030","text":"Tous les matins tu as bu du café","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":19,"end":24,"suggestion":"as bu"}]}
+{"id":"fr-aspect-pos-031","text":"Tous les soirs il a regardé la télé","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":18,"end":27,"suggestion":"a regardé"}]}
+{"id":"fr-aspect-pos-032","text":"Chaque été nous avons visité Paris","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":28,"suggestion":"avons visité"}]}
+{"id":"fr-aspect-pos-033","text":"Chaque jour ils ont travaillé ensemble","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":29,"suggestion":"ont travaillé"}]}
+{"id":"fr-aspect-pos-034","text":"Toujours nous avons travaillé ensemble","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":14,"end":29,"suggestion":"avons travaillé"}]}
+{"id":"fr-aspect-pos-035","text":"Parfois tu as oublié ton sac","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":20,"suggestion":"as oublié"}]}
+{"id":"fr-aspect-pos-036","text":"De temps en temps il a oublié son livre","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":21,"end":29,"suggestion":"a oublié"}]}
+{"id":"fr-aspect-pos-037","text":"D'habitude nous avons fini le travail","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":26,"suggestion":"avons fini"}]}
+{"id":"fr-aspect-pos-038","text":"À l'époque il a habité à Lyon","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":14,"end":22,"suggestion":"a habité"}]}
+{"id":"fr-aspect-pos-039","text":"Tandis que tu as parlé, il a écouté","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":14,"end":22,"suggestion":"as parlé"}]}
+{"id":"fr-aspect-pos-040","text":"En général nous avons mangé à la maison","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":27,"suggestion":"avons mangé"}]}
+{"id":"fr-aspect-pos-041","text":"Souvent il a parlé avec son ami","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":11,"end":18,"suggestion":"a parlé"}]}
+{"id":"fr-aspect-pos-042","text":"Tous les jours elle a chanté une chanson","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":20,"end":28,"suggestion":"a chanté"}]}
+{"id":"fr-aspect-pos-043","text":"Chaque matin tu as bu du café","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":16,"end":21,"suggestion":"as bu"}]}
+{"id":"fr-aspect-neg-001","text":"Hier tu as mangé une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-002","text":"Hier il a mangé une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-003","text":"Hier elle a parlé doucement","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-004","text":"Hier nous avons regardé un film","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-005","text":"Hier vous avez écrit une lettre","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-006","text":"Hier ils ont travaillé ensemble","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-007","text":"Soudain il a ouvert la porte","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-008","text":"Soudain elle a crié","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-009","text":"Avant-hier nous avons visité Paris","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-010","text":"Lundi dernier ils ont travaillé ensemble","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-011","text":"Le mois dernier nous avons habité à Paris","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-012","text":"Puis tu as fini ton repas","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-013","text":"Ensuite il a fini son repas","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-014","text":"Enfin elle a dormi calmement","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-015","text":"Pendant deux ans nous avons travaillé ensemble","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-016","text":"Il y a trois jours il a dormi chez nous","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-017","text":"Souvent tu mangeais une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-018","text":"Souvent il mangeait une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-019","text":"Tous les jours il mangeait une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-020","text":"Tous les matins tu buvais du café","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-021","text":"Tous les soirs il regardait la télé","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-022","text":"Chaque été nous habitions à Paris","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-023","text":"Chaque jour ils travaillaient ensemble","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-024","text":"Toujours il travaillait à la maison","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-025","text":"Parfois tu écrivais une lettre","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-026","text":"De temps en temps il dormait chez nous","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-027","text":"D'habitude vous travailliez ensemble","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-028","text":"À l'époque il habitait à Lyon","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-029","text":"Tandis que tu parlais, il écoutait","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-030","text":"Je mange une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-031","text":"Tu manges une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-032","text":"Il mange une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-033","text":"Nous mangeons une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-034","text":"Vous mangez une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-035","text":"Ils mangent une pomme","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-036","text":"Le chat dort sur le canapé","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-037","text":"Elle parle français","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-038","text":"Nous parlons au téléphone","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-039","text":"Tu écoutes la radio","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-040","text":"Il regarde la télé","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-041","text":"Hier elle a parlé avec son ami","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-042","text":"Souvent elle dormait chez nous","lang":"fr","expected":[]}
+{"id":"fr-aspect-neg-043","text":"Tous les jours il travaillait à la maison","lang":"fr","expected":[]}

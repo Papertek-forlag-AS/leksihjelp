@@ -979,6 +979,7 @@
 #lexi-spell-overlay .lh-spell-es-subjuntivo { background: #f59e0b; }  /* amber — P2 warn, Phase 11 MOOD-01 */
 #lexi-spell-overlay .lh-spell-es-imperfecto-hint { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 11 MOOD-02 */
 #lexi-spell-overlay .lh-spell-fr-subjonctif { background: #f59e0b; }  /* amber — P2 warn, Phase 11 MOOD-03 */
+#lexi-spell-overlay .lh-spell-fr-aspect-hint { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 32-01 */
 #lexi-spell-overlay .lh-spell-es-pro-drop { background: none; border-bottom: 2px dotted #94a3b8; }  /* P3 hint, Phase 12 PRON-01 */
 #lexi-spell-overlay .lh-spell-es-gustar { background: #f59e0b; }  /* amber — P2 warn, Phase 12 PRON-02 */
 #lexi-spell-overlay .lh-spell-fr-clitic-order { background: #f59e0b; }  /* amber — P2 warn, Phase 12 PRON-03 */
