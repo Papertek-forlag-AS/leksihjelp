@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: executing
-last_updated: "2026-04-30T19:10:00.000Z"
-last_activity: "2026-04-30 -- Plan 32-02 complete: ES por/para pedagogy migration to papertek-vocabulary lexicon. Cross-repo: papertek-vocabulary 84111f5c + leksihjelp 04e0573 (Task 1, data) + 279059f (Task 2, rule refactor + version bump 2.9.9 → 2.9.10). 50-case fixture lock held at P=R=F1=1.000. Plan-text deviation: followed Phase 26 finding.pedagogy contract over plan's <interfaces> proposal of explain()-returns-pedagogy. Pre-existing in-flight failures from sibling 32-01 / 32-03 work in es-gustar fixture + benchmark-coverage logged to deferred-items.md (out of scope for 32-02)."
+last_updated: "2026-04-30T19:25:00.000Z"
+last_activity: "2026-04-30 -- Plan 32-01 complete: FR aspect-hint rule + first FR pedagogy block. Cross-repo data in papertek-vocabulary (commit 17d848af) + 3 leksihjelp commits (8133a5f data sync, 7737210 rule + fixtures, 4b8db99 gate extension). check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy). 86 fixtures at P=R=F1=1.000. All 20 release gates green. Versions aligned at 2.9.11."
 progress:
   total_phases: 10
   completed_phases: 5
   total_plans: 24
-  completed_plans: 17
+  completed_plans: 19
 ---
 
 # Session State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Position
 
 **Milestone:** v3.3 Exam Mode
-**Phase:** 30 (Shared Popup Views) -- IN PROGRESS
-**Plan:** 30-04 next (30-01 + 30-02 + 30-03 complete; 30-04 lockdown sidepanel UX integration filed)
-**Status:** Staging UAT passed; ready to plan/execute 30-04
-**Last activity:** 2026-04-29 -- Plan 30-03 staging UAT complete (stb-lockdown.app). Five tactical UAT fixes shipped via cross-repo commits (popup-views.css generator, dictionary state population, vocab-adapter wrap, dark-mode dropped, freq-en silence). Plan 30-04 filed for shared-helper extraction + UX integration (single-source language picker, pinned Aa, click-rebind). Phase 31 filed (FR rule suite). Production deploy to papertek.app still deferred per user instruction. skriveokt-zero parity stays at deferred Phase 28.1, ordered AFTER Phase 31.
+**Phase:** 32 (FR/ES pedagogy) -- IN PROGRESS
+**Plan:** 32-03 next (32-01 + 32-02 complete; 32-03 ES gustar pedagogy migration + class extension)
+**Status:** Plan 32-01 complete (first FR pedagogy block + check-explain-contract pedagogy branch); ready to execute 32-03
+**Last activity:** 2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11.
 
-Progress: [████████░░] 75% (Phase 30 — 3 of 4 plans complete; 30-04 next)
+Progress: [████████░░] 79% (Plan 19 of 24 complete; Phase 32 — 2 of 3 plans complete; 32-03 next)
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [████████░░] 75% (Phase 30 — 3 of 4 plans comple
 | Phase 30 P01 | 50 | 3 tasks | 11 files |
 | Phase 30 P02 | 10 | 4 tasks | 8 files |
 | Phase 32-fr-es-pedagogy P02 | 12 | 2 tasks | 5 files |
+| Phase 32-fr-es-pedagogy P01 | 23 | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -91,6 +92,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 32-02]: ES pedagogy uses semantic_category: 'preposition' (no DE-style 'case' field); check-pedagogy-shape's case-validator doesn't reject because synthetic ctx ('durch die Schule') doesn't trigger es-por-para patterns. Gate exits informational-PASS.
 - [Phase 32-02]: Subtype keys mirror the rule's existing patternType discriminators verbatim (purpose / beneficiary / deadline / duration). Pedagogy lives on the *suggested-fix* preposition (para_prep carries purpose+beneficiary+deadline; por_prep carries duration).
 - [Phase 32-02]: Side-patched extension/data/es.json directly because deployed papertek-vocabulary Vercel API hadn't picked up the lexicon edit; documented as recognised future-sync no-op (same pattern as 32-03 chore commit b2a4be2).
+- [Phase 32]: 32-01: FR aspect-hint rule (P3 hint, P=R=F1=1.000, 86 fixtures) + first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary; check-explain-contract extended with optional pedagogy-shape branch + 3 paired scratch scenarios; version bumped 2.9.9 → 2.9.11
 
 ### Pending Todos
 
