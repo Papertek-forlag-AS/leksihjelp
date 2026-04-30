@@ -320,9 +320,9 @@ Plans:
   5. UAT findings either land as in-flight fixes during the session or are filed as discrete follow-up phases — no `human_needed` deferrals roll forward.
   6. VERIFICATION.md authored summarising the walk, with screenshots/notes per surface and a clear pass/fail per criterion.
 
-**Plans:** 0/1 plan (planned)
+**Plans:** 1 plan
 Plans:
-- [ ] 34-01-PLAN.md — Consolidated browser UAT walkthrough script + VERIFICATION.md authoring
+- [ ] 34-01-PLAN.md — Consolidated browser UAT walkthrough (lockdown exam-mode E2E + sidepanel dictionary parity + Phase 26 DE Lær mer + Phase 32 FR/ES pedagogy) + 34-VERIFICATION.md authoring with per-criterion pass/fail and finding dispositions
 
 ### Phase 32: FR/ES Pedagogy (Lær mer)
 
