@@ -96,3 +96,37 @@
 {"id":"es-gust-a60","text":"Te gustan los gatos.","expected":[],"comment":"te (dative) + gustan -> no flag"}
 {"id":"es-gust-a61","text":"Me interesa la clase.","expected":[],"comment":"me (dative) + interesa -> no flag"}
 {"id":"es-gust-a62","text":"Le encanta la clase.","expected":[],"comment":"le (dative) + encanta -> no flag"}
+# Phase 32-03: Extended verb-class detection (encantar/interesar/doler/sobrar/parecer/apetecer)
+{"id":"es-gust-ext-1","text":"El encanta los deportes.","expected":[{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"le encanta"}],"comment":"el + encanta without dative -> warn"}
+{"id":"es-gust-ext-2","text":"Ella encanta el chocolate.","expected":[{"rule_id":"es-gustar","start":5,"end":12,"suggestion":"le encanta"}],"comment":"ella + encanta without dative -> warn"}
+{"id":"es-gust-ext-3","text":"Yo encanto este libro.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"me encanto"}],"comment":"yo + encanto without dative -> warn (also pro-drop)"}
+{"id":"es-gust-ext-4","text":"Ellas encantan la fiesta.","expected":[{"rule_id":"es-gustar","start":6,"end":14,"suggestion":"les encantan"}],"comment":"ellas + encantan without dative -> warn"}
+{"id":"es-gust-ext-5","text":"Nosotros encanta el cine.","expected":[{"rule_id":"es-gustar","start":9,"end":16,"suggestion":"nos encanta"}],"comment":"nosotros + encanta without dative -> warn"}
+{"id":"es-gust-ext-6","text":"Tu encantas el postre.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":11,"suggestion":"te encantas"}],"comment":"tu + encantas without dative -> warn"}
+{"id":"es-gust-ext-7a","text":"Me encantan los perros.","expected":[],"comment":"me (dative) + encantan -> no flag"}
+{"id":"es-gust-ext-8a","text":"Le encanta la pelicula.","expected":[],"comment":"le (dative) + encanta -> no flag"}
+{"id":"es-gust-ext-9a","text":"Nos encanta el viaje.","expected":[],"comment":"nos (dative) + encanta -> no flag"}
+{"id":"es-gust-ext-10","text":"El interesa el arte.","expected":[{"rule_id":"es-gustar","start":3,"end":11,"suggestion":"le interesa"}],"comment":"el + interesa without dative -> warn"}
+{"id":"es-gust-ext-11","text":"Ella interesan los libros.","expected":[{"rule_id":"es-gustar","start":5,"end":14,"suggestion":"le interesan"}],"comment":"ella + interesan without dative -> warn"}
+{"id":"es-gust-ext-12","text":"Ellos interesan la historia.","expected":[{"rule_id":"es-gustar","start":6,"end":15,"suggestion":"les interesan"}],"comment":"ellos + interesan without dative -> warn"}
+{"id":"es-gust-ext-13","text":"Nosotros interesa la ciencia.","expected":[{"rule_id":"es-gustar","start":9,"end":17,"suggestion":"nos interesa"}],"comment":"nosotros + interesa without dative -> warn"}
+{"id":"es-gust-ext-14","text":"El no interesa nada.","expected":[{"rule_id":"es-gustar","start":6,"end":14,"suggestion":"le interesa"}],"comment":"el + no + interesa without dative -> warn"}
+{"id":"es-gust-ext-15a","text":"Me interesa la musica.","expected":[],"comment":"me (dative) + interesa -> no flag"}
+{"id":"es-gust-ext-16a","text":"Te interesan los deportes.","expected":[],"comment":"te (dative) + interesan -> no flag"}
+{"id":"es-gust-ext-17a","text":"A Juan le interesa el tema.","expected":[],"comment":"a Juan le (dative) + interesa -> no flag"}
+{"id":"es-gust-ext-18","text":"El duele la cabeza.","expected":[{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"le duele"}],"comment":"el + duele without dative -> warn"}
+{"id":"es-gust-ext-19","text":"Ella duelen los pies.","expected":[{"rule_id":"es-gustar","start":5,"end":11,"suggestion":"le duelen"}],"comment":"ella + duelen without dative -> warn"}
+{"id":"es-gust-ext-20","text":"Ellos duelen mucho.","expected":[{"rule_id":"es-gustar","start":6,"end":12,"suggestion":"les duelen"}],"comment":"ellos + duelen without dative -> warn"}
+{"id":"es-gust-ext-21","text":"Yo duelo bastante.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"me duelo"}],"comment":"yo + duelo without dative -> warn"}
+{"id":"es-gust-ext-22","text":"Tu dueles mucho.","expected":[{"rule_id":"es-pro-drop","start":0,"end":2,"suggestion":""},{"rule_id":"es-gustar","start":3,"end":9,"suggestion":"te dueles"}],"comment":"tu + dueles without dative -> warn"}
+{"id":"es-gust-ext-23a","text":"Me duele la cabeza.","expected":[],"comment":"me (dative) + duele -> no flag"}
+{"id":"es-gust-ext-24a","text":"Le duelen los pies.","expected":[],"comment":"le (dative) + duelen -> no flag"}
+{"id":"es-gust-ext-25a","text":"Nos duele todo.","expected":[],"comment":"nos (dative) + duele -> no flag"}
+{"id":"es-gust-ext-26","text":"El sobra dinero.","expected":[{"rule_id":"es-gustar","start":3,"end":8,"suggestion":"le sobra"}],"comment":"el + sobra without dative -> warn"}
+{"id":"es-gust-ext-27","text":"Ella sobran horas.","expected":[{"rule_id":"es-gustar","start":5,"end":11,"suggestion":"le sobran"}],"comment":"ella + sobran without dative -> warn"}
+{"id":"es-gust-ext-28a","text":"Me sobra tiempo.","expected":[],"comment":"me (dative) + sobra -> no flag"}
+{"id":"es-gust-ext-29a","text":"Les sobran euros.","expected":[],"comment":"les (dative) + sobran -> no flag"}
+{"id":"es-gust-ext-30","text":"Ella parece bien.","expected":[{"rule_id":"es-gustar","start":5,"end":11,"suggestion":"le parece"}],"comment":"ella + parece without dative -> warn"}
+{"id":"es-gust-ext-31a","text":"Nos parece bien.","expected":[],"comment":"nos (dative) + parece -> no flag"}
+{"id":"es-gust-ext-32","text":"El apetece un cafe.","expected":[{"rule_id":"es-gustar","start":3,"end":10,"suggestion":"le apetece"}],"comment":"el + apetece without dative -> warn"}
+{"id":"es-gust-ext-33a","text":"Me apetece salir.","expected":[],"comment":"me (dative) + apetece -> no flag"}

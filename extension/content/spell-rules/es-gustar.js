@@ -39,6 +39,17 @@
   // Tokens allowed between dative clitic and verb (negation).
   const NEGATION_WORDS = new Set(['no', 'nunca', 'tampoco', 'ya']);
 
+  // Phase 32-03: Spanish preposition/verb-form collisions. After gustar-class
+  // expanded to include `sobrar` (Phase 32-03), the preteritum form `sobré`
+  // accent-strips to `sobre` — which is also the very common preposition
+  // "about". Without this guard, "Pienso sobre mi familia" would flag `sobre`
+  // as a misconjugated gustar-class verb. Same risk for any future expansion:
+  // `bastar` would collide with no real preposition but `costar` → `costo`
+  // collides with the noun "costo" (none of these are gustar-class today).
+  // This list is the closed set of Spanish prepositions that surface-collide
+  // with gustar-class verb forms after accent-stripping.
+  const PREPOSITION_COLLISIONS = new Set(['sobre', 'a', 'de', 'en', 'con', 'por', 'para']);
+
   // Subject pronouns that precede gustar-class verbs in wrong SVO pattern.
   // Map from pronoun (lowercase accent-stripped) to the appropriate dative clitic.
   const PRONOUN_TO_CLITIC = {
@@ -56,13 +67,23 @@
     ustedes: 'les',
   };
 
-  // Lazy-init grammar tables
-  let _gustarVerbs = null;
-  function getGustarVerbs() {
-    if (_gustarVerbs) return _gustarVerbs;
-    const gt = host.__lexiGrammarTables || {};
-    _gustarVerbs = gt.ES_GUSTAR_CLASS_VERBS || new Set();
-    return _gustarVerbs;
+  // Phase 32-03: class membership + pedagogy now sourced from vocab.
+  //   - ctx.vocab.gustarClassVerbs is built from verb_class: "gustar-class"
+  //     markers on verbbank entries (lexical-entry-driven, not inline list).
+  //   - ctx.vocab.gustarPedagogy is the shared grammarbank.pedagogy.gustar_class
+  //     teaching block — surfaced via the "Lær mer" panel through explain().
+  //
+  // The pedagogy is cached at module scope on first check() call so explain()
+  // can read it without a ctx (the explain-contract release gate calls
+  // rule.explain(fakeFinding) outside any ctx). NOT attached to findings —
+  // gustar-class is not a case-prep, so it would fail check-pedagogy-shape's
+  // VALID_CASES validator. The "Lær mer" surface reads explain().pedagogy.
+  let _cachedPedagogy = null;
+  function getGustarVerbs(ctx) {
+    if (ctx && ctx.vocab && ctx.vocab.gustarClassVerbs && ctx.vocab.gustarClassVerbs.size) {
+      return ctx.vocab.gustarClassVerbs;
+    }
+    return new Set();
   }
 
   const rule = {
@@ -78,18 +99,35 @@
     explain: function (finding) {
       const original = finding.original || '';
       const fix = finding.fix || '';
-      return {
-        nb: 'Verbet <em>' + escapeHtml(original) + '</em> brukes med indirekte objekt (dativ) paa spansk: <em>' + escapeHtml(fix) + '</em>. Norsk bruker subjekt + verb, men spansk bruker dativ-klitikon (me/te/le/nos/os/les) + verb.',
-        nn: 'Verbet <em>' + escapeHtml(original) + '</em> blir brukt med indirekte objekt (dativ) paa spansk: <em>' + escapeHtml(fix) + '</em>. Norsk brukar subjekt + verb, men spansk brukar dativ-klitikon (me/te/le/nos/os/les) + verb.',
+      // Phase 32-03: pedagogy sourced from the module-level cache populated
+      // on first check() call. Returns {nb, nn} short strings for the dot-
+      // popover plus an optional `pedagogy` field for the "Lær mer" panel.
+      // When the cache is empty (gate test path before any check() call),
+      // we fall back to a summary baked from the inline catch-all string.
+      const ped = _cachedPedagogy;
+      const summaryNb = (ped && ped.summary && ped.summary.nb) || 'Gustar-klassen behandler tingen som subjekt og personen som dativ-klitikon (me/te/le/nos/os/les).';
+      const summaryNn = (ped && ped.summary && ped.summary.nn) || 'Gustar-klassen handsamar tingen som subjekt og personen som dativ-klitikon (me/te/le/nos/os/les).';
+      const out = {
+        nb: 'Verbet <em>' + escapeHtml(original) + '</em> brukes med indirekte objekt (dativ) paa spansk: <em>' + escapeHtml(fix) + '</em>. ' + summaryNb,
+        nn: 'Verbet <em>' + escapeHtml(original) + '</em> blir brukt med indirekte objekt (dativ) paa spansk: <em>' + escapeHtml(fix) + '</em>. ' + summaryNn,
         severity: 'warning',
       };
+      if (ped) out.pedagogy = ped;
+      return out;
     },
     check(ctx) {
       if (ctx.lang !== 'es') return [];
       if (!ctx.sentences || !tokensInSentence) return [];
 
-      const gustarVerbs = getGustarVerbs();
+      const gustarVerbs = getGustarVerbs(ctx);
       if (!gustarVerbs.size) return [];
+
+      // Phase 32-03: cache the shared pedagogy block on first run so explain()
+      // (called by the popover surface, sometimes outside any ctx) can render
+      // the "Lær mer" structured content without re-reading vocab.
+      if (!_cachedPedagogy && ctx.vocab && ctx.vocab.gustarPedagogy) {
+        _cachedPedagogy = ctx.vocab.gustarPedagogy;
+      }
 
       const presensToVerb = ctx.vocab && ctx.vocab.esPresensToVerb;
       const preteritumToVerb = ctx.vocab && ctx.vocab.esPreteritumToVerb;
@@ -105,6 +143,11 @@
         for (let i = range.start; i < range.end; i++) {
           const tokenWord = ctx.tokens[i].word; // lowercase
           const stripped = stripAccents(tokenWord);
+
+          // Phase 32-03: skip surface forms that collide with common Spanish
+          // prepositions. Prevents `sobre` (preposition) being misread as a
+          // sobrar-class verb form (sobré → sobre after accent-strip).
+          if (PREPOSITION_COLLISIONS.has(tokenWord) || PREPOSITION_COLLISIONS.has(stripped)) continue;
 
           // Check if this token is a conjugated form of a gustar-class verb
           let verbInfo = null;
