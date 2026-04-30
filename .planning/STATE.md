@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
-status: phase-complete
-last_updated: "2026-04-30T21:55:26.896Z"
-last_activity: "2026-04-30 -- Plan 33-03 complete. exam.safe audit: 22 flipped to true (NB/EN/DE/ES/FR single-token banks + gender/elision/contraction/coordination/agreement); 27 stayed with one-line audit comment (5 pedagogy / 11 multi-token / 5 doc-drift / 6 context aux/mood). Version 2.9.11 -> 2.9.12 across manifest+package+landing. All 24 release gates green; bundle 12.67/20 MiB; baseline 130/200 KB. Phase 33 / v3.1 cleanup shipped. Final ship: leksihjelp main + lockdown staging (beadf6b) pushed."
+status: planning
+last_updated: "2026-04-30T22:06:24.346Z"
+last_activity: "2026-04-30 -- Plan 33-03 complete. exam.safe audit: 22 lookup-shaped rules flipped to safe=true (NB/EN/DE/ES/FR single-token banks + gender/elision/contraction/coordination/agreement); 27 stayed with one-line audit comment (pedagogy / multi-token / doc-drift / context-dependent aux/mood). Version bumped 2.9.11 -> 2.9.12 across manifest.json + package.json + backend/public/index.html. All 24 release gates green (check-fixtures, check-explain-contract+test, check-rule-css-wiring+test, check-spellcheck-features, check-network-silence+test, check-exam-marker+test, check-popup-deps+test, check-bundle-size, check-baseline-bundle-size+test, check-benchmark-coverage+test, check-governance-data+test, check-pedagogy-shape+test, check-stateful-rule-invalidation+test, test:vocab-store/seam/popup-views/dict-state-builder). Bundle 12.67 MiB / 20 MiB cap. NB baseline 130 KB / 200 KB cap. Final ship step: leksihjelp main pushed; lockdown staging branch (beadf6b from 33-02) pushed."
 progress:
   total_phases: 12
   completed_phases: 7
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 **Milestone:** v3.1 Polish & Intelligence (cleanup phase)
 **Phase:** 33 (v3.1 cleanup) -- COMPLETE
 **Plan:** Phase 33 done (3/3 plans complete); next milestone work or close v3.1
-**Status:** Phase 33 complete; v3.1 cleanup shipped
+**Status:** Ready to plan
 **Last activity:** 2026-04-30 -- Plan 33-03 complete. exam.safe audit: 22 lookup-shaped rules flipped to safe=true (NB/EN/DE/ES/FR single-token banks + gender/elision/contraction/coordination/agreement); 27 stayed with one-line audit comment (pedagogy / multi-token / doc-drift / context-dependent aux/mood). Version bumped 2.9.11 -> 2.9.12 across manifest.json + package.json + backend/public/index.html. All 24 release gates green (check-fixtures, check-explain-contract+test, check-rule-css-wiring+test, check-spellcheck-features, check-network-silence+test, check-exam-marker+test, check-popup-deps+test, check-bundle-size, check-baseline-bundle-size+test, check-benchmark-coverage+test, check-governance-data+test, check-pedagogy-shape+test, check-stateful-rule-invalidation+test, test:vocab-store/seam/popup-views/dict-state-builder). Bundle 12.67 MiB / 20 MiB cap. NB baseline 130 KB / 200 KB cap. Final ship step: leksihjelp main pushed; lockdown staging branch (beadf6b from 33-02) pushed.
 
 Progress: [██████████] 100% (Phase 33 complete — 3/3 plans)
