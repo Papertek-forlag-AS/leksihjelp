@@ -19,7 +19,9 @@ const _STRINGS = {
     // ── Header ──
     pin_label: 'Fest',
     pin_title: 'Hold Leksihjelp åpen i eget vindu',
-    skriv_btn_title: 'Åpne skriveokt',
+    fest_onboarding_title: 'Fest Leksihjelp ved siden av nettsiden',
+    fest_onboarding_body: 'Trykk «Fest» øverst for å åpne ordboka i sidepanelet, så ligger den klar mens du leser og skriver — uten å lukke seg.',
+    skriv_btn_title: 'Åpne skriveokt — et privat skriveområde i nettleseren der teksten lagres lokalt på din maskin (ingen sky, ingen innlogging).',
     settings_title: 'Innstillinger',
 
     // ── Pin overlay ──
@@ -202,7 +204,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillinger',
-    nav_pause_title: 'Skru av ordforslag og uttale midlertidig',
+    nav_pause_title: 'Pause Leksihjelp midlertidig: skrur av ordforslag, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dem på igjen. Påvirker ikke ordboka.',
 
     // ── Widget (floating-widget.js) ──
     widget_title: 'Leksihjelp — Uttale',
@@ -287,7 +289,9 @@ const _STRINGS = {
   nn: {
     pin_label: 'Fest',
     pin_title: 'Hald Leksihjelp ope i eige vindauge',
-    skriv_btn_title: 'Opne skriveøkt',
+    fest_onboarding_title: 'Fest Leksihjelp ved sida av nettsida',
+    fest_onboarding_body: 'Trykk «Fest» øvst for å opne ordboka i sidepanelet, så ligg ho klar medan du les og skriv — utan å lukke seg.',
+    skriv_btn_title: 'Opne skriveøkt — eit privat skriveområde i nettlesaren der teksten vert lagra lokalt på maskina di (ingen sky, ingen innlogging).',
     settings_title: 'Innstillingar',
 
     pin_overlay_title: 'Fest Leksihjelp til verktøylinjen',
@@ -453,7 +457,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillingar',
-    nav_pause_title: 'Skru av ordforslag og uttale mellombels',
+    nav_pause_title: 'Pausa Leksihjelp mellombels: skrur av ordforslag, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dei på att. Påverkar ikkje ordboka.',
 
     widget_title: 'Leksihjelp — Uttale',
     widget_close: 'Lukk',
@@ -534,7 +538,9 @@ const _STRINGS = {
   en: {
     pin_label: 'Pin',
     pin_title: 'Keep Leksihjelp open in a separate window',
-    skriv_btn_title: 'Open writing space',
+    fest_onboarding_title: 'Pin Leksihjelp next to the page',
+    fest_onboarding_body: 'Click "Pin" at the top to open the dictionary in the side panel — it stays alongside the page while you read and write, instead of closing.',
+    skriv_btn_title: 'Open Skriveokt — a private writing space in your browser where text is saved locally on your device (no cloud, no sign-in).',
     settings_title: 'Settings',
 
     pin_overlay_title: 'Pin Leksihjelp to the toolbar',
@@ -698,7 +704,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Settings',
-    nav_pause_title: 'Temporarily disable word suggestions and pronunciation',
+    nav_pause_title: 'Temporarily pause Leksihjelp: turns off word suggestions, the pronunciation button and spell-check on every webpage. Click "Start" to re-enable. The dictionary is unaffected.',
 
     widget_title: 'Leksihjelp — Pronunciation',
     widget_close: 'Close',

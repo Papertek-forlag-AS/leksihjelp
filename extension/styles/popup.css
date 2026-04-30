@@ -30,9 +30,13 @@
 }
 
 body {
-  width: 380px;
+  /* In Chrome popup mode, the popup sizes itself to body's intrinsic width:
+     min-width gives us the 380px design width. In side-panel ("festet") mode,
+     the panel is wider — width:100% lets the body fill it instead of leaving
+     a grey strip on the right. */
+  width: 100%;
+  min-width: 380px;
   min-height: 520px;
-  max-height: 700px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   color: var(--text);
@@ -45,7 +49,8 @@ body {
   flex-direction: column;
   height: 100vh;
   min-height: 520px;
-  max-height: 700px;
+  /* No max-height: in popup mode Chrome caps height itself; in side-panel
+     mode we want the app to fill the panel's full height. */
 }
 
 /* ── Glass utility ── */
@@ -113,6 +118,74 @@ body {
 
 .icon-btn:hover {
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* Skriv (pencil) button: hidden by default — shown only once the user has
+   searched something AND the inline "Trenger du et sted å skrive?" placeholder
+   prompt is gone. While the placeholder is still showing, the inline link is
+   doing the same job, so the header pencil would just be visual noise. */
+#skriv-btn { display: none; }
+.app:has(#view-dictionary.active #search-results:not(:has(.results-placeholder))) #skriv-btn {
+  display: flex;
+}
+
+/* First-run Fest onboarding callout. Sits below the header pointing at the
+   Fest button (right side of header). One-shot — gated by a storage flag in
+   popup.js#initFestOnboarding so it only appears once per install. */
+.fest-onboarding {
+  position: relative;
+  margin: 8px 12px 0;
+  padding: 12px 32px 12px 14px;
+  background: var(--accent, #15a37f);
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  z-index: 50;
+  animation: fest-onboarding-pop 280ms ease-out;
+}
+.fest-onboarding[hidden] { display: none; }
+.fest-onboarding::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  /* Arrow points up at the Fest button (centred between Skriv and Settings
+     in the header-actions row). 110px from right matches the button position
+     for the 380px-wide popup. */
+  right: 110px;
+  width: 14px;
+  height: 14px;
+  background: var(--accent, #15a37f);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.fest-onboarding-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.fest-onboarding-body {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0.95;
+}
+.fest-onboarding-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.fest-onboarding-close:hover { background: rgba(255, 255, 255, 0.15); }
+@keyframes fest-onboarding-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Pin (Fest) Button ── */

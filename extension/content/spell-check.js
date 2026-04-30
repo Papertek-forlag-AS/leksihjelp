@@ -56,14 +56,14 @@
   }
 
   async function init() {
-    const stored = await storageGet(['predictionEnabled', 'spellCheckEnabled', 'lexiPaused']);
+    const stored = await storageGet(['spellCheckEnabled', 'lexiPaused']);
     paused = !!stored.lexiPaused;
-    const predictionEnabled = stored.predictionEnabled !== false;
-    // Default: tracks prediction (same users, same gating).
-    // Explicit spellCheckEnabled=false disables even if prediction is on.
-    enabled = predictionEnabled && stored.spellCheckEnabled !== false;
+    // Spell-check is on by default (helps every student, not only dyslexia users).
+    // Independent of predictionEnabled so users can keep spell-check while
+    // turning predictions off.
+    enabled = stored.spellCheckEnabled !== false;
 
-    warn('init', { lang: VOCAB.getLanguage(), enabled, paused, predictionEnabled, spellCheckEnabled: stored.spellCheckEnabled });
+    warn('init', { lang: VOCAB.getLanguage(), enabled, paused, spellCheckEnabled: stored.spellCheckEnabled });
 
     // Vocab is loaded by vocab-seam.js; just wait for it to be ready.
     // The seam's onReady queue handles late subscribers deterministically.

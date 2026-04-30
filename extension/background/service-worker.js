@@ -30,7 +30,11 @@ chrome.runtime.onInstalled.addListener((details) => {
     if (!result.language) {
       // Don't set a default language — let the popup show the first-run picker
       chrome.storage.local.set({
-        predictionEnabled: true,
+        // Word predictions default OFF: many users without dyslexia install
+        // Leksihjelp for the dictionary / TTS / spell-check, and predictions
+        // can feel intrusive. Users who want predictions enable them in
+        // Innstillinger.
+        predictionEnabled: false,
         isAuthenticated: false
       });
     }
