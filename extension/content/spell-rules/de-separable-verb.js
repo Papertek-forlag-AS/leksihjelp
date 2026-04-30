@@ -114,7 +114,11 @@
             start: tok.start,
             end: tok.end,
             original: tok.display,
-            fix: stem + ' ... ' + matchedPrefix,
+            // Structural rule — separable verb must split into stem + prefix
+            // around other tokens. No atomic substitution. noAutoFix
+            // suppresses the popover's Fiks button.
+            fix: tok.display,
+            noAutoFix: true,
             prefix: matchedPrefix,
             stem: stem,
             message: tok.display + ' → ' + stem + ' ... ' + matchedPrefix + ' (trennbar)',

@@ -148,7 +148,12 @@
             end: verbTok.end,
             original: verbTok.display,
             display: verbTok.display,
-            fix: verbTok.display + ' (flytt til slutten)',
+            // Structural rule — the fix requires moving the verb across other
+            // tokens, not a one-spot substitution. noAutoFix tells the popover
+            // to suppress the "Fiks" button so the user gets the explanation
+            // only and edits manually.
+            fix: verbTok.display,
+            noAutoFix: true,
             message: 'Verbet skal stå til slutt i bisetningen: "' + verbTok.display + '"',
             severity: 'warning',
           });

@@ -594,22 +594,36 @@
         });
       }
     } else {
+      // Structural rules (de-verb-final, de-separable-verb) set noAutoFix:true
+      // because their fix can't be expressed as an atomic string substitution
+      // \u2014 they require moving tokens across the clause. For those, suppress
+      // the Fiks button (clicking it would paste literal instruction text
+      // like "(flytt til slutten)" into the document) and hide the
+      // "orig \u2192 fix" head, since the fix string is just the original. The
+      // explain block carries the actionable instruction for the student.
+      const headHtml = finding.noAutoFix
+        ? `<div class="lh-spell-head"><span class="lh-spell-orig">${escapeHtml(finding.original)}</span>${registerBadgeHtml}</div>`
+        : `<div class="lh-spell-head">
+            <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
+            <span class="lh-spell-arrow">\u2192</span>
+            <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
+            ${registerBadgeHtml}
+          </div>`;
+      const fixBtnHtml = finding.noAutoFix
+        ? ''
+        : '<button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>';
       popover.innerHTML = `
-        <div class="lh-spell-head">
-          <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
-          <span class="lh-spell-arrow">\u2192</span>
-          <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
-          ${registerBadgeHtml}
-        </div>
+        ${headHtml}
         <div class="lh-spell-explain">${renderExplain(finding, lang)}</div>
         <div class="lh-spell-actions">
-          <button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>
+          ${fixBtnHtml}
           <button type="button" class="lh-spell-btn lh-spell-decline">\u2715 Avvis</button>
           <button type="button" class="lh-spell-btn lh-spell-report">\u26a0 Feil?</button>
         </div>
         ${finding.pedagogy ? `<button type="button" class="lh-spell-laer-mer-btn" aria-expanded="false">${escapeHtml(t('laer_mer_button'))}</button><div class="lh-spell-pedagogy-panel" hidden></div>` : ''}
       `;
-      popover.querySelector('.lh-spell-accept').addEventListener('click', () => applyFix(finding));
+      const acceptBtn = popover.querySelector('.lh-spell-accept');
+      if (acceptBtn) acceptBtn.addEventListener('click', () => applyFix(finding));
     }
 
     // Phase 26: L\u00e6r mer pedagogy panel \u2014 toggle handler. Builds panel content

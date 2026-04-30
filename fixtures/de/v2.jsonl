@@ -91,7 +91,7 @@
 {"id":"de-v2-acc-060","text":"Nach dem Essen machen wir Hausaufgaben.","expected":[],"status":"ok"}
 {"id":"de-v2-acc-061","text":"Vor dem Schlafen lese ich ein Buch.","expected":[],"status":"ok"}
 {"id":"de-v2-acc-062","text":"Seit gestern regnet es.","expected":[{"rule_id":"typo","start":13,"end":19,"original":"regnet","suggestion":"regnte"}],"status":"ok"}
-{"id":"de-v2-acc-063","text":"Während des Unterrichts schlafe ich.","expected":[{"rule_id":"typo","start":8,"end":11,"original":"des","suggestion":"del"},{"rule_id":"typo","start":12,"end":23,"original":"Unterrichts","suggestion":"Unterrichte"},{"rule_id":"de-verb-final","start":24,"end":31,"original":"schlafe","suggestion":"schlafe (flytt til slutten)"}],"status":"ok"}
+{"id":"de-v2-acc-063","text":"Während des Unterrichts schlafe ich.","expected":[{"rule_id":"typo","start":8,"end":11,"original":"des","suggestion":"del"},{"rule_id":"typo","start":12,"end":23,"original":"Unterrichts","suggestion":"Unterrichte"},{"rule_id":"de-verb-final","start":24,"end":31,"original":"schlafe","suggestion":"schlafe"}],"status":"ok"}
 
 {"id":"de-v2-acc-64","text":"Ich gehe zur Schule.","expected":[],"status":"ok"}
 {"id":"de-v2-acc-65","text":"Er spielt im Garten.","expected":[],"status":"ok"}
