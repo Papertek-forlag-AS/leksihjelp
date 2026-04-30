@@ -299,7 +299,7 @@ Plans:
   6. Version bumped (`extension/manifest.json` + `package.json` + `backend/public/index.html` aligned per the Release Workflow). Downstream consumers re-pin.
   7. All 15 release-workflow gates exit 0.
 
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 Plans:
 - [ ] 33-01-PLAN.md — Lift dict-state-builder into a shared module + remove sidepanel host stubs + fix direction toggle + fix exam-profile ordbok hide
 - [ ] 33-02-PLAN.md — Lockdown sync re-run + verify Phase 26/27 surfaces refreshed; document any diffs that need upstream fix

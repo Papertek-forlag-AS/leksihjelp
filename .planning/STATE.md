@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
-status: completed
-last_updated: "2026-04-30T21:40:03.330Z"
-last_activity: "2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11."
+status: executing
+last_updated: "2026-04-30T21:49:02.081Z"
+last_activity: "2026-04-30 -- Plan 33-02 complete. Re-ran lockdown's scripts/sync-leksihjelp.js — 18 files refreshed in /Users/geirforbord/Papertek/lockdown/public/leksihjelp/ (1 new: spell-rules/fr-aspect-hint.js; 17 modified including dict-state-builder.js +229 lines for 33-01 buildDictState extension, es-gustar/es-por-para Phase 32 refactors, vocab-seam-core +5 FR pedagogy indexes, all 6 data/*.json regenerated). Verified sync script + LEKSI_BUNDLE order correct as-is — no script edits needed (Phase 30-04 had already added dict-state-builder + grammar-features-section to sync). Lockdown commit beadf6b on staging branch (NOT pushed; Plan 33-03 owns push). 4 orphan upstream-tree changes (i18n/strings.js, spell-check.js, floating-widget.js, popup.css) flowed through as-is per CLAUDE.md sync-as-faithful-mirror contract — flagged for separate triage. Sidepanel-host 33-01 fix already committed upstream (1c76271), nothing left staged in lockdown."
 progress:
   total_phases: 12
   completed_phases: 6
   total_plans: 27
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Session State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 **Milestone:** v3.1 Polish & Intelligence (cleanup phase)
 **Phase:** 33 (v3.1 cleanup) -- IN PROGRESS
-**Plan:** 33-02 next (33-01 complete; 33-02 lockdown sync + 33-03 cross-repo commit + version bump)
+**Plan:** 33-03 next (33-02 lockdown sync complete; 33-03 = version bump + cross-repo coordinated push)
 **Status:** Phase 33 in progress
-**Last activity:** 2026-04-30 -- Plan 33-01 complete. Lifted buildDictState + buildInflectionIndex into shared dict-state-builder.js (Phase 30-04 follow-through). popup.js loadDictionary delegates via posMapper/genusMapper opts (i18n labels stay popup-side; lockdown gets raw codes). lockdown sidepanel host populateDictState upgraded from stub to full state spread — STAGED, not committed (Plan 33-03 lands cross-repo coordination). Exam-profile ordbok-hide audit claim investigated and found NOT present (already fixed in Phase 29 leksihjelp_exam→exam merge). 6 new unit tests; check-popup-deps + test:popup-views remain green. Task 4 UAT checkpoint auto-approved per auto-mode.
+**Last activity:** 2026-04-30 -- Plan 33-02 complete. Re-ran lockdown's scripts/sync-leksihjelp.js — 18 files refreshed in /Users/geirforbord/Papertek/lockdown/public/leksihjelp/ (1 new: spell-rules/fr-aspect-hint.js; 17 modified including dict-state-builder.js +229 lines for 33-01 buildDictState extension, es-gustar/es-por-para Phase 32 refactors, vocab-seam-core +5 FR pedagogy indexes, all 6 data/*.json regenerated). Verified sync script + LEKSI_BUNDLE order correct as-is — no script edits needed (Phase 30-04 had already added dict-state-builder + grammar-features-section to sync). Lockdown commit beadf6b on staging branch (NOT pushed; Plan 33-03 owns push). 4 orphan upstream-tree changes (i18n/strings.js, spell-check.js, floating-widget.js, popup.css) flowed through as-is per CLAUDE.md sync-as-faithful-mirror contract — flagged for separate triage. Sidepanel-host 33-01 fix already committed upstream (1c76271), nothing left staged in lockdown.
 
-Progress: [████████░░] 80% (Plan 33-01 complete; 33-02 + 33-03 next)
+Progress: [█████████░] 90% (Plan 33-02 complete; 33-03 next)
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [████████░░] 80% (Plan 33-01 complete; 33-02 + 33-
 | Phase 32-fr-es-pedagogy P01 | 23 | 3 tasks | 9 files |
 | Phase 32 P03 | 75 | 2 tasks | 8 files |
 | Phase 33 P01 | 32 | 4 tasks | 5 files |
+| Phase 33 P02 | 2 min | 3 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 32]: 32-03: Lexical verb_class marker on verbbank entries (vs inline grammar-table list); shared pedagogy under grammarbank.pedagogy.{class_name}; explain() returns pedagogy (not finding.pedagogy — gustar is not a case-prep so the check-pedagogy-shape VALID_CASES validator wouldn't accept it); PREPOSITION_COLLISIONS guard prevents sobre→sobrar false positives
 - [Phase 33]: 33-01: lifted buildDictState + buildInflectionIndex into shared dict-state-builder.js; popup.js delegates via posMapper/genusMapper opts so i18n labels stay popup-side; lockdown sidepanel host populateDictState updated (STAGED, not committed — Plan 33-03 lands cross-repo coordination)
 - [Phase 33]: 33-01: exam-profile ordbok-hide audit claim INVESTIGATED, not present — getSpellEngineEnvelope('exam') already returns leksihjelp:true post-Phase-29 redesign; no fix needed
+- [Phase 33]: 33-02: lockdown sync mirrored 18 files (1 new fr-aspect-hint.js, 17 modified); sync script + LEKSI_BUNDLE order verified correct as-is — no script edits needed; 4 orphan upstream working-tree changes flowed through as faithful mirror per CLAUDE.md downstream-consumers contract
 
 ### Pending Todos
 
@@ -124,5 +126,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-29
-Stopped at: Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
+Last session: 2026-04-30
+Stopped at: Completed 33-02-PLAN.md (lockdown sync). 18 files refreshed in lockdown public/leksihjelp/, committed as beadf6b on staging branch (NOT pushed; Plan 33-03 owns version bump + push). Sync script + LEKSI_BUNDLE order verified correct as-is. 4 orphan upstream changes flowed through; flagged for separate triage. Previous (2026-04-29): Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
