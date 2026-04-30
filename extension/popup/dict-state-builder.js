@@ -262,8 +262,11 @@
     const lang = o.lang || null;
     const noLang = o.noLang || 'nb';
     const vocabCore = o.vocabCore || null;
+    const flattenOpts = {};
+    if (typeof o.posMapper === 'function') flattenOpts.posMapper = o.posMapper;
+    if (typeof o.genusMapper === 'function') flattenOpts.genusMapper = o.genusMapper;
 
-    const allWords = flattenBanks(raw);
+    const allWords = flattenBanks(raw, flattenOpts);
 
     // Inflection index — prefer this module's own builder; vocabCore may
     // optionally override (none ships today, but the contract is open).
@@ -290,7 +293,7 @@
     let nbIdToTargetIndex = new Map();
 
     if (sisterRaw) {
-      noWords = flattenBanks(sisterRaw);
+      noWords = flattenBanks(sisterRaw, flattenOpts);
       if (vocabCore && typeof vocabCore.buildIndexes === 'function') {
         const noIdx = vocabCore.buildIndexes({ raw: sisterRaw, lang: noLang });
         noNounGenusMap = (noIdx && noIdx.nounGenus) || new Map();

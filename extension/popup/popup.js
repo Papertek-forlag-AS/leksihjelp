@@ -52,7 +52,7 @@ function getTranslation(entry) {
   // Resolve linkedTo primary ID via the loaded Norwegian dictionary
   const link = entry.linkedTo?.[ui] || entry.linkedTo?.nb || entry.linkedTo?.nn;
   if (link?.primary && viewState.noDictionary) {
-    for (const bank of Object.keys(BANK_TO_POS)) {
+    for (const bank of Object.keys(self.__lexiDictStateBuilder.BANK_TO_POS)) {
       const resolved = viewState.noDictionary[bank]?.[link.primary];
       if (resolved?.word) return resolved.word;
     }
@@ -65,34 +65,12 @@ function getTranslation(entry) {
   return '';
 }
 
-function generatedFromRefs(entry) {
-  const g = entry._generatedFrom;
-  if (!g) return [];
-  if (Array.isArray(g)) return g;
-  return g.split(',').map(s => s.trim());
-}
-
-// Bank name to Norwegian part of speech mapping
-const BANK_TO_POS = {
-  verbbank: 'verb',
-  nounbank: 'substantiv',
-  adjectivebank: 'adjektiv',
-  articlesbank: 'artikkel',
-  generalbank: 'ord',
-  numbersbank: 'tall',
-  phrasesbank: 'frase',
-  pronounsbank: 'pronomen',
-  languagesbank: 'språk',          // Phase 05.1 Gap B
-  nationalitiesbank: 'nasjonalitet' // Phase 05.1 Gap B
-};
-
-// Genus to gender mapping (kept for reference; use genusToGender() for display)
-const GENUS_TO_GENDER = {
-  m: 'maskulin',
-  f: 'feminin',
-  n: 'nøytrum',
-  pl: 'flertall'
-};
+// Phase 33-01: BANK_TO_POS, generatedFromRefs, NORWEGIAN_IRREGULAR_VERBS,
+// norwegianInfinitive, and the standalone flattenBanks/buildInflectionIndex
+// definitions all moved to extension/popup/dict-state-builder.js. Access via
+// self.__lexiDictStateBuilder when needed (loaded by popup.html before this
+// file). The i18n-aware bankToPos/genusToGender below stay popup-local since
+// they call t() to produce translated UI labels.
 
 function bankToPos(bank) {
   const keys = { verbbank: 'pos_verb', nounbank: 'pos_noun', adjectivebank: 'pos_adjective',
@@ -104,53 +82,6 @@ function bankToPos(bank) {
 function genusToGender(genus) {
   const keys = { m: 'gender_m', f: 'gender_f', n: 'gender_n', pl: 'gender_pl' };
   return keys[genus] ? t(keys[genus]) : genus;
-}
-
-// Norwegian irregular verb forms -> infinitive (without "å" prefix)
-const NORWEGIAN_IRREGULAR_VERBS = {
-  'er': 'være', 'var': 'være',
-  'har': 'ha', 'hadde': 'ha',
-  'kan': 'kunne', 'kunne': 'kunne',
-  'vil': 'ville', 'ville': 'ville',
-  'skal': 'skulle', 'skulle': 'skulle',
-  'må': 'måtte',
-  'vet': 'vite', 'visste': 'vite',
-  'går': 'gå', 'gikk': 'gå',
-  'får': 'få', 'fikk': 'få',
-  'gjør': 'gjøre', 'gjorde': 'gjøre',
-  'ser': 'se', 'så': 'se',
-  'sier': 'si', 'sa': 'si',
-  'tar': 'ta', 'tok': 'ta',
-  'kommer': 'komme', 'kom': 'komme',
-  'finner': 'finne', 'fant': 'finne',
-  'gir': 'gi', 'gav': 'gi',
-  'ligger': 'ligge', 'lå': 'ligge',
-  'sitter': 'sitte', 'satt': 'sitte',
-  'står': 'stå', 'stod': 'stå',
-  'drar': 'dra', 'dro': 'dra',
-  'legger': 'legge', 'la': 'legge',
-  'setter': 'sette', 'satte': 'sette',
-  'skriver': 'skrive', 'skrev': 'skrive',
-  'spiser': 'spise', 'spiste': 'spise',
-  'liker': 'like', 'likte': 'like',
-  'bor': 'bo', 'bodde': 'bo',
-  'heter': 'hete', 'het': 'hete',
-  'snakker': 'snakke', 'snakket': 'snakke',
-  'leser': 'lese', 'leste': 'lese',
-  'lærer': 'lære', 'lærte': 'lære',
-  'synger': 'synge', 'sang': 'synge',
-  'danser': 'danse', 'danset': 'danse',
-  'svømmer': 'svømme',
-  'lager': 'lage', 'lagde': 'lage',
-  'leker': 'leke', 'lekte': 'leke'
-};
-
-function norwegianInfinitive(form) {
-  const lower = form.toLowerCase();
-  if (NORWEGIAN_IRREGULAR_VERBS[lower]) return NORWEGIAN_IRREGULAR_VERBS[lower];
-  // Regular verb heuristic: present "-er" -> infinitive "-e"
-  if (lower.endsWith('er') && lower.length > 3) return lower.slice(0, -1);
-  return null;
 }
 
 function applyTranslations() {
@@ -205,6 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initGrammarSettings();
   initNav();
   initPinButton();
+  initFestOnboarding();
   initSkrivButton();
   initPauseButton();
   initAuth();
@@ -284,25 +216,21 @@ function initVocabStatus() {
     // 'error' is sticky until the next state change for that lang.
   }
 
-  // Snapshot of cached languages on popup open so a popup opened mid-download
-  // doesn't start with an empty pill row. Cached langs are 'ready' (and will
-  // auto-hide on the standard timer).
-  try {
-    chrome.runtime.sendMessage({ type: 'lexi:status' }, (response) => {
-      if (chrome.runtime.lastError) return;
-      const revisions = (response && response.revisions) || {};
-      for (const lang of Object.keys(revisions)) {
-        if (lang === 'nb') continue; // NB baseline is implicit
-        setPill(lang, 'ready');
-      }
-    });
-  } catch (_) { /* service worker unavailable — no-op */ }
+  // Pills are surfaced only for live state transitions in the current popup
+  // session (downloads in flight, freshly hydrated, errored). We deliberately
+  // don't snapshot cached languages on open — replaying "Tysk klar / Engelsk
+  // klar" on every popup open is noisy when nothing has actually changed.
 
   // Live updates from bootstrap + content seam.
   chrome.runtime.onMessage.addListener((m) => {
     if (!m || !m.lang) return;
     if (m.type === 'lexi:hydration' && m.state) {
       if (m.lang === 'nb' && m.state === 'baseline') return; // implicit
+      // Suppress 'ready' events that came from a cache hit (vocab-seam fires
+      // these on every language switch). The user already knows that lang is
+      // installed — replaying "Tysk klar" on each switch is noise. Only fresh
+      // downloads (no fromCache flag) and errors deserve a pill.
+      if (m.state === 'ready' && m.fromCache) return;
       setPill(m.lang, m.state, m.reason);
       return;
     }
@@ -555,114 +483,42 @@ function chromeStorageSet(obj) {
 }
 
 // ── Dictionary loading ─────────────────────────────────────
+// Phase 33-01: state-build logic lifted into shared dict-state-builder.
+// loadDictionary now fetches raw + sister dicts and delegates the
+// flatten/inflection/NB-enrichment/two-way-translation walk to
+// __lexiDictStateBuilder.buildDictState (also used by the lockdown
+// sidepanel host).
 async function loadDictionary(lang) {
   try {
-    // Try vocab store (IndexedDB) first, fall back to bundled file
     viewState.dictionary = await loadLanguageData(lang);
     if (!viewState.dictionary) throw new Error('No dictionary data');
 
-    viewState.allWords = flattenBanks(viewState.dictionary);
-    viewState.inflectionIndex = buildInflectionIndex(viewState.allWords);
-
-    // Phase 17 COMP-01: build nounGenus for compound decomposition
-    const vocabCore = self.__lexiVocabCore;
-    if (vocabCore && vocabCore.buildIndexes) {
-      const indexes = vocabCore.buildIndexes({ raw: viewState.dictionary, lang: viewState.currentLang });
-      viewState.nounGenusMap = indexes.nounGenus || new Map();
-      viewState.currentIndexes = indexes; // Phase 24: capture for predictCompound
+    const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
+    let sisterRaw = null;
+    if (lang !== noLang) {
+      try { sisterRaw = await loadLanguageData(noLang); } catch { sisterRaw = null; }
     }
+    viewState.noDictionary = sisterRaw;
+
+    const builder = self.__lexiDictStateBuilder;
+    const state = builder.buildDictState({
+      raw: viewState.dictionary,
+      sisterRaw,
+      lang: viewState.currentLang,
+      noLang,
+      vocabCore: self.__lexiVocabCore,
+      // i18n-aware display mappers — popup needs translated POS + gender
+      // strings on every flattened entry; the lockdown sidepanel passes
+      // neither (raw codes are fine there).
+      posMapper: bankToPos,
+      genusMapper: genusToGender,
+    });
+
+    // Spread builder output into viewState — single assignment beats the
+    // 100-line inline walk this replaces.
+    Object.assign(viewState, state);
 
     updateLangLabels();
-
-    // Load Norwegian dictionary for two-way lookups (match UI language: nn or nb)
-    const noLang = getUiLanguage() === 'nn' ? 'nn' : 'nb';
-    if (lang !== noLang) {
-      try {
-        viewState.noDictionary = await loadLanguageData(noLang);
-        viewState.noWords = viewState.noDictionary ? flattenBanks(viewState.noDictionary) : [];
-        // Build reverse indexes from NB dictionary
-        viewState.nbEnrichmentIndex = new Map();
-        viewState.nbTranslationIndex = new Map();
-        const langPrefix = `${currentLang}-nb/`;
-        const nbIdToWord = new Map();
-        if (viewState.noDictionary) {
-          for (const bank of Object.keys(viewState.noDictionary)) {
-            const bankData = viewState.noDictionary[bank];
-            if (!bankData || typeof bankData !== 'object') continue;
-            for (const [id, entry] of Object.entries(bankData)) {
-              if (id.startsWith('_')) continue;
-              if (entry.word) nbIdToWord.set(id, entry.word);
-              // Enrichment index (falseFriends/senses via linkedTo)
-              if ((entry.falseFriends || entry.senses) && entry.linkedTo?.[viewState.currentLang]?.primary) {
-                const linkId = entry.linkedTo[viewState.currentLang].primary;
-                const existing = viewState.nbEnrichmentIndex.get(linkId);
-                viewState.nbEnrichmentIndex.set(linkId, {
-                  falseFriends: [...(existing?.falseFriends || []), ...(entry.falseFriends || [])],
-                  senses: [...(existing?.senses || []), ...(entry.senses || [])]
-                });
-              }
-              // Direction 1: NB→target (e.g. NB _generatedFrom "de-nb/bank:chef_noun")
-              if (entry._generatedFrom && entry.word) {
-                for (const trimmed of generatedFromRefs(entry)) {
-                  if (trimmed.startsWith(langPrefix)) {
-                    const colonIdx = trimmed.indexOf(':');
-                    if (colonIdx !== -1) {
-                      const targetId = trimmed.substring(colonIdx + 1);
-                      if (!viewState.nbTranslationIndex.has(targetId)) {
-                        viewState.nbTranslationIndex.set(targetId, entry.word);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        // Direction 2: target→NB (e.g. FR _generatedFrom "nb-fr/bank:skole_noun")
-        const revPrefix = `nb-${currentLang}/`;
-        viewState.nbIdToTargetIndex = new Map();
-        if (viewState.dictionary) {
-          for (const bank of Object.keys(viewState.dictionary)) {
-            const bankData = viewState.dictionary[bank];
-            if (!bankData || typeof bankData !== 'object') continue;
-            for (const [id, entry] of Object.entries(bankData)) {
-              if (id.startsWith('_') || !entry._generatedFrom) continue;
-              for (const trimmed of generatedFromRefs(entry)) {
-                if (trimmed.startsWith(revPrefix)) {
-                  const colonIdx = trimmed.indexOf(':');
-                  if (colonIdx !== -1) {
-                    const nbId = trimmed.substring(colonIdx + 1);
-                    const nbWord = nbIdToWord.get(nbId);
-                    if (nbWord) {
-                      if (!viewState.nbTranslationIndex.has(id)) viewState.nbTranslationIndex.set(id, nbWord);
-                      if (!viewState.nbIdToTargetIndex.has(nbId)) viewState.nbIdToTargetIndex.set(nbId, id);
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        if (viewState.noDictionary && vocabCore && vocabCore.buildIndexes) {
-          const noIndexes = vocabCore.buildIndexes({ raw: viewState.noDictionary, lang: noLang });
-          viewState.noNounGenusMap = noIndexes.nounGenus || new Map();
-        }
-      } catch {
-        viewState.noDictionary = null;
-        viewState.noWords = [];
-        viewState.noNounGenusMap = new Map();
-        viewState.nbEnrichmentIndex = new Map();
-        viewState.nbTranslationIndex = new Map();
-        viewState.nbIdToTargetIndex = new Map();
-      }
-    } else {
-      viewState.noDictionary = null;
-      viewState.noWords = [];
-      viewState.noNounGenusMap = new Map();
-      viewState.nbEnrichmentIndex = new Map();
-      viewState.nbTranslationIndex = new Map();
-      viewState.nbIdToTargetIndex = new Map();
-    }
   } catch (e) {
     console.error('Failed to load dictionary:', e);
   }
@@ -677,12 +533,24 @@ const BUNDLED_LANGUAGES = new Set(['nb', 'nn', 'en']);
  * NB, NN, EN are bundled but also cached in IndexedDB if downloaded from API.
  */
 async function loadLanguageData(lang) {
-  // Try IndexedDB first (works for all languages)
+  // Bundled languages (nb, nn, en) always read from the shipped JSON file.
+  // The bundled data is the source of truth — it gets refreshed by
+  // `npm run sync-vocab` and ships in the extension zip. Reading IndexedDB
+  // first would serve stale data after a sync. Stays offline-first because
+  // chrome.runtime.getURL hits a local resource, no network.
+  if (BUNDLED_LANGUAGES.has(lang)) {
+    try {
+      const url = chrome.runtime.getURL(`data/${lang}.json`);
+      const res = await fetch(url);
+      if (res.ok) return res.json();
+    } catch { /* fall through to cache/download */ }
+  }
+
+  // Foreign languages: prefer IndexedDB cache, then download.
   if (window.__lexiVocabStore) {
     const cached = await window.__lexiVocabStore.getCachedLanguage(lang);
     if (cached) return cached;
 
-    // Not cached in IndexedDB — download from API if it's a foreign language
     if (!BUNDLED_LANGUAGES.has(lang)) {
       try {
         showDownloadStatus(lang, t('settings_downloading'));
@@ -699,7 +567,7 @@ async function loadLanguageData(lang) {
     }
   }
 
-  // Fall back to bundled file (nb, nn, en)
+  // Last-resort fallback for bundled langs if disk read failed unexpectedly.
   try {
     const url = chrome.runtime.getURL(`data/${lang}.json`);
     const res = await fetch(url);
@@ -849,125 +717,8 @@ function hideDownloadStatus() {
   container.innerHTML = `<div class="results-placeholder"><p>${t('search_placeholder_text')}</p></div>`;
 }
 
-/**
- * Flatten bank-based dictionary into a searchable array
- */
-function flattenBanks(dict) {
-  const words = [];
-  const banks = Object.keys(BANK_TO_POS);
-
-  for (const bank of banks) {
-    const bankData = dict[bank];
-    if (!bankData || typeof bankData !== 'object') continue;
-
-    for (const [wordId, entry] of Object.entries(bankData)) {
-      if (wordId.startsWith('_')) continue; // Skip metadata
-
-      words.push({
-        ...entry,
-        _wordId: wordId,
-        _bank: bank,
-        // Normalize fields for display
-        partOfSpeech: bankToPos(bank),
-        gender: entry.genus ? genusToGender(entry.genus) : null,
-        grammar: entry.explanation?._description || null
-      });
-    }
-  }
-
-  return words;
-}
-
-function buildInflectionIndex(words) {
-  const index = new Map();
-
-  function addToIndex(key, entry, matchType, matchDetail) {
-    if (!key || key === (entry.word || '').toLowerCase()) return;
-    if (!index.has(key)) index.set(key, []);
-    index.get(key).push({ entry, matchType, matchDetail });
-  }
-
-  for (const entry of words) {
-    // Verb conjugations
-    if (entry.conjugations) {
-      for (const [tenseName, tenseData] of Object.entries(entry.conjugations)) {
-        if (!tenseData?.former) continue;
-        const former = tenseData.former;
-        if (Array.isArray(former)) {
-          for (const form of former) {
-            if (form) addToIndex(form.toLowerCase(), entry, 'conjugation', tenseName);
-          }
-        } else if (typeof former === 'object') {
-          for (const [pronoun, form] of Object.entries(former)) {
-            if (!form) continue;
-            if (Array.isArray(form)) {
-              for (const f of form) { if (f) addToIndex(f.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`); }
-            } else {
-              addToIndex(form.toLowerCase(), entry, 'conjugation', `${pronoun} (${tenseName})`);
-            }
-          }
-        }
-      }
-    }
-
-    // Noun plurals
-    if (entry._bank === 'nounbank') {
-      if (entry.plural) {
-        const plurals = Array.isArray(entry.plural) ? entry.plural : [entry.plural];
-        for (let p of plurals) {
-          if (!p || typeof p !== 'string') continue;
-          if (p.startsWith('die ')) p = p.slice(4);
-          addToIndex(p.toLowerCase(), entry, 'plural', null);
-        }
-      }
-      if (entry.declension?.flertall) {
-        for (const variant of [entry.declension.flertall.ubestemt, entry.declension.flertall.bestemt]) {
-          if (!variant?.form) continue;
-          let f = variant.form;
-          if (f.startsWith('die ')) f = f.slice(4);
-          addToIndex(f.toLowerCase(), entry, 'plural', null);
-        }
-      }
-    }
-
-    // Noun case forms (v2.0: cases.{case}.forms.{number}.{article})
-    if (entry._bank === 'nounbank' && entry.cases) {
-      for (const [caseName, caseData] of Object.entries(entry.cases)) {
-        if (!caseData?.forms) continue;
-        for (const [number, numberForms] of Object.entries(caseData.forms)) {
-          if (!numberForms) continue; // plurale tantum: singular is null
-          for (const [article, form] of Object.entries(numberForms)) {
-            if (!form) continue;
-            // Index full form e.g. "den hund" for exact match
-            const fullForm = form.toLowerCase();
-            addToIndex(fullForm, entry, 'case', `${caseName} ${number} ${article}`);
-            // Also index bare noun without article prefix for bare search
-            const parts = form.split(' ');
-            if (parts.length > 1) {
-              addToIndex(parts[parts.length - 1].toLowerCase(), entry, 'case', `${caseName} ${number} ${article}`);
-            }
-          }
-        }
-      }
-    }
-
-    // Typos — index common misspellings (særskriving splits, missing diacritics, etc.)
-    if (entry.typos && Array.isArray(entry.typos)) {
-      for (const typo of entry.typos) {
-        addToIndex(typo.toLowerCase(), entry, 'typo', null);
-      }
-    }
-
-    // Accepted forms — alternative valid spellings
-    if (entry.acceptedForms && Array.isArray(entry.acceptedForms)) {
-      for (const form of entry.acceptedForms) {
-        addToIndex(form.toLowerCase(), entry, 'typo', null);
-      }
-    }
-  }
-
-  return index;
-}
+// Phase 33-01: flattenBanks + buildInflectionIndex live in dict-state-builder.js
+// now (delegated to via __lexiDictStateBuilder.buildDictState in loadDictionary).
 
 // Phase 30-01: legacy updateLangLabels removed — dictionary-view owns it now;
 // the delegator after initSearch routes calls into the mounted view.
@@ -1173,7 +924,7 @@ async function initGrammarSettings() {
 function isFeatureEnabled(featureId) {
   if (enabledFeatures.has(featureId)) return true;
   // Also check language-specific variants (e.g., grammar_articles → grammar_nb_genus)
-  const langPrefix = `grammar_${currentLang}_`;
+  const langPrefix = `grammar_${viewState.currentLang}_`;
   // Map generic feature IDs to language-specific equivalents
   const genericToLangMap = {
     'grammar_articles': [`${langPrefix}genus`],
@@ -1270,8 +1021,8 @@ function buildVocabAdapter() {
     decomposeCompound: (q, genusMap, lang) => self.__lexiVocabCore && self.__lexiVocabCore.decomposeCompound
       ? self.__lexiVocabCore.decomposeCompound(q, genusMap, lang)
       : null,
-    norwegianInfinitive,
-    generatedFromRefs,
+    norwegianInfinitive: self.__lexiDictStateBuilder.norwegianInfinitive,
+    generatedFromRefs: self.__lexiDictStateBuilder.generatedFromRefs,
     // getTranslation defers to popup's getTranslation, which already honors
     // viewState.noDictionary / nbTranslationIndex.
     getTranslation: (entry, _state, _uiLang) => getTranslation(entry),
@@ -1614,6 +1365,39 @@ function initNav() {
     showView('dictionary');
     await buildLangSwitcher();
   });
+}
+
+// ── Fest first-run onboarding ──────────────────────────────
+// Shown once per install: a callout below the header pointing at the Fest
+// button. The Fest flow is the high-leverage interaction (opens the side
+// panel and keeps the dictionary alongside the page) but is easy to miss in
+// a screenshot of icons. Dismissed by the close button or by clicking Fest;
+// in the side-panel/pinned context we skip it entirely (already pinned).
+async function initFestOnboarding() {
+  const callout = document.getElementById('fest-onboarding');
+  const dismissBtn = document.getElementById('fest-onboarding-dismiss');
+  const pinBtn = document.getElementById('pin-btn');
+  if (!callout || !dismissBtn) return;
+
+  // Skip in side-panel / pinned-window contexts — the user has already
+  // discovered the pinning behaviour.
+  const params = new URLSearchParams(location.search);
+  if (params.get('pinned') === '1') return;
+  if (window !== window.top) return;
+  if (pinBtn && pinBtn.classList.contains('hidden')) return;
+
+  const seen = await chromeStorageGet('festOnboardingSeen');
+  if (seen) return;
+
+  callout.hidden = false;
+
+  async function dismiss() {
+    callout.hidden = true;
+    await chromeStorageSet({ festOnboardingSeen: true });
+  }
+
+  dismissBtn.addEventListener('click', dismiss);
+  if (pinBtn) pinBtn.addEventListener('click', dismiss, { once: true });
 }
 
 // ── Pin (Fest) Button ──────────────────────────────────────

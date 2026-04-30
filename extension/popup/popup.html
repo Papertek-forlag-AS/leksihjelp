@@ -36,6 +36,15 @@
       </div>
     </header>
 
+    <!-- First-run callout pointing at the Fest button. Only shown the first
+         time the popup is opened; dismissed with the X or by clicking Fest.
+         JS in popup.js#initFestOnboarding gates visibility on a storage key. -->
+    <div id="fest-onboarding" class="fest-onboarding" hidden role="dialog" aria-live="polite">
+      <button id="fest-onboarding-dismiss" class="fest-onboarding-close" type="button" aria-label="Lukk" title="Lukk">×</button>
+      <p class="fest-onboarding-title" data-i18n="fest_onboarding_title">Fest Leksihjelp ved siden av nettsiden</p>
+      <p class="fest-onboarding-body" data-i18n="fest_onboarding_body">Trykk «Fest» øverst for å åpne ordboka i sidepanelet, så ligger den klar mens du leser og skriver — uten å lukke seg.</p>
+    </div>
+
     <!-- Plan 23-04: vocab update notice (non-blocking banner). Sits just
          below the header so plan 23-03's hydration pill (also rendered near
          the top) stacks vertically with this one rather than overlapping. -->
@@ -353,6 +362,7 @@
   <script src="../exam-registry.js"></script>
   <script src="../content/vocab-store.js"></script>
   <script src="../content/vocab-seam-core.js"></script>
+  <script src="dict-state-builder.js"></script>
   <script src="views/dictionary-view.js"></script>
   <script src="views/settings-view.js"></script>
   <script src="views/pause-view.js"></script>
