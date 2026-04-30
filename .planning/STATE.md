@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: completed
-last_updated: "2026-04-30T19:49:10.983Z"
+last_updated: "2026-04-30T21:40:03.330Z"
 last_activity: "2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11."
 progress:
-  total_phases: 10
+  total_phases: 12
   completed_phases: 6
-  total_plans: 24
-  completed_plans: 18
+  total_plans: 27
+  completed_plans: 19
 ---
 
 # Session State
@@ -23,13 +23,13 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 
 ## Position
 
-**Milestone:** v3.3 Exam Mode
-**Phase:** 32 (FR/ES pedagogy) -- IN PROGRESS
-**Plan:** 32-03 next (32-01 + 32-02 complete; 32-03 ES gustar pedagogy migration + class extension)
-**Status:** Milestone complete
-**Last activity:** 2026-04-30 -- Plan 32-01 complete. New rule fr-aspect-hint (P3 soft hint, 86 fixtures P=R=F1=1.000), first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary. check-explain-contract extended with additive pedagogy-shape branch (validatePedagogy) + 3 paired :test scratch scenarios. fr-aspect-hint added to TARGETS as 60th popover-surfacing rule (2nd pedagogy-bearing). 5 new vocab-seam-core indexes (frAspectAdverbs, frAspectPedagogy, frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms). All 20 release gates green. Versions aligned at 2.9.11.
+**Milestone:** v3.1 Polish & Intelligence (cleanup phase)
+**Phase:** 33 (v3.1 cleanup) -- IN PROGRESS
+**Plan:** 33-02 next (33-01 complete; 33-02 lockdown sync + 33-03 cross-repo commit + version bump)
+**Status:** Phase 33 in progress
+**Last activity:** 2026-04-30 -- Plan 33-01 complete. Lifted buildDictState + buildInflectionIndex into shared dict-state-builder.js (Phase 30-04 follow-through). popup.js loadDictionary delegates via posMapper/genusMapper opts (i18n labels stay popup-side; lockdown gets raw codes). lockdown sidepanel host populateDictState upgraded from stub to full state spread — STAGED, not committed (Plan 33-03 lands cross-repo coordination). Exam-profile ordbok-hide audit claim investigated and found NOT present (already fixed in Phase 29 leksihjelp_exam→exam merge). 6 new unit tests; check-popup-deps + test:popup-views remain green. Task 4 UAT checkpoint auto-approved per auto-mode.
 
-Progress: [████████░░] 79% (Plan 19 of 24 complete; Phase 32 — 2 of 3 plans complete; 32-03 next)
+Progress: [████████░░] 80% (Plan 33-01 complete; 33-02 + 33-03 next)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [████████░░] 79% (Plan 19 of 24 complete; Phase 32
 | Phase 32-fr-es-pedagogy P02 | 12 | 2 tasks | 5 files |
 | Phase 32-fr-es-pedagogy P01 | 23 | 3 tasks | 9 files |
 | Phase 32 P03 | 75 | 2 tasks | 8 files |
+| Phase 33 P01 | 32 | 4 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 32-02]: Side-patched extension/data/es.json directly because deployed papertek-vocabulary Vercel API hadn't picked up the lexicon edit; documented as recognised future-sync no-op (same pattern as 32-03 chore commit b2a4be2).
 - [Phase 32]: 32-01: FR aspect-hint rule (P3 hint, P=R=F1=1.000, 86 fixtures) + first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary; check-explain-contract extended with optional pedagogy-shape branch + 3 paired scratch scenarios; version bumped 2.9.9 → 2.9.11
 - [Phase 32]: 32-03: Lexical verb_class marker on verbbank entries (vs inline grammar-table list); shared pedagogy under grammarbank.pedagogy.{class_name}; explain() returns pedagogy (not finding.pedagogy — gustar is not a case-prep so the check-pedagogy-shape VALID_CASES validator wouldn't accept it); PREPOSITION_COLLISIONS guard prevents sobre→sobrar false positives
+- [Phase 33]: 33-01: lifted buildDictState + buildInflectionIndex into shared dict-state-builder.js; popup.js delegates via posMapper/genusMapper opts so i18n labels stay popup-side; lockdown sidepanel host populateDictState updated (STAGED, not committed — Plan 33-03 lands cross-repo coordination)
+- [Phase 33]: 33-01: exam-profile ordbok-hide audit claim INVESTIGATED, not present — getSpellEngineEnvelope('exam') already returns leksihjelp:true post-Phase-29 redesign; no fix needed
 
 ### Pending Todos
 
