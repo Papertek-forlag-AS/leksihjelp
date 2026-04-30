@@ -19,10 +19,17 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'Invalid client' });
   }
 
-  const { type, category, ruleId, original, suggestion, context, text, language, description, url } = req.body || {};
+  const { type, category, ruleId, original, suggestion, context, text, language, description, url, lockdownContext } = req.body || {};
 
   if (!type || !['spell', 'vocab', 'ui', 'other'].includes(type)) {
     return res.status(400).json({ error: 'type required (spell|vocab|ui|other)' });
+  }
+
+  let lockdownCtx = null;
+  if (lockdownContext && typeof lockdownContext === 'object') {
+    const tc = typeof lockdownContext.testCode === 'string' ? lockdownContext.testCode.slice(0, 16) : null;
+    const pid = typeof lockdownContext.pid === 'string' ? lockdownContext.pid.slice(0, 64) : null;
+    if (tc || pid) lockdownCtx = { testCode: tc, pid };
   }
 
   let userEmail = null;
@@ -49,6 +56,7 @@ export default async function handler(req, res) {
       url: (url || '').slice(0, 500),
       userEmail,
       ip,
+      lockdownContext: lockdownCtx,
       status: 'new',
       createdAt: new Date().toISOString(),
     });
