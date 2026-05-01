@@ -22,17 +22,17 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 37 (Hygiene, Templates & Pre-flight) — In Progress
-Plan: 01 complete (3/4 plans done — 01, 03, 04 shipped; 02 remaining)
-Status: HYG-01/02/03 satisfied (UAT walkthrough/finding templates + auto-mode pause convention); HYG-07 pre-flight script live; HYG-06 [lockdown-resync-needed] convention adopted
-Last activity: 2026-05-01 — Plan 37-01 complete (UAT templates HYG-01/02 + verification_kind: human-browser-walk auto-mode pause HYG-03)
+Phase: 37 (Hygiene, Templates & Pre-flight) — Complete (4/4 plans shipped)
+Plan: 02 complete (HYG-04 + HYG-05 release gates landed)
+Status: All Phase 37 requirements satisfied (HYG-01..HYG-07). Release-gate suite extended from 12 to 14 entries. Ready for `/gsd:plan-phase 38`.
+Last activity: 2026-05-01 — Plan 37-02 complete (check-version-alignment HYG-04 + check-synced-surface-version HYG-05 with paired self-tests, registered as Release Workflow steps 14-15)
 
 ## Performance Metrics
 
 - **Phases:** 0/5 complete
 - **Plans:** 0/0 (planning not yet started)
 - **Requirements:** 0/27 satisfied
-- **Release gates active (entering v3.2):** 12 (target +2 in Phase 37: check-version-alignment, check-synced-surface-version)
+- **Release gates active (post Phase 37):** 14 (added in Phase 37-02: check-version-alignment HYG-04, check-synced-surface-version HYG-05)
 
 ## Accumulated Context
 
@@ -54,6 +54,10 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 37-hygiene-templates-pre-flight]: HYG-07 pre-flight: re-implemented upstream computeRevision inline (zero-dep CommonJS) and compare hex8 suffix only (date prefix shifts on UTC-day rollover); per-language drift report with actionable fix lines; explicitly NOT a release gate
 - [Phase 37-01]: UAT templates' HTML usage comment placed AFTER frontmatter (gsd-tools.cjs `frontmatter get` regex requires file to start with `---`); literal `TBD` placeholders in frontmatter values keep parsed output clean
 - [Phase 37-01]: `verification_kind: human-browser-walk` documented as top-level CLAUDE.md `##` section (placed before `## graphify`) — cross-cutting GSD convention, sits with Release Workflow / Downstream consumers as canonical agent instruction
+- [Phase 37-02]: HYG-04 plant target chosen as backend/public/index.html (lowest-risk source — display only, never touched by build/test pipeline) per RESEARCH Pitfall 3
+- [Phase 37-02]: HYG-05 self-test cleanup uses non-destructive `git reset --soft BEFORE_SHA` instead of `--hard` — preserves any unrelated dirty files in working tree, so the self-test is safe to run mid-development without clobbering pending work
+- [Phase 37-02]: extension/data/*.json no-exclusion in HYG-05 honored per CONTEXT lock; vocab-sync-with-version-bump is the canonical pattern, the noise floor is the right tradeoff
+- [Phase 37-02]: [lockdown-resync-needed] commit-message hint coupled directly into HYG-05 failure diagnostic — pulls HYG-06 nudge into the surface where developers will actually see it (at gate-failure time, in copy-pastable form)
 
 ### Pending Todos
 
@@ -77,5 +81,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Completed 37-hygiene-templates-pre-flight/37-03-PLAN.md (HYG-07 vocab-deployment pre-flight script).
-Next: Execute remaining Plan 37-02 (UAT templates HYG-01/02 + check-version-alignment HYG-04 + check-synced-surface-version HYG-05).
+Stopped at: Completed 37-hygiene-templates-pre-flight/37-02-PLAN.md (HYG-04 + HYG-05 release gates with paired self-tests; registered as Release Workflow steps 14-15). All 4 plans of Phase 37 now complete.
+Next: `/gsd:plan-phase 38` (extension UAT batch — first phase that can rely on the Phase 37 discipline infrastructure).

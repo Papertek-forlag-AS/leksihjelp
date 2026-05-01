@@ -105,7 +105,7 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
 
 ### 🚧 v3.2 UAT & Deploy Prep (Phases 37-41) — ACTIVE
 
-- [ ] **Phase 37: Hygiene, Templates & Pre-flight** — UAT walkthrough/finding templates, `verification_kind` frontmatter convention, `check-version-alignment` + `check-synced-surface-version` release gates with paired self-tests, papertek-vocabulary deployment verified at HEAD before any UAT runs
+- [x] **Phase 37: Hygiene, Templates & Pre-flight** — UAT walkthrough/finding templates, `verification_kind` frontmatter convention, `check-version-alignment` + `check-synced-surface-version` release gates with paired self-tests, papertek-vocabulary deployment verified at HEAD before any UAT runs (completed 2026-05-01)
 - [ ] **Phase 38: Extension UAT Batch + Bug-Fix Loop + REGR** — Drain 4 walkthroughs (F36-1 fr-aspect-hint → Phase 30-01 popup view → Phase 27 exam-mode → Phase 26 DE Lær mer incl. F7 NN/EN), hot-loop canonical 9-step Fix → Sync → Re-test, mandatory regression-fixture per fix (school-year stakes), close Phase 27 release-asset upload
 - [ ] **Phase 39: Lockdown Sync + Staging UAT** — Re-pin lockdown to tagged v3.2 head (defends Phase 30-02 orphan-mirror class), 8-step sidepanel staging UAT verification, cross-repo sync drift-detection PR, skriveokt-zero `--dry-run` verification (defers silent bit-rot)
 - [ ] **Phase 40: Deploy Runbook Authoring** — Four runbooks at `.planning/runbooks/` (lockdown-prod-deploy, papertek-app-sidepanel-deploy, extension-uat-fix-loop, lockdown-staging-deploy) with fixed 6-section structure, dry-run-walked end-to-end against staging with explicit user "I would feel safe running this against production" sign-off
@@ -178,7 +178,7 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 37. Hygiene, Templates & Pre-flight | 3/4 | In Progress|  |
+| 37. Hygiene, Templates & Pre-flight | 4/4 | Complete   | 2026-05-01 |
 | 38. Extension UAT Batch + Bug-Fix Loop + REGR | 0/0 | Not started | - |
 | 39. Lockdown Sync + Staging UAT | 0/0 | Not started | - |
 | 40. Deploy Runbook Authoring | 0/0 | Not started | - |

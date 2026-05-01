@@ -13,8 +13,8 @@ Requirements for v3.2. Each maps to a roadmap phase.
 - [x] **HYG-01**: UAT walkthrough template exists at `.planning/uat/TEMPLATE-walkthrough.md` with mandatory pre-flight evidence block (extension version string, IDB revision, default-preset profile, browser+version, `chrome://extensions` reload timestamp), defects-observed section, and target-browsers list
 - [x] **HYG-02**: Finding template exists at `.planning/uat/TEMPLATE-finding.md` formalizing the F-id pattern (severity, sync-status, regression-fixture-id) — promotes the implicit F1/F2/F36-1 convention from v3.1 Phase 34/35/36 to repo standard
 - [x] **HYG-03**: `verification_kind: human-browser-walk` frontmatter convention adopted on UAT phase plans; orchestrator hard-pauses (no auto-advance) on phases declaring this kind. Documented in CLAUDE.md.
-- [ ] **HYG-04**: `check-version-alignment` release gate added with paired `:test` self-test — asserts manifest.json + package.json + backend/public/index.html versions agree. Inserted into Release Workflow numbered list in CLAUDE.md.
-- [ ] **HYG-05**: `check-synced-surface-version` release gate added with paired `:test` self-test — fails when synced surfaces (`extension/content/`, `extension/popup/views/`, `extension/exam-registry.js`, `extension/styles/content.css`, `extension/data/`, `extension/i18n/`) changed since last tag without a `package.json` version bump
+- [x] **HYG-04**: `check-version-alignment` release gate added with paired `:test` self-test — asserts manifest.json + package.json + backend/public/index.html versions agree. Inserted into Release Workflow numbered list in CLAUDE.md.
+- [x] **HYG-05**: `check-synced-surface-version` release gate added with paired `:test` self-test — fails when synced surfaces (`extension/content/`, `extension/popup/views/`, `extension/exam-registry.js`, `extension/styles/content.css`, `extension/data/`, `extension/i18n/`) changed since last tag without a `package.json` version bump
 - [x] **HYG-06**: `[lockdown-resync-needed]` commit-message convention documented in CLAUDE.md downstream-consumers section; applied retroactively to outstanding synced-surface commits during phase work
 - [x] **HYG-07**: Papertek API vocabulary deployment verified as pre-flight to UAT. Direct repo access at `/Users/geirforbord/Papertek/papertek-vocabulary`; confirm git status clean + remote up-to-date + Vercel deployment at HEAD revision; verify `papertek-vocabulary.vercel.app/api/vocab/v1/revisions` reflects latest. Reconcile v3.1 side-patched extension data (e.g., `extension/data/es.json` gustar/por-para edits per Phase 32-02 decision) by either (a) confirming the edit landed in papertek-vocabulary and re-syncing via `npm run sync-vocab`, or (b) explicitly carrying the side-patch as deferred with documented reason. Hard pre-condition for UAT-EXT-* and UAT-LOCK-* — testing against stale vocab data is a Pitfall-1 (stale-artifact) failure mode.
 
@@ -99,8 +99,8 @@ All 27 v1 requirements mapped to exactly one phase by gsd-roadmapper on 2026-05-
 | HYG-01 | Phase 37 | Complete |
 | HYG-02 | Phase 37 | Complete |
 | HYG-03 | Phase 37 | Complete |
-| HYG-04 | Phase 37 | Pending |
-| HYG-05 | Phase 37 | Pending |
+| HYG-04 | Phase 37 | Complete |
+| HYG-05 | Phase 37 | Complete |
 | HYG-06 | Phase 37 | Complete |
 | HYG-07 | Phase 37 | Complete |
 | UAT-EXT-01 | Phase 38 | Pending |
