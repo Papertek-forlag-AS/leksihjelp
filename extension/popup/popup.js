@@ -1286,11 +1286,19 @@ async function initSettings() {
       // Switch language
       viewState.currentLang = lang;
       await chromeStorageSet({ language: viewState.currentLang });
+      // F38-1: broadcast LANGUAGE_CHANGED FIRST, before potentially-failing
+      // popup-internal work. Previously the broadcast lived inside the
+      // try/catch, so any throw from loadDictionary / loadGrammarFeatures
+      // (e.g. FR vocab not yet downloaded, IndexedDB error) silently swallowed
+      // the broadcast. Content scripts then ran with stale `currentLang`,
+      // and rules filtered against the wrong language. Storage is already
+      // updated above, so any fresh page load picks up the new language —
+      // but live tabs need the broadcast to re-route their seam.
+      chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: viewState.currentLang });
       try {
         await loadDictionary(viewState.currentLang);
         await loadGrammarFeatures(viewState.currentLang);
         initGrammarSettings();
-        chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: viewState.currentLang });
       } catch (e) {
         console.error('Language switch failed:', e);
       }

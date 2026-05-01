@@ -164,14 +164,33 @@
         // Add future cross-lang indexes here as they ship through the seam.
       ];
       const FOREIGN_VERB_SET_KEYS = ['frAuxPresensForms'];
+      // F38-1: French elision strip. The tokenizer emits elided tokens whole
+      // (e.g. "j'ai", "n'a", "qu'as", "s'est"), but the seam-exposed FR
+      // mood/aspect indexes contain only the unelided base ("ai", "a", "as",
+      // "est"). Without this strip, the cross-language guard misses every
+      // elided auxiliary and nb-typo-fuzzy falsely flags `j'ai` → `j'aime`
+      // (F38-1 walker symptom). The strip mirrors the elision-detection
+      // pattern in extension/content/spell-rules/fr-aspect-hint.js (the
+      // /^[a-zçéèêëàâ]'(.+)$/ regex on the auxiliary candidate).
+      const ELISION_RE = /^(?:j|n|s|c|d|l|m|t|qu)'(.+)$/i;
+      function stripElision(lc) {
+        const m = lc.match(ELISION_RE);
+        return m ? m[1] : null;
+      }
       function tokenIsForeignVerbForm(lc) {
+        const stripped = stripElision(lc);
+        const candidates = stripped ? [lc, stripped] : [lc];
         for (const k of FOREIGN_VERB_INDEX_KEYS) {
           const m = vocab && vocab[k];
-          if (m && typeof m.has === 'function' && m.has(lc)) return true;
+          if (m && typeof m.has === 'function') {
+            for (const c of candidates) if (m.has(c)) return true;
+          }
         }
         for (const k of FOREIGN_VERB_SET_KEYS) {
           const s = vocab && vocab[k];
-          if (s && typeof s.has === 'function' && s.has(lc)) return true;
+          if (s && typeof s.has === 'function') {
+            for (const c of candidates) if (s.has(c)) return true;
+          }
         }
         return false;
       }
