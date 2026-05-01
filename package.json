@@ -65,6 +65,7 @@
     "check-synced-surface-version": "node scripts/check-synced-surface-version.js",
     "check-synced-surface-version:test": "node scripts/check-synced-surface-version.test.js",
     "check-vocab-deployment": "node scripts/check-vocab-deployment.js",
+    "check-fr-bundle-completeness": "node scripts/check-fr-bundle-completeness.js",
     "build-popup-views-css": "node scripts/build-popup-views-css.js",
     "test:vocab-store": "node --test extension/content/vocab-store.test.js",
     "test:vocab-seam": "node --test extension/content/vocab-seam.test.js",
