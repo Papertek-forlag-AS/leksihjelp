@@ -361,10 +361,11 @@ Plans:
   6. **F36-6 Process gate (INFRA-10):** Add `npm run check-vocab-seam-coverage` release gate that asserts every key returned by `vocab-seam-core.buildIndexes` has a matching `getX()` getter in `vocab-seam.js` AND a matching entry in `spell-check.js`'s vocab object construction. Paired `:test` self-test variant. Catches the Phase 26-01 / 32-01 / 32-03 class of regression where a new index ships through gates green but is silently empty in the browser. This gate is the long-term fix for the bug class that took down Phase 35 verification.
   7. All release-workflow gates (now 12 with the new one) exit 0; one or more leksihjelp version bumps signal lockdown + skriveokt-zero downstream consumers to re-pin.
 
-**Plans:** 2/2 plans complete
+**Plans:** 3 plans (2 complete, 1 gap-closure pending)
 Plans:
-- [ ] 36-01-PLAN.md — Triage + fix F36-1/F36-3/F36-4/F36-5; verify F36-2 watch-item; version bump + 36-VERIFICATION.md with per-finding pass/fail
-- [ ] 36-02-PLAN.md — INFRA-10 process gate (check-vocab-seam-coverage + paired :test + CLAUDE.md gate #12)
+- [x] 36-01-PLAN.md — Triage + fix F36-1/F36-3/F36-4/F36-5; verify F36-2 watch-item; version bump + 36-VERIFICATION.md with per-finding pass/fail
+- [x] 36-02-PLAN.md — INFRA-10 process gate (check-vocab-seam-coverage + paired :test + CLAUDE.md gate #12)
+- [ ] 36-03-PLAN.md — Gap closure F36-1 (browser-still-fails): probe + cross-language verb-form guard in nb-typo-fuzzy + population canaries in check-vocab-seam-coverage; v2.9.18
 
 ### Phase 32: FR/ES Pedagogy (Lær mer)
 
