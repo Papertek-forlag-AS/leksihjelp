@@ -1,443 +1,450 @@
-# Architecture Patterns
+# Architecture Research — v3.2 UAT & Deploy Prep
 
-**Domain:** Compound word decomposition + polish items for Leksihjelp v2.1
-**Researched:** 2026-04-26
-**Confidence:** HIGH (all recommendations grounded in direct code read of existing architecture)
+**Domain:** Cross-repo integration architecture for a risk-reduction milestone
+**Researched:** 2026-05-01
+**Confidence:** HIGH (drawn from existing repo state, CLAUDE.md, lockdown-adapter-contract, STATE.md)
 
----
+## Scope Note
 
-## 1. Baseline Architecture (Post-v2.0)
-
-The existing system has three key integration surfaces relevant to v2.1:
-
-### 1.1 Vocab Seam (shared indexes)
-
-```
-vocab-seam-core.js (1,224 LOC)        vocab-seam.js (325 LOC)
-  Pure, side-effect-free                Browser IIFE glue
-  buildIndexes() → state object         Exposes self.__lexiVocab
-  Dual-export: Node + browser           Getter surface for all consumers
-```
-
-`buildIndexes` already produces: `nounGenus` (Map, ~4k entries), `compoundNouns` (Set, noun headwords), `validWords` (Set). These are the three indexes compound decomposition needs.
-
-### 1.2 Spell-Check Pipeline
-
-```
-spell-check.js: runCheck()
-  → builds vocab bag from VOCAB.getXxx()
-  → CORE.check(text, vocab, opts)
-    → tokenize → build ctx → iterate rules → dedup
-```
-
-Rules receive `ctx = {tokens, vocab, cursorPos, lang, suppressed, sentences, ...}`. The `vocab` bag is assembled in `runCheck()` (lines 225-259) and passed verbatim to every rule's `check(ctx)`.
-
-### 1.3 Dictionary Popup
-
-```
-popup.js: performSearch(query)
-  → Phase 1: direct matches on allWords[]
-  → Phase 2: inflection matches via inflectionIndex
-  → Phase 3: phonetic matches
-  → renderResults([{entry, inflectionHint}])
-```
-
-popup.js operates on its own `dictionary` object loaded from `extension/data/{lang}.json`. It does NOT currently load `vocab-seam-core.js` or use `__lexiVocab`.
+This research is NOT for "what to build" — v3.2 ships zero new features. It is for "how do UAT-driven changes propagate safely across three repositories under a shared sync pipeline." The architecture concern is **integration paths and version-skew risk**, not new components.
 
 ---
 
-## 2. Compound Decomposition Engine
-
-### 2.1 Where It Lives: `vocab-seam-core.js`
-
-**Decision:** Add `decomposeCompound(word, nounGenus, lang)` as a new pure function in `vocab-seam-core.js`, exported alongside `buildIndexes`, `phoneticNormalize`, and `phoneticMatchScore`.
-
-**Rationale:**
-1. **Already houses compound-adjacent data.** `buildLookupIndexes` builds `compoundNouns` and `nounGenus` -- the exact indexes decomposition needs.
-2. **Dual-export pattern.** Runs identically in browser (content scripts) and Node (fixture harness). Free testability.
-3. **No new manifest entry.** No new content script file = no load-order coordination.
-4. **Three consumers need it.** Spell rules (nb-sarskriving, de-compound-gender), dictionary popup, and potentially future NB/NN gender inference. Putting it in a rule file would lock out the popup.
-
-**Why NOT a separate module:** Adding a new `compound-decompose.js` would require a manifest.json content_scripts entry and load-order guarantees relative to vocab-seam-core.js. The function is ~80 LOC and operates on data already produced by `buildIndexes`. It belongs with its data.
-
-**Why NOT inside a spell rule:** Rules have no established import mechanism between each other. The popup doesn't load spell rules at all. A rule-housed engine would be unreachable from the dictionary.
-
-### 2.2 Function Signature and Return Shape
-
-```javascript
-/**
- * @param {string} word       - lowercase token to decompose
- * @param {Map<string,string>} nounGenus - word -> genus ('m','f','n')
- * @param {string} lang       - 'nb'|'nn'|'de'
- * @returns {null | {
- *   parts: Array<{word: string, genus: string|null, linker: string}>,
- *   gender: string,        // genus of last component (operative gender)
- *   confidence: 'high'|'medium'
- * }}
- */
-function decomposeCompound(word, nounGenus, lang) { ... }
-```
-
-**Shape rationale:**
-- `parts` array (not a pair) supports 3+ component compounds: `brannstasjonsjef` = brann + stasjon + sjef (NB), `Donaudampfschifffahrt` (DE).
-- Each part carries `genus` for educational display (popup can show per-component gender).
-- `linker` records the joining element (empty string, 's', 'e', 'n', 'en', 'er', 'es') for pedagogical transparency.
-- `confidence: 'high'` = both head and tail are known nouns. `'medium'` = only the tail is a known noun. Consumers can gate on this: spell-check acceptance requires `'high'`, popup display accepts both.
-
-### 2.3 Language-Specific Linking Elements
-
-```javascript
-const LINKERS_BY_LANG = {
-  de: ['s', 'n', 'en', 'er', 'e', 'es'],  // existing set from de-compound-gender.js
-  nb: ['s', 'e'],                           // binde-s (arbeidstid), binde-e (barnehage)
-  nn: ['s', 'e'],                           // same as NB
-};
-```
-
-DE linkers are already proven correct in `de-compound-gender.js` (line 31). NB/NN linkers are simpler -- Norwegian productive compounding uses `binde-s` (most common: arbeidstid, brannstasjon) and occasionally `binde-e` (barnehage, gudskelov).
-
-### 2.4 Algorithm: Greedy Longest-Head, Recursive
+## System Overview — Three-Repo Topology
 
 ```
-1. For split positions 3..len-3:
-   a. Direct: head is known noun, tail is known noun → high confidence
-   b. With linker: head + linker + tail, both known → high confidence
-2. If no high-confidence split found:
-   a. Tail-only: try shortest tail that's a known noun → medium confidence
-   b. With linker variant
-3. Recursive: if head is known, try decomposing the tail → 3+ part compounds
+┌──────────────────────────────────────────────────────────────────────┐
+│                    leksihjelp (THIS repo, upstream)                  │
+│                     Source of truth for all shared code              │
+├──────────────────────────────────────────────────────────────────────┤
+│  extension/content/*.js     extension/popup/views/*.js               │
+│  extension/exam-registry.js extension/styles/content.css             │
+│  extension/data/*           extension/i18n/*                         │
+│                                                                      │
+│  package.json version  ←——— sync signal to downstreams               │
+│  scripts/*.js (14 release gates)                                     │
+└─────────────┬──────────────────────────────────┬─────────────────────┘
+              │ file:../leksihjelp               │ (future: npm)
+              │ postinstall: sync-leksihjelp.js  │
+              ▼                                  ▼
+┌──────────────────────────────────┐   ┌──────────────────────────────┐
+│  lockdown (downstream, shipping) │   │  skriveokt-zero (deferred,   │
+│  /Users/.../Papertek/lockdown    │   │   not yet shipping)          │
+├──────────────────────────────────┤   ├──────────────────────────────┤
+│  public/leksihjelp/*  ← synced   │   │  src/leksihjelp/*  ← synced  │
+│  + leksihjelp-loader.js (shim)   │   │  + own chrome shim           │
+│  + leksihjelp-sidepanel-host.js  │   │  + skriveokt-zero/scripts/   │
+│    (Phase 30 mount adapter)      │   │    sync-leksihjelp.js        │
+│                                  │   │                              │
+│  public/leksihjelp/data/         │   │  EXAM-09 deferred until      │
+│    NOT in sync — lockdown uses   │   │  ships to consumers          │
+│    own bundled vocab approach    │   │                              │
+│  audio/  EXCLUDED from sync      │   │                              │
+│                                  │   │                              │
+│  Firebase hosting:               │   │  Tauri desktop binary        │
+│   - papertek.app (prod)          │   │  (no web deploy)             │
+│   - lockdown-stb (staging)       │   │                              │
+│  Firebase Functions + firestore. │   │                              │
+│   rules (RESOURCE_PROFILES)      │   │                              │
+└──────────────────────────────────┘   └──────────────────────────────┘
 ```
 
-This matches the approach already working in `de-compound-gender.js` `inferGenderFromSuffix` (lines 78-103) but generalizes it to NB/NN and returns structured data instead of just genus.
+### Component Responsibilities (v3.2 lens)
 
-### 2.5 Wiring Into buildIndexes
-
-`buildIndexes` returns a bound closure so consumers don't need to manage the `nounGenus` dependency:
-
-```javascript
-// In buildIndexes return object, add:
-decomposeCompound: (word) => decomposeCompound(word, nounGenus, lang),
-```
-
-This follows the pattern of `phoneticNormalize` and `phoneticMatchScore` on the existing API export.
+| Component | Responsibility | Touchpoint for v3.2 |
+|-----------|----------------|---------------------|
+| `extension/` source tree | Canonical implementation of every shared surface | Every UAT bug-fix lands here first |
+| 14 release gates (`scripts/check-*.js`) | Block ship on regressions | Re-run on every UAT fix; gate passes are pre-condition for `npm run package` |
+| `package.json` version | Sync signal to downstream consumers | Bump after every UAT fix that changes a synced surface |
+| `npm run package` | Builds zip with minified `data/*.json` | Re-runs minification on every release |
+| Lockdown's `scripts/sync-leksihjelp.js` (postinstall) | Pulls synced files from `node_modules/@papertek/leksihjelp` (currently `file:../leksihjelp`) | Manually or auto-triggered after extension version bump |
+| `leksihjelp-loader.js` (lockdown chrome shim) | Provides chrome.runtime/storage/getURL surface | Touched only if seam contract changes; v3.2 should not touch it |
+| `leksihjelp-sidepanel-host.js` (lockdown Phase 30 mount) | Mounts shared view modules with `audioEnabled: false` deps | UAT walkthrough surface for Phase 30-02 |
+| Firebase hosting + Functions + firestore.rules (lockdown) | Production runtime for EXAM-10 + papertek.app sidepanel host | Deploy runbook target — actual deploy deferred |
 
 ---
 
-## 3. Integration Point 1: vocab-seam.js (Browser Glue)
+## Recommended `.planning/` Structure for v3.2
 
-Add one getter to `self.__lexiVocab`:
-
-```javascript
-getDecomposeCompound: () => (state && state.decomposeCompound)
-  ? state.decomposeCompound
-  : null,
+```
+.planning/
+├── PROJECT.md                          # already maintained
+├── STATE.md                            # already maintained
+├── lockdown-adapter-contract.md        # durable doc — leave in place
+├── research/                           # this milestone's research
+│   ├── SUMMARY.md
+│   ├── STACK.md
+│   ├── FEATURES.md
+│   ├── ARCHITECTURE.md  ← this file
+│   └── PITFALLS.md
+├── milestones/                         # archived milestones (v3.1, v3.0, …)
+└── runbooks/                           # NEW — durable, top-of-planning
+    ├── README.md                       # index + when to use each
+    ├── extension-uat-fix-loop.md       # canonical fix → sync → re-test
+    ├── lockdown-staging-deploy.md      # firestore.rules + Functions to lockdown-stb
+    ├── lockdown-prod-deploy.md         # papertek.app prod (user-gated)
+    └── papertek-app-sidepanel-deploy.md # Phase 30 hosting deploy
 ```
 
-Returns the bound closure from `buildIndexes`, or `null` if state isn't loaded yet. Consumers null-check before calling.
+### Structure Rationale — runbooks live at `.planning/runbooks/` not in milestone
+
+**Decision:** Runbooks are durable operational artifacts, not milestone-scoped deliverables. They MUST survive the v3.2 archive.
+
+- **`.planning/runbooks/`** (durable): Each runbook is referenced by name from any future milestone that re-deploys. The next person who needs to push firestore.rules in v3.5 should find the runbook at a stable path, not buried inside `milestones/v3.2-*`.
+- **`.planning/milestones/v3.2/`** (when archived): May contain a *pointer* (`See ../../runbooks/lockdown-prod-deploy.md`) plus the milestone-specific UAT findings log.
+- **Top-level (e.g., repo root)** (rejected): Runbooks aren't user-facing docs. Mixing them with `README.md` / `CLAUDE.md` dilutes both.
+
+**Integration point for the next reader:** `.planning/runbooks/README.md` is the index. CLAUDE.md gets a one-line pointer in the "Release Workflow" section: *"For deploy steps that touch lockdown (firestore.rules, Functions, hosting), see `.planning/runbooks/`."*
 
 ---
 
-## 4. Integration Point 2: Spell-Check Pipeline
+## Architectural Patterns
 
-### 4.1 vocab Bag Wiring
+### Pattern 1: Canonical Fix → Sync → Re-test Loop
 
-In `spell-check.js` `runCheck()`, add one line to the `vocab` object (after line 258):
-
-```javascript
-decomposeCompound: VOCAB.getDecomposeCompound(),
-```
-
-Rules access it as `vocab.decomposeCompound(word)`. If `null` (vocab not loaded), rules skip decomposition gracefully.
-
-### 4.2 nb-sarskriving Upgrade
-
-**Current behavior (line 80):** `compoundNouns.has(prev.word + t.word)` -- dictionary lookup only.
-
-**Upgraded behavior:** Falls back to decomposition when concatenation is NOT in compoundNouns:
-
-```javascript
-const concat = prev.word + t.word;
-const isKnownCompound = compoundNouns.has(concat);
-const isDecomposable = !isKnownCompound
-  && vocab.decomposeCompound
-  && vocab.decomposeCompound(concat)?.confidence === 'high';
-
-if (isKnownCompound || isDecomposable) {
-  out.push({ ... });
-}
-```
-
-**Only `confidence === 'high'` triggers the flag.** This prevents false positives where the head is a verb stem or adjective rather than a noun. The existing `SARSKRIVING_BLOCKLIST` (lines 30-45) continues to guard against function-word collisions.
-
-### 4.3 de-compound-gender Refactoring
-
-Replace the local `inferGenderFromSuffix` (lines 78-103) with a delegation to shared decomposition:
-
-```javascript
-// Current:
-const inference = inferGenderFromSuffix(t.word, nounGenus);
-
-// Becomes:
-const decomp = vocab.decomposeCompound ? vocab.decomposeCompound(t.word) : null;
-if (!decomp) continue;
-const inference = { genus: decomp.gender, suffix: decomp.parts[decomp.parts.length - 1].word };
-```
-
-**Keep `inferGenderFromSuffix` as dead code for one release cycle** as a rollback path. Remove once fixtures pass cleanly with the shared engine.
-
-### 4.4 NB/NN Gender Inference for Decomposed Compounds
-
-The existing `nb-gender` rule (or a new sibling) can use decomposition to infer gender for unknown compounds:
+**What:** Every UAT-surfaced bug follows a strict path. No hot-fixes downstream.
 
 ```
-"en skolesekk" → decomposeCompound('skolesekk') → gender 'm' → matches 'en' → OK
-"et skolesekk" → gender 'm' → mismatch with 'et' (n) → flag
+┌─────────────────────────────────────────────────────────────┐
+│ 1. UAT surfaces bug in extension OR lockdown sidepanel      │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 2. Edit canonical source in /Users/…/leksihjelp/extension/  │
+│    (NEVER edit /Users/…/lockdown/public/leksihjelp/*)       │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 3. Run all 14 release gates locally                         │
+│    npm run check-fixtures && \                              │
+│    npm run check-explain-contract && \                      │
+│    npm run check-rule-css-wiring && \                       │
+│    npm run check-spellcheck-features && \                   │
+│    npm run check-network-silence && \                       │
+│    npm run check-bundle-size && \                           │
+│    npm run check-baseline-bundle-size && \                  │
+│    npm run check-benchmark-coverage && \                    │
+│    npm run check-governance-data && \                       │
+│    npm run check-vocab-seam-coverage && \                   │
+│    npm run check-exam-marker && \                           │
+│    npm run check-popup-deps && \                            │
+│    npm run check-stateful-rule-invalidation && \            │
+│    npm run check-pedagogy-shape                             │
+│    (paired :test self-tests run in CI; not strictly needed  │
+│     locally per fix, but run before milestone close)        │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 4. Bump version in THREE places (mandatory by Release       │
+│    Workflow step 13):                                        │
+│      - extension/manifest.json                              │
+│      - package.json   ← this is the SYNC SIGNAL             │
+│      - backend/public/index.html                            │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 5. npm run package                                          │
+│    (regenerates zip with minified data/*.json)              │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 6. Commit in leksihjelp repo                                │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 7. In /Users/…/lockdown:                                    │
+│      cd /Users/…/lockdown                                    │
+│      npm install   # triggers postinstall sync-leksihjelp   │
+│         OR                                                   │
+│      node scripts/sync-leksihjelp.js   # explicit re-sync   │
+│    Verify: git status shows public/leksihjelp/* changes      │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 8. Lockdown smoke-test (depends on what changed):           │
+│    - Synced view module change → load sidepanel-host UAT    │
+│    - exam-registry.js change → re-load exam profile         │
+│    - content.css change → visual regression on dialect-mix  │
+│      / spell dots / EKSAMENMODUS amber border               │
+│    - data/* (NB baseline only) → reload extension to clear  │
+│      IDB cache                                              │
+└──────────────────────┬──────────────────────────────────────┘
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│ 9. Commit in lockdown repo with message referencing          │
+│    leksihjelp version: "sync: leksihjelp 2.9.19"            │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-This extends the existing nounGenus-based gender checking to productive compounds not in the dictionary.
+**When to use:** Every single UAT bug-fix in v3.2.
+**Trade-off:** Slow (9 steps per fix) vs. safe (catches version skew, gate regressions, sync drift). At a UAT cycle's volume of small fixes, batching helps — see Build Order below.
+
+### Pattern 2: Batched UAT Drain Before Sync
+
+**What:** Don't sync after every micro-fix. Drain a UAT walkthrough's findings into one extension version bump.
+
+**When to use:** When multiple findings emerge in the same UAT walkthrough (e.g., 6 DE Lær mer walks may surface 3 small copy/CSS fixes — bundle them).
+**Trade-off:** Reduces lockdown re-sync churn (good) but risks one fix masking another's regression on first lockdown smoke-test (acceptable: gates run against the bundle, not per-fix).
+
+**Heuristic from existing v3.1 pattern:** UAT batches matched roughly 1 phase = 1 walkthrough = 1 bump. Continue this rhythm.
+
+### Pattern 3: Runbook-as-Code Pre-flight
+
+**What:** Each deploy runbook ends with a copy-pasteable command block + a verification step. Treat it like a checked-in Bash transcript with prose between commands.
+
+**Example shape (for `lockdown-prod-deploy.md`):**
+
+```markdown
+## Pre-flight
+
+- [ ] Confirm `firebase use papertek-prod` (NOT `lockdown-stb`)
+- [ ] Diff staging firestore.rules vs prod: `firebase firestore:rules:list`
+- [ ] Confirm `RESOURCE_PROFILES.LEKSIHJELP_EXAM` enum present in prod Functions config
+
+## Deploy
+
+```bash
+cd /Users/…/lockdown
+firebase deploy --only firestore:rules,functions --project papertek-prod
+```
+
+## Verify
+
+- [ ] Open papertek.app, sign in as test teacher
+- [ ] Apply LEKSIHJELP_EXAM profile to a test student
+- [ ] Confirm student sees EKSAMENMODUS badge + amber border
+```
+
+**When to use:** Every deploy artifact in v3.2 (firestore.rules + Functions for EXAM-10; papertek.app hosting for Phase 30 sidepanel).
+**Trade-off:** Verbose vs. low-cognitive-load for the next deployer (typically the user themselves under time pressure).
+
+### Pattern 4: Dep-Injection Contract Stability (existing — preserve, don't touch)
+
+**What:** Phase 30 view modules accept `mountXView(container, deps)` with explicit deps. Lockdown sidepanel host passes `audioEnabled: false` + no auth/payment/exam-toggle.
+
+**v3.2 implication:** Any UAT fix in `extension/popup/views/*.js` MUST keep contract additive. Adding required deps breaks the lockdown sidepanel host silently. The `check-popup-deps` gate enforces no implicit globals but does NOT catch "added a new required dep field." Mitigation: code review + lockdown smoke-test step 8 above.
 
 ---
 
-## 5. Integration Point 3: Dictionary Popup
+## Data Flow — UAT-Specific
 
-### 5.1 The Problem
+### UAT Finding → Production-Ready Path
 
-popup.js operates on its own data pipeline (`dictionary`, `allWords`, `inflectionIndex`). It does NOT load `vocab-seam-core.js`. When a student searches for an unknown compound like "skolesekk" or "fotballtrening", `performSearch` returns zero results.
-
-### 5.2 Solution: Load vocab-seam-core.js in popup.html
-
-Add a `<script>` tag in `popup.html` before `popup.js`:
-
-```html
-<script src="../content/vocab-seam-core.js"></script>
-<script src="popup.js"></script>
+```
+UAT walkthrough (manual, in-browser)
+     ↓
+Finding logged in milestone phase doc
+     ↓
+Decision: extension fix? data fix? lockdown-only fix?
+     ├── extension fix     → Pattern 1 (canonical loop)
+     ├── data fix          → papertek-vocabulary repo, then sync-vocab in extension, then Pattern 1
+     └── lockdown-only fix → lockdown repo direct (rare; only for shim/host code)
+     ↓
+Lockdown re-sync + smoke-test
+     ↓
+Staging UAT (lockdown-stb on Firebase hosting)
+     ↓
+Production deploy runbook authored / refined based on staging experience
+     ↓
+[v3.2 milestone close — actual prod deploy deferred per Decision below]
 ```
 
-This gives popup.js access to `self.__lexiVocabCore.decomposeCompound`. The IIFE self-registers on `self.__lexiVocabCore` (line 1222 of vocab-seam-core.js) which works in both content-script and popup contexts.
+### Version-Skew Detection
 
-### 5.3 Build a nounGenus Map in popup.js
+There is NO automatic detection today. Skew can occur if:
 
-popup.js already has `dictionary` with full `nounbank`. Build the map once when dictionary loads:
+1. Lockdown's `package.json` lockdown-side pin lags behind the leksihjelp version that introduced a fix.
+2. Someone hot-fixes `lockdown/public/leksihjelp/*` directly (forbidden by CLAUDE.md but possible).
+3. Lockdown's `npm install` doesn't run between leksihjelp version bumps (e.g., manual file copy).
 
-```javascript
-// In loadDictionary(), after flattenBanks(dictionary):
-let popupNounGenus = new Map();
-if (dictionary.nounbank) {
-  for (const entry of Object.values(dictionary.nounbank)) {
-    if (entry.word && entry.genus) {
-      popupNounGenus.set(entry.word.toLowerCase(), entry.genus);
-    }
-  }
-}
-```
-
-### 5.4 Decomposition Fallback in performSearch
-
-At the end of `performSearch`, after all existing search phases find zero results:
-
-```javascript
-if (directResults.length === 0 && inflectionResults.length === 0) {
-  const core = self.__lexiVocabCore;
-  if (core && popupNounGenus.size > 0) {
-    const decomp = core.decomposeCompound(q, popupNounGenus, currentLang);
-    if (decomp) {
-      renderDecompositionResult(decomp, q);
-      return;
-    }
-  }
-}
-```
-
-### 5.5 renderDecompositionResult
-
-A dedicated renderer (NOT piped through `renderResults`) because decomposition results have a fundamentally different shape:
-
-```javascript
-function renderDecompositionResult(decomp, query) {
-  const container = document.getElementById('search-results');
-  const partsHtml = decomp.parts.map(p => {
-    const genusLabel = p.genus ? genusToGender(p.genus) : '';
-    return `<span class="decomp-part">${escapeHtml(p.word)}${
-      genusLabel ? ` <span class="decomp-genus">(${escapeHtml(genusLabel)})</span>` : ''
-    }${p.linker ? `<span class="decomp-linker">${escapeHtml(p.linker)}</span>` : ''}</span>`;
-  }).join(' + ');
-
-  const genderLabel = decomp.gender ? genusToGender(decomp.gender) : '';
-  container.innerHTML = `
-    <div class="result-card glass decomp-card">
-      <div class="decomp-header">${escapeHtml(query)}</div>
-      <div class="decomp-breakdown">${partsHtml}</div>
-      <div class="decomp-gender">${t('compound_gender')}: ${escapeHtml(genderLabel)}</div>
-      <div class="decomp-confidence">${
-        decomp.confidence === 'high' ? t('compound_conf_high') : t('compound_conf_medium')
-      }</div>
-    </div>`;
-}
-```
-
-Each component word is clickable -- clicking triggers a new `performSearch` for that component, showing the full dictionary entry. This gives the student the "drill down" experience.
+**Mitigation (existing):** CLAUDE.md documents the rule. **Gap (v3.2 should address):** Add to `lockdown-prod-deploy.md` runbook a pre-flight check that compares the leksihjelp `package.json` version in the lockdown repo's `node_modules` against the latest tag in the leksihjelp repo.
 
 ---
 
-## 6. Integration Point 4: Manual Spell-Check Button
+## Risk Analysis — UAT-Driven Changes Specifically
 
-### 6.1 The Problem
+### Risk 1: Asymmetric extension-vs-lockdown drift
 
-Currently, spell-check runs on input/keyup events with an 800ms debounce. Uncertain or dyslexic students want an explicit "check now" action.
+**Why:** Extension UAT can surface bugs that ONLY manifest in extension context (e.g., chrome.identity.launchWebAuthFlow paths). The fix may not need lockdown re-sync. But the version still bumps. If we get into a habit of "extension bumped but lockdown re-sync deferred," we accumulate drift on shared surfaces that DO need the re-sync.
 
-### 6.2 Event Mechanism: CustomEvent (Not chrome.runtime.sendMessage)
+**Mitigation:** Every extension version bump triggers a "does lockdown need this?" decision — recorded in commit message tag (e.g., `[lockdown-resync-needed]` or `[extension-only]`).
 
-`floating-widget.js` and `spell-check.js` execute in the same content-script context. Using `chrome.runtime.sendMessage` would route through the background script unnecessarily. A DOM CustomEvent stays within the page:
+### Risk 2: Partial fixes between UAT walkthroughs
 
-```javascript
-// floating-widget.js (button click handler):
-document.dispatchEvent(new CustomEvent('lexi-spell-check-run'));
+**Why:** UAT walkthrough A surfaces a fix that lands. UAT walkthrough B then runs against the post-fix code. If walkthrough B surfaces a bug, was it pre-existing or caused by A's fix?
 
-// spell-check.js (listener, added in attachListeners):
-document.addEventListener('lexi-spell-check-run', () => {
-  if (!enabled || paused) return;
-  const el = resolveEditable(document.activeElement);
-  if (el) {
-    activeEl = el;
-    runCheck();  // bypass debounce, run immediately
-  }
-});
-```
+**Mitigation:** Run walkthroughs in a defined order; capture each walkthrough's "before-version" and "after-version" in the phase doc.
 
-### 6.3 Button Placement
+### Risk 3: Release-gate false negatives during UAT
 
-Add a small checkmark/pencil icon button to the floating widget (alongside the existing TTS play button). The button is always visible when the widget is shown, not gated on subscription status (spell-check is free).
+**Why:** All 14 gates target known regression classes. UAT often surfaces bugs that NO gate catches (otherwise we'd have caught them pre-ship). Adding a new gate for each UAT finding is the right long-term answer (per the Phase 36 INFRA-10 precedent) but slows the milestone.
 
-### 6.4 Pipeline Reuse
+**Mitigation:** Distinguish "ship-blocking gate addition" (rare; only for regression classes that recurred 2+ times) vs. "fix-only" (most cases). Log gate-candidate ideas in `.planning/research/PITFALLS.md` for future milestones.
 
-The manual button calls the exact same `runCheck()` function. No separate code path. The only difference is it bypasses the 800ms debounce timer.
+### Risk 4: Lockdown staging deploy ≠ production behavior
 
----
+**Why:** firestore.rules + Functions deploys to lockdown-stb may pass UAT, then fail in prod due to firestore index differences, prod-only auth claims, or env-var divergence.
 
-## 7. Integration Point 5: Demonstrative-Mismatch Rule
+**Mitigation:** The `lockdown-prod-deploy.md` runbook MUST include a pre-flight diff step (rules + Functions config + env vars) against staging. This is the single most important runbook item.
 
-### 7.1 Architecture
+### Risk 5: Audio re-introduction to lockdown
 
-New file: `extension/content/spell-rules/nb-demonstrative-mismatch.js`
+**Why:** Three independent safeguards exist (`audioEnabled: false` in deps, host never passes real `playAudio`, `extension/audio/` excluded from sync). A naive UAT-driven view-module refactor could break the renderResults gate.
 
-Standard plugin rule shape. Uses existing `nounGenus` Map (no new data needed). Checks `det/den/dette/denne/disse` + following token against nounGenus:
+**Mitigation:** No new safeguard needed — `check-popup-deps` + manual review + the host's hard-coded `audioEnabled: false` already cover. v3.2 should NOT touch the audio safeguards.
 
-```
-"Det boka" → nounGenus('boka') = 'f' → 'det' expects 'n' → mismatch → flag
-"Den huset" → nounGenus('huset') = 'n' → 'den' expects 'm/f' → mismatch → flag
-```
+### Risk 6: Runbook drift after first prod deploy
 
-### 7.2 Demonstrative-Gender Mapping
+**Why:** v3.2 ships runbooks; first actual prod deploy happens post-milestone. If the first deploy reveals runbook gaps, will they be patched back?
 
-```javascript
-const DEMONSTRATIVE_GENDER = {
-  'den': new Set(['m', 'f']),   // maskulin/feminin
-  'det': new Set(['n']),         // noytrum
-  'denne': new Set(['m', 'f']),
-  'dette': new Set(['n']),
-  'disse': null,                 // plural, no gender check
-};
-```
-
-### 7.3 Decomposition Integration
-
-When the noun following a demonstrative is NOT in `nounGenus`, try decomposition:
-
-```javascript
-let genus = nounGenus.get(nextToken.word);
-if (!genus && vocab.decomposeCompound) {
-  const decomp = vocab.decomposeCompound(nextToken.word);
-  if (decomp && decomp.confidence === 'high') genus = decomp.gender;
-}
-```
-
-This makes the demonstrative rule work on productive compounds -- a natural benefit of the shared decomposition engine.
+**Mitigation:** Add to runbook header: *"After first production execution, append a `## Run Log` section with date, executor, and any deviations. Patch the steps if deviations were necessary."*
 
 ---
 
-## 8. Anti-Patterns to Avoid
+## Modified vs. New Components
 
-### Anti-Pattern 1: Decomposition as a Spell Rule
+**New:** Almost nothing. v3.2 is a risk-reduction milestone.
 
-Putting the engine in `spell-rules/nb-compound-decompose.js` would lock it away from popup.js (which doesn't load spell rules) and from de-compound-gender.js (no import path between rules).
+**Genuinely new artifacts:**
+- `.planning/runbooks/README.md` — index file
+- 4 runbook files (extension-uat-fix-loop, lockdown-staging-deploy, lockdown-prod-deploy, papertek-app-sidepanel-deploy)
+- Optional: a `[lockdown-resync-needed]` / `[extension-only]` commit-message convention (no code, just discipline)
 
-### Anti-Pattern 2: Pre-Computing All Compounds at Build Time
+**Modified (highest-risk first):**
 
-The compound space is O(n^2) on nounGenus entries (~4k^2 = ~16M). Most are nonsense. On-demand decomposition costs ~0.1ms per call. No index needed.
+| Surface | Risk | Why |
+|---------|------|-----|
+| `extension/popup/views/*.js` | HIGH | Synced to lockdown sidepanel host; dep-contract changes break silently |
+| `extension/exam-registry.js` | HIGH | Synced to lockdown for teacher-lock; entry shape changes break firestore profile mapping |
+| `extension/content/spell-rules/*.js` | MEDIUM | Synced to lockdown; rule additions need exam-marker + CSS wiring + explain-contract; gates catch most |
+| `extension/styles/content.css` | MEDIUM | Synced whole; selectors for lockdown-only contexts (`.pdf-text-layer`) live here too |
+| `extension/data/nb-baseline.json` | LOW-MEDIUM | Bundled in zip; capped at 200KB by gate; lockdown uses own data path so sync impact minimal |
+| `extension/i18n/*` | LOW | Synced; copy-only changes; UAT may surface NB/NN/EN string fixes |
+| Lockdown `leksihjelp-sidepanel-host.js` | LOW | NOT synced (lockdown-owned); modify only if dep contract demands it |
+| Lockdown `firestore.rules` | DEPLOY-RISK | Rule changes for EXAM-10 already in staging; prod deploy is user-gated |
+| Lockdown Cloud Functions (RESOURCE_PROFILES) | DEPLOY-RISK | Same — staging deployed; prod runbook is the v3.2 deliverable |
 
-### Anti-Pattern 3: Piping Decomposition Through renderResults
-
-Decomposition results have a different shape (parts array, no conjugations, no examples). Force-fitting into the existing card template produces empty sections. Use a dedicated renderer.
-
-### Anti-Pattern 4: Injecting Inferred Genders Into nounGenus
-
-Mutating the shared index at query time creates race conditions and test non-determinism. Keep decomposition results ephemeral.
-
----
-
-## 9. Build Order (Dependency-Driven)
-
-| Phase | What | Depends On | Files Changed |
-|-------|------|-----------|--------------|
-| **1** | Decomposition engine | -- | `vocab-seam-core.js` (+80 LOC), `vocab-seam.js` (+3 LOC) |
-| **2** | Spell-check wiring + rule upgrades | Phase 1 | `spell-check.js` (+2), `nb-sarskriving.js` (+15), `de-compound-gender.js` (+5/-25) |
-| **3** | NB/NN gender inference for compounds | Phase 1 | Existing `nb-gender` rule or new sibling (+20 LOC) |
-| **4** | Dictionary popup integration | Phase 1 | `popup.html` (+1), `popup.js` (+70), `content.css` (+10), `strings.js` (+8) |
-| **5** | Demonstrative-mismatch rule | Phase 1 (optional, uses decomp) | **New:** `nb-demonstrative-mismatch.js` (~60), `content.css` (+2), `strings.js` (+4) |
-| **6** | Manual spell-check button | -- (independent) | `floating-widget.js` (+15), `spell-check.js` (+10), `content.css` (+8), `strings.js` (+2) |
-| **7** | Triple-letter typo budget | -- (independent) | `nb-typo-fuzzy.js` (+10) |
-| **8** | Browser visual verification | -- (independent) | Manual testing, fix any regressions |
-
-**Phases 5, 6, 7 are independent and can run in parallel.** Phase 8 is pure verification with no code dependency.
+**Genuinely untouched (and should stay so):**
+- `backend/api/*` — Vercel serverless paths; v3.2 has no auth/subscription work
+- `extension/background/service-worker.js` — bootstrap path; no v3.2 work
+- `scripts/sync-vocab.js` — Papertek API sync; no v3.2 vocab work expected
+- 14 existing release gates — none should be modified; new gates would be a Phase-class effort
 
 ---
 
-## 10. Files Modified vs New
+## Suggested Build Order
 
-### Modified Files (11)
+**Recommendation: Sequential by surface, NOT interleaved per fix.**
 
-| File | Change | LOC Delta |
-|------|--------|-----------|
-| `extension/content/vocab-seam-core.js` | Add `decomposeCompound` function + export on API object | +80 |
-| `extension/content/vocab-seam.js` | Add `getDecomposeCompound` getter on `__lexiVocab` | +3 |
-| `extension/content/spell-check.js` | Wire `decomposeCompound` into vocab bag + CustomEvent listener for manual trigger | +12 |
-| `extension/content/spell-rules/nb-sarskriving.js` | Decomposition fallback for unknown compounds (confidence=high gate) | +15 |
-| `extension/content/spell-rules/de-compound-gender.js` | Delegate splitting to shared `decomposeCompound` | +5, -25 |
-| `extension/content/spell-rules/nb-typo-fuzzy.js` | Triple-letter budget frequency-weighted tiebreak | +10 |
-| `extension/content/floating-widget.js` | Manual spell-check button (CustomEvent dispatch) | +15 |
-| `extension/styles/content.css` | Button CSS + new rule dot colour for demonstrative-mismatch | +20 |
-| `extension/popup/popup.js` | Decomposition search fallback + `renderDecompositionResult` | +70 |
-| `extension/popup/popup.html` | Script tag for vocab-seam-core.js | +1 |
-| `extension/i18n/strings.js` | i18n keys for compound breakdown + button tooltip + demonstrative explain | +14 |
+Rationale: UAT walkthroughs are slow and cognitively expensive. Context-switching between "do an extension UAT walk" and "author a deploy runbook" wastes warm-up. Group like work.
 
-### New Files (1)
+```
+Phase A — Extension UAT batch (drain all 6 walkthroughs first)
+  A1. F36-1 fr-aspect-hint browser confirm        ← smallest, warm-up
+  A2. Phase 27 9-step exam-mode walk              ← user-facing, high-value
+  A3. Phase 30-01 9-step extension popup view walk
+  A4. Phase 26 6 DE Lær mer browser walks
+  A5. Phase 26 NN + EN locale Lær mer walks (F7)
+  Output: a list of findings (bugs + version bumps), all extension-side
+  Sync trigger: ONE bump per walkthrough that surfaced fixes
+                (not 1 bump per micro-fix)
 
-| File | Purpose | LOC |
-|------|---------|-----|
-| `extension/content/spell-rules/nb-demonstrative-mismatch.js` | Demonstrative + noun gender mismatch (`Det boka`, `Den huset`) | ~60 |
+Phase B — Lockdown sync + staging UAT
+  B1. cd /Users/…/lockdown && npm install (pulls all Phase A bumps at once)
+  B2. Phase 30-02 lockdown sidepanel 8-step staging UAT
+  B3. Bug-fix loop for any sidepanel-host-specific findings
+       (extension fixes go upstream via Pattern 1 — re-loop A)
+  Output: lockdown-stb confirmed at parity with extension HEAD
 
-### No New Manifest Entries Required
+Phase C — Deploy runbook authoring
+  C1. lockdown-staging-deploy.md (we just did it in B; capture the steps)
+  C2. lockdown-prod-deploy.md    (firestore.rules + Functions for EXAM-10)
+  C3. papertek-app-sidepanel-deploy.md (Phase 30 hosting)
+  C4. extension-uat-fix-loop.md  (capture Pattern 1 above as a runbook)
+  C5. .planning/runbooks/README.md (index)
+  Output: 5 runbooks; CLAUDE.md gets a one-line pointer
+```
 
-`nb-demonstrative-mismatch.js` goes in `spell-rules/` which is already covered by the wildcard content_scripts entry in manifest.json. popup.html gets an additional `<script>` tag for vocab-seam-core.js (already a content script, now also loads in popup context).
+**Why A → B → C and not interleaved:**
+
+1. **A first** because everything else depends on extension code being UAT-confirmed. Authoring a deploy runbook for unstable code is wasted work.
+2. **B after A** because lockdown sync must consume the post-A version. Syncing mid-A means re-syncing later anyway.
+3. **C last** because the staging-deploy runbook (C1) is a literal transcript of what you just did in B2. Authoring it cold (without B's recent experience) loses fidelity.
+
+**Carve-out:** If Phase A surfaces a critical bug that blocks Phase B (e.g., view module won't mount in lockdown shim), do a hot-loop B1 immediately to confirm, then resume A. Don't let A finish in isolation if B is showing red on a fundamental.
 
 ---
 
-## 11. Scalability Considerations
+## Anti-Patterns
 
-| Concern | Current (v2.0) | v2.1 Impact | Notes |
-|---------|----------------|-------------|-------|
-| Startup time | ~120ms buildIndexes | +0ms (decompose is lazy, on-demand) | No build-time cost |
-| Per-token cost in spell-check | ~0.05ms validWords.has() | +0.1ms decomposeCompound() only for unknown tokens | Cache-miss only; most tokens are known |
-| Memory | nounGenus ~4k entries | +0 (reuses existing Map) | No new data structures at build time |
-| Bundle size | 12.47 MiB | +~4 KB (decompose fn + button CSS + new rule) | Well within 20 MiB cap |
-| Popup memory | dictionary + allWords | +popupNounGenus Map (~4k entries, ~200KB) | One-time cost; popup already holds full dictionary |
+### Anti-Pattern 1: "Just edit lockdown directly, port back later"
+
+**What:** Hot-fix `lockdown/public/leksihjelp/*` to unblock UAT.
+**Why wrong:** Next `npm install` in lockdown silently reverts the fix; CLAUDE.md explicitly forbids it; pattern was the entire reason the canonical-source-of-truth rule exists.
+**Do this instead:** Pattern 1 above. If the fix is urgent, the canonical loop is still ~10 minutes, not hours.
+
+### Anti-Pattern 2: Skipping `package.json` bump because "no functional change"
+
+**What:** UAT surfaces a CSS-only or i18n-only fix; skip the version bump because "nothing real changed."
+**Why wrong:** `package.json` is the lockdown sync signal. Without a bump, nothing tells the downstream consumer to re-sync.
+**Do this instead:** Always bump on synced-surface changes. Patch versions are cheap.
+
+### Anti-Pattern 3: Running gates ad-hoc instead of all-14
+
+**What:** "I only changed CSS, I'll just run check-rule-css-wiring."
+**Why wrong:** Gates exist precisely because changes have non-obvious blast radius. Phase 36 INFRA-10 surfaced bugs in three FR files when only DE was being touched.
+**Do this instead:** Run all 14 gates before every commit. They're fast (~10s aggregate). Add a Bash alias if needed.
+
+### Anti-Pattern 4: Authoring runbooks before doing the deploy at least once
+
+**What:** Write `lockdown-prod-deploy.md` from memory or by reading firebase docs.
+**Why wrong:** Prod-deploy runbooks need real deploy experience to capture the steps that aren't in vendor docs (env-var quirks, project-aliases, two-factor prompts).
+**Do this instead:** Phase B's staging deploy IS the runbook draft. Capture it live.
+
+### Anti-Pattern 5: Treating UAT findings as "minor copy fixes"
+
+**What:** Bundle 8 UAT findings into one untracked commit.
+**Why wrong:** Loses traceability — "which finding caused which fix?" matters when a UAT walkthrough re-runs and re-surfaces a regression.
+**Do this instead:** Each finding gets a fix-commit referencing the UAT walkthrough doc and finding number.
+
+---
+
+## Integration Points
+
+### External Services
+
+| Service | Integration Pattern | v3.2 Touch |
+|---------|---------------------|------------|
+| Firebase hosting (papertek.app, lockdown-stb) | `firebase deploy --only hosting` from lockdown repo | Runbook only; no actual deploy |
+| Firebase Functions | `firebase deploy --only functions --project <id>` | Runbook only; staging already deployed |
+| Firebase Firestore (rules) | `firebase deploy --only firestore:rules` | Runbook only; staging already deployed |
+| Vercel (leksihjelp.no backend) | `vercel deploy --prod` | NOT touched in v3.2 |
+| Papertek API | sync-vocab.js | NOT touched in v3.2 expected |
+| ElevenLabs | TTS proxy in backend | NOT touched in v3.2 |
+| Vipps + Stripe | OAuth + Recurring/Checkout | NOT touched in v3.2 |
+| Chrome Web Store | Manual upload of zip | Post-milestone (not in v3.2 scope) |
+
+### Internal Boundaries
+
+| Boundary | Communication | v3.2 Risk |
+|----------|---------------|-----------|
+| `extension/` ↔ lockdown `public/leksihjelp/` | File copy via sync script (postinstall) | Version skew if sync skipped |
+| `extension/popup/views/*` ↔ `leksihjelp-sidepanel-host.js` | Dep-injection (`mountXView(container, deps)`) | Contract drift if deps added |
+| `exam-registry.js` ↔ lockdown firestore RESOURCE_PROFILES | String-keyed registry → enum mapping in Functions | Out-of-sync entries silently de-classified |
+| `extension/styles/content.css` ↔ lockdown `leksihjelp.css` (renamed) | File copy; whole-file sync | New selectors must work in BOTH contexts |
+| `extension/data/nb-baseline.json` ↔ lockdown vocab path | Lockdown uses own data path; baseline is extension-only | Low |
+| Release gates ↔ CI (if any) ↔ local pre-commit | Manual today | Gates don't fire if not run; v3.2 should NOT add CI infra (out of scope) |
 
 ---
 
 ## Sources
 
-- Direct code analysis of `vocab-seam-core.js` (1,224 LOC), `vocab-seam.js` (325 LOC), `spell-check.js` (~560 LOC), `nb-sarskriving.js` (99 LOC), `de-compound-gender.js` (183 LOC), `popup.js` (~1,800 LOC)
-- Norwegian compound formation: binde-s (arbeidstid) and binde-e (barnehage) are the two productive linking morphemes in NB/NN
-- German compound linkers: verified in existing `de-compound-gender.js` (line 31): `['s', 'n', 'en', 'er', 'e', 'es']`
-- `.planning/PROJECT.md` -- v2.1 milestone definition, existing architecture description
-- Confidence: HIGH -- all recommendations based on direct source reading of existing architecture, no external sources needed
+- `/Users/geirforbord/Papertek/leksihjelp/CLAUDE.md` — Release Workflow + Downstream Consumers sections (HIGH confidence — canonical project doc)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/PROJECT.md` — milestone scope, key decisions table (HIGH)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/lockdown-adapter-contract.md` — seam contract surface (HIGH)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/STATE.md` — pending todos describing carry-over UAT scope (HIGH)
+- v3.1 archived phase decisions (Phase 30, 33, 36 specifically) — HIGH confidence on existing dep-injection contract and INFRA-10 seam-coverage gate
+
+---
+*Architecture research for: leksihjelp v3.2 UAT & Deploy Prep — cross-repo integration architecture*
+*Researched: 2026-05-01*

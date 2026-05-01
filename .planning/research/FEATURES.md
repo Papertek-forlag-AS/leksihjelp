@@ -1,171 +1,204 @@
-# Feature Landscape
+# Feature Landscape — v3.2 UAT & Deploy Prep
 
-**Domain:** Compound word decomposition + polish for Norwegian/German language-learning spell-checker
-**Researched:** 2026-04-26
-**Milestone:** v2.1 Compound Decomposition & Polish
+**Domain:** Hardening / risk-reduction milestone (UAT-execution + bug-fix loop + cross-repo sync + deploy-runbook readiness)
+**Researched:** 2026-05-01
+**Mode:** Ecosystem (project-internal — derived from v3.1 carry-over backlog and audit findings)
 
-> **Scope note:** This file covers ONLY the v2.1 milestone features. v1.0 (dictionary, TTS, word-prediction, per-token spell-check) and v2.0 (structural grammar governance, 57 plugin rules) are shipped. The question here is: *what features does compound decomposition need, what carry-over polish items complete the surface, and what are the edge cases?*
+---
 
-## Table Stakes
+## Overview & Framing
 
-Features users expect. Missing = product feels incomplete.
+A hardening milestone behaves differently from a feature milestone: there is no "differentiator" axis in the user-value sense — every shipped item is risk-reduction. The meaningful axis is **what kind of risk** an item reduces:
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Dictionary lookup for unknown compounds | Students write thousands of productive compounds (hverdagsmas, fotballsko, skolebrødoppskrift) not in the 2,124-entry NB nounbank (2,123 NN, 1,641 DE). Returning "no results" for valid words breaks trust. | Med | Decomposition engine + popup rendering. Existing `inferGenderFromSuffix` in de-compound-gender.js covers DE gender; extend to full decomposition for NB/NN/DE. |
-| Gender inference from last component | "Last component determines gender" is THE fundamental compound rule in Norwegian and German. Without it, gender coverage has a massive hole on productive nouns. Currently only DE has this (de-compound-gender.js). | Low | Greedy longest-suffix algorithm already proven in DE. NB/NN reuse is the same algorithm with different linking elements. |
-| Accept decomposable compounds in spell-check | Flagging valid compounds like "fotballsko" as unknown (because they're not in the flat nounbank) is a false positive that teaches students to distrust the checker. | Med | Add decomposition check to validWords path in vocab-seam-core.js. Must run AFTER nounbank lookup (stored Tier 1 entries take precedence over decomposed Tier 2). |
-| Linking element awareness (fuge-s, fuge-e, zero) | NB compounds use linking elements: -s- (hverdagsmas, tenåringsbok), -e- (barnehage, juletre), zero (skoledag, brødskive). Without linker awareness, decomposition misses a large fraction of productive compounds. DE already has -s-, -n-, -en-, -er-, -e-, -es- in the existing code. | Med | NB/NN linkers: s, e (common), er (less common). Pattern-based: -s- after suffixes -tion/-sjon/-het/-else/-tet/-skap/-dom; -e- often for animal/person first components; zero otherwise. Some lexical exceptions exist but pattern coverage is sufficient for v2.1. |
-| Manual "Run spell-check" button | Dyslexic users (core persona per PROJECT.md "Perfekt for elever med dysleksi") may not register subtle underlines. An explicit "check my text" affordance makes the checked-state legible. | Low | UI trigger + toast result ("3 feil funnet" / "Ser bra ut!"). Internally calls same rule-runner pipeline as auto-detect. No new rule code needed. |
-| Demonstrative-mismatch rule (det boka / den huset) | nb-gender currently only checks indefinite articles (en/ei/et for NB, ein/ei/eit for NN). Demonstratives (den/det/denne/dette) follow the SAME gender agreement rules and students mix these constantly. "Det boka" is as wrong as "et bok". | Low | Same pattern as existing nb-gender.js. Add DEMONSTRATIVE_GENUS map. Key difference: the noun following a demonstrative is in definite form (boka, huset), so the rule needs to look up the definite form's gender in nounGenus. |
+1. **Direct UAT execution** — confirm code-complete features actually work for a human
+2. **Bug-fix loop** — surface→fix→verify discipline, with bidirectional surfacing into the loop
+3. **Cross-repo propagation** — leksihjelp fix → lockdown-leksihjelp sync → lockdown re-validation
+4. **Deploy readiness** — turn the deferred prod deploys from "scary one-off" into "runnable from a checklist"
+5. **Permanent regression defense** — turn UAT findings into release-gate fixtures so the same bug cannot recur
 
-## Differentiators
+This re-frames the "table-stakes vs differentiator" split: items 1–4 are table-stakes for any hardening milestone; item 5 (regression capture) is the value-add that distinguishes a polished milestone from a debt-paydown milestone. **The user should treat item 5 as in scope** — see Differentiators below.
 
-Features that set the product apart. Not expected, but valued.
+---
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Visual compound breakdown in popup | Show "Samansett ord: hverdag + s + mas" with gender badge from last component. Students learn WHY the word has that gender. Pedagogical, not just functional. No competitor does this offline for Norwegian. | Low | Pure rendering. The decomposition engine produces the parts; this is presentation with a "samansett ord" label. |
-| Recursive compound decomposition | Handle 3+ component compounds (skolebrødoppskrift = skole + brød + oppskrift). Norwegian allows arbitrary depth. Students at B1+ regularly form 3-component compounds. | Med | Greedy longest-suffix naturally handles this: after finding "oppskrift" as last component, remainder "skolebrød" is recursively decomposed. Cap depth at 4 to prevent pathological input. |
-| Expanded sarskriving via decomposition | Current nb-sarskriving only flags "skole sekk" if "skolesekk" is in compoundNouns (2,124 entries). With decomposition, flag "skole dag" even though "skoledag" isn't stored -- because both are nouns and their concatenation decomposes validly. | High | High false-positive risk. Two adjacent nouns are not always sarskriving ("Per dag" = proper name + noun). Needs existing SARSKRIVING_BLOCKLIST AND decomposition-validity check. Ship after basic decomposition proves stable. |
-| Triple-letter typo budget | Flag "tykkkjer" (three k's) as likely typo with frequency-weighted fuzzy-distance tiebreak. Also covers the Norwegian compound triple-consonant elision rule: natt+tog = nattog (two t's), natt+time = nattime (not natttime -- one t is dropped). | Med | Two sub-features: (1) generic triple-identical-letter detection, (2) compound-boundary consonant elision awareness. The elision rule: when component boundary produces 3 identical consonants, one is dropped. Decomposition engine must try elision-restored form when decomposing. |
-| Compound-aware gender mismatch for NB/NN | Flag "et fotballsko" (sko = m, should be "en fotballsko") via decomposition. Currently only DE has compound-gender checking (de-compound-gender.js). Extending to NB/NN closes the gender-coverage gap on productive compounds. | Med | Combine decomposition engine with nb-gender rule pattern. New rule or extension of nb-gender to handle nouns not in nounGenus but decomposable. |
+## Categories (the milestone REQUIREMENTS shape)
 
-## Anti-Features
+The milestone's REQUIREMENTS should be grouped under five categories:
 
-Features to explicitly NOT build.
+| # | Category | Code prefix | Why this exists | Item count |
+|---|----------|-------------|-----------------|------------|
+| 1 | Extension UAT Execution | UAT-EXT-NN | Walk the 5 in-extension v3.1 features in real Chrome (not Node fixtures) | 5 walkthroughs |
+| 2 | Lockdown UAT Execution | UAT-LOCK-NN | Walk Phase 30 sidepanel host in lockdown-staging after sync | 1 walkthrough (8-step) |
+| 3 | Bug-Fix Loop & Cross-Repo Sync | FIX-NN | Container for whatever UAT surfaces + the leksihjelp→lockdown sync mechanics | 2-N (size-of-bugs unknown until UAT runs) |
+| 4 | Deploy Runbooks | DEPLOY-NN | Turn the 2 deferred deploys into checklist-driven, low-risk operations | 2 runbooks |
+| 5 | Regression Capture (the value-add) | REGR-NN | For each UAT finding, write a fixture / release gate that prevents recurrence | 1 framework + per-bug fixtures |
+
+Why these specifically:
+
+- **EXT vs LOCK is real, not pedantic.** The extension runs under real `chrome.*` APIs; lockdown runs under a chrome-shim with limited surface. Bug classes diverge (e.g., `chrome.tabs` works in extension, doesn't in lockdown). Splitting the categories means the milestone can ship Extension UAT and Bug-Fix Loop wins even if lockdown-staging access is gated on Geir's availability.
+- **FIX is its own category, not folded into UAT.** UAT findings can produce 0 bugs or 30 bugs; the count isn't predictable at planning time. A separate category means the milestone can size the Fix-Loop phases adaptively without reopening the UAT phases. This is also where leksihjelp-version-bump → lockdown-sync-script-rerun lives.
+- **DEPLOY is artifacts, not deploys.** User explicitly chose "make them easy to execute correctly after the milestone." Runbook = deliverable; production deploy = post-milestone user action.
+- **REGR is the milestone's signature.** v3.1 audit shows 12 release gates; the project culture already treats fixture-capture as first-class engineering. Continuing that into v3.2 preserves the "every UAT finding becomes a permanent guard" pattern.
+
+---
+
+## Table Stakes (must ship for v3.2 to count as "done")
+
+Features the milestone cannot omit without missing its stated goal.
+
+| Feature | Category | Why required | Complexity | Notes |
+|---------|----------|--------------|------------|-------|
+| **F36-1 fr-aspect-hint browser confirmation** | UAT-EXT | Defensively closed via INFRA-10 + cross-language guard; rule-fires confirmation outstanding. Smallest UAT item — good warm-up. | Low (1 test) | Rule was the trigger for INFRA-10; closure formalises the v3.1 → v3.2 handoff. |
+| **Phase 26: 6 DE Lær mer browser walks** | UAT-EXT | de-prep-case + Wechselpräpositionen pedagogy panel — six discrete walks (dativ badge colour, Wechsel pair rendering, Esc collapse, NN locale, EN locale, Tab nav state reset). F6 already closed in Phase 35. F7 (NN+EN locale) explicitly carried into v3.2. | Med (4 + 2 split) | Split rationale: 4 default-locale walks first (no UI-language switch needed); 2 locale walks bundled separately because they require resetting UI language and re-walking. |
+| **Phase 26 follow-up: NN + EN locale walks (F7)** | UAT-EXT | Verifies pedagogy renders correctly under non-default UI language — the highest-risk locale class because i18n strings are loaded async after first paint. | Low (2 walks) | Should run AFTER the 4 default-locale walks confirm baseline rendering. |
+| **Phase 27: 9-step exam-mode walk** | UAT-EXT | Exam Mode is a school-deployment feature; "auto-approved per auto-mode" closure is acceptable for code complete but unacceptable for a feature whose entire value proposition is teacher trust. Toggle on/off, EKSAMENMODUS badge, amber border, suppression behaviour across rules — every step matters. | Med (9 steps, 1 sitting) | Highest-stakes UAT in milestone. Capture screenshots for the deploy runbook. |
+| **Phase 30-01: 9-step extension popup view walk** | UAT-EXT | View modules are a synced surface for lockdown; bugs here propagate. Dictionary view, settings view, pause, report, lang switch, direction toggle, compound suggestion, vocab-update banner. | Med (9 steps, 1 sitting) | Should run BEFORE Phase 30-02 lockdown UAT — extension is canonical. |
+| **Phase 30-02: 8-step lockdown sidepanel staging UAT** | UAT-LOCK | First end-to-end test of view-module sync into lockdown-staging. Create leksihjelp-enabled test, join as student, verify no audio buttons, verify EKSAMENMODUS profile rendering. | Med-High (8 steps + lockdown setup) | DEPENDS ON: Phase 30-01 closure + leksihjelp re-sync + version bump. Don't run UAT-LOCK if any UAT-EXT bug fix landed and hasn't been synced. |
+| **Bug-fix triage protocol** | FIX | Per-finding severity classification (block-release / fix-and-ship / defer-to-v3.3) so UAT findings don't open-endedly extend the milestone. | Low | Lightweight playbook; documented once, applied per-finding. |
+| **leksihjelp → lockdown sync script execution** | FIX | After every leksihjelp version bump within milestone, re-run `lockdown/scripts/sync-leksihjelp.js`, commit in lockdown-staging, validate sidepanel still mounts. The sync mechanics are documented in CLAUDE.md but the milestone needs an explicit "sync was run after fix N" record. | Low (per sync) | Synced surfaces: `extension/content/*.js`, `extension/exam-registry.js`, `extension/popup/views/*.js`, `extension/styles/content.css`, `extension/data/*`, `extension/i18n/*`. |
+| **Lockdown-stb production Firebase deploy runbook** | DEPLOY | Covers `firestore.rules + functions` deploy for EXAM-10 enum. Staging-lockdown deployed 2026-04-28; production user-gated. | Med | See "Deploy Runbook Anatomy" below for required contents. |
+| **Lockdown papertek.app production hosting deploy runbook** | DEPLOY | Covers Phase 30 sidepanel host. Same shape as Firebase runbook but `--only hosting`. | Med | Can share template with Firebase runbook. |
+
+---
+
+## Differentiators (value-add — what distinguishes "polished" from "debt paid")
+
+Items the milestone could omit and still claim its stated goal — but shouldn't, because they convert one-time UAT into permanent infrastructure.
+
+| Feature | Category | Why valuable | Complexity | Notes |
+|---------|----------|--------------|------------|-------|
+| **UAT-finding-to-fixture conversion** | REGR | Every UAT bug surfaced → captured as a fixture in `scripts/check-fixtures.js` (or a new browser-walk-driven gate where fixture isn't a fit). The project's 12-gate culture justifies the discipline; v3.1 INFRA-10 came directly from this pattern. | Low per finding | The REGR category exists precisely because v3.1 retrospective shows: every release gate caught a regression class that previous releases shipped. |
+| **UAT walkthrough scripts checked into repo** | REGR | The 9-step exam-mode walk and 9-step popup view walk are valuable IP. Saving them as `.planning/uat-scripts/exam-mode.md` etc. means v3.3 can re-run them in 30 minutes instead of re-deriving from PLAN.md. | Low | Lockdown CLAUDE.md notes "manual UAT" without checked-in scripts; this fixes the same gap on the leksihjelp side. |
+| **Deploy runbook self-test** | DEPLOY | A 5-minute "dry run" pass that walks the runbook against staging without firing the actual prod deploy command — catches stale URLs / wrong project IDs / missing env vars. | Low | Mirrors the `:test` self-test pattern of release gates (e.g., `check-explain-contract:test`). |
+| **Pre-flight Firestore-rules diff capture** | DEPLOY | `firebase deploy --only firestore:rules --dry-run` (if supported) or manual `firestore.rules` diff against deployed snapshot, captured into the runbook artifact at deploy-time. Catches "rules drifted from main" before the deploy lands. | Med | Especially valuable for EXAM-10 because the Cloud Functions enum and rules co-evolve. |
+| **Post-deploy smoke-test checklist** | DEPLOY | Per runbook: a 3-5 item "what to check in prod within 60 seconds of deploy" list. For Firebase: enum loads, no Cloud Functions cold-start error, exam-mode toggle in admin UI works. For hosting: sidepanel route loads, view modules render, no console errors. | Low | Goes into the runbook itself; doesn't ship as separate artifact. |
+
+---
+
+## Anti-Features (explicitly NOT in scope — preventing scope creep)
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Inherited examples from components | Memory file is explicit: "brød examples are misleading on skolebrød." Examples should only exist when authored for that specific compound. Inheriting creates false pedagogical confidence. | Show compound breakdown + gender badge only. No examples on decomposed compounds. |
-| ML-based decompounding | Forces online dependency (violates SC-06 network silence gate) and external API costs. Dictionary-based greedy match achieves >95% accuracy per academic benchmarks (Korfhage & Muller 2017, Algolia). | Greedy longest-suffix with dictionary lookup. The existing DE algorithm proves this works in production. |
-| Auto-correct compound splits | Silently joining "skole dag" into "skoledagen" violates the "no auto-correct" principle. PROJECT.md Out-of-Scope: "Auto-correct without user confirmation -- dyslexia research: silent fixes compound errors." | Show suggestion in popover; user clicks to accept. Same pattern as all other spell-check rules. |
-| Exhaustive fuge-rule database | Norwegian fuge rules are partially lexical (per-word exceptions) and partially pattern-based. Trying to enumerate all exceptions is unbounded and brittle. | Support the common patterns algorithmically: -s- after -tion/-sjon/-het/-else/-tet/-skap/-dom; -e- for short first components referring to animals/people; zero otherwise. Accept false negatives on rare patterns rather than over-generating false positives. |
-| Decomposing non-nouns | Verb compounds (overtale), adjective compounds (langvarig) follow different patterns with different semantics. Adding verb/adjective decomposition is scope creep for v2.1. | v2.1 decomposes noun+noun compounds only. Both components must be in the nounbank. Verb and adjective compounds are future work. |
-| Whole-page manual check | A "check entire page" button that scans all text on the page (not just the focused textarea). Would require content-script permissions expansion and performance work. | Manual button checks the focused textarea only -- same scope as auto-detect. |
+| **Production Firebase + hosting deploys** | User explicitly deferred. Running them inside the milestone removes the user's "I'll do this when ready" optionality and turns the milestone into release-orchestration. | Ship the runbooks; let user execute post-milestone with the runbook in hand. |
+| **Phase 28.1 skriveokt-zero exam-mode sync** | EXAM-09 deferred by design — skriveokt-zero not yet shipping to consumers. Doing this work now races ahead of the consumer. | Leave deferred in PROJECT.md until skriveokt-zero starts shipping. |
+| **New v3.2 features beyond UAT/fix/sync** | Adding feature work blurs the milestone identity. v3.2 = "everything v3.1 shipped, validated and locked-in." | Park new features in `### Deferred` for v3.3+ planning. |
+| **Reopening v3.1 audit findings beyond the 14 listed** | Open-ended re-audit would expand scope unbounded. | Trust the 2026-05-01 v3.1 audit; if a new finding surfaces during v3.2 UAT, route it through the FIX category triage protocol. |
+| **Bundled major version bump (e.g., v3.2 → v4.0)** | Hardening milestones don't justify major version bumps. Patch/minor bumps from bug fixes are the right shape. | Increment minor (2.10.x) for bug-fix releases as needed; defer major-bump justification to v4.0 planning. |
+| **Test-suite expansion via /gsd:add-tests beyond REGR captures** | The user's memory `project_test_suite_at_milestone_end.md` indicates `/gsd:add-tests` runs once at end-of-milestone before `/gsd:complete-milestone`. Don't pre-empt it inside phases. | Run `/gsd:add-tests` once after the last phase; treat REGR captures as in-phase work. |
+| **Telemetry instrumentation to "measure" UAT findings** | GDPR/Schrems-II + landing-page trust commitment — already in Out of Scope at PROJECT.md. | Track findings manually in the milestone audit. |
+
+---
 
 ## Feature Dependencies
 
 ```
-Decomposition engine (new, core module)
-  +---> Dictionary popup for decomposed compounds (needs engine output)
-  +---> Spell-check: accept decomposable compounds as valid (needs engine)
-  +---> Gender inference from last component for NB/NN (needs engine + nounGenus)
-  +---> Expanded sarskriving detection (needs engine + existing nb-sarskriving rule)
-  +---> Compound-aware NB/NN gender mismatch (needs engine + nb-gender pattern)
-  +---> Triple-consonant elision in decomposition (needs engine internals)
-
-nb-gender rule (existing, shipped v1.0)
-  +---> Demonstrative-mismatch rule (extends existing ARTICLE_GENUS pattern)
-
-spell-check.js DOM adapter (existing, shipped v1.0)
-  +---> Manual "Run spell-check" button (new UI trigger for existing pipeline)
-
-nb-typo-fuzzy (existing, shipped v1.0)
-  +---> Triple-letter typo budget (extends fuzzy distance calculation)
-
-de-compound-gender.js (existing, shipped v2.0)
-  +---> Refactor: extract inferGenderFromSuffix into shared engine
-  +---> DE rule becomes thin wrapper over shared decomposition engine
+UAT-EXT (extension walkthroughs, parallelisable)
+  ├── F36-1 fr-aspect-hint                       (smallest; warm-up)
+  ├── Phase 26 default-locale (4 walks)
+  ├── Phase 26 NN+EN locale (2 walks, F7)        ← after default-locale walks
+  ├── Phase 27 exam-mode (9 steps)
+  └── Phase 30-01 popup views (9 steps)          ← canonical for lockdown
+        │
+        ▼
+FIX (per finding from UAT-EXT)
+  ├── triage (block / fix / defer)
+  ├── fix in extension
+  ├── REGR capture (fixture / gate / walkthrough script)
+  ├── version bump (manifest.json + package.json + index.html)
+  ├── package + release zip
+  └── leksihjelp → lockdown sync (script + commit)
+        │
+        ▼
+UAT-LOCK
+  └── Phase 30-02 sidepanel (8 steps in lockdown-staging)  ← only after sync settles
+        │
+        ▼
+FIX (round 2 if lockdown UAT surfaces lockdown-only bugs)
+        │
+        ▼
+DEPLOY (runbooks — independent of UAT outcomes once both UAT rounds close)
+  ├── Lockdown-stb Firebase runbook
+  ├── Lockdown papertek.app hosting runbook
+  └── Self-test (dry-run each runbook against staging)
+        │
+        ▼
+/gsd:add-tests + /gsd:complete-milestone
 ```
 
-## Edge Cases Requiring Design Decisions
+**Critical path:** UAT-EXT → FIX → sync → UAT-LOCK. Don't UAT lockdown with stale code.
 
-### Ambiguous Splits
+**Parallelisable:** Within UAT-EXT, the 5 walkthroughs are independent. Within DEPLOY, the two runbooks share a template but otherwise run independently.
 
-Some words have multiple valid decompositions:
-- "blåbærgraut" = blåbær + graut (correct semantic parse) OR blå + bær + graut (valid but wrong)
-- "strandstol" = strand + stol (only valid split)
+---
 
-**Recommendation:** Greedy longest-suffix (right-to-left) naturally produces the correct semantic parse in most cases because it finds the longest meaningful tail component first. This matches the existing de-compound-gender.js approach (lines 82-85). For dictionary display, show only the first (longest-suffix) parse. Do not show alternatives -- students need one clear answer, not ambiguity.
+## MVP Recommendation (if scope must compress)
 
-### Recursive Depth
+Prioritise (in order):
 
-Norwegian allows theoretically infinite compound depth:
-- Depth 2: "skolesekk" = skole + sekk
-- Depth 3: "skolebrødoppskrift" = skole + brød + oppskrift
-- Depth 4: "sykehusavdelingssjef" = syke + hus + avdeling + s + sjef
-- Depth 5+: rare in student writing, often humorous
+1. **F36-1** (15 min) — closes the only v3.1 phase still in `closed-pending-browser-uat` state
+2. **Phase 27 exam-mode 9-step walk** (60 min) — highest-stakes feature; school-deployment trust depends on it
+3. **Phase 30-01 popup view walk** (60 min) — must precede any lockdown UAT
+4. **Phase 30-02 lockdown sidepanel UAT** (90 min + setup) — confirms the cross-repo sync path actually delivers the user-visible feature
+5. **Both deploy runbooks** (90 min each) — turn the deferred prod deploys from latent risk into routine
 
-**Recommendation:** Cap recursion at 4 components. Beyond that, the word is either a joke compound or better handled as a stored entry. The cap also prevents pathological performance on adversarial input (worst case: O(n^2) per depth level where n = word length).
+Defer (acceptable to slip into v3.3 if v3.2 runs long):
 
-### Triple-Consonant Elision at Component Boundaries
+- **Phase 26 NN+EN locale walks** — locale rendering is lower-risk than exam-mode trust; baseline (default-locale) walks already partially closed in Phase 35
+- **REGR captures for low-severity findings** — capture the high-severity ones; let the rest accumulate into a v3.3 sweep
 
-When compound components meet at the same consonant producing three identical letters, one is dropped:
-- natt + time = nattime (not natttime)
-- toll + lov = tollov (not tolllov)
-- stoff + fabrikk = stoffabrikk (not stofffabrikk)
-- But: natt + tog = nattog (correct, only two consonants meet -- no elision)
+---
 
-**Recommendation for decomposition engine:** When decomposing a word, try BOTH the raw split AND the elision-restored form. Example: decomposing "nattime" -- direct suffix lookup fails on "nattime", but try inserting the elided consonant: test "natttime" = "natt" + "time" -- both in nounbank, valid decomposition.
+## Deploy Runbook Anatomy (what makes a good runbook vs. a one-line shell command)
 
-**Recommendation for triple-letter typo rule:** Flag any word containing three consecutive identical letters ("tykkkjer", "natttog") as a likely typo, UNLESS the word is in validWords (some words legitimately have unusual letter patterns). Severity: error (P1). Separate from the compound-elision handling.
+The user's question called this out specifically. A good runbook for the two outstanding deploys contains:
 
-### Linking Element Ambiguity
+| Section | Purpose | Example for `firebase deploy --only firestore:rules,functions --project lockdown-stb` |
+|---------|---------|--------------------------------------------------------------------------------------|
+| **Pre-flight environment check** | Confirm shell is in the right state | `firebase --version` ≥ X; `firebase projects:list` shows lockdown-stb; `node --version` matches lockdown's `.nvmrc`; `gcloud auth list` shows the right account |
+| **Pre-flight code check** | Confirm the right commit is being deployed | `git status` clean in `/Users/geirforbord/Papertek/lockdown`; `git log -1` matches expected commit; staging-lockdown branch is rebased onto main |
+| **Pre-flight diff capture** | Show what's actually changing | `firebase deploy --only firestore:rules --dry-run` (or manual diff) saved to artifact; `git diff main..HEAD -- functions/` for functions-side review |
+| **Deploy command** | The actual one-liner | `cd /Users/geirforbord/Papertek/lockdown && firebase deploy --only firestore:rules,functions --project lockdown-stb` |
+| **Expected output checkpoints** | What success looks like (so partial failure is recognisable) | "✔ Deploy complete!" line; functions list shows expected functions, no "removed" warnings; rules version timestamp newer than previous deploy |
+| **Post-deploy smoke test** | Within-60-seconds validation | Open lockdown admin UI → exam-mode toggle exists for LEKSIHJELP_EXAM profile; create test resource with profile; no console errors in functions logs (`firebase functions:log --limit 20`) |
+| **Observability checks (next 10 min)** | What to keep an eye on | Firebase console error rate; Cloud Functions cold-start metrics; Firestore rules-deny rate spike |
+| **Rollback procedure** | If the smoke test fails | `firebase deploy --only firestore:rules,functions --project lockdown-stb` from previous-good commit; for rules specifically: Firestore console → Rules → version history → rollback. Document the previous-good commit SHA at the top of the runbook before deploy. |
+| **Communication step** | Who to tell, how | Post in #lockdown-deploys (or equivalent) with deploy commit SHA, smoke-test result, link to functions log. |
+| **Sign-off checkbox** | Audit trail | Date, deployer, smoke-test pass/fail, observability all-clear after 10 min. |
 
-Some positions could be either a linking element or part of the next component:
-- "barneskole" = barn + e + skole (linking -e-) -- correct
-- "fiskesaus" = fisk + e + saus (linking -e-) -- correct
-- But the -e- could theoretically be the start of a component
+**The hosting runbook (`firebase deploy --only hosting`) follows the same template** with hosting-specific smoke tests (sidepanel route loads, view modules render, no 404 on synced assets, audio buttons absent in lockdown context).
 
-**Recommendation:** Try without linker first (direct split into two nounbank entries), then with each linker stripped. This is the exact strategy already used in de-compound-gender.js lines 88-100. The nounbank lookup disambiguates: only accept splits where both halves resolve to known nouns.
+---
 
-### Definite-Form Input
+## What's Commonly Missed in a UAT-Cleanup Milestone (the "you'll regret deferring" list)
 
-Students might search for definite forms in the dictionary: "skolesekken" (the school bag). The decomposition engine should handle definite suffixes.
+Based on v3.1 audit + the project's own retrospective patterns:
 
-**Recommendation:** Strip common definite endings (-en, -et, -a, -ene, -ane, -ar, -ane) before attempting decomposition. Attempt decomposition on the stem. Low priority for v2.1 -- the popup already handles definite-form lookup for known words; extend to decomposed compounds if time permits.
+1. **Screenshots of the actual UAT surfaces.** A 9-step walkthrough that ships without screenshots becomes un-redoable in 6 months. Even a single screenshot per UAT step is gold for v3.3+ regression-spotting.
+2. **REGR capture for the bugs UAT *didn't* find.** When UAT passes a step cleanly, that's a signal the rule is robust enough to deserve a permanent fixture asserting the same behaviour. Don't only capture failures.
+3. **The leksihjelp version-bump-and-sync ritual.** Easy to fix a bug, run check-fixtures, and forget that lockdown's `node_modules/@papertek/leksihjelp` won't auto-pick up the change. CLAUDE.md documents the rule; v3.2 should treat each in-milestone version bump as a discrete REGR-capturable event.
+4. **Runbook *self-test*.** A runbook nobody dry-runs is a runbook with stale URLs. Mirror the project's own `:test` gate culture — every runbook gets a paired dry-run script.
+5. **The "what's the rollback story for EXAM-10 specifically" question.** Firestore rules rollback is well-known; but EXAM-10 introduced enum values that existing data depends on. Removing the enum after data uses it is destructive. The runbook needs an explicit "what to do if EXAM-10 needs to be reverted after data has been written" section, even if that section is just "page Geir, do not auto-rollback."
+6. **REQUIREMENTS.md hygiene that isn't in scope but should be.** v3.1 audit flagged EXAM-01..EXAM-07 still labelled "Planned" despite verification passing. v3.2 is the natural moment to also flip-and-archive the Phase 31 orphan if it wasn't fully cleaned in the v3.1 quick task. Worth a single hygiene plan inside the milestone.
+7. **The "lockdown's CLAUDE.md says 'mirror fixes upstream'" reverse-sync check.** Before running v3.2 lockdown UAT, confirm there's nothing in `lockdown/public/leksihjelp/**` that diverges from the synced source. If lockdown has accumulated fixes downstream that never made it back, the v3.2 sync will silently revert them.
+8. **A clean v3.2 → v3.3 handoff.** The milestone audit pattern is mature; v3.2 should produce its own MILESTONE-AUDIT.md at close and explicitly enumerate "what's deferred to v3.3" — including any UAT findings classified as `defer-to-v3.3` during the FIX triage.
 
-### Compound vs Stored Entry Precedence
+---
 
-"Hverdag" is both a stored nounbank entry AND decomposable (hver + dag). Stored entries must always win.
+## Confidence Assessment
 
-**Recommendation:** The decomposition engine ONLY activates for words NOT found in nounbank. This is the Tier 1 (stored) vs Tier 2 (decomposed) distinction from the memory file. Implementation: check nounbank first; on miss, try decomposition. Never show decomposition UI for a stored entry.
+| Area | Confidence | Reason |
+|------|------------|--------|
+| Category structure (5 categories) | HIGH | Derived directly from the 6 UAT items + 2 deploys + sync mechanics in PROJECT.md & STATE.md |
+| Dependency graph | HIGH | Cross-repo sync requirement documented in CLAUDE.md; UAT-EXT before UAT-LOCK is forced by the sync direction |
+| Deploy runbook anatomy | MEDIUM | Best-practice synthesis; project has no prior runbook to template from. The `:test` self-test mirror is project-grounded. |
+| "Commonly missed" list | MEDIUM-HIGH | Items 1, 3, 4, 6, 7, 8 are project-grounded (audit + CLAUDE.md). Items 2, 5 are best-practice synthesis. |
+| Anti-features | HIGH | All grounded in user-stated milestone scope or PROJECT.md "Out of Scope" / "Deferred" |
 
-## Interaction with Existing Features
-
-### Existing sarskriving rule (nb-sarskriving.js)
-Currently checks `compoundNouns.has(prev.word + t.word)` -- flat lookup against 2,124 NB nounbank entries. The decomposition engine provides a fallback: when the flat lookup misses, call `isDecomposableCompound(concatenation)`. This expands sarskriving coverage from stored compounds to the full productive space.
-
-**Risk:** False positives on adjective+noun pairs. The existing SARSKRIVING_BLOCKLIST (44 entries including "stor", "god", "lang", etc.) must also apply to the decomposition path. Additionally, decomposition should require the LEFT half to also be a known noun (not just any word) to avoid flagging "god dag" where "goddag" happens to decompose.
-
-### Existing de-compound-gender.js
-Already implements greedy longest-suffix with LINKERS for DE (lines 78-103). The v2.1 decomposition engine should generalize this into a shared module. Refactor: extract `inferGenderFromSuffix` + LINKERS into a new shared file (e.g., `compound-decompose.js`), parameterize by language-specific linker set. The DE rule becomes a thin wrapper that calls the shared engine.
-
-### Word prediction
-Decomposed compounds should NOT appear in word-prediction suggestions. Word prediction works from the stored wordList. Decomposition is for validation (spell-check) and lookup (dictionary popup), not generation. This maintains the current architecture where word-prediction suggests only authored entries.
-
-### Popup dictionary
-The popup's `renderResults` function (popup.js:1195) needs a new rendering path for decomposed results. Show: (1) gender badge from last component, (2) compound breakdown visualization ("hverdag + s + mas"), (3) definite/indefinite forms derived from last component, (4) "Samansett ord" label. Do NOT show: conjugation tables (nouns don't conjugate), examples (explicitly excluded per memory), senses (no authored sense data for decomposed compounds).
-
-### Manual spell-check button placement
-The existing spell-check.js DOM adapter attaches to focused textareas. The manual button should be a persistent element in the floating widget area (near the TTS button in floating-widget.js). Clicking it: (1) triggers a full re-check of the focused textarea, (2) shows a transient toast with result count, (3) dismisses after 3 seconds or on click. If no textarea is focused, the button should be grayed out or hidden.
-
-## MVP Recommendation
-
-Prioritize (in dependency order):
-1. **Decomposition engine** -- core dependency for 5 downstream features. Place in a shared module consumed by spell-check, dictionary, and gender rules.
-2. **Dictionary popup for decomposed compounds** -- highest user-visible impact. Stops "no results" for valid compounds.
-3. **Spell-check: accept decomposable compounds** -- stops false positives on valid compounds.
-4. **Gender inference for NB/NN** -- extends proven DE pattern. Refactor de-compound-gender.js to use shared engine.
-5. **Manual spell-check button** -- independent of decomposition, low complexity, high dyslexia-persona value.
-6. **Demonstrative-mismatch rule** -- independent, low complexity, proven nb-gender pattern.
-7. **Triple-letter typo budget** -- independent, moderate complexity.
-
-Defer within v2.1 (ship in a later phase if time permits):
-- **Expanded sarskriving via decomposition**: Ship after basic decomposition proves stable with fixtures. High false-positive risk needs careful fixture authoring (30+ positive, 15+ acceptance cases per the release workflow).
-- **Compound-aware NB/NN gender mismatch**: Depends on decomposition engine being stable. Ship after dictionary/spell-check integration proves the engine's accuracy.
+---
 
 ## Sources
 
-- [Algolia: Multilingual search decompounding](https://www.algolia.com/blog/engineering/increase-decompounding-accuracy-by-generating-a-language-specific-lexicon) -- decompounding accuracy with language-specific lexicons
-- [Bitext: Decompounding German, Korean and More](https://www.bitext.com/blog/decompounding-german-korean-and-more/) -- cross-language decompounding patterns
-- [Life in Norway: Compound Words Explained](https://www.lifeinnorway.net/compound-words-in-norwegian/) -- Norwegian linking elements (-s-, -e-, zero)
-- [Nuenki: Cracking Norwegian Compound Words](https://nuenki.app/info/norwegian_compound_words) -- compound formation rules
-- [Korfhage & Muller: Simple Compound Splitting for German (ACL 2017)](https://aclanthology.org/W17-1722.pdf) -- greedy longest match beats complex implementations
-- [Microsoft Patent: Compound word breaker and spell checker](https://patents.google.com/patent/US20050091030A1/en) -- compound analysis + spell-checking integration
-- [NLS Norwegian: Importance of Compound Words in Norskproven](https://nlsnorwegian.no/the-importance-of-compound-words-in-norskproven/) -- pedagogical importance
-- [Mastering Demonstratives in Norwegian](https://nlsnorwegian.no/mastering-the-use-of-demonstratives-in-norwegian/) -- den/det/denne/dette agreement rules
-- [Helperbird: Accessibility & Dyslexia Support Extension](https://www.helperbird.com/) -- competitor UX patterns for dyslexia tools
-- Existing codebase: `de-compound-gender.js` (lines 78-103), `nb-sarskriving.js`, `nb-gender.js`, `vocab-seam-core.js` (lines 700-807)
-- Memory files: `project_compound_word_decomposition.md`, `project_phase5_manual_spellcheck_button.md`
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/PROJECT.md` (v3.2 milestone definition, Out of Scope, Deferred)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/STATE.md` (Pending Todos — the 6 UAT items + 2 deploys, verbatim)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/milestones/v3.1-MILESTONE-AUDIT.md` (Tech Debt Aggregation — 14 items across 8 phases)
+- `/Users/geirforbord/Papertek/leksihjelp/CLAUDE.md` (synced-surface list, lockdown sync mechanics, version-bump ritual, downstream fix-mirror agreement)
+- User memory `project_test_suite_at_milestone_end.md` (informs anti-feature on /gsd:add-tests)

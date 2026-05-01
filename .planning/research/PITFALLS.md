@@ -1,271 +1,456 @@
-# Domain Pitfalls — v2.1 Compound Decomposition & Polish
+# Pitfalls Research — v3.2 UAT & Deploy Prep
 
-**Domain:** Adding compound word decomposition (NB/NN/DE) + carry-over polish items to existing 57-rule spell-check extension
-**Researched:** 2026-04-26
-**Confidence:** HIGH -- grounded in existing codebase analysis, Spraakraadet fuge documentation, and v1.0/v2.0 shipped rule interaction patterns
+**Domain:** Hardening / UAT / cross-repo-sync / deploy-runbook milestone for a Chrome MV3 extension with two downstream consumers (lockdown webapp shipped, skriveokt-zero deferred) and a Firebase + Vercel backend.
+**Researched:** 2026-05-01
+**Confidence:** HIGH (drawn from this project's own v1.0–v3.1 incident history; not generalised testing-best-practice)
 
-**System state:** 57 spell rules (plugin architecture), 2,124 NB nouns, 1,641 DE nouns, `dedupeOverlapping` priority-based conflict resolution, 9 release gates, 3,326 fixture lines at F1=1.000, 12.47 MiB zip (20 MiB cap).
+A hardening cycle is its own pitfall genre. The failure modes are not "we built feature X wrong" — they are "we claimed we tested when we didn't," "we fixed one thing and broke another via downstream sync," and "we wrote a deploy runbook that misses the production-only failure mode." This file catalogues the specific shapes those failures take in **this** project, with a `gate` vs `process step` recommendation per pitfall for the roadmapper downstream consumer.
 
 ---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Greedy longest-suffix produces phantom compound splits
+### Pitfall 1: Verifier walks a stale build, stale data, or wrong browser profile and reports PASS
 
-**What goes wrong:** The existing `de-compound-gender.js` (lines 78-103) uses greedy longest-suffix matching -- scan from position 1 rightward to find the longest tail in `nounGenus`. This works for DE gender inference (where you only validate the suffix) but fails for full decomposition because it never validates the PREFIX side. Result: words that happen to end with a real noun but are not compounds get accepted as valid.
+**What goes wrong:** A UAT walkthrough completes with a green checkmark in the verification log, but the human verifier was looking at:
+- the **previous** unpacked extension (Chrome doesn't reload the manifest automatically — the verifier opened a tab before re-loading the extension);
+- **stale IndexedDB** vocab from a v3.0 install (Phase 23 migrated v2→v3 silently; the user never cleared `lexi-vocab` v3 since the bug was fixed);
+- the **wrong Chrome profile** (the dev profile has every grammar feature toggled on, masking the default-preset bug class that INFRA-10 was created to defend against);
+- a **previous lockdown sync** of leksihjelp (the webapp's `node_modules/@papertek/leksihjelp` is from before the fix landed).
 
-Concrete examples from the NB nounbank:
-- "minister" contains suffix "ister" (suet/lard in Norwegian)
-- "angrep" contains suffix "rep" (rope)
-- "familie" contains suffix "lie" (a lie in English, but also in some dictionaries)
-- "karakter" contains "akter" (aft/stern)
+**Why it happens:** Browser-extension UAT has no equivalent of "fresh CI VM per run." Chrome holds onto unpacked extensions, IndexedDB caches survive reloads, and the lockdown sync is a postinstall hook — not a `git pull`. Phase 26-01 / 32-01 / 32-03 each shipped seam regressions that passed every Node-side gate green; the seam was empty in browser, but the tester's profile happened to have feature flags that masked the empty index. INFRA-10 + population canaries (Phase 36) is the structural defence against the data side. The build/profile/cache side has no such defence yet.
 
-With linking-element stripping, the surface expands further. Stripping a fuge-s from "ministers" yields "minister" -> suffix "ister" after dropping the 's' linker. Ghost splits multiply.
+**How to avoid:** Every browser UAT walkthrough header must include a **pre-flight evidence block** asserting:
+- Extension version string visible in `chrome://extensions` matches the in-scope version
+- `chrome://extensions` shows "Reloaded" timestamp **after** the fix commit's timestamp
+- Browser profile is the **default-preset profile** (no grammar features toggled — the first-run state) for at least one walk; the dev-toggled profile only for completeness walks
+- IndexedDB `lexi-vocab` `revision` column matches what the API currently serves (or has been wiped; the popup `Oppdater ordlister nå` button is the supported reset)
+- For lockdown walks: the lockdown sidepanel header shows the `@papertek/leksihjelp` version pinned in `lockdown/package.json`, and the postinstall sync ran after the leksihjelp version landed
 
-**Why it happens:** The `inferGenderFromSuffix` function in `de-compound-gender.js` deliberately only checks the suffix side because its purpose is gender inference, not decomposition validation. Extending this approach to full decomposition without adding prefix validation replicates the one-sided check.
+**Warning signs:** A verification log that just says "walked steps 1-9, all PASS" with no version strings, screenshots, or DevTools snapshots. Phase 27 / 30-01 / 30-02 verification logs from v3.1 are exactly this shape — that's why all six walks deferred to v3.2.
 
-**Consequences:** (a) False acceptance of misspelled words as valid compounds, (b) wrong dictionary popup results, (c) wrong gender inference propagating to article-correction rules, (d) expanded sarskriving false positives.
-
-**Prevention:**
-1. Require BOTH sides of every split to be valid entries. Prefix must be in `nounGenus` (or `validWords` for non-noun first components). Suffix must be in `nounGenus`.
-2. Minimum component length >= 3 for BOTH prefix AND suffix (not just suffix as in the current `MIN_SUFFIX_LEN = 3`).
-3. Build a validation corpus: run decomposition against all 2,124 existing NB nouns. Any noun that decomposes into parts where either part lacks independent meaning is a false positive. Target: <2% false-positive rate on existing nounbank.
-4. Maintain a small blocklist of known false splits (words that look decomposable but etymologically aren't). Seed from the validation corpus; grow from user reports.
-
-**Detection:** Automated test: for every noun already in nounbank, run decomposition. If the noun has a stored compound structure, verify decomposition recovers it. If the noun is NOT a compound, verify decomposition returns null. This test catches regressions when the noun bank grows.
+**Phase to address:** First UAT execution phase of v3.2 — make the pre-flight evidence block a **template** that every `*-VERIFICATION.md` must instantiate. **Recommendation: process step + lightweight scratch helper script**, not a release gate. A script `scripts/uat-preflight.js` that prints version strings + IDB revision + `chrome://extensions` reload timestamp gives the human verifier a one-shot "paste this into the verification log" capability without imposing CI overhead. Pure release-gate is wrong here because the failure mode is at human verification time, not at fixture time.
 
 ---
 
-### Pitfall 2: Linking element ambiguity creates wrong splits and missed splits
+### Pitfall 2: `workflow.auto_advance=true` skips human verification on a phase that needs it
 
-**What goes wrong:** The same characters can be a linking element OR part of a word. "Arbeidsliv" = arbeid + s + liv (fuge-s). But in "arbeidslos" the 's' is part of the word stem, not a linker. For DE, "-en-" could be the linker or part of "Frauen" (which ends in -en). Trying all linking elements at every split point creates combinatorial splits where multiple decompositions are valid.
+**What goes wrong:** GSD's auto-mode silently advances past a phase whose verification requires a human in front of a browser. The phase is marked complete; the deferred-todo grows; nobody notices until the next milestone-archive audit asks "where is the verification log for Phase X?"
 
-NB/NN fuge rules are partially lexical, partially suffix-pattern-based. Spraakraadet documents that fuge-s is "almost always" used after word-endings -dom, -else, -het, -skap, -sjon, -tet, -ling. But outside these patterns, "Det kan vaere vanskelig aa vite" (it can be difficult to know). DE linguistics literature confirms: "there are no fixed rules" for Fugenelemente selection.
+**Why it happens:** This project's auto-mode is correctly configured to **never run production deploys** (per memory `project_phase30_04_sso_status.md`'s implicit precedent), but auto-mode does **not** know which phases need a human. Six v3.1 walkthroughs got deferred this way. The user's "auto but no-prod-deploy" rule exists *because* agents skipped them and left them as todos.
 
-**Consequences:** Wrong linking element choice -> wrong split boundaries -> wrong gender inference from wrong suffix. Or: valid compound missed because the algorithm tries the wrong linker first and finds no valid split.
+**How to avoid:** Phases whose verification is browser-walk-shaped must declare it explicitly in the phase frontmatter. Conventions:
+- A phase frontmatter field `verification_kind: human-browser-walk | fixture-only | runbook-dry-run` (or similar)
+- Phase plans with `verification_kind: human-browser-walk` are **excluded** from auto-advance — the orchestrator must surface them as a hard pause and wait for explicit user sign-off before marking complete
+- The pause message includes the verification step list inline (so the user can copy-paste into a browser session)
 
-**Prevention:**
-1. For NB/NN: implement Spraakraadet's suffix-based heuristics as a first-pass fuge predictor. If the first component ends in -dom, -else, -het, -skap, -sjon, -tet, -ling, -nad: expect fuge-s. This covers the documented "naer alltid" (almost always) cases.
-2. For both NB and DE: try splits in this order: (a) zero-fuge first, (b) fuge-s (most common), (c) remaining linkers. Accept the FIRST valid split (both sides valid). Do not enumerate all possible splits -- greedy is acceptable here because ambiguous splits are rare enough not to justify exhaustive search.
-3. For DE: reuse the existing `LINKERS = ['s', 'n', 'en', 'er', 'e', 'es']` from `de-compound-gender.js` with the same priority ordering.
-4. Consider adding a `fuge` property to high-frequency first components in papertek-vocabulary nounbank (e.g., hverdag -> "s", skole -> "", barn -> "e"). Research question for phase planning: how many nouns commonly appear as first components? Estimate: <200 for NB. This is a data enrichment, not logic.
+**Warning signs:** A milestone audit that finds "Phase X complete, but VERIFICATION.md is empty / missing / says 'deferred to next milestone.'" v3.1's six-walkthrough backlog is exactly this signal.
 
-**Detection:** Benchmark test: for known compounds containing linking elements (hverdagsmas, gutteklasse, barnehage), verify decomposition recovers the correct split point and correct linker. Manual review of the first 50 decompositions on benchmark texts.
-
----
-
-### Pitfall 3: Decomposition silences typo-fuzzy on misspelled long words
-
-**What goes wrong:** The typo-fuzzy rule (priority 50) fires on unknown words not in `validWords`. If decomposition adds successfully-decomposed compounds to the "accepted" set (or runs at a priority that preempts typo-fuzzy), a misspelled compound that accidentally decomposes into real parts is silently accepted.
-
-Example: student writes "skoledegen" (typo for "skoledagen", the school day). Decomposition: "skole" + "degen" -- "degen" IS a word (the rapier/sword). Decomposition says "valid compound", student never sees the typo correction.
-
-This is the mirror image of v1.0 Pitfall 1 (typo entries shadowed into validWords, silencing the curated-typo branch -- fixed in `vocab-seam-core.js` line 777). Same class of error: an acceptance path that's too broad silences a correction path.
-
-**Why it happens:** Decomposition validates syntactic validity (both parts are real words) but has no way to check semantic plausibility. In Norwegian and German, ANY two nouns can be productively compounded, so "skoledegen" (school rapier) is syntactically valid even though semantically nonsensical.
-
-**Consequences:** The system's primary value -- catching misspellings -- degrades for compound-length words, which are exactly the words students misspell most often.
-
-**Prevention:**
-1. Decomposition MUST NOT add compounds to `validWords`. It should be a separate acceptance path.
-2. Priority ordering: if typo-fuzzy finds a d=1 neighbor for the FULL compound word, the typo correction wins over decomposition acceptance. Implement: decomposition acceptance runs at priority > 50 (after typo-fuzzy); if typo-fuzzy already emitted a finding for this token, decomposition defers.
-3. Alternatively: decomposition only accepts compounds where the FIRST component is >= 4 characters AND the SECOND component is >= 4 characters, reducing the chance of accidental two-short-word matches.
-4. Fixture cases: include misspelled compounds where a typo-fuzzy correction exists. Verify the typo finding fires, not decomposition acceptance.
-
-**Detection:** Write ~10 fixture cases of misspelled compounds that accidentally decompose (e.g., "skoledegen", "huskattten"). Verify typo-fuzzy fires on each.
+**Phase to address:** A v3.2 hygiene/process phase early in the milestone (before the UAT batch starts) — establish the convention, retrofit the v3.2 phase headers, and treat any deferred walkthrough as a milestone-blocker (i.e. it becomes a hard gate at `gsd:complete-milestone`). **Recommendation: process step in roadmap + frontmatter convention**. Not a script gate; this is a roadmap-discipline issue.
 
 ---
 
-### Pitfall 4: Sarskriving expansion without blocklist update causes false-positive storm
+### Pitfall 3: Status-quo bias in UAT notes — only what passed gets recorded
 
-**What goes wrong:** The current `nb-sarskriving.js` checks if `prev.word + t.word` exists in `compoundNouns` (a Set of nounbank base entries). With decomposition, you could flag "skole dag" even if "skoledag" isn't stored -- because decomposition verifies it's a valid compound. But this massively expands the firing surface. Every adjacent noun pair where the concatenation decomposes validly becomes a candidate.
+**What goes wrong:** The verifier writes "Step 3: clicked the Lær mer panel — appeared correctly with case badges and example pairs ✓" but does **not** record that the panel took 2.3 seconds to render, that the close-X had no hover state, that the keyboard escape didn't dismiss it, or that the panel rendered behind the spell-check popover on a 1280px viewport. None of these are bugs that block the walk, but each one is a real defect that the next milestone will discover and a future student will hit.
 
-The existing `SARSKRIVING_BLOCKLIST` (lines 30-45 in `nb-sarskriving.js`) was tuned for the 2,124-entry `compoundNouns` set. It blocks function words and common adjectives. But it does NOT block noun-noun adjacency where both words are independently valid nouns. "glass bord" could be a list ("a glass and a table") or a compound ("glassbord", a glass table). The current system never had to decide because "glassbord" was either in `compoundNouns` or it wasn't.
+**Why it happens:** Verification templates ask "did step N pass?" and reward green checkmarks. They do not ask "what felt off?" Time pressure encourages binary answers.
 
-**Consequences:** Sarskriving precision (currently P=1.000 on 55 NB + 46 NN cases) drops below the 0.92 threshold in `check-fixtures.js`. Students see false positives on legitimate noun phrases and lose trust in the rule.
+**How to avoid:** Every walkthrough template must have an explicit **"Defects observed (non-blocking)"** section, separate from pass/fail. The orchestrator surfaces these at milestone close as candidate v3.3 backlog. Specifically:
+- Three free-form prompts at the foot of every UAT template: "What was slower than expected?", "What needed a second click to discover?", "What looked out-of-place?"
+- A "screenshots that capture surprise, not just success" instruction — the existing `leksiscreenshots/` workflow already does this informally; formalise it as part of the UAT template
 
-**Prevention:**
-1. DO NOT expand sarskriving to use decomposition in the first implementation phase. Ship decomposition for dictionary lookup and spell-check acceptance first. Sarskriving expansion is a separate, later step requiring its own fixture tuning round.
-2. When eventually expanding: require a linking element (fuge-s, fuge-e) in the concatenated form as a stronger signal. "skolesekk" (zero-fuge) is already in compoundNouns; "hverdagsmas" (fuge-s) is a strong signal because the 's' disambiguates from a two-word reading. Zero-fuge decomposition-based sarskriving has lower precision.
-3. Add minimum combined length >= 8 for decomposition-based sarskriving expansions.
-4. Run the expanded sarskriving against all benchmark texts; manual-review every new finding. If >10% are false positives, the expansion isn't ready.
+**Warning signs:** A UAT log with only checkmarks and zero free-form notes. A verification log shorter than 20 lines for a 9-step walk.
 
-**Detection:** Before shipping sarskriving expansion: measure P/R delta on existing fixtures + benchmark corpus. Ship only if P stays >= 0.92.
+**Phase to address:** Same hygiene phase as Pitfall 2. **Recommendation: process step + verification-log template change**. Not a gate.
 
 ---
 
-## Moderate Pitfalls
+### Pitfall 4: Single-browser UAT misses Edge / Brave / Chromium-incognito differences
 
-### Pitfall 5: Performance regression from decomposition on every unknown word
+**What goes wrong:** The walkthrough is performed in Chrome stable on macOS. Bugs that surface only in Edge (different `chrome.identity` redirect-URI handling), Brave (more aggressive resource-blocker that may drop ElevenLabs requests), or Chromium incognito (more restricted IndexedDB quotas; no `chrome.storage.sync` propagation) ship to users.
 
-**What goes wrong:** The typo-fuzzy rule already iterates `validWords` (a Set of every known form, likely 10,000+ entries for NB) for every unknown token. Adding decomposition means trying to split every unknown token at every position (average word length ~8), checking both halves against `nounGenus`. With ~2,124 NB nouns in `nounGenus`, each split-check is O(1) for the Map lookup, but there are O(word_length * linker_count) = ~48 split attempts per word. This runs on every keystroke during auto-detect.
+**Why it happens:** The extension is shipped as one zip across all three Chromium variants and on three platforms (Mac, Windows, Linux). UAT on one configuration does not exercise the others. The Side Panel for "Fest" already needed a macOS-specific fix in 2.5.0 (memory `project_sidepanel_fest_macos.md`).
 
-**Why it happens:** Decomposition is inherently more expensive than a `Set.has()` lookup. The cost multiplies by the number of unknown tokens in the text.
+**How to avoid:** UAT walkthroughs that touch any of these surfaces must run on **at least two Chromium variants**:
+- TTS / ElevenLabs path: Chrome + Brave (Brave's shields)
+- Side Panel / popup window: Chrome + Edge (Edge has its own side-panel quirks) on macOS
+- IndexedDB / vocab cache: Chrome stable + Chrome incognito (incognito has stricter quota and the cache may be evicted between walks)
+- Vipps OIDC: Chrome + Edge (`launchWebAuthFlow` redirect-URI shape differs)
 
-**Prevention:**
-1. Gate decomposition behind minimum word length >= 6. Words shorter than 6 characters are almost never productive compounds in NB or DE.
-2. Cache decomposition results in a `Map<string, DecompResult|null>` cleared on language change. The same unknown word appears on every keystroke re-check; caching avoids redundant work.
-3. Run decomposition ONLY on tokens that fail `validWords.has()` AND `sisterValidWords.has()` -- same precondition as typo-fuzzy.
-4. Measure before optimizing: profile the spell-check pass on a 500-word benchmark text with and without decomposition. If delta < 50ms, no optimization needed. Current budget is probably ~20ms for the full pass.
+The pragmatic minimum is to declare in each verification template which **target browsers** the walk applies to, and require at least one walk per target.
 
-**Detection:** Performance test: time `check()` on a 500-word NB text with 20% unknown words, with and without decomposition. Alert threshold: 50ms delta.
+**Warning signs:** A user bug report that says "doesn't work on my school PC" where the school PC runs Edge on Windows. The exam-mode rollout is exam-mode-in-Edge-on-Windows; that's the actual deployment target.
 
-### Pitfall 6: `compoundNouns` Set semantics silently change
-
-**What goes wrong:** The `compoundNouns` Set in `vocab-seam-core.js` (line 712, 793) currently contains only nounbank base entries. It's consumed exclusively by `nb-sarskriving.js`. If decomposition-verified compounds are added to this Set, the semantics change from "stored compounds" to "stored + inferred compounds." Any code that checks `compoundNouns.has(word)` gets a different answer than before.
-
-**Why it happens:** Reusing an existing data structure for a new purpose without auditing all consumers.
-
-**Prevention:**
-1. DO NOT modify the `compoundNouns` Set. Keep it as the stored-compound set for sarskriving.
-2. Create a NEW function `decomposeCompound(word, vocab)` in `vocab-seam-core.js` that returns a decomposition result `{prefix, linker, suffix, genus}` or `null`. Export via `__lexiVocabCore` API.
-3. Rules that need decomposition call the function directly. The function is stateless and side-effect-free.
-4. grep-audit: `compoundNouns` currently appears only in `nb-sarskriving.js` (consumer) and `vocab-seam-core.js` (builder). Keep it that way.
-
-**Detection:** grep for `compoundNouns` across all files after implementation. Only `nb-sarskriving.js` and `vocab-seam-core.js` should reference it.
-
-### Pitfall 7: Demonstrative-mismatch rule collides with nb-gender on overlapping spans
-
-**What goes wrong:** New demonstrative-mismatch rule ("Det boka" -> "Den boka") flags det/den when the gender doesn't match the following noun. But `nb-gender` (priority 10) already flags article-noun gender mismatches for en/ei/et. If a student writes "Det bok" (wrong determiner + missing definiteness), both rules could fire on overlapping spans. `dedupeOverlapping` keeps the first (lowest priority number wins).
-
-Problem 1: If demonstrative-mismatch gets priority < 10, it suppresses nb-gender on cases where the student used "det" as a vague article (common student error pattern: "det bok" meaning "en bok"). The more common error gets no feedback.
-
-Problem 2: If demonstrative-mismatch gets priority > 10, nb-gender fires on "det boka" and suggests "en boka" or "ei boka" -- wrong fix. The article "det" is being used as a demonstrative (this), not an indefinite article.
-
-**Prevention:**
-1. Demonstrative-mismatch MUST distinguish demonstrative from article usage. Key signal: definiteness of the following noun. Demonstrative + definite noun ("det boka") is the demonstrative pattern. "Det" + indefinite noun ("det bok") is the article-usage pattern (nb-gender territory).
-2. Demonstrative-mismatch should ONLY fire when followed by a definite noun form (ending in -en, -a, -et, -ene, etc. for NB; -en, -a, -et, -ane, -ene for NN).
-3. Priority: 15 (after nb-gender at 10). On the rare overlap where both could fire, nb-gender wins, which is pedagogically correct -- article-gender is the higher-frequency student error.
-4. Skip tokens in the en/ei/et/ein/eit article set -- let nb-gender handle those exclusively.
-
-**Detection:** Fixture cases: (a) "Det boka" -> "Den boka" fires demonstrative-mismatch, (b) "Et bok" -> "En bok" fires nb-gender only, (c) "Det bok" -> nb-gender fires (article error), demonstrative-mismatch does NOT fire (indefinite noun = not demonstrative pattern).
-
-### Pitfall 8: Triple-letter typo interacts badly with typo-fuzzy scoring
-
-**What goes wrong:** The triple-letter feature ("tykkkjer" -> "tykkjer") is a d=1 deletion in edit-distance terms. But the existing typo-fuzzy scoring (line 50-56 in `nb-typo-fuzzy.js`) penalizes shorter candidates by 50 points: `if (cand.length < query.length) s -= 50`. The correct fix "tykkjer" (shorter by 1 char) gets penalized, potentially losing to a wrong same-length substitute.
-
-Additionally, the first-character filter (`if (cand[0] !== first) continue` at line 103) means triple-letter at the start of a word (e.g., "ssskriv") would need the candidate "skriv" with a different first letter -- the filter blocks it.
-
-**Why it happens:** Typo-fuzzy was designed for common typo patterns (transposition, substitution, adjacent-key). Triple-letter repetition is a specific dyslexia-related pattern that the general scoring was never tuned for.
-
-**Prevention:**
-1. Implement triple-letter as a SEPARATE rule file (`nb-typo-triple-letter.js`) with its own priority, not as a modification to typo-fuzzy. This keeps the 188+ existing typo fixture cases stable.
-2. Priority: ~45 (before typo-fuzzy at 50, after curated typo at 40). If the word contains 3+ consecutive identical letters and removing one produces a word in `validWords`, emit a finding.
-3. Simple pattern: `/(.)\1{2,}/` regex to detect triple-letter sequences. For each triple, try removing one instance and check `validWords.has()`. No edit-distance computation needed.
-4. Frequency-weighted tiebreak: if multiple single-letter removals each produce a valid word, prefer the higher-frequency one (using `vocab.freq`).
-5. The rule should fire on ALL languages (dyslexia-related key repetition isn't language-specific), not just NB/NN.
-
-**Detection:** Fixture cases: "tykkkjer", "kommmmer", "skkole", "skkkole". Verify the triple-letter rule fires (not typo-fuzzy) and produces correct suggestions.
-
-### Pitfall 9: Manual spell-check button re-running full check causes visual flash
-
-**What goes wrong:** The auto-detect spell-check runs on a debounced keystroke timer and applies findings as DOM underlines. A manual "Run spell-check" button that calls the same `check()` pipeline clears and re-applies all underlines, causing a visible flash. If text hasn't changed since last auto-check, this is wasteful and visually jarring.
-
-**Prevention:**
-1. Track a `lastCheckedText` hash (or the text itself, for short documents). Manual button compares current text against hash. If identical, skip re-check and show toast with existing findings count.
-2. The toast/acknowledgement is the primary UX value (per memory file: "so the button click feels acknowledged even when there's nothing to flag"). The re-check is secondary.
-3. Toast format: "X feil funnet" (X errors found) or "Alt ser bra ut!" (everything looks good).
-4. When text HAS changed: run full check, apply findings, then show toast. No different from auto-detect except user-initiated.
-
-**Detection:** Manual browser test: type text, wait for auto-detect, click button. Verify no flash. Then type new text, click button before debounce. Verify check runs.
-
-### Pitfall 10: Dictionary popup for decomposed compounds shows wrong declension
-
-**What goes wrong:** Gender is correctly inferred from the last component ("Schulranzen" -> Ranzen = m -> der Schulranzen). But plural forms of compounds often differ from the last component's standalone plural. "Spielplatz" plural is "Spielplatze" (not "Platze" in isolation). NB "barnehage" plural is "barnehager" but compound-specific plural forms may have irregularities not captured by the last component's entry.
-
-**Prevention:**
-1. Show ONLY gender (inferred from last component) and the component breakdown in the decomposed popup. Do NOT show inferred plural or declension forms.
-2. The memory file explicitly states: "Do NOT inherit examples from components -- 'brod' examples are misleading on 'skolebrod'."
-3. Mark decomposed results clearly: "Samansett ord: hverdag + s + mas" with gender from "mas" (m -> en hverdagsmas).
-4. If the compound IS in the nounbank (Tier 1: stored compound), the stored entry takes precedence -- decomposition popup never overrides a stored entry.
-
-**Detection:** Verify: for every stored compound in nounbank, decomposition either returns null (word found directly) or matches the stored entry's gender. Any mismatch is a data quality issue.
+**Phase to address:** v3.2 UAT batch phase plans must list target-browsers per walk. **Recommendation: process step in phase plans**, not a gate (CI cannot run human walks across browser variants without a substantial new infrastructure investment that's out of scope for v3.2).
 
 ---
 
-## Minor Pitfalls
+### Pitfall 5: Fix lands in extension only — lockdown still ships the bug because sync didn't run
 
-### Pitfall 11: NB/NN fuge rules differ but share the same nounbank
+**What goes wrong:** A v3.2 bug-fix lands in `extension/content/spell-rules/foo.js`, the release zip is rebuilt, the version is bumped, and the change ships to extension users. Lockdown's `node_modules/@papertek/leksihjelp` does not move because `lockdown/package.json` pins `file:../leksihjelp` and lockdown's CI hasn't been run. Lockdown users keep hitting the bug for weeks.
 
-**What goes wrong:** NB and NN have slightly different fuge conventions. NB "gutteklasse" vs NN "guteklasse". The vocab seam builds one `nounGenus` from raw data for both NB and NN (via `buildLookupIndexes`). If decomposition uses language-specific fuge rules but language-neutral noun data, the NB decomposer might accept a split the NN decomposer should reject.
+**Why it happens:** The leksihjelp release process documented in CLAUDE.md ends at "upload zip as GitHub Release asset." Nothing in that process triggers lockdown's postinstall sync. The dependency model is `file:../leksihjelp` (per CLAUDE.md note "once published to GitHub Packages it'll be a versioned `npm install`") — there's no version bump to detect. Phase 30-02 of v3.1 was the last time the sync ran successfully, and even then it mirrored four orphan working-tree changes upstream wasn't ready to ship (see Pitfall 7).
 
-**Prevention:** Start with language-neutral fuge rules. The differences are minor -- a word that decomposes in NB almost always decomposes in NN too, with possibly a different linking element. The gender inference (from last component) is identical. If a specific NB/NN divergence causes a false positive in fixtures, add a per-language override at that point. Don't pre-engineer language splits.
+**How to avoid:** Every v3.2 bug-fix phase plan that touches a synced file must include a **post-fix sync verification step**:
+1. Identify whether the fix touches a synced surface (the CLAUDE.md "Downstream consumers" section enumerates them: `extension/content/*`, `extension/styles/content.css`, `extension/data/*`, `extension/i18n/*`, `extension/popup/views/*`, `extension/exam-registry.js`)
+2. If yes, the phase plan's success criteria must include "lockdown sync re-run; lockdown-staging walk verifies fix present"
+3. Bump `package.json` version on every synced-file change (CLAUDE.md already says this — enforce it)
 
-### Pitfall 12: Bundle size growth from per-noun fuge data in papertek-vocabulary
+**Warning signs:** A fix commit that touches a synced surface with no corresponding lockdown sync commit within 24h. A lockdown bug report that's already-fixed upstream.
 
-**What goes wrong:** If fuge properties are added to every nounbank entry, JSON files grow. With 2,124 NB nouns + 1,641 DE nouns, adding `"fuge": "s"` is ~30KB total -- negligible against the current 12.47 MiB zip and 20 MiB cap (~38% headroom). Not a real risk for v2.1 but worth monitoring.
-
-**Prevention:** Monitor via `check-bundle-size` (already enforced). No action needed unless nounbank grows dramatically.
-
-### Pitfall 13: Browser visual verification backlog masks compound-rule rendering bugs
-
-**What goes wrong:** Phases 6/7 deferred browser visual verification (P1/P2/P3 dot colours, quotation suppression, word-order dots). Adding compound decomposition findings without verifying the existing visual layer means compound findings might render with wrong dot colour, wrong popover layout, or broken explain text -- and the deferred verification gap means nobody catches it.
-
-**Prevention:** Sequence the deferred browser verification BEFORE shipping compound decomposition to users. The v2.1 milestone already includes this as a carry-over item. Do it first.
-
-### Pitfall 14: Recursive decomposition (3+ component compounds) without depth limit
-
-**What goes wrong:** Norwegian and German allow chains: "bankregistreringsnummer" = bank + registrering + s + nummer. If decomposition is recursive (decompose prefix further if it's also unknown), without a depth limit you get: (a) performance regression on long words, (b) increasingly unlikely splits at depth 3+, (c) complex explain text in the popup.
-
-**Prevention:** Limit decomposition to 2 components in v2.1. Two-component splits cover the vast majority of student-relevant compounds. Three-component splits can be added in a future phase if needed. The longest NB nouns in the nounbank ("bankregistreringsnummer" at 23 chars) are stored entries -- decomposition doesn't need to handle them.
+**Phase to address:** Every bug-fix phase plan in v3.2. **Recommendation: a release gate** — this is mechanical and will recur. Specifically: `npm run check-synced-surface-version` that diffs the last-tagged version's synced surfaces against `HEAD`; if they differ, asserts `package.json` version has been bumped since the last tag. Catches the "fix landed, version not bumped, lockdown won't notice" class. Companion process step: a v3.2 bug-fix phase plan template that explicitly enumerates synced-surface impact in success criteria.
 
 ---
 
-## Phase-Specific Warnings
+### Pitfall 6: Add a regression fixture that doesn't actually exercise the bug path (Node-runner masks browser truth)
 
-| Phase Topic | Likely Pitfall | Mitigation |
-|-------------|---------------|------------|
-| Decomposition engine | #1 (phantom compounds), #2 (linking ambiguity), #14 (recursive depth) | Validate both sides; Spraakraadet suffix heuristics for NB fuge; limit to 2 components |
-| Spell-check integration | #3 (silencing typo-fuzzy), #6 (compoundNouns semantics) | New `decomposeCompound()` function; don't add to validWords/compoundNouns; priority > 50; typo-fuzzy d=1 wins |
-| Dictionary popup | #10 (wrong declension), stored-entry precedence | Show gender only, not declension; mark as "Samansett ord"; Tier 1 stored entries take precedence |
-| Sarskriving expansion | #4 (false-positive storm) | Defer to separate step; require linking element for new flags; min combined length 8 |
-| Gender inference (NB/NN) | #11 (NB/NN fuge divergence) | Start language-neutral; override only when evidence demands |
-| Demonstrative-mismatch | #7 (collision with nb-gender) | Require definite noun; priority 15; skip article tokens |
-| Triple-letter typo | #8 (fuzzy scoring interaction) | Separate rule file; priority 45; regex pattern match, no edit distance |
-| Manual spell-check button | #9 (UI flash) | Hash-compare before re-check; toast is primary value |
-| Performance | #5 (keystroke latency) | Min length 6; cache results; measure before optimizing |
-| Browser verification | #13 (visual bugs masked) | Sequence before compound decomposition ships |
+**What goes wrong:** A v3.2 fix lands with a new fixture in `tests/fixtures/spell-check/` that asserts the rule fires on the bug input. `npm run check-fixtures` exits 0. The fix ships. Browser users still see the bug because the fixture's vocab-loading path uses the unfiltered, fully-populated Node-side build, which is **never** what the browser presents at runtime under default presets.
+
+**Why it happens:** This is the INFRA-10 root cause. Phase 26-01, 32-01, and 32-03 all shipped indexes through the Node fixture-runner green; the seam was empty in browser. INFRA-10 (Phase 36) added static-parse + population canaries to defend against the seam shape. But INFRA-10 does not — and cannot — assert that **a new fixture meaningfully exercises a bug path the user actually hits.** A fixture that calls a rule directly with a hand-built `vocab` literal is just unit-testing the rule, not regressing the bug.
+
+**How to avoid:** v3.2 bug-fix phase plans that add a fixture must answer two questions in the plan body:
+1. **What was the user-visible symptom?** (e.g. "fr-aspect-hint did not fire on `je mangeait` in browser")
+2. **Does the new fixture exercise the same code path as the user-visible symptom, or does it shortcut around the seam?** (the answer must be "same path" — and ideally the fixture is added to `benchmark-texts/expectations.json` so INFRA-08 also covers it, which is closer to "what the browser actually runs")
+
+For seam-shaped bugs specifically: the fix is incomplete without a population canary in INFRA-10's gate (the Phase 36 pattern). INFRA-10 is extensible — every new index added to `buildIndexes` should also get a canary asserting non-empty population under default preset.
+
+**Warning signs:** A fixture-add commit with no benchmark-texts/expectations.json entry. A bug-fix PR whose fixture passes the same runner that originally let the bug ship.
+
+**Phase to address:** Every bug-fix phase plan in v3.2. **Recommendation: process step in plan template** (not a gate — too hard to mechanically distinguish "good" from "shortcut" fixtures). Companion gate change: extend INFRA-10's canary list whenever a new seam-shaped bug surfaces in v3.2. The gate is the existing one; the discipline is "every new index gets a canary."
 
 ---
 
-## "Looks Done But Isn't" Checklist (v2.1-specific)
+### Pitfall 7: Lockdown sync mirrors orphan working-tree changes upstream wasn't ready to ship
 
-- [ ] Decomposition engine: false-positive rate < 2% measured against existing nounbank?
-- [ ] Decomposition engine: handles zero-fuge, fuge-s, fuge-e correctly for NB/NN?
-- [ ] Decomposition engine: handles DE Fugenelemente (s, n, en, er, e, es)?
-- [ ] Decomposition engine: limited to 2 components (no recursive chains)?
-- [ ] Spell-check integration: typo-fuzzy d=1 correction STILL wins over decomposition acceptance?
-- [ ] Sarskriving: NOT expanded to use decomposition (deferred)?
-- [ ] Gender inference: fires only when article precedes AND gender mismatches?
-- [ ] Dictionary popup: shows gender + breakdown only, no inherited declension/examples?
-- [ ] Demonstrative-mismatch: only fires with definite noun following?
-- [ ] Demonstrative-mismatch: does NOT overlap with nb-gender findings?
-- [ ] Triple-letter: separate rule file, not a typo-fuzzy modification?
-- [ ] Triple-letter: fixture cases green, no regression on existing typo fixtures?
-- [ ] Manual button: no visual flash on unchanged text?
-- [ ] Browser verification: deferred Phase 6/7 visual checks completed?
-- [ ] Performance: decomposition adds < 50ms to spell-check pass on 500-word text?
-- [ ] Bundle size: still under 20 MiB cap after any nounbank fuge-data additions?
-- [ ] All 9 existing release gates still pass?
+**What goes wrong:** Phase 30-02 of v3.1 ran `node scripts/sync-leksihjelp.js` from lockdown. The script mirrored 18 files faithfully, including 4 orphan upstream working-tree changes that weren't part of the in-scope v3.1 work and that the user had been actively considering reverting. Those orphan changes are now in production lockdown.
+
+**Why it happens:** The sync script reads from the upstream working tree, not from a tagged release. There is no filter; the script trusts that whatever's in `extension/` is intended to ship.
+
+**How to avoid:** Every lockdown sync in v3.2 must run **against a tagged leksihjelp version**, not against the working tree. Concrete process:
+1. Before sync, check `git status` in leksihjelp working dir is clean (no unstaged changes to synced surfaces)
+2. Sync runs against the tagged commit corresponding to the leksihjelp version pinned in lockdown's `package.json`
+3. After sync, lockdown's `git diff` should match the diff of the leksihjelp tag-to-tag range — any deviation means the sync mirrored uncommitted state
+
+**Warning signs:** A sync that produces a lockdown-side diff including files the leksihjelp release notes don't mention. A leksihjelp working tree with uncommitted changes to `extension/content/` or `extension/popup/views/` at sync time.
+
+**Phase to address:** v3.2 sync phase. **Recommendation: a release gate on the sync side** — `lockdown/scripts/sync-leksihjelp.js` should refuse to run if the upstream working tree is dirty (or if the upstream HEAD is not a tagged commit), with an `--allow-untagged` escape hatch for emergencies. This is a lockdown-side gate, not a leksihjelp-side gate, but the v3.2 plan should specify it as the contract.
+
+---
+
+### Pitfall 8: `exam-registry.js` load-order regression after sync (must load BEFORE content scripts)
+
+**What goes wrong:** Sync to lockdown re-orders `LEKSI_BUNDLE` array in the loader, or a new lockdown-side script is inserted before `exam-registry.js`, with the result that `__lexiExamRegistry` is undefined when `spell-check-core.js` initialises. Spell-check silently classifies every rule as unclassified — the worst failure mode for an exam-compliance feature, since teachers can't trust suppression is happening.
+
+**Why it happens:** CLAUDE.md flags this explicitly: "must be loaded BEFORE `spell-check-core.js` so `__lexiExamRegistry` exists when consumers initialise." But the sync script doesn't enforce ordering — it copies files; the lockdown loader's `LEKSI_BUNDLE` array enforces the order, and that array is hand-maintained.
+
+**How to avoid:** Lockdown loader (`lockdown/public/js/leksihjelp-loader.js`) needs a runtime assertion: after `LEKSI_BUNDLE` loads, check `typeof window.__lexiExamRegistry === 'object'` before initialising spell-check; if missing, fail loudly with a console error and short-circuit spell-check (so misclassification cannot ship silently). On the leksihjelp side, the `check-exam-marker` gate should add a self-test that asserts `exam-registry.js` is the first file in the documented `LEKSI_BUNDLE` ordering snippet (which we'd codify as a comment in `extension/exam-registry.js`).
+
+**Warning signs:** A lockdown UAT walk where spell-check fires inside EKSAMENMODUS for rules it shouldn't. Console error "exam registry not loaded" in lockdown dev tools.
+
+**Phase to address:** v3.2 lockdown-staging UAT phase + sync phase. **Recommendation: runtime assertion in lockdown loader (process step in lockdown-side change) + extend `check-exam-marker` gate** to assert load-order documentation correctness on the leksihjelp side.
+
+---
+
+### Pitfall 9: skriveokt-zero falls behind silently (deferred consumer)
+
+**What goes wrong:** v3.2 ships exam-mode fixes / view-module changes / new exam-registry entries. skriveokt-zero is "deferred consumer — un-defer when ships to schools" (CLAUDE.md). Six months later the user signs a school deployment for skriveokt-zero. The desktop app is several leksihjelp versions behind, the sync script in `skriveokt-zero/scripts/sync-leksihjelp.js` may have bit-rotted, and the `rules/` rename from `spell-rules/` may collide with a new `extension/content/spell-rules/` subdirectory introduced in v3.2.
+
+**Why it happens:** Deferred consumers don't run their sync. The contract (CLAUDE.md "Downstream consumers" → "skriveokt-zero / lockdown-zero") is documented but not exercised in v3.2.
+
+**How to avoid:** v3.2 should include a single "sync dry-run for skriveokt-zero" step — execute the sync script in dry-run mode against the current leksihjelp working tree to detect breakage before it bites at unfreeze time. If the sync script lives in skriveokt-zero, ask the user to run a one-shot `node scripts/sync-leksihjelp.js --dry-run` and capture the output. If breakage is detected, file the diff as a v3.2 deferred-consumer item, not a milestone-blocker.
+
+**Warning signs:** A new directory under `extension/content/` whose name collides with skriveokt-zero's rename targets. A new file in a synced surface that the skriveokt-zero sync script doesn't enumerate.
+
+**Phase to address:** v3.2 sync phase, as a single low-cost step. **Recommendation: process step (one-time check)**. Not a gate — a hard CI gate against a deferred consumer is over-investment.
+
+---
+
+### Pitfall 10: Bump version in 1 of 3 places (manifest.json + package.json + backend/public/index.html)
+
+**What goes wrong:** A v3.2 fix lands. `extension/manifest.json` bumped to 2.10.0. `package.json` still says 2.9.18. `backend/public/index.html` still says 2.9.18. The landing page advertises the wrong version; the lockdown sync doesn't see a version change (it reads `package.json`); the GitHub Release tag races with the unbumped strings. v2.2's milestone audit literally caught this (`package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1`).
+
+**Why it happens:** Three sources of truth, no single command to bump them, no gate to assert agreement.
+
+**How to avoid:** A new release gate, `check-version-alignment`, that asserts the three strings are equal. Paired self-test plants a divergent version (gate fires) and a coherent version (gate passes). This is mechanical, recurring, and exactly what a release gate exists to prevent.
+
+**Warning signs:** A milestone audit that mentions "version skew." Lockdown sync that doesn't pick up a freshly-shipped fix.
+
+**Phase to address:** v3.2 hygiene phase, early. **Recommendation: a release gate**. Mechanical and recurring — gate is correct.
+
+---
+
+### Pitfall 11: Fix in lockdown directly without porting upstream — silent revert on next sync
+
+**What goes wrong:** During lockdown-staging UAT, a bug shows up that's quick to fix in lockdown's `public/leksihjelp/` tree. The lockdown developer fixes it there to unblock the walkthrough. The fix is never ported to leksihjelp upstream. Next `npm install` in lockdown re-runs the postinstall sync and silently reverts the fix.
+
+**Why it happens:** Time pressure during UAT. CLAUDE.md documents the contract ("Downstream-only quick fixes ... over there are fine for testing, but the canonical change still belongs *here*") but enforcement relies on developer discipline.
+
+**How to avoid:** Two-pronged:
+1. The lockdown sync script should detect drift — for each synced file, compare lockdown's current copy against the freshly-synced copy; if they differ, log a loud warning ("you are about to overwrite N files that diverge from upstream"). Force confirmation.
+2. The v3.2 lockdown UAT phase plan must explicitly forbid in-tree lockdown fixes during the walk; surfaced bugs go into a "port back to leksihjelp" todo before next sync.
+
+**Warning signs:** A lockdown commit that touches `public/leksihjelp/` files and is not paired with a leksihjelp commit. A re-sync that produces a large diff because previous fixes are being reverted.
+
+**Phase to address:** v3.2 lockdown UAT phase + sync phase. **Recommendation: process step in phase plan + lockdown-side enhancement to sync script**. Not a leksihjelp-side gate (the leksihjelp repo can't see lockdown's tree).
+
+---
+
+### Pitfall 12: Lockdown re-pin to wrong leksihjelp version (`file:../leksihjelp` vs versioned)
+
+**What goes wrong:** During v3.2, lockdown's `package.json` still pins `file:../leksihjelp`. The contributor on lockdown checks out their lockdown branch with a **different** leksihjelp working tree alongside it (e.g. they were working on v3.3 prep in another worktree). The relative-path resolution silently picks up the wrong version. Lockdown-staging is now running a leksihjelp build that's not the tagged v3.2.
+
+**Why it happens:** `file:` deps trust the directory layout. Worktrees and side-by-side checkouts are common in this user's workflow (`/Users/geirforbord/papertek/leksihjelp` exists alongside `/Users/geirforbord/Papertek/leksihjelp` per the env block).
+
+**How to avoid:** Lockdown's postinstall sync should print **the resolved leksihjelp version** (read from upstream `package.json`) and **the upstream HEAD commit hash**. The lockdown deploy runbook should require the deployer to confirm both before proceeding to a staging or production deploy.
+
+**Warning signs:** Two leksihjelp directories on disk. A lockdown sync that resolves to a leksihjelp version different from what was tagged for the v3.2 release.
+
+**Phase to address:** v3.2 deploy-runbook phase. **Recommendation: process step in runbook + lockdown-side sync-script enhancement**. The "publish to GitHub Packages and pin a version" migration is the long-term fix but is out of scope for v3.2.
+
+---
+
+### Pitfall 13: Deploy runbook reads as "run this command" without rollback / observability / smoke-test
+
+**What goes wrong:** A v3.2 deliverable is the deploy runbook for `firestore.rules` + Cloud Functions (EXAM-10) + `papertek.app` hosting (Phase 30 sidepanel host). The runbook is written as: "1. Run `firebase deploy --only firestore:rules`. 2. Run `firebase deploy --only functions`. 3. Done." There is no rollback step, no smoke-test step ("how do I know it worked?"), no observability step ("what dashboards do I check?"), no pre-flight ("is the staging deploy green?"). When the production deploy fails or, worse, succeeds-but-breaks, the operator has no playbook.
+
+**Why it happens:** Runbooks are written by the person who just executed the deploy in their head; they leave out everything they consider obvious. The original deploy author moves on; six months later a different person has to deploy and is missing the unwritten knowledge.
+
+**How to avoid:** Every deploy runbook in v3.2 must follow a **fixed structure**:
+1. **Pre-flight** — what state must staging / source repo / environment be in
+2. **Deploy command** — exact command + project/environment flag
+3. **Smoke test** — 2–5 specific assertions to verify the deploy works (e.g. "open student account in staging classroom, toggle exam-mode profile, confirm spell-check rules suppress as expected")
+4. **Observability** — exact dashboard URLs / log queries / metrics to watch for the first 30 minutes
+5. **Rollback** — exact command to revert + how to verify revert worked
+6. **Deferred-cleanup** — anything that needs follow-up after success (e.g. clear a cache, notify a stakeholder)
+
+The roadmapper should treat any runbook missing one of these six sections as incomplete (auditor-flag).
+
+**Warning signs:** A runbook shorter than 50 lines for a multi-service deploy. A runbook with no rollback section. A runbook that doesn't name the dashboard URL or the log query.
+
+**Phase to address:** v3.2 deploy-runbook phase. **Recommendation: process step in phase plan + runbook template**. A release gate could enforce structural presence (does the runbook file have all six section headers?) but the value-add is small relative to the cost — process discipline is correct here.
+
+---
+
+### Pitfall 14: Firebase rules deploy cascades to wrong project (`--project` flag forgotten on a staging branch)
+
+**What goes wrong:** Deployer is on `lockdown-stb` staging branch. Their muscle memory says `firebase deploy --only firestore:rules`. Firebase CLI's "active project" defaults to whatever was last set globally — which might be production. The staging-intended deploy hits production Firestore. Production rules diverge from production code; reads start failing for live students.
+
+**Why it happens:** `firebase deploy` uses the active project from `~/.config/configstore/firebase-tools.json`, which is global. The `--project` flag is the safety override but is easy to forget. The staging-vs-production distinction is purely procedural.
+
+**How to avoid:** Every Firebase deploy command in every v3.2 runbook must include `--project <explicit-project-id>`. Add a pre-flight assertion: `firebase use` returns the expected project before running deploy. Document in the runbook: "if `firebase use` shows anything other than `<expected>`, STOP — run `firebase use <expected>` first." Consider adding a wrapper script in lockdown that refuses to run `firebase deploy` without a `--project` flag.
+
+**Warning signs:** A runbook command that doesn't include `--project`. A `firebase use` output mismatched to the deploy target.
+
+**Phase to address:** v3.2 deploy-runbook phase. **Recommendation: process step in runbook + deploy-wrapper script in lockdown**. This is a lockdown-side concern primarily.
+
+---
+
+### Pitfall 15: Cloud Functions cold-start failure (works in deploy log; fails on first invocation)
+
+**What goes wrong:** `firebase deploy --only functions` exits 0. Deploy log says "✔ functions[applyExamModeLock]". Five hours later a teacher tries to apply the exam-mode profile to a classroom; the function cold-starts and crashes because a runtime env var was set in staging but not promoted to production, or because a dependency moved between Node 18 and Node 20 and the function's runtime is pinned wrong.
+
+**Why it happens:** Functions deploy validates package upload, not runtime. The first invocation happens whenever a real user triggers it.
+
+**How to avoid:** Runbook must include a **post-deploy synthetic invocation** — a script that calls the function (against a test fixture user/classroom in production, or a "ping" no-op variant of the function) immediately after deploy and asserts a 2xx response. EXAM-10's `applyExamModeLock` is a good candidate for a no-op variant: "apply profile NONE to test classroom, assert response, revert." Without this, the deploy is "done" but unverified.
+
+**Warning signs:** A Functions deploy runbook with no smoke-invocation step. A Cloud Functions error log that shows the first error of the day at the deploy time + cold-start delay.
+
+**Phase to address:** v3.2 deploy-runbook phase. **Recommendation: process step in runbook + dedicated synthetic-invocation script**. The script lives in lockdown.
+
+---
+
+### Pitfall 16: Hosting deploy succeeds but cached CDN serves stale leksihjelp bundle for hours
+
+**What goes wrong:** `firebase deploy --only hosting` for papertek.app succeeds. New `leksihjelp-sidepanel-host.js` and synced `public/leksihjelp/*` are uploaded. Some users get the new bundle; others get the old bundle from CloudFlare or a browser cache. Bug reports are inconsistent: half say it's fixed, half say it's broken.
+
+**Why it happens:** Firebase Hosting + browser caches + intermediate CDNs all have independent TTLs. Cache-busting on synced leksihjelp files relies on filename hashing or version-stamped URLs, neither of which is documented in the current sync flow.
+
+**How to avoid:** Runbook must specify cache-headers configuration in `firebase.json` (long max-age for hashed assets, short max-age for entry-point HTML). Smoke test must include a fresh-incognito visit + a "force-refresh existing tab" check. If filename hashing isn't yet wired for synced leksihjelp assets, that's a v3.2 (or v3.3 deferred) tech-debt item to surface explicitly.
+
+**Warning signs:** Inconsistent bug reports after a hosting deploy. A `firebase.json` with no `headers` configuration for the leksihjelp paths.
+
+**Phase to address:** v3.2 deploy-runbook phase + papertek.app sidepanel-host runbook specifically. **Recommendation: process step in runbook + cache-header audit during runbook authoring**.
+
+---
+
+### Pitfall 17: "UAT walked, looked fine" with no artifacts — milestone auditor can't verify
+
+**What goes wrong:** v3.2 closes. Six UAT walkthroughs are marked complete with verification logs that say "walked, all PASS." No screenshots, no version-string evidence, no DevTools snapshots. Three months later a regression surfaces; the team tries to reconstruct "what state was UAT actually in?" and cannot.
+
+**Why it happens:** This is the v3.1 v3.2-deferred-walkthrough story rewritten. Verification logs were thin enough that the user (correctly) declined to mark them complete and pushed them to v3.2. v3.2 will repeat the failure if templates don't change.
+
+**How to avoid:** UAT verification template must require:
+- Pre-flight evidence block (Pitfall 1)
+- Per-step screenshot or DevTools snapshot of the **observed result** (not just "passed")
+- "Defects observed (non-blocking)" section (Pitfall 3)
+- Final summary listing what was verified, what was deferred, and what was found
+
+Auditor at milestone close treats any walkthrough log without these four pieces as incomplete and refuses to archive.
+
+**Warning signs:** A verification log that's text-only, has no screenshot references, and is shorter than the step list it's verifying.
+
+**Phase to address:** v3.2 milestone-archive phase. **Recommendation: process step + verification template + auditor checklist**. Not a gate — gates can't assess artifact quality.
+
+---
+
+### Pitfall 18: Tech-debt re-deferred to v3.3 without explicit gate on what justifies deferral
+
+**What goes wrong:** v3.2 close approaches. Two of the six UAT walkthroughs surfaced bugs that are non-trivial to fix. The instinct is to defer them to v3.3. Without a structured "what justifies deferral" decision, the deferred-todo grows unboundedly. v3.1 carried 6 walkthroughs; v3.2 might carry 8; v3.3 might carry 12.
+
+**Why it happens:** No defined deferral criteria. Time pressure at milestone close.
+
+**How to avoid:** Establish v3.2 milestone-close convention: any deferred item must be classified as one of:
+1. **Hard-deferred** — depends on a sibling project state change (e.g. skriveokt-zero shipping)
+2. **Time-deferred** — sized + scheduled into the next milestone with explicit phase plan
+3. **Backlog-deferred** — explicitly added to "Future candidates" in PROJECT.md with a "won't ship unless…" condition
+
+Anything that doesn't fit one of the three categories must ship in v3.2.
+
+**Warning signs:** A milestone-archive section "Known Tech Debt" longer than 5 items. A v3.3 milestone start that opens with the same 6 deferred walkthroughs.
+
+**Phase to address:** v3.2 milestone-archive phase. **Recommendation: process step + milestone-archive template field**. Not a gate.
+
+---
+
+### Pitfall 19: Production deploy todos linger forever (deploy is user-gated, agents skip)
+
+**What goes wrong:** Per memory `project_phase30_04_sso_status.md`, "auto-mode but no-prod-deploy" is the rule. Lockdown-stb production Firebase deploy and papertek.app production hosting deploy are explicitly user-gated. They will sit in the todo list until the user runs them. v3.1 closed with both still open. v3.2 will close the same way unless the runbook is so good that the user **wants** to execute it.
+
+**Why it happens:** User-gated deploys require user time + confidence. Confidence comes from a runbook that's been dry-run-walked and a green staging deploy. Both are v3.2 deliverables — the milestone has a real chance to close this loop.
+
+**How to avoid:** v3.2 runbook phase must include a **dry-run** of each runbook against staging — not the actual production deploy, but a walk-through where every command is explained, every smoke-test is performed against staging, and the user signs off "yes, I would feel safe running this against production." That sign-off is the milestone deliverable, not the production deploy itself. Then the production deploys remain user-gated but are *unblocked* — the only remaining barrier is calendar time.
+
+**Warning signs:** A v3.2 close with the same two production-deploy todos still open. A runbook that's never been walked end-to-end against staging.
+
+**Phase to address:** v3.2 deploy-runbook phase, last sub-phase. **Recommendation: process step + explicit user-sign-off success criterion**. Not a gate.
+
+---
+
+## Technical Debt Patterns
+
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Walk UAT in dev profile only | Faster — features already toggled | Misses default-preset bugs (INFRA-10 root cause class) | Never for popover-surfacing rules; OK for setting-screen visual checks |
+| Defer browser walkthrough to next milestone | Unblocks code merge | Walks accumulate; eventually become unverifiable due to drift | Only with explicit GSD-templated deferral classification (Pitfall 18) |
+| Quick-fix in lockdown tree only | Unblocks UAT same-day | Silent revert on next sync (Pitfall 11) | Never — port upstream same day or revert the lockdown fix |
+| Skip `--project` flag because "I'm already on the right one" | One less character to type | Cross-project deploy disaster (Pitfall 14) | Never |
+| Skip post-deploy synthetic invocation | Saves 5 minutes | Cold-start failure surfaces hours later (Pitfall 15) | Never on Functions; OK on rules-only deploys (no runtime to fail) |
+| Use `file:` dep instead of versioned package | Zero ceremony for cross-repo work | Wrong-version pickup on side-by-side checkouts (Pitfall 12) | Until the GitHub Packages migration ships; document the risk |
+| Bump only `manifest.json` for a quick fix | Faster | Version-skew detection downstream (Pitfall 10) | Never — `check-version-alignment` gate should enforce |
+
+---
+
+## Integration Gotchas
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Lockdown sync script | Run from dirty leksihjelp working tree | Refuse to sync if upstream has uncommitted changes to synced surfaces (Pitfall 7) |
+| `chrome.identity.launchWebAuthFlow` (Vipps OIDC) | Test only on Chrome stable | Test on Edge too — redirect-URI shape differs (Pitfall 4) |
+| ElevenLabs TTS in lockdown | Forget to pass `audioEnabled: false` | Three independent safeguards per CLAUDE.md must remain (host arg + view check + sync-exclusion) |
+| Cloud Functions deploy | Trust deploy log, skip cold-start invoke | Synthetic invocation against staging-equivalent test fixture (Pitfall 15) |
+| Firebase Hosting deploy | Assume CDN clears immediately | Verify with incognito + cache-header audit (Pitfall 16) |
+| `exam-registry.js` load order | Trust sync to preserve order | Runtime assertion in lockdown loader + ordering comment in registry file (Pitfall 8) |
+
+---
+
+## Performance Traps
+
+This milestone is hardening, not perf-sensitive — only one trap is in scope:
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Lær mer panel renders synchronously on click | Visible delay (~0.5–2s) on first open after rule fires | Pre-warm panel data when popover opens, not when "Lær mer" clicked | When pedagogy data grows (DE Wechselpräps already non-trivial; FR/ES will compound) |
+
+---
+
+## Security Mistakes
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Wrong-project Firestore deploy | Production rules overwritten by staging rules → student PII exposure | `--project` flag mandatory + `firebase use` pre-flight (Pitfall 14) |
+| Cloud Functions exposed without auth check | Random callers can `applyExamModeLock` to arbitrary classrooms | Verify EXAM-10 functions have auth predicate; runbook smoke-test with unauthenticated call asserting 401/403 |
+| Lockdown sync mirrors a leksihjelp `.env` accidentally placed in synced tree | Backend secrets ship to public lockdown bundle | Sync script's allowlist (already in place per CLAUDE.md) + runtime assertion that synced files have no `.env*` patterns |
+| Stale CDN serves outdated leksihjelp bundle that contains a since-fixed XSS in renderSenses | Window of vulnerability extends beyond deploy time | Cache-header strategy + smoke-test (Pitfall 16) |
+
+---
+
+## UX Pitfalls
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| EKSAMENMODUS badge missing after upgrade due to localStorage clear | Student thinks exam-mode is off, panics during exam | Persist exam-mode toggle outside `chrome.storage.local`-only — also write to `chrome.storage.sync` if user account is linked, with a visible reassurance toast on toggle |
+| Lockdown sidepanel ordbok tab visible but search returns empty (Phase 33 fix) | Student loses trust in tool — "looks broken" | Phase 33 already fixed; v3.2 UAT must verify the fix in lockdown-staging end-to-end |
+| Lær mer panel scrolls behind spell-check popover on small viewport | Student can't read explanation | UAT walks must include a 1280px viewport check |
+| Popup view module renders before vocab hydration in lockdown | Search shows "no results" briefly before populating | Hydration loading state must be explicit, not "empty results" — lockdown sidepanel host should pass an `isHydrating` dep |
+
+---
+
+## "Looks Done But Isn't" Checklist
+
+- [ ] **UAT walkthrough:** verification log has version strings, screenshots, defects-observed section, and at least one default-preset profile walk — not just step checkmarks
+- [ ] **Bug fix:** synced-surface impact documented, lockdown re-sync run, version bumped in all 3 places, fixture exercises real bug path (not shortcut), regression added to benchmark-texts/expectations.json if appropriate
+- [ ] **Lockdown sync:** ran against tagged leksihjelp version (not working tree), upstream `git status` was clean, lockdown loader load-order verified at runtime, in-tree fixes ported back upstream
+- [ ] **Deploy runbook:** has all six sections (pre-flight + command + smoke + observability + rollback + deferred-cleanup), `--project` flag explicit, synthetic invocation step for Functions, cache-header strategy for Hosting
+- [ ] **Production deploy readiness:** runbook walked end-to-end against staging, user signed off "I would feel safe running this against production" — actual production deploy is allowed to remain user-gated
+- [ ] **Milestone archive:** every deferred item classified (hard / time / backlog), no thin-walk verification logs, EXAM-09 / skriveokt-zero status statement updated, version-string alignment checked
+
+---
+
+## Recovery Strategies
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| UAT walked stale build (Pitfall 1) | LOW | Re-run with pre-flight evidence; cost is the verifier's time |
+| Fix shipped to extension but not lockdown (Pitfall 5) | LOW–MEDIUM | Run lockdown sync, bump lockdown's leksihjelp pin, re-deploy lockdown staging; cost is staging-deploy time |
+| Lockdown sync mirrored orphan changes (Pitfall 7) | MEDIUM | Identify orphan files via leksihjelp tag-to-tag diff; revert in lockdown; document in lockdown release notes |
+| `exam-registry.js` load-order broken (Pitfall 8) | LOW | Restore order in lockdown loader; emergency-deploy lockdown staging; runtime-assertion would have caught early |
+| Wrong-project Firebase deploy (Pitfall 14) | HIGH | Restore production rules from git; if rules tightened, no harm; if rules loosened, audit Firestore for window-of-exposure access |
+| Cloud Functions cold-start failure (Pitfall 15) | MEDIUM | Identify env var or runtime issue; redeploy with fix; user-impact bounded by deploy-to-detection delay |
+| Stale CDN bundle (Pitfall 16) | MEDIUM | Bust CDN cache (CloudFlare purge or Firebase Hosting redeploy with header changes); communicate "force-refresh" to affected users |
+| Tech-debt re-deferred unboundedly (Pitfall 18) | HIGH | Recovery is a dedicated debt-burn-down milestone — expensive |
+
+---
+
+## Pitfall-to-Phase Mapping
+
+Suggested v3.2 phase structure with pitfall coverage. Roadmapper should consolidate phases per the user's "fewer larger phases" preference (memory `feedback_fewer_phases.md`).
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| 1, 2, 3, 4, 17 (UAT discipline) | v3.2 hygiene-and-templates phase (early) | Verification template review; one walkthrough exercises new template |
+| 5, 6, 11 (bug-fix loop) | Each v3.2 bug-fix phase plan | Fix has lockdown-sync step + benchmark-texts entry; INFRA-10 canary if seam-shaped |
+| 7, 8, 9, 12 (sync hygiene) | v3.2 sync phase | Sync runs from clean tagged version; lockdown loader runtime-asserts exam-registry presence; skriveokt-zero dry-run captured |
+| 10 (version alignment) | v3.2 hygiene phase + new release gate | `check-version-alignment` gate exits 0; paired self-test passes |
+| 13, 14, 15, 16 (deploy runbook) | v3.2 deploy-runbook phase | Runbook follows 6-section structure; staging dry-run walked; user sign-off captured |
+| 18, 19 (milestone close) | v3.2 milestone-archive phase | Every deferred item classified; production-deploy runbooks unblocked-but-user-gated |
+
+**Recommended gate additions for roadmapper:**
+1. **`check-version-alignment`** (Pitfall 10) — mechanical, recurring, exactly the right shape for a release gate. High priority.
+2. **`check-synced-surface-version`** (Pitfall 5) — diff-based; recurring; modest complexity. Medium priority.
+3. **Extend `check-exam-marker`** (Pitfall 8) — assert load-order documentation in `exam-registry.js`. Low cost.
+4. **Extend INFRA-10 canaries** (Pitfall 6) — every new index gets a canary; not a new gate but a discipline change. Document as a v3.2 convention.
+
+**Recommended process steps (not gates):**
+- Pre-flight evidence block in UAT templates (Pitfall 1)
+- `verification_kind` frontmatter field + auto-mode pause for human walks (Pitfall 2)
+- "Defects observed" section in UAT templates (Pitfall 3)
+- Target-browsers list per walk (Pitfall 4)
+- 6-section runbook structure (Pitfall 13)
+- Deferral classification at milestone close (Pitfall 18)
+- Staging dry-run with user sign-off (Pitfall 19)
 
 ---
 
 ## Sources
 
-- [Spraakraadet: Fugebokstav (binde-s og binde-e)](http://www.sprakradet.no/svardatabase/etiketter/fugebokstav-binde-s-og-binde-e/) -- official NB/NN fuge guidance. Suffix patterns requiring fuge-s: -dom, -else, -het, -skap, -sjon, -tet, -ling, -nad.
-- [Fuge-s -- Wikipedia (Norwegian)](https://no.wikipedia.org/wiki/Fuge-s) -- NB fuge rules and suffix patterns with "naer alltid" documentation.
-- [Spraakraadet: Binde-s med -fag- og -spraak-](https://sprakradet.no/spraksporsmal-og-svar/binde-s-i-sammensetninger-med-fag-og-sprak/) -- specific fuge-s cases.
-- [Nuebling & Szczepaniak 2013: Linking elements in German](https://www.germanistik.uni-mainz.de/files/2015/03/Nuebling_Szczepaniak_2013_linking_elements_grammaticalization.pdf) -- DE Fugenelement linguistics; confirms "no fixed rules."
-- [German compound formation](https://www.giuliostarace.com/posts/compound-words-german/) -- DE compound rules overview.
-- Existing codebase: `de-compound-gender.js` lines 78-103 (`inferGenderFromSuffix`, `LINKERS`, `MIN_SUFFIX_LEN`). HIGH confidence.
-- Existing codebase: `nb-sarskriving.js` lines 30-45 (`SARSKRIVING_BLOCKLIST`), line 80 (`compoundNouns.has()`). HIGH confidence.
-- Existing codebase: `nb-typo-fuzzy.js` lines 59-83 (scoring formula, shorter-candidate penalty). HIGH confidence.
-- Existing codebase: `nb-gender.js` lines 19-21 (`ARTICLE_GENUS`, priority 10). HIGH confidence.
-- Existing codebase: `spell-check-core.js` lines 391-398 (`dedupeOverlapping`), lines 129-248 (rule runner, priority sorting). HIGH confidence.
-- Existing codebase: `vocab-seam-core.js` lines 706-807 (`buildLookupIndexes`, `compoundNouns` Set, `validWords` Set). HIGH confidence.
-- User memory: `project_compound_word_decomposition.md` (v2.1 scope, two-tier compound model, existing code to build on). HIGH confidence.
-- User memory: `project_phase5_manual_spellcheck_button.md` (manual button UX requirements). HIGH confidence.
+- This project's own incident history: PROJECT.md Key Decisions table (especially INFRA-10 entries and Phase 26-01 / 32-01 / 32-03 references), MILESTONES.md v3.1 "Known Tech Debt" section, STATE.md Pending Todos
+- CLAUDE.md "Downstream consumers" section — synced-surface enumeration, exam-registry load-order requirement, sync contract
+- `.planning/lockdown-adapter-contract.md` — vocab seam shape, three lockdown-implementation options, coordination notes
+- v2.2 milestone audit — version-skew incident (`package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1`)
+- v3.0 audit — SCHEMA-01 dormant subscriber, BUNDLED_LANGS staleness (representative "looks done but isn't" cases)
+- User memories: `project_phase30_04_sso_status.md` (auto-mode no-prod-deploy precedent), `feedback_fewer_phases.md` (consolidation preference), `project_test_suite_at_milestone_end.md` (run /gsd:add-tests once at end), `project_sidepanel_fest_macos.md` (cross-platform browser-quirks evidence)
 
 ---
-*Pitfalls research for: v2.1 Compound Decomposition & Polish*
-*Researched: 2026-04-26*
+*Pitfalls research for: leksihjelp v3.2 UAT & Deploy Prep milestone*
+*Researched: 2026-05-01*

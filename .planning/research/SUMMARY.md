@@ -1,294 +1,185 @@
 # Project Research Summary
 
-**Project:** Leksihjelp v2.0 — Depth of Coverage: Grammar Governance Beyond Tokens
-**Domain:** Offline structural grammar rules for a Chrome MV3 extension; Norwegian students writing DE/ES/FR/EN/NB/NN
-**Researched:** 2026-04-24
+**Project:** leksihjelp v3.2 — UAT & Deploy Prep
+**Domain:** Hardening / risk-reduction milestone (UAT execution + cross-repo sync + deploy-runbook authoring)
+**Researched:** 2026-05-01
 **Confidence:** HIGH
 
 ## Executive Summary
 
-v2.0 extends the shipped v1.0 per-token spell-check surface into structural
-grammar: word order, case/agreement governance, aspect/mood selection, register
-drift, and collocation errors. The research is unusually well-grounded — v1.0 is
-already in production, all constraints are binding, the benchmark corpus is
-hand-authored, and the codebase was read directly. The recommended approach
-requires exactly one new browser primitive (`Intl.Segmenter`), zero new npm
-dependencies, and additive data schema changes in `papertek-vocabulary`. Every
-new capability is achieved through three new architectural seams — a sentence
-segmenter (Phase 6), a tagged-token view with syntax-lite helpers (Phase 7), and
-a document-state two-pass runner (Phase 13) — layered on top of the existing
-plugin rule architecture and `__lexiVocab` seam.
+v3.2 is a hardening milestone for an already-shipped Chrome MV3 extension with two downstream consumers (lockdown webapp in production; skriveokt-zero deferred). It ships zero new features. The deliverables are: (1) execute six v3.1-deferred browser UAT walkthroughs (1 fr-aspect-hint, 6 DE Lær mer, 9-step exam-mode, 9-step popup views, 8-step lockdown sidepanel); (2) drain whatever bug fixes those walkthroughs surface through the canonical fix → release-gates → version-bump → lockdown-sync → re-test loop; (3) author production deploy runbooks for `firestore.rules`+Functions (EXAM-10) and papertek.app hosting (Phase 30 sidepanel) so the user-gated production deploys become checklist-driven and low-risk.
 
-The dominant delivery risk is not technical novelty but discipline: structural
-rules have an open-ended acceptance surface that token-local rules did not.
-Fixture green is a necessary but insufficient release criterion for structural
-rules; the new `check-benchmark-acceptance` gate (≤2 stray flags per 500-word
-passage) is equally binding. A second compounding risk is data-track latency:
-every phase depends on `papertek-vocabulary` schema additions (`aux`, `separable`,
-`copula`, `human`, `bags`, governance tables, trigger banks), and that authoring
-queue must be opened as data-track tickets in parallel with logic work, not after.
+The recommended approach adds **no new runtime dependencies, no test frameworks, and no CI infrastructure**. Playwright/Cypress/Puppeteer are net-negative at 6-walkthrough scope and cannot exercise Vipps OIDC, Side Panel chrome, or visual rendering reliably. Instead: structured Markdown UAT templates with mandatory pre-flight evidence blocks, repo-local finding/runbook files at `.planning/uat/` and `.planning/runbooks/`, and lightweight conventions (commit-message tags, `verification_kind` frontmatter). The 14 existing release gates already encode the right "automate what's mechanical" decisions; v3.2 should add at most one or two more (`check-version-alignment` is mechanical and recurring; `check-synced-surface-version` is a strong candidate).
 
-Phase 6 is deliberately overloaded: beyond its own register/collocation/redundancy
-features, it must land the sentence segmenter, quotation-span suppression tier,
-hint-tier CSS and severity contract, priority-band documentation, the P1/P2/P3
-benchmark-line labeling convention, the `papertek-vocabulary` SCHEMA.md ownership
-model, and the skeleton of `check-benchmark-acceptance`. If Phase 6 is scoped as
-"just register polish" these infrastructure items slip to Phase 7, where they
-arrive too late because Phase 7 is the first high-FP-risk word-order phase.
-Phase 6 is the infrastructure phase.
+The dominant risks are not technical — they are process. v3.1 deferred all six walkthroughs precisely because verification logs were thin (no version strings, no screenshots, no defects-observed section). Without template discipline, v3.2 will repeat the failure. The other top risks: stale-build/stale-IDB UAT (verifier looks at the wrong artifact and reports PASS); fix lands in extension but lockdown's `node_modules/@papertek/leksihjelp` doesn't move; lockdown sync mirrors orphan working-tree changes (happened in v3.1 Phase 30-02); deploy runbook reads as "run this command" with no rollback/observability/smoke-test sections; production deploys linger forever because runbooks were never dry-run-walked end-to-end against staging.
 
 ## Key Findings
 
 ### Recommended Stack
 
-v2.0 requires no new runtime dependencies. The addition set is: `Intl.Segmenter`
-(browser-native since Chromium 87, ICU-backed, Baseline 2024-04, zero bundle
-cost) for locale-aware sentence and word segmentation; additive JSON fields on
-`papertek-vocabulary` banks; and rolled-own micro-helpers of 40–200 LOC each for
-light syntactic reasoning. All alternatives considered (sentencex-js, compromise,
-de-compromise, NLP libraries, WASM Hunspell, ML taggers) were rejected for bundle
-cost, license incompatibility (GPL-2.0 Norwegian dicts), or mismatch with the
-closed-set, deterministic, offline requirements.
+No new dependencies. Three small Markdown templates plus an optional ~30 LOC bash convenience script. Existing toolchain (Vercel CLI, Firebase CLI 13.x, Chrome 114+, GitHub Releases, macOS `screencapture`, `gh`) covers everything in scope.
 
-**Core technologies:**
-- `Intl.Segmenter` — locale-aware sentence/word segmentation — zero bundle cost, ICU-backed, handles DE/FR/ES/NB punctuation edge cases (`¿?`, `«»`, decimals, abbreviations) that a regex segmenter cannot
-- Additive `papertek-vocabulary` schema — authoritative data source for governance fields (`aux`, `separable`, `copula`, `human`, `bags`, governance tables, trigger banks) — cross-app single source of truth; additive-only to protect sibling consumers
-- Rolled-own rule-local helpers (~40–200 LOC each) — closed-set syntactic reasoning (V2 detection, subordinator lookup, clitic-cluster order, prefix-stranding) — lighter than any library candidate by 10–100×
+**Core technologies (existing — no changes):**
+- Chrome MV3 vanilla JS extension — UAT subject; manual exercise of the shipped artifact
+- Firebase CLI 13.x — selective `--only firestore:rules` / `--only functions` deploys for lockdown
+- Vercel CLI — leksihjelp.no hosting deploys (out of v3.2 scope but documented in runbooks for completeness)
+- GitHub Releases — extension zip distribution rhythm
 
-**New gate scripts (v2.0 additions):**
-- `check-benchmark-coverage` (~80 LOC) — phase-close criterion anchored to P1/P2/P3-weighted benchmark flip-rate; not a bare 80% percentage
-- `check-governance-data` (~60 LOC) — asserts verbbank entries matching aux/separable heuristics have the expected field; guards against silent no-ops when sync drops a field
-- `check-stateful-rule-invalidation` — edit-sequence simulator for Phase 13 discourse-state rules; asserts findings match final text after paste, undo, delete
+**New artifacts (planning/docs only, not runtime):**
+- `.planning/uat/TEMPLATE-walkthrough.md` — per-walkthrough script with pre-flight evidence + pass/fail/defects-observed
+- `.planning/uat/TEMPLATE-finding.md` — per-finding artifact (F-id, severity, sync-status)
+- `.planning/runbooks/*.md` — durable deploy runbooks (NOT scoped to milestone — they survive archive)
+- Optionally: `scripts/uat-evidence.sh` (~30 LOC bash) for screen-recording capture
 
 ### Expected Features
 
-**Must have — P1 (table stakes, v2.0.0–v2.1):**
-- 6.3 Stylistic redundancy (`return back`, `free gift`) — highest ROI per LOC; literal-match
-- 6.1 Register/formality detector — EN `gonna` + NB anglicisms; proves opt-in toggle pattern
-- 6.2 Collocation errors EN seed — `make a photo → take`; proves data-bigram rule shape
-- 8.1 DE preposition-case governance — highest error-density per benchmark token
-- 8.2 DE separable verbs (`ich aufstehe`)
-- 8.3 DE perfekt auxiliary (`haben` vs `sein`)
-- 8.4 DE compound-noun gender from last component
-- 9.1 ES ser vs estar
-- 9.2 ES por vs para
-- 9.3 ES personal "a"
-- 10.1 FR élision — deterministic, closed set
-- 10.2 FR être vs avoir
-- 14.1 EN morphological overgeneration (`childs`, `eated`)
+This is a hardening milestone — the "table stakes" axis is *what kind of risk* an item reduces, not user-value differentiation. Five categories: Extension UAT execution, Lockdown UAT execution, Bug-fix loop & cross-repo sync, Deploy runbooks, and Regression capture (the value-add that distinguishes "polished" from "debt paid").
 
-**Should have — P2 (differentiators, v2.1–v2.2):**
-- 7.1 NB V2 word-order (`Hvorfor du tror`) — HIGH impact, MEDIUM-HIGH FP risk
-- 7.2 DE V2 + subordinate verb-final (`dass er ist nett`) — shares syntactic reasoner with 7.1
-- 7.3 FR BAGS adjective placement — closed ~40-adj list; competitors miss it
-- 10.3a FR participe passé agreement — tight adjacent-window scope, default-off toggle; 10.3b explicitly deferred
-- 11.1 ES subjuntivo triggers
-- 11.3 FR subjonctif triggers
-- 13.3 NB bokmål/riksmål drift — brand-distinctive; no competitor ships it
-- 13.4 NN a-infinitiv/e-infinitiv drift — brand-distinctive for NN users
-- 12.1 ES pro-drop overuse (soft hint)
-- 12.2 ES gustar-class syntax
-- 14.2 ES/FR opaque-noun gender mismatch
+**Must have (table stakes — milestone cannot omit):**
+- F36-1 fr-aspect-hint browser confirmation (smallest; warm-up)
+- Phase 26: 6 DE Lær mer browser walks (4 default-locale + 2 NN/EN locale split)
+- Phase 27: 9-step exam-mode walk (highest-stakes — school-deployment trust)
+- Phase 30-01: 9-step extension popup view walk (canonical for lockdown)
+- Phase 30-02: 8-step lockdown sidepanel staging UAT (after sync settles)
+- Bug-fix triage protocol + leksihjelp→lockdown sync ritual
+- Two production deploy runbooks (Firebase EXAM-10; papertek.app hosting)
 
-**Defer to v3.0 or kill:**
-- Phase 16 (tense harmony, anaphora, long-distance SV agreement) — high FP risk; defer unless Phase 13 seam generalizes cleanly
-- 15.3 Idiomatic literalism detection — "scope TBD" is a trap; curated exact-match only or kill
-- P3 features (13.1 DE du/Sie drift, 13.2 FR tu/vous drift, 12.3 FR clitic order, 15.x collocation banks at scale) — after Phase 6/13 seams proven
+**Should have (differentiators — converts one-time UAT into permanent infrastructure):**
+- UAT-finding-to-fixture conversion (continues 14-gate culture; INFRA-10 precedent)
+- UAT walkthrough scripts checked into repo (`.planning/uat-scripts/`) for v3.3+ re-runs
+- Deploy runbook self-test (`:test` mirror of release-gate culture)
+- Pre-flight Firestore-rules diff capture
+- Post-deploy 60-second smoke-test checklist per runbook
 
-**Anti-features (never build):** auto-correct/silent rewrite, ML-powered grammar rewrites, online-only integration, premium gating for any spell-check rule.
+**Defer (anti-features — explicitly NOT in scope):**
+- Production Firebase + hosting deploys (user-gated; runbooks are the deliverable)
+- Phase 28.1 skriveokt-zero exam-mode sync (EXAM-09 stays deferred until consumer ships)
+- Any new v3.2 features beyond UAT/fix/sync
+- New unit-test framework adoption; Playwright/Puppeteer/Cypress; CI infrastructure
+- Major version bump (2.10.x is the right shape)
+- Telemetry instrumentation
+- `/gsd:add-tests` inside phases — runs once at milestone end per user convention
 
 ### Architecture Approach
 
-v2.0 extends the existing `spell-check-core.js` → plugin rule registry pipeline
-with three new seams, each introduced at its first point of need. The plugin
-registry, `__lexiVocab` getter contract, popover rendering, and all six v1.0
-release gates are unchanged. The only structural edit to `spell-check.js` is the
-Phase 13 two-pass runner (~50 LOC). Everything else is additive.
+Three-repo topology with leksihjelp as upstream source of truth. Lockdown (shipping) consumes via `file:../leksihjelp` postinstall sync; skriveokt-zero (deferred) has its own sync path. The architectural concern in v3.2 is **integration paths and version-skew risk**, not new components. Runbooks live at `.planning/runbooks/` (durable, top-of-planning) — NOT inside `milestones/v3.2/` — because they must survive the milestone archive and be referenced by future deploys.
 
-**Three new seams (lands-in phase):**
+**Major components:**
+1. **`extension/` source tree** — canonical implementation of every shared surface; every UAT bug-fix lands here first
+2. **14 release gates (`scripts/check-*.js`)** — re-run on every UAT fix; gate passes are pre-condition for `npm run package`
+3. **`package.json` version** — sync signal to downstream consumers; bump on every synced-surface change
+4. **Lockdown sync pipeline** — `scripts/sync-leksihjelp.js` pulls synced surfaces (content/, popup/views/, exam-registry.js, content.css, data/, i18n/) from `node_modules/@papertek/leksihjelp`
+5. **Phase 30 dep-injection contract** — `mountXView(container, deps)` must stay additive; `audioEnabled: false` safeguard in lockdown must remain
+6. **`.planning/runbooks/`** — new durable directory with deploy runbooks following a fixed 6-section structure
 
-1. **Sentence segmenter `segmentSentences(text, tokens) → Sentence[]`** — Phase 6, `spell-check-core.js`. Exposes `ctx.sentences`. Uses `Intl.Segmenter` + per-language abbreviation allow-list. Rules that do not need sentences ignore it.
-2. **Tagged-token view `ctx.getTagged(i) → TaggedToken` + syntax-lite helpers** — Phase 7, `spell-check-core.js`. Lazy lookup-based enrichment (not statistical). Helpers: `findFiniteVerb`, `findSubordinator`, `findCliticCluster`, `isMainClause`, `agree`. Memoized per `ctx`. Phases 8–12 reuse.
-3. **Document-state two-pass runner `kind: 'document'` + `checkDocument(ctx, findings)`** — Phase 13, `spell-check-core.js`. Shape agreed by design spike in Phase 7 (no code lands until Phase 13). Priority ranges: sentence rules 1–199, document rules 200+.
-
-**New `__lexiVocab` getters (additive, staggered):**
-`getRegisterLevel`, `getCollocationBank`, `getRedundancyPhrases` (Phase 6);
-`getBagsAdjectives` (Phase 7);
-`getPrepositionCase`, `getSeparablePrefixes`, `getAuxiliary`, `getCompoundSplitter` (Phase 8);
-`getCopulaTag`, `getPorParaPatterns`, `getHumanNouns` (Phase 9);
-`getElisionTriggers` (Phase 10);
-`getSubjunctiveTriggers`, `getAspectAdverbs` (Phase 11);
-`getGustarVerbs` (Phase 12);
-`getIrregularForms`, `getWordFamily` (Phase 14).
-All follow the existing empty-safe contract (`return new Map()`).
+**Key patterns:**
+- **Canonical Fix → Sync → Re-test (Pattern 1):** 9-step loop per UAT bug; never hot-fix lockdown directly
+- **Batched UAT Drain (Pattern 2):** drain a walkthrough's findings into one extension version bump; ~1 phase = 1 walkthrough = 1 bump
+- **Runbook-as-Code Pre-flight (Pattern 3):** copy-pasteable command blocks + verification step; "checked-in Bash transcript with prose between commands"
+- **Dep-Injection Contract Stability (Pattern 4):** preserve, don't touch — `check-popup-deps` enforces no implicit globals but does NOT catch added required deps
 
 ### Critical Pitfalls
 
-Top five of twelve identified:
-
-1. **FP avalanche on structural rules (Pitfall 1)** — Structural rules have open-ended acceptance surfaces; fixture-green alone is not enough. Prevention: ≥2× acceptance cases vs positive cases per structural rule; `check-benchmark-acceptance` gate (≤2 stray flags per 500-word passage) is binding alongside `check-fixtures`. Must land in Phase 7 before any word-order rule ships.
-
-2. **Discourse-state staleness in Phase 13 (Pitfall 4)** — Cross-sentence state goes stale on edit/paste/undo; ghost findings erode trust. Prevention: document-level state is derived never cached; content-hash keyed invalidation; `check-stateful-rule-invalidation` gate. Mandatory research step before any Phase 13 rule code.
-
-3. **Benchmark overfitting (Pitfall 2)** — The 80%-flip-rate incentive drives rules tuned to visible benchmark phrasings rather than underlying patterns. Prevention: hold-out corpus (30% of benchmark additions hidden during authoring); fixtures seeded from independent sources; P1/P2/P3 weighted closure (100% P1 required, not just 80% overall).
-
-4. **DE case governance parsing overreach (Pitfall 5)** — "Find the NP head after the preposition" breaks on adjective chains and embedded relatives. Prevention: Phase 8.1 scoped to adjacent-article-only window; precision floor ≥0.90 before recall optimization.
-
-5. **Feature-gated index starvation v2 (Pitfall 3)** — New vocab indexes (preposition tables, BAGS list, trigger banks) can be silently wired through `buildIndexes` (preset-filtered) instead of `buildLookupIndexes` (unfiltered), disabling rules under default presets. Prevention: extend `check-spellcheck-features` for every new index; `check-seam-routing` static grep asserts correct builder.
-
-Additional high-impact: Pitfall 7 (quoted-speech bleed-through — tier `ctx.suppressedFor.structural` in Phase 6), Pitfall 8 (hint tier never differentiated — Phase 6 builds dashed-underline tier), Pitfall 9 (schema drift — SCHEMA.md ownership per field), Pitfall 12 (80%-flip fetishism — P1/P2/P3 closure criterion required).
+1. **Stale-build/stale-IDB UAT reports PASS (Pitfall 1)** — verifier looks at the wrong artifact. Mitigation: mandatory pre-flight evidence block (extension version string, `chrome://extensions` reload timestamp, IDB revision, default-preset profile) on every walkthrough.
+2. **Auto-mode skips human verification (Pitfall 2)** — root cause of the v3.1 six-walkthrough deferral. Mitigation: `verification_kind: human-browser-walk` frontmatter excludes phases from auto-advance; orchestrator surfaces hard pause.
+3. **Fix in extension; lockdown still ships the bug (Pitfall 5)** — sync didn't run. Mitigation: post-fix sync verification step in every bug-fix phase plan; new gate `check-synced-surface-version` to detect version-bump-skipped after synced-surface change.
+4. **Lockdown sync mirrors orphan working-tree changes (Pitfall 7)** — happened in v3.1 Phase 30-02 (4 orphan files shipped). Mitigation: sync only against tagged versions; refuse if upstream `git status` dirty.
+5. **Three-version-string skew (Pitfall 10)** — manifest.json + package.json + backend/public/index.html drift. v2.2 audit caught this. Mitigation: new `check-version-alignment` release gate (mechanical, recurring — exactly the right shape).
+6. **Deploy runbook reads as "run this command" (Pitfall 13)** — no rollback / smoke-test / observability. Mitigation: fixed 6-section structure (pre-flight, deploy command, smoke test, observability, rollback, deferred-cleanup) — auditor flags any runbook missing a section.
+7. **Wrong-project Firebase deploy (Pitfall 14)** — staging-vs-prod is purely procedural. Mitigation: `--project <id>` mandatory in every deploy command; `firebase use` pre-flight assertion.
+8. **Production deploys linger forever (Pitfall 19)** — user-gated, agents skip. Mitigation: dry-run runbook end-to-end against staging with explicit user sign-off ("I would feel safe running this against production") as the milestone deliverable.
 
 ## Implications for Roadmap
 
-The research validates the 11-phase grouping in the seed roadmap. The synthesis
-adds specific scoping decisions and sequencing constraints that were implicit in
-the seed.
+Based on combined research, the natural phase sequence is **A → B → C** (sequential by surface, NOT interleaved per fix). Context-switching between "do an extension UAT walk" and "author a deploy runbook" wastes warm-up; group like work. Per user's `feedback_fewer_phases.md`, consolidate into fewer larger phases — the rough mapping below collapses to ~5 phases.
 
-### Phase 6 — Register, Collocations, Redundancy + Infrastructure Build-Out
-**Rationale:** Lowest-risk features open the milestone, but Phase 6 must be
-explicitly scoped as infrastructure delivery — not just feature delivery. Every
-cross-cutting convention needed by Phases 7–16 must land here.
-**Delivers:** 6.1 register/formality detector; 6.2 EN collocation errors seed;
-6.3 stylistic redundancy; sentence segmenter (`ctx.sentences`); quotation-span
-suppression tier (`ctx.suppressedFor.structural`); hint-tier CSS + `severity`
-contract; priority-band documentation; P1/P2/P3 benchmark labeling; SCHEMA.md
-ownership model; `check-benchmark-acceptance` skeleton; `check-spellcheck-features`
-extended for new indexes.
-**Avoids:** Pitfalls 7, 8, 9, 10, 12.
-**Research flag:** Design spikes at phase start (not pre-phase research) for sentence segmenter abbreviation lists and suppression tier shape.
+### Phase 1: Hygiene & UAT Templates (Process Foundation)
+**Rationale:** Without template discipline, v3.2 repeats v3.1's six-walkthrough deferral. Must come first so every downstream phase uses the new template.
+**Delivers:** `.planning/uat/TEMPLATE-walkthrough.md` (with pre-flight evidence block + defects-observed section + target-browsers list), `.planning/uat/TEMPLATE-finding.md`, `verification_kind` frontmatter convention, `check-version-alignment` release gate (with paired `:test`), optional `scripts/uat-evidence.sh` and `scripts/uat-preflight.js`.
+**Avoids:** Pitfalls 1, 2, 3, 4, 10, 17.
 
-### Phase 7 — Word-Order Violations (NB + DE + FR) + Seam Design Spike
-**Rationale:** First high-FP-risk structural phase. Tagged-token view lands here.
-A document-state seam design spike is embedded (shape agreed, no code) so Phase
-13 does not design it under pressure.
-**Delivers:** 7.1 NB V2; 7.2 DE V2 + verb-final; 7.3 FR BAGS (parallel-safe
-with 7.1/7.2); tagged-token view + helpers in `spell-check-core.js`;
-document-state seam shape stubbed in `spell-rules/README.md`;
-`check-benchmark-acceptance` fully active and green.
-**Avoids:** Pitfall 1 (≥2× acceptance fixtures mandatory), Pitfall 2 (hold-out corpus active).
-**Research flag:** Needs pre-phase research. NB V2 FP risk and acceptance-fixture strategy require upfront design.
+### Phase 2: Extension UAT Batch (drain all 5 extension walkthroughs)
+**Rationale:** Everything else depends on extension code being UAT-confirmed. Authoring deploy runbooks for unstable code is wasted work. Sequence by warm-up → highest-stakes → canonical-for-lockdown.
+**Delivers:** Verification logs for F36-1 fr-aspect-hint, Phase 27 exam-mode (9 steps), Phase 30-01 popup views (9 steps), Phase 26 DE Lær mer (4 default-locale + 2 NN/EN locale walks). Each log instantiates the new template.
+**Implements:** Canonical Fix → Sync → Re-test loop (Pattern 1) for any surfaced bugs; batched-drain (Pattern 2) — ONE version bump per walkthrough that surfaced fixes.
+**Avoids:** Pitfalls 1, 3, 4, 6, 11, 17.
+**Note:** Bug fixes within this phase trigger version bumps (per ritual); REGR captures (fixture or benchmark-texts entry) accompany every fix.
 
-### Phases 8 / 9 / 10 — Language-Siloed Structural Coverage (Can Parallel)
-**Rationale:** Fully siloed languages; all depend only on Phase 6+7 seams.
-DE first (highest error-density). Phase 8 must deliver shared `grammar-tables.js`
-primitive before Phases 9/10 rule code starts.
-**Delivers (Phase 8 DE):** 8.1 prep-case (adjacent scope, precision ≥0.90 floor); 8.2 separable verbs; 8.3 perfekt aux; 8.4 compound gender; `grammar-tables.js` shared primitive.
-**Delivers (Phase 9 ES):** 9.1 ser/estar; 9.2 por/para (≤15 trigger patterns); 9.3 personal "a".
-**Delivers (Phase 10 FR):** 10.1 élision; 10.2 être/avoir; 10.3a PP agreement (adjacent-window, default-off; 10.3b explicitly deferred).
-**Avoids:** Pitfall 5 (parsing overreach), Pitfall 6 (FR PP eating phase), Pitfall 11 (zero-transfer language work — Phase 8 primitive enforced).
-**Research flag:** Phase 8 needs research on shared-primitive API shape. Phases 9/10 are standard patterns once primitive shape is known.
+### Phase 3: Lockdown Sync + Staging UAT
+**Rationale:** Lockdown sync must consume the post-Phase-2 version. Syncing mid-Phase-2 means re-syncing later anyway. Tagged-version sync (not working-tree) prevents Pitfall 7.
+**Delivers:** `cd lockdown && npm install` against tagged leksihjelp v3.2; Phase 30-02 sidepanel 8-step staging UAT verification log; lockdown-stb confirmed at parity with extension HEAD; one-time skriveokt-zero sync dry-run output captured.
+**Avoids:** Pitfalls 5, 7, 8, 9, 11, 12.
+**Carve-out:** If a critical bug surfaces, hot-loop back to Phase 2's Pattern 1 (extension fix → re-package → re-sync); don't fix lockdown directly.
 
-### Phase 11 — Aspect and Mood (ES + FR)
-**Rationale:** Gates on Phase 9/10 trigger infrastructure. Entry requires gate
-check confirming the trigger-detection primitive is shared. If not, refactor
-sub-phase blocks entry.
-**Delivers:** 11.1 ES subjuntivo triggers; 11.2 ES pretérito/imperfecto (hint tier only); 11.3 FR subjonctif triggers.
-**Avoids:** Pitfall 8 (11.2 aspect is a hint, not an error), Pitfall 11 (must consume Phase 8/9 primitive).
-**Research flag:** Gate check (not research) before opening: confirm primitive is reusable.
+### Phase 4: Deploy Runbooks (authoring + dry-run + sign-off)
+**Rationale:** Authoring cold (without recent staging-deploy experience) loses fidelity. Phase 3's staging deploy IS the runbook draft — capture it live.
+**Delivers:** `.planning/runbooks/README.md` (index), `lockdown-staging-deploy.md` (transcript of Phase 3), `lockdown-prod-deploy.md` (firestore.rules + Functions for EXAM-10 — 6-section structure), `papertek-app-sidepanel-deploy.md` (Phase 30 hosting), `extension-uat-fix-loop.md` (codifies Pattern 1). Each runbook dry-run-walked against staging with explicit user sign-off. CLAUDE.md gets a one-line pointer in Release Workflow.
+**Avoids:** Pitfalls 13, 14, 15, 16, 19.
+**Note:** Production deploys themselves remain user-gated post-milestone — sign-off ("I would feel safe running this") is the deliverable.
 
-### Phase 12 — Pronoun and Pro-drop (ES + FR)
-**Rationale:** All three rules are soft hints or complex patterns. Parallel-safe
-with Phase 11. All must use hint tier.
-**Delivers:** 12.1 ES pro-drop (soft hint); 12.2 ES gustar-class syntax; 12.3 FR clitic cluster order.
-**Avoids:** Pitfall 8 (all Phase 12 rules must be hint tier, not error tier).
-**Research flag:** Standard patterns; no dedicated research needed.
-
-### Phase 13 — Register Consistency Within a Text (Document-State Seam)
-**Rationale:** Highest-risk phase in v2.0. Mandatory pre-phase research step
-on invalidation protocol before any rule code. The seam shape was agreed in
-Phase 7 spike; now it becomes code.
-**Delivers:** Two-pass runner in `spell-check-core.js`; 13.1 DE du/Sie drift;
-13.2 FR tu/vous drift; 13.3 NB bokmål/riksmål drift (brand-distinctive);
-13.4 NN a-/e-infinitiv drift; `check-stateful-rule-invalidation` gate active.
-**Avoids:** Pitfall 4 (content-hash invalidation, never module-level mutable state, edit-sequence gate).
-**Research flag:** Mandatory pre-phase research on document-state invalidation protocol. Do not start rule code before seam design passes review.
-
-### Phase 14 — Morphology and Agreement Beyond Tokens (EN + ES + FR)
-**Rationale:** Language-siloed; reuses tagged-token infra. Low seam cost. 14.1
-is P1 and ships earliest.
-**Delivers:** 14.1 EN morphological overgeneration; 14.2 ES/FR opaque-noun gender mismatch; 14.3 EN word-family confusion.
-**Avoids:** Pitfall 9 (SCHEMA.md entry per new field — word-family map, irregular-form map).
-**Research flag:** Standard patterns; no dedicated research needed.
-
-### Phase 15 — Collocations and Idioms at Scale
-**Rationale:** Depends on Phase 6.2 proving the collocation-list pattern works.
-Data-heavy, little new logic. 15.3 must be explicitly decided — kill unless
-curated-only exact-match.
-**Delivers:** 15.1 NB preposition collocations; 15.2 DE/FR/ES preposition governance; (15.3 curated exact-match only if approved).
-**Avoids:** Pitfall 11 (must share Phase 6.2 list data shape).
-**Research flag:** Standard patterns. Kill/scope decision on 15.3 required in phase plan.
-
-### Phase 16 — Tense Harmony and Discourse (Conditional)
-**Rationale:** Defer to v3.0 unless Phase 13 seam generalizes cleanly to tense
-tracking. Do not duct-tape. Individual sub-rules may ship if they independently
-clear the FP threshold.
-**Avoids:** Pitfall 4 (same risk class as Phase 13, harder).
-**Research flag:** No planning until post-Phase-13 evaluation. Conditional on seam generalization.
+### Phase 5: Milestone Archive (close hygiene)
+**Rationale:** v3.1 carry-over pattern shows un-classified deferrals accumulate; v3.2 must break the cycle.
+**Delivers:** `/gsd:add-tests` run once (per user convention `project_test_suite_at_milestone_end.md`); `v3.2-MILESTONE-AUDIT.md` with explicit deferral classification (hard / time / backlog) for every carry-over; version-string alignment check; EXAM-09 / skriveokt-zero status statement updated; `/gsd:complete-milestone`.
+**Avoids:** Pitfalls 18, 19.
 
 ### Phase Ordering Rationale
 
-- Phase 6 first because it lands the sentence segmenter and all cross-cutting infrastructure conventions (hint tier, priority bands, suppression tier, P-labeling) that every later phase depends on; opening with low-risk features validates velocity before harder structural phases
-- Phase 7 second because tagged-token view is needed by Phases 8/9/10 and the FP-risk mitigation gates must be proven green before high-risk structural phases open
-- Phases 8/9/10 parallel after Phase 7 because they are fully language-siloed and depend only on Phase 6+7 seams; DE first due to highest error-density
-- Phase 11 gates hard on Phase 9/10 trigger infrastructure — forced gate check before entry
-- Phase 13 after Phases 8–12 because the seam shape matures through those phases before it becomes code; highest-risk phase benefits from maximum infrastructure stability
-- Phase 15 after Phase 6.2; Phase 16 conditional on Phase 13 seam
+- **Phase 1 first** because UAT discipline must exist before UAT runs; templates and the version-alignment gate are infrastructure for everything else
+- **Phase 2 before Phase 3** because lockdown sync must consume a stable extension head — Pattern 1's "tagged-version sync" rule depends on this
+- **Phase 3 before Phase 4** because the staging-deploy runbook is a literal transcript of Phase 3's lockdown sync experience; authoring it cold loses fidelity
+- **Phase 4 before Phase 5** because runbook sign-off is a milestone-close criterion that Phase 5 must verify
+- **No interleaving** because UAT walkthroughs are slow and cognitively expensive; context-switching wastes warm-up
 
 ### Research Flags
 
-Phases requiring dedicated pre-phase research or design spikes:
-- **Phase 7:** High-FP-risk NB V2 rule + document-state seam spike. Recommend pre-phase research step.
-- **Phase 8:** Shared-primitive API shape design. Short research step needed.
-- **Phase 13:** Mandatory pre-phase research on document-state invalidation protocol. Highest-risk phase.
+Phases likely needing deeper research during planning:
+- **Phase 4 (deploy runbooks):** Firebase CLI 13.x exact command shapes for rules diff (`--dry-run` semantics; `firebase firestore:rules:get` for snapshot comparison) need verification at write-time. Cloud Functions rollback path needs explicit documentation (no `firebase functions:rollback` command; actual path is re-deploy from previous-good git SHA).
+- **Phase 3 (lockdown sync):** Drift-detection enhancement to lockdown's `scripts/sync-leksihjelp.js` (refuse to overwrite divergent files without confirmation) is a lockdown-side change — needs cross-repo coordination during plan.
 
-Phases with standard patterns (skip dedicated research):
-- **Phase 6:** Design spikes at phase start, not discovery research.
-- **Phase 9, 10:** Standard lookup patterns after Phase 8 primitive known.
-- **Phase 11:** Gate check (not research) before entry.
-- **Phase 12, 14, 15:** Standard lookup or data patterns; no research needed.
-- **Phase 16:** No planning until post-Phase-13 evaluation.
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (hygiene & templates):** Mechanical; templates synthesised in this research file.
+- **Phase 2 (extension UAT batch):** Walkthrough steps already documented in v3.1 phase plans being carried forward.
+- **Phase 5 (milestone archive):** Established pattern; v3.1's archive is the template.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Constraints are binding; `Intl.Segmenter` verified Baseline 2024-04; all alternatives reviewed and rejected with specific reasons; no dependency uncertainty |
-| Features | HIGH | P1/P2/P3 grounded in hand-authored benchmark corpus, competitor analysis, and v1.0 complexity analogues; MEDIUM on Phase 11 trigger-set completeness and FR BAGS adj count |
-| Architecture | HIGH | Direct code read of `spell-check.js`, `spell-check-core.js`, `vocab-seam.js`, `vocab-seam-core.js`; seam boundaries verified against existing runner |
-| Pitfalls | HIGH | All 12 pitfalls map to specific project evidence (v1.0 audit bugs, benchmark construction, codebase patterns); no speculative entries |
+| Stack | HIGH | Project's own CLAUDE.md + PROJECT.md are authoritative; "no new deps" is enforceable from PROJECT.md constraints |
+| Features | HIGH | Categories derived directly from STATE.md Pending Todos + v3.1 audit's 14-item tech-debt list |
+| Architecture | HIGH | Three-repo topology + sync mechanics fully documented in CLAUDE.md "Downstream consumers" + lockdown-adapter-contract.md |
+| Pitfalls | HIGH | Drawn from this project's own incident history (INFRA-10 root cause, v2.2 version-skew, v3.1 six-walkthrough deferral, Phase 30-02 orphan-mirror) — not generic best practice |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **Phase 11 trigger-set completeness:** Open as data-track ticket early; needs a `papertek-vocabulary` audit during Phase 11 planning. Do not assume roadmap canonical list is complete.
-- **FR BAGS adjective list size:** "~40" is a roadmap estimate; actual closed-set size needs audit at authoring time.
-- **`papertek-vocabulary` schema shape per field:** Cross-app coordination with `papertek-webapps` and `papertek-nativeapps` required before any data PR. SCHEMA.md ownership record (Phase 6) is the coordination artifact.
-- **Phase 13 invalidation protocol:** Never built in this codebase. Mandatory research step; do not treat as known-cost item.
-- **Phase 15.3 idiomatic literalism scope:** Explicit kill/curated-only decision required in Phase 15 plan.
-- **Phase 16 feasibility:** Evaluate post-Phase-13 only.
-- **80%-flip-rate must be weighted by priority:** Bare 80% target in seed roadmap is insufficient. Every phase plan must specify P1 (100% required), P2 (80%), P3 (50%); unflipped P1 blocks closure without written exception.
+- **Firebase CLI exact semantics:** `--dry-run` support varies by surface (rules vs. functions vs. hosting). The `lockdown-prod-deploy.md` runbook must verify exact command shapes against `firebase --help` at write-time, not assume vendor-doc patterns hold. *Address: during Phase 4 plan, run a one-shot CLI exploration step before runbook authoring.*
+- **Lockdown sync drift-detection:** The recommended sync-script enhancement (refuse to overwrite divergent files; print resolved leksihjelp version + HEAD commit) is a lockdown-side change. Whether it lands in v3.2 or as a coordinated cross-repo deferral is a Phase 3 plan-time decision. *Address: flag in Phase 3 plan body; if not in v3.2, log as Phase 5 deferral with classification.*
+- **EXAM-10 rollback semantics:** Removing the `LEKSIHJELP_EXAM` enum after Firestore data uses it is destructive. The `lockdown-prod-deploy.md` runbook needs an explicit "what to do if EXAM-10 needs to be reverted after data has been written" section — likely "page Geir, do not auto-rollback." *Address: Phase 4 runbook authoring includes this as a mandatory section.*
+- **Cache-busting strategy for synced leksihjelp assets in papertek.app:** If filename hashing isn't yet wired, that's tech-debt to surface explicitly during Phase 4 hosting-runbook authoring. *Address: Phase 4 includes a `firebase.json` headers audit; surface gap as Phase 5 deferral if not in scope.*
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- `.planning/research/STACK.md` — technology decisions, dependency rationale, "what NOT to use"
-- `.planning/research/FEATURES.md` — feature landscape, P1/P2/P3 matrix, dependency graph, benchmark-line anchors
-- `.planning/research/ARCHITECTURE.md` — seam design, data-flow changes, build-order plan, scalability considerations
-- `.planning/research/PITFALLS.md` — 12 pitfalls with phase-to-prevention mapping and recovery strategies
-- `.planning/PROJECT.md` — binding constraints, Out-of-Scope list, v1.0 shipped requirements, Key Decisions table
-- `.planning/v2.0-benchmark-driven-roadmap.md` — 11-phase groupings, benchmark-line anchors, validation protocol, non-goals
-- `extension/content/spell-check.js`, `spell-check-core.js`, `vocab-seam.js`, `vocab-seam-core.js` — direct code read (via ARCHITECTURE.md research)
-- `CLAUDE.md` — 8 release gates, data-logic separation principle, release workflow
+- `/Users/geirforbord/Papertek/leksihjelp/CLAUDE.md` — Release Workflow steps 1-15, 14 release gate descriptions, Downstream consumer contracts (synced-surface enumeration, version-bump ritual, exam-registry load-order requirement)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/PROJECT.md` — v3.2 milestone scope, constraints (no new runtime deps, MIT/free-tier promise), Out of Scope, Deferred, Key Decisions table (especially INFRA-10)
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/STATE.md` — Pending Todos enumerating the 6 UAT items + 2 deploys verbatim
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/MILESTONES.md` — v3.1 closing audit; six-walkthrough deferral provenance
+- `/Users/geirforbord/Papertek/leksihjelp/.planning/lockdown-adapter-contract.md` — sync contract surface area; informs which findings need lockdown re-validation
+- v3.1 archived phase decisions (Phase 30, 33, 36) — dep-injection contract and INFRA-10 seam-coverage gate
+- v2.2 milestone audit — version-skew incident (`package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1`)
 
 ### Secondary (MEDIUM confidence)
-- `benchmark-texts/*.txt` — 6 hand-authored student-error corpora; high confidence on error patterns, MEDIUM on whether the benchmark fully represents real student writing variance
-- Competitor analysis (LanguageTool, Grammarly free tier) — feature comparison; training-data based, not current product audit
+- Firebase CLI documentation patterns for selective deploy and rules-state inspection — well-known but exact command shapes need write-time verification
+- Chrome `chrome.sidePanel` API support matrix per Chrome 114+ release notes
 
-### Tertiary (LOW confidence)
-- Phase 11 trigger-set completeness — no `papertek-vocabulary` data audit yet; needs validation during Phase 11 planning
-- FR BAGS adjective count — "~40" is a roadmap estimate; actual closed-set size unverified
+### User memory (HIGH confidence — workflow constraints)
+- `feedback_fewer_phases.md` — consolidate into fewer larger phases (1M context, GSD designed for 200k)
+- `project_test_suite_at_milestone_end.md` — `/gsd:add-tests` runs once at milestone end before `/gsd:complete-milestone`
+- `project_phase30_04_sso_status.md` — auto-mode but no-prod-deploy precedent
+- `project_sidepanel_fest_macos.md` — cross-platform browser-quirks evidence
 
 ---
-*Research completed: 2026-04-24*
+*Research completed: 2026-05-01*
 *Ready for roadmap: yes*
