@@ -124,7 +124,11 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
   4. `npm run check-version-alignment` exits 0 when manifest.json + package.json + backend/public/index.html agree, exits 1 with per-file diagnostic when they drift; paired `:test` self-test plants drift → gate fires, restores → gate passes. `npm run check-synced-surface-version` exits 1 when synced surfaces (`extension/content/`, `extension/popup/views/`, `extension/exam-registry.js`, `extension/styles/content.css`, `extension/data/`, `extension/i18n/`) changed since last tag without a `package.json` bump; paired `:test` self-test exists.
   5. `papertek-vocabulary.vercel.app/api/vocab/v1/revisions` reflects the latest committed revision in `/Users/geirforbord/Papertek/papertek-vocabulary` (git status clean, remote up-to-date, Vercel deployment at HEAD); any v3.1 side-patched extension data file (e.g., gustar/por-para edits per Phase 32-02) is either re-synced from upstream or explicitly carried as deferred with documented reason — verified before Phase 38 begins.
   6. `[lockdown-resync-needed]` commit-message convention documented in CLAUDE.md downstream-consumers section; applied retroactively to outstanding synced-surface commits during phase work.
-**Plans**: TBD
+**Plans**: 4 plans
+  - [ ] 37-01-PLAN.md — UAT templates (walkthrough + finding) + verification_kind auto-pause convention in CLAUDE.md (HYG-01, HYG-02, HYG-03)
+  - [ ] 37-02-PLAN.md — check-version-alignment + check-synced-surface-version release gates with paired self-tests (HYG-04, HYG-05)
+  - [ ] 37-03-PLAN.md — check-vocab-deployment.js pre-flight script (HYG-07)
+  - [ ] 37-04-PLAN.md — [lockdown-resync-needed] commit convention + retroactive catch-up doc (HYG-06)
 
 ### Phase 38: Extension UAT Batch + Bug-Fix Loop + REGR
 **Goal**: Every v3.1-shipped extension feature is walked in real Chrome, every surfaced bug is fixed via the canonical loop, every fix carries a regression artifact — school-year readiness.
