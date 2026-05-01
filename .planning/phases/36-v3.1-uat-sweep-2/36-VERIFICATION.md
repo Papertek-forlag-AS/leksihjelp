@@ -1,209 +1,164 @@
-# Phase 36 — v3.1 UAT Sweep #2 — Verification
+---
+phase: 36-v3.1-uat-sweep-2
+verified: 2026-05-01T12:00:00Z
+status: gaps_found
+score: 5/6 must-haves verified (F36-1 browser FAILED on user walkthrough)
+gaps:
+  - id: F36-1-browser-still-fails
+    finding: "fr-aspect-hint still does not fire on `Hier il mangeait une pomme.` in the browser at v2.9.17 even after Plan 36-02 wired frImparfaitToVerb / frPasseComposeParticiples / frAuxPresensForms through the seam"
+    status: failed
+    evidence: "User browser walkthrough 2026-05-01: F36-2/3/4/5 confirmed pass; F36-1 explicitly reported as failing. Console shows pre-existing 404s for bundled FR sidecars (bigrams-fr / freq-fr / pitfalls-fr) — these are gracefully handled by loadBundledSidecar (returns null) and not the cause"
+    next_steps: "Open via /gsd:plan-phase 36 --gaps. Investigate: (a) is the rule firing at all in the browser path? add console.log at fr-aspect-hint.js entry, (b) is dedupeOverlapping suppressing it in favor of typo-fuzzy?, (c) is the FR vocab pipeline (frImparfaitToVerb in particular) actually populated in the browser at lookup time? add a runtime probe via __lexiVocab.getFrImparfaitToVerb(). The seam-coverage gate proves the index is wired, but does not prove it is populated for FR."
+human_verification:
+  - test: "F36-2 ES Aa-pill dropdown watch-item"
+    expected: "ES language appears in the green Aa pill dropdown after page reload on skriv.papertek.app; if missing, DevTools captures show __lexiVocabStore.listCachedLanguages() and chrome.storage.local.get('activatedLangs') discrepancy"
+    why_human: "Requires a live browser session with the extension at v2.9.17 installed; no programmatic way to test chrome.storage + IndexedDB vocab-store interaction"
+  - test: "F36-1 browser confirmation: fr-aspect-hint fires (not typo-fuzzy) on 'Hier il mangeait une pomme.'"
+    expected: "Popover shows rule_id fr-aspect-hint on the mangeait token; no typo finding"
+    why_human: "Node-side verified clean; browser seam now also wired (Plan 36-02 drive-by fix for frImparfaitToVerb). Final confirmation requires live browser with DevTools capture of document.querySelector('.lh-spell-popover')?.outerHTML"
+  - test: "F36-3/F36-4 browser confirmation: DE kein/keine gender flags"
+    expected: "With Aa=DE, 'Ich habe kein Zeit.' flags kein suggesting keine; 'Ich sehe keine Mann.' flags keine suggesting kein"
+    why_human: "Rule logic and fixtures are verified; browser walk confirms the seam delivers nounGenus correctly"
+  - test: "F36-5 browser confirmation: Fiks button absent on structural rules"
+    expected: "Triggering a nb-v2, de-v2, or fr-bags finding shows no Fiks button and no arrow head in the popover; explain block carries the actionable instruction"
+    why_human: "noAutoFix:true is metadata-only; no fixture shape impact. Browser popover render must be visually confirmed"
+---
 
-Per-finding diagnosis + outcome for the second wave of v3.1 UAT findings.
+# Phase 36: v3.1 UAT Sweep #2 Verification Report
 
-## Summary
+**Phase Goal:** Close the second wave of v3.1 UAT findings (F36-1 through F36-6). F36-1 FR partial spell-check (fr-aspect-hint vs typo-fuzzy on `mangeait`); F36-2 ES Aa-pill dropdown watch-item; F36-3 DE `kein Zeit` should suggest `keine`; F36-4 DE `keine Mann` should suggest `kein`; F36-5 noAutoFix on structural rules (nb-v2, de-v2, fr-bags) so Fiks button is suppressed; F36-6 INFRA-10 `check-vocab-seam-coverage` release gate + paired :test.
+**Verified:** 2026-05-01T12:00:00Z
+**Status:** human_needed
+**Re-verification:** No — initial GSD-format verification (prior 36-VERIFICATION.md was a prose artifact, not GSD-format)
 
-| Finding | Status | Evidence |
-| ------- | ------ | -------- |
-| F36-1 (FR mangeait) | FIXED (defensive — Node already correct; pinned via fixture) | `[fr/aspect-hint] 88/88 pass` |
-| F36-2 (ES Aa-pill watch-item) | WATCH — auto-deferred for browser session | recipe captured below |
-| F36-3 (DE kein + fem) | FIXED | `[de/grammar] 18/18 pass` |
-| F36-4 (DE keine + masc/neut) | FIXED | same — KEIN_PARADIGM stays in indefinite paradigm |
-| F36-5 (Fiks-button on structural rules) | FIXED | nb-v2 + de-v2 + fr-bags now carry `noAutoFix:true`; fixtures green |
+## Goal Achievement
 
-## Release gates (all 12)
+### Observable Truths
+
+| # | Truth | Status | Evidence |
+|---|-------|--------|----------|
+| 1 | F36-1: fr-aspect-hint fires (not typo) on `Hier il mangeait une pomme` in fixtures; Node-side clean | VERIFIED | `fixtures/fr/aspect-hint.jsonl` lines 100-101 contain `fr-aspect-pos-f36-1-period` and `fr-aspect-neg-f36-1-clean`; `[fr/aspect-hint] P=1.000 R=1.000 F1=1.000 88/88 pass`; Plan 36-02 drive-by also wired `frImparfaitToVerb` seam index |
+| 2 | F36-2: ES still appears in Aa language dropdown after page reload (watch-item; outcome documented) | NEEDS HUMAN | Auto-deferred per auto-mode; browser session required |
+| 3 | F36-3: `Ich habe kein Zeit.` flags `kein` with suggestion `keine` | VERIFIED | `de-gender.js` KEIN_PARADIGM + manual block for `kein` + feminine noun; fixture `de-gender-kein-fem-1` at line 13 of `fixtures/de/grammar.jsonl`; `[de/grammar] P=1.000 R=1.000 F1=1.000 18/18 pass` |
+| 4 | F36-4: `Ich sehe keine Mann.` flags `keine` with suggestion `kein` | VERIFIED | `de-gender.js` ARTICLE_GENUS includes `'keine': 'f'`; main loop triggers mismatch for masculine Mann; KEIN_PARADIGM stays in indefinite paradigm; fixtures `de-gender-keine-masc-1` + `de-gender-keine-neut-1` at lines 14-15 of `fixtures/de/grammar.jsonl` |
+| 5 | F36-5: Structural rules (nb-v2, de-v2, fr-bags) carry noAutoFix:true; Fiks button suppressed | VERIFIED | `nb-v2.js:239`, `de-v2.js:169`, `fr-bags.js:139` all contain `noAutoFix: true`; 9 total noAutoFix references in spell-rules/; full fixture suite P=R=F1=1.000 for all three rules |
+| 6 | F36-6: `npm run check-vocab-seam-coverage` exits 0 at head; paired :test exits 0 (3 scenarios) | VERIFIED | Gate exits 0: "PASS — 36 indexes, all surfaced through seam + consumer"; :test exits 0: "3/3 scenarios green"; both scripts registered in package.json; CLAUDE.md updated with gate #12, subsequent steps renumbered to 13-15 |
+
+**Score:** 5/6 truths verified (1 deferred to human — F36-2 browser watch-item)
+
+### Required Artifacts
+
+| Artifact | Expected | Status | Details |
+|----------|----------|--------|---------|
+| `extension/content/spell-rules/de-gender.js` | kein/keine paradigm coverage | VERIFIED | ARTICLE_GENUS has `'keine': 'f'`; KEIN_PARADIGM `{ m: kein, f: keine, n: kein }`; manual block for bare `kein` + feminine noun (line 142); 9 noAutoFix references total in spell-rules/ |
+| `fixtures/de/grammar.jsonl` | 6 new kein/keine fixture cases | VERIFIED | Lines 13-18: `de-gender-kein-fem-1`, `de-gender-keine-masc-1`, `de-gender-keine-neut-1`, `de-gender-keine-fem-clean`, `de-gender-kein-neut-clean`, `de-gender-kein-masc-clean` |
+| `fixtures/fr/aspect-hint.jsonl` | 2 new F36-1 pin cases | VERIFIED | Lines 100-101: `fr-aspect-pos-f36-1-period` (canonical UAT sentence with period), `fr-aspect-neg-f36-1-clean` (passe-compose variant) |
+| `scripts/check-vocab-seam-coverage.js` | Vocab seam coverage gate (min 80 lines) | VERIFIED | 484 lines; exits 0 at head; reports "36 indexes, all surfaced through seam + consumer" |
+| `scripts/check-vocab-seam-coverage.test.js` | Paired self-test (min 60 lines) | VERIFIED | 200 lines; 3 scenarios (gate-fires, gate-passes, clean-head); exits 0 |
+| `package.json` | Scripts `check-vocab-seam-coverage` + `:test` | VERIFIED | Lines 61-62 register both scripts |
+| `CLAUDE.md` | Release workflow updated with gate #12, 15 steps total | VERIFIED | Lines 382-391: gate #12 documented with why-this-gate-exists; version-bump at step 13, rebuild at step 14, upload at step 15 |
+
+### Key Link Verification
+
+| From | To | Via | Status | Details |
+|------|----|-----|--------|---------|
+| `de-gender.js` ARTICLE_GENUS map | kein/keine paradigm | `'keine': 'f'` lookup against vocab.nounGenus | VERIFIED | `'keine': 'f'` present at line 24; KEIN_PARADIGM map ensures suggestions stay in indefinite paradigm |
+| `de-gender.js` manual `kein` block | feminine noun flag (F36-3) | `if (prev.word === 'kein' && nounGenus.get(t.word) === 'f')` | VERIFIED | Lines 142-154; fix: `matchCase(prev.display, 'keine')` |
+| Structural rules (nb-v2, de-v2, fr-bags) | spell-check.js noAutoFix Fiks-suppression branch | `noAutoFix: true` on finding | VERIFIED | nb-v2:239, de-v2:169, fr-bags:139 all carry `noAutoFix: true` |
+| `vocab-seam-core.js` buildIndexes return object | vocab-seam.js getX() getters AND spell-check.js vocab object | static AST/regex parse in check-vocab-seam-coverage.js | VERIFIED | Gate passes: 36 indexes all wired; Plan 36-02 also drive-by fixed `frImparfaitToVerb`, `frPasseComposeParticiples`, `frAuxPresensForms` that the v2.9.15 fix missed |
+
+### Requirements Coverage
+
+No new requirement IDs declared in Plan 36-01 or 36-02 frontmatter (`requirements: []` in both plans). Phase 36 is gap-closure only; all work is tracked via F36-N finding IDs, not REQUIREMENTS.md entries. No orphaned requirements found.
+
+### Anti-Patterns Found
+
+None found. Scanned `de-gender.js`, `nb-v2.js`, `de-v2.js`, `fr-bags.js`, `scripts/check-vocab-seam-coverage.js` for TODO/FIXME/PLACEHOLDER, empty implementations, and console.log stubs. All clear.
+
+### Release Gates (all 12)
 
 | Gate | Status |
-| ---- | ------ |
-| check-fixtures | EXIT=0 |
-| check-explain-contract | EXIT=0 (60/60) |
-| check-rule-css-wiring | EXIT=0 (59/59) |
-| check-spellcheck-features | EXIT=0 |
-| check-network-silence | EXIT=0 |
-| check-exam-marker | EXIT=0 (63 rules + 10 registry) |
-| check-popup-deps | EXIT=0 (4 views) |
-| check-bundle-size | EXIT=0 (12.68 MiB / 20 MiB cap) |
-| check-baseline-bundle-size | EXIT=0 (130 KB / 200 KB cap) |
-| check-benchmark-coverage | EXIT=0 (40/40 expectations) |
-| check-governance-data | EXIT=0 (116 entries) |
-| check-vocab-seam-coverage | EXIT=0 (36 indexes — INFRA-10 from Plan 36-02 already shipped) |
+|------|--------|
+| check-fixtures | EXIT=0 — all 57 rule suites P=R=F1=1.000 |
+| check-explain-contract | EXIT=0 (per SUMMARY) |
+| check-rule-css-wiring | EXIT=0 (per SUMMARY) |
+| check-spellcheck-features | EXIT=0 (per SUMMARY) |
+| check-network-silence | EXIT=0 (per SUMMARY) |
+| check-exam-marker | EXIT=0 (per SUMMARY) |
+| check-popup-deps | EXIT=0 (per SUMMARY) |
+| check-bundle-size | EXIT=0 12.68 MiB / 20 MiB cap (per SUMMARY) |
+| check-baseline-bundle-size | EXIT=0 130 KB / 200 KB cap (per SUMMARY) |
+| check-benchmark-coverage | EXIT=0 40/40 expectations (per SUMMARY) |
+| check-governance-data | EXIT=0 116 entries (per SUMMARY) |
+| check-vocab-seam-coverage | EXIT=0 36 indexes — **verified live** |
 
-## Version
+### Version
 
-Bumped 2.9.16 → 2.9.17 across:
+Manifest 2.9.17, package.json 2.9.17, backend/public/index.html line 579 "Versjon 2.9.17" — all three aligned, verified live.
 
-- `extension/manifest.json` (line 4)
-- `package.json` (line 3)
-- `backend/public/index.html` (line 579)
+### Human Verification Required
 
-Package rebuilt: `backend/public/lexi-extension.zip` (12.68 MiB, 13,292,942 bytes).
+#### 1. F36-2: ES Aa-pill dropdown watch-item
 
-## Downstream consumers
+**Test:** On skriv.papertek.app with v2.9.17 extension installed, click the green Aa language pill. Verify ES (and any other previously-downloaded languages) appear in the dropdown.
 
-Lockdown + skriveokt-zero need to re-pin to leksihjelp 2.9.17. Notable shared-surface changes in this version:
+**Expected:** All activated languages are listed, including ES.
 
-- `extension/content/spell-rules/de-gender.js` — new `keine` / `kein` paradigm (synced to lockdown).
-- `extension/content/spell-rules/{nb-v2,de-v2,fr-bags}.js` — new `noAutoFix:true` finding-property; lockdown popover already honours the property (Phase 28 / 30 sync).
-
-
-
-## F36-1: FR `mangeait` typo-vs-aspect-hint dispute
-
-**Status:** FIXED (defensive — Node-side already correct; pinned via fixture)
-
-### Node repro (canonical sentence)
-
+**If ES missing:** Run in DevTools:
+```js
+await __lexiVocabStore.listCachedLanguages()
+await chrome.storage.local.get('activatedLangs')
 ```
-$ node -e "... core.check('Hier il mangeait une pomme.', vocab, { lang: 'fr' })"
-[
-  {
-    "rule_id": "fr-aspect-hint",
-    "start": 8,
-    "end": 16,
-    "original": "mangeait",
-    "fix": "mangeait",
-    "adverb": "Hier",
-    "expectedAspect": "passe_compose",
-    ...
-  }
-]
-```
+Capture and compare. If ES is present in cache but absent from dropdown, file a new follow-up bug.
 
-**Verdict:** Only `fr-aspect-hint` fires Node-side; `nb-typo-fuzzy` correctly skips because `mangeait` is in `vocab.validWords` (verified: `verbInfinitive.get('mangeait') === 'manger'`, `imparfait` conjugation present in `extension/data/fr.json` `manger_verbe`).
+**Why human:** chrome.storage + IndexedDB vocab-store interaction; no programmatic substitute.
 
-### Feature-gating sanity
+#### 2. F36-1 browser confirmation
 
-Simulated FR `basic` preset (no `grammar_fr_imparfait`):
+**Test:** Set Aa=FR, type `Hier il mangeait une pomme.`, click the marker on `mangeait`, run `document.querySelector('.lh-spell-popover')?.outerHTML`.
 
-```
-mangeait in validWords? true
-verbInfinitive mangeait -> manger
-mangeais in validWords? true
-```
+**Expected:** rule_id is `fr-aspect-hint`, not a typo rule. Node-side already confirmed clean. Plan 36-02 drive-by wired `frImparfaitToVerb` seam index, which was one of the three missed by v2.9.15 fix — this makes the browser match the Node path.
 
-Lookup indexes are built from the unfiltered superset (per `check-spellcheck-features` gate contract); imparfait forms remain searchable even when feature gated off the active preset. Therefore `nb-typo-fuzzy`'s `!validWords.has(t.word)` guard correctly suppresses on `mangeait`.
+**Why human:** Seam wiring is now verified by the gate (36 indexes), but a final popover screenshot pins the browser path.
 
-### Browser repro
+#### 3. F36-3/F36-4 browser confirmation
 
-(captured during Task 4 human-verify checkpoint — see Task-4 section below)
+**Test:** Set Aa=DE. Type `Ich habe kein Zeit. Ich sehe keine Mann.` Click each marker. Verify `kein` suggests `keine`, `keine` suggests `kein`.
 
-### Fix path chosen
+**Expected:** Both markers fire with correct indefinite-paradigm suggestion (not definite `der/die/das`).
 
-Plan listed Case A (priority swap), Case B (data fix). Diagnosis showed neither was needed — Node-side already green. Chosen path: **defensive pinning only.** Added two fixture cases:
+**Why human:** Fixture logic confirmed; browser run confirms seam delivers nounGenus for Mann and Zeit correctly.
 
-- `fr-aspect-pos-f36-1-period` — canonical UAT sentence with trailing period
-- `fr-aspect-neg-f36-1-clean` — passé-composé variant clean
+#### 4. F36-5 browser confirmation
 
-These pin the canonical regression so a future change to `nb-typo-fuzzy`/`fr-aspect-hint` cannot silently regress.
+**Test:** Trigger a nb-v2 finding (e.g., NB: `I går jeg gikk på kino.`) and a de-v2 finding. Click marker. Verify no Fiks button, no arrow head; explain block carries the instruction.
 
-### Evidence
+**Expected:** Popover renders without Fiks button for structural rules.
 
-```
-$ npm run check-fixtures 2>&1 | grep "fr/aspect-hint"
-[fr/aspect-hint] P=1.000 R=1.000 F1=1.000  88/88 pass
-```
+**Why human:** `noAutoFix: true` is a metadata flag; popover render branch must be visually confirmed in the live extension.
 
-## F36-2: ES Aa-pill dropdown watch-item
+---
 
-**Status:** WATCH — auto-deferred (auto-mode browser walkthrough)
+### Gaps Summary
 
-Auto-mode (workflow.auto_advance=true) auto-approved the Task 4 human-verify checkpoint per `/Users/geirforbord/.claude/get-shit-done/references/checkpoints.md` § Auto-mode behavior. The watch-item requires a real browser session (DevTools `await __lexiVocabStore.listCachedLanguages()` + `await chrome.storage.local.get('activatedLangs')`) which auto-mode cannot perform.
+**1 hard gap (browser-path):**
 
-**Recipe to resolve in a later browser session:**
+**F36-1 — fr-aspect-hint still silent on `Hier il mangeait une pomme.` in v2.9.17 browser**
 
-1. Reload extension at v2.9.17 on `skriv.papertek.app`.
-2. Click the green Aa pill. Verify dropdown lists ES (and any previously activated languages).
-3. If ES missing despite being cached, capture in DevTools:
-   ```js
-   await __lexiVocabStore.listCachedLanguages()
-   await chrome.storage.local.get('activatedLangs')
-   ```
-4. Outcome → either RESOLVED (ES present) or new follow-up bug filed.
+User confirmed during 2026-05-01 walkthrough: F36-2/3/4/5 all pass; F36-1 explicitly fails. Plan 36-02 drive-by wiring of `frImparfaitToVerb`/`frPasseComposeParticiples`/`frAuxPresensForms` through the vocab seam was necessary but not sufficient — the rule still does not fire in the browser. Node-side fixtures pass.
 
-Tracking continuation: batched with deferred Phase 26 + 27 + 30-01 + 30-02 + 35 F7 manual UATs.
+Pre-existing FR sidecar 404s (`bigrams-fr.json`, `freq-fr.json`, `pitfalls-fr.json`) appear in the console, but `loadBundledSidecar` returns `null` for these gracefully — these are visual noise, not the cause.
 
-## Task 4: Browser walkthrough — auto-deferred
+**Root-cause hypotheses to test in gap closure:**
+1. The rule may not be loading at all — verify `[lexi-rules]` log includes `fr-aspect-hint` for FR.
+2. `dedupeOverlapping` may be ranking typo-fuzzy above aspect-hint — check priority bands and overlap-region logic.
+3. `__lexiVocab.frImparfaitToVerb` may be wired (per gate) but **empty** at lookup time — the seam-coverage gate proves the index is surfaced, not that it is populated. Check whether FR vocab build path includes the imparfait conjugation flattening.
 
-Auto-mode auto-approved per `workflow.auto_advance=true`. Manual UAT recipe captured here for the deferred walkthrough:
+**Recommended next step:** `/gsd:plan-phase 36 --gaps` (creates Phase 36.1 gap-closure plan).
 
-1. **F36-2** dropdown — see recipe above.
-2. **F36-1** With Aa=FR, type `Hier il mangeait une pomme.` Click marker on `mangeait`. Capture `document.querySelector('.lh-spell-popover')?.outerHTML`. Expected rule_id: `fr-aspect-hint`. Node-side already verified.
-3. **F36-3** With Aa=DE, type `Ich habe kein Zeit.` Marker on `kein` should suggest `keine`.
-4. **F36-4** With Aa=DE, type `Ich sehe keine Mann.` Marker on `keine` should suggest `kein`.
-5. **F36-5** With Aa=DE, type `Gestern ich gehe ins Kino.` Click marker. Verify NO `Fiks` button + NO `orig → fix` arrow head; explain block carries the V2 instruction. Repeat for NB `I går jeg gikk på kino.` and FR BAGS canonical.
+F36-2 watch-item passed in the same walkthrough.
 
-Outcome to log when run: PASS / new bug filed.
+---
 
-## F36-3 / F36-4: DE `kein`/`keine` paradigm
-
-**Status:** FIXED
-
-### Changes
-
-- `extension/content/spell-rules/de-gender.js`:
-  - `ARTICLE_GENUS` extended with `'keine': 'f'` (mirrors `eine: f`).
-  - New `KEIN_PARADIGM` map (`m: kein, f: keine, n: kein`) used when the offending article is itself in the negative-indefinite paradigm. Without this, `keine Mann` would suggest `der` (definite) — wrong paradigm.
-  - New manual block for bare `kein` before a feminine noun (mirrors the existing `ein` patch). The reverse direction (`keine` before m/n nouns) is handled by the main loop via `ARTICLE_GENUS['keine']` + `KEIN_PARADIGM`.
-
-### Data
-
-- `Mann` is `m`, `Zeit` is `f`, `Auto` is `n`, `Buch` is `n` in `extension/data/de.json` — verified via Node repro. No data side-patch needed.
-
-### New fixtures (in `fixtures/de/grammar.jsonl`)
-
-| id | text | expected |
-| -- | ---- | -------- |
-| de-gender-kein-fem-1 | "Ich habe kein Zeit." | gender → keine |
-| de-gender-keine-masc-1 | "Ich sehe keine Mann." | gender → kein |
-| de-gender-keine-neut-1 | "Ich sehe keine Buch." | gender → kein |
-| de-gender-keine-fem-clean | "Ich habe keine Zeit." | (clean) |
-| de-gender-kein-neut-clean | "Ich habe kein Auto." | (clean) |
-| de-gender-kein-masc-clean | "Ich habe kein Mann." | (clean) |
-
-### Evidence
-
-```
-$ npm run check-fixtures 2>&1 | grep "de/grammar"
-[de/grammar] P=1.000 R=1.000 F1=1.000  18/18 pass
-```
-
-Full suite exit=0.
-
-
-## F36-5: Structural-rule Fiks-button suppression
-
-**Status:** FIXED
-
-### Triage table
-
-| Rule | Verdict | Reason |
-| ---- | ------- | ------ |
-| `nb-v2.js` | NEEDS noAutoFix | Fix swaps subject+verb across clause; marker spans only the subject pronoun. Pasting `fix` (verb subj) over the subject token produces gibberish. |
-| `de-v2.js` | NEEDS noAutoFix | Same shape as nb-v2 — multi-token reorder, single-token marker. |
-| `fr-bags.js` | NEEDS noAutoFix | Fix is the literal instructional string `tok.display + ' (flytt foran substantivet)'` — instructional, not a substitution. |
-| `fr-pp-agreement.js` | KEEP | Atomic single-token suffix change (`mangé` → `mangée`). Fiks pastes the new token over the original PP. |
-| `fr-clitic-order.js` | KEEP | Span covers the contiguous clitic cluster; `fix` is the reordered cluster covering the same span. Atomic substitution from the popover's perspective. |
-| `de-perfekt-aux.js` | KEEP | Atomic single-token swap (`hat` ↔ `ist`). |
-| `es-pro-drop.js` | KEEP | `fix: ''` deletes the redundant pronoun token; technically atomic. (Defense-in-depth tweak optional later.) |
-
-### Patches
-
-- `extension/content/spell-rules/nb-v2.js` — added `noAutoFix: true` to the V2 finding (lines 226-238 region).
-- `extension/content/spell-rules/de-v2.js` — same.
-- `extension/content/spell-rules/fr-bags.js` — same.
-
-Pre-existing consumers (de-verb-final, de-separable-verb) unchanged. Total `noAutoFix` references in `spell-rules/` after patch: **9** (3 new finding-property assignments × 1 line each plus the 2 pre-existing × 3 lines including comments — exact count from grep).
-
-### Evidence
-
-```
-$ npm run check-fixtures 2>&1 | grep -E "nb/v2|de/v2|fr/bags"
-[nb/v2] P=1.000 R=1.000 F1=1.000  96/96 pass
-[de/v2] P=1.000 R=1.000 F1=1.000  135/135 pass
-[fr/bags] P=1.000 R=1.000 F1=1.000  207/207 pass
-```
-
-`noAutoFix` is metadata-only (popover-render flag); no fixture-shape impact.
-
-
+_Verified: 2026-05-01T12:00:00Z_
+_Verifier: Claude (gsd-verifier)_
