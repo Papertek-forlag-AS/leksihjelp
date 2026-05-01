@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: planning
-last_updated: "2026-05-01T06:45:05.085Z"
-last_activity: "2026-05-01 -- Plan 35-01 complete. v3.1 UAT follow-ups closed: F6 Lær mer panel state-loss bug fixed (pedagogyPanelExpanded module flag + save/restore around hidePopover; commit 4bbab27); F1/F2/F3 verified PASS in current data via Node repros (no cross-repo papertek-vocabulary PR needed); F5 docs-only — `in der Schule` is correct German, alternate canonical triggers `in den Schule` + `auf der Tisch` documented; F7 NN/EN locale walkthroughs auto-approved per workflow.auto_advance with recipe captured. Version 2.9.13 -> 2.9.14. All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred manual UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7)."
+last_updated: "2026-05-01T09:35:15.345Z"
+last_activity: 2026-05-01 -- Plan 35-01 complete. F6 Lær mer panel state-loss bug fixed (commit 4bbab27); F1/F2/F3 verified PASS in current data with Node repros; F5 alternate canonical triggers documented (`in den Schule`, `auf der Tisch`); F7 auto-approved with manual UAT recipe captured in 35-VERIFICATION.md. Version 2.9.13 -> 2.9.14 (patch — narrow logic fix). All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14.
 progress:
-  total_phases: 13
+  total_phases: 14
   completed_phases: 8
-  total_plans: 29
-  completed_plans: 22
+  total_plans: 31
+  completed_plans: 23
 ---
 
 # Session State
@@ -55,6 +55,7 @@ Progress: [██████████] 100% (Phase 35 complete — 1/1 plans
 | Phase 33 P02 | 2 min | 3 tasks | 18 files |
 | Phase 33 P03 | 8 | 6 tasks | 53 files |
 | Phase 35-v3.1-uat-followups P01 | 9 | 3 tasks | 5 files |
+| Phase 36 P02 | 6 | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 35-v3.1-uat-followups]: F1/F2/F3 verified PASS in current data; no cross-repo papertek-vocabulary PR needed (Phase 34 failures attributed to stale-deploy or human-verifier UI artifacts)
 - [Phase 35-v3.1-uat-followups]: F5 docs-only fix: in der Schule is correct German; documented in den Schule + auf der Tisch as canonical Wechselpräposition triggers (rejected semantic motion detection as low-precision speculative grammar)
 - [Phase 35-v3.1-uat-followups]: F6 fixed via module-level pedagogyPanelExpanded flag with save/restore around hidePopover() inside showPopover(); hidePopover() default-resets so dismissal paths still start collapsed
+- [Phase 36]: 36-02: INFRA-10 gate static-parses buildIndexes return literal incl. ...moodIndexes spread; EXEMPT list documents non-spell-check surface keys
+- [Phase 36]: 36-02: drive-by fix wired 3 more FR mood-aspect indexes (frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms) the v2.9.15 fix missed — same Phase 35 bug-class
 
 ### Pending Todos
 
