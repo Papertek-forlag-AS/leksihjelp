@@ -92,43 +92,44 @@ Explicitly excluded for v3.2.
 
 ## Traceability
 
-Empty initially; populated by gsd-roadmapper.
+All 27 v1 requirements mapped to exactly one phase by gsd-roadmapper on 2026-05-01.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HYG-01 | Phase [N] | Pending |
-| HYG-02 | Phase [N] | Pending |
-| HYG-03 | Phase [N] | Pending |
-| HYG-04 | Phase [N] | Pending |
-| HYG-05 | Phase [N] | Pending |
-| HYG-06 | Phase [N] | Pending |
-| HYG-07 | Phase [N] | Pending |
-| UAT-EXT-01 | Phase [N] | Pending |
-| UAT-EXT-02 | Phase [N] | Pending |
-| UAT-EXT-03 | Phase [N] | Pending |
-| UAT-EXT-04 | Phase [N] | Pending |
-| FIX-01 | Phase [N] | Pending |
-| FIX-02 | Phase [N] | Pending |
-| FIX-03 | Phase [N] | Pending |
-| FIX-04 | Phase [N] | Pending |
-| UAT-LOCK-01 | Phase [N] | Pending |
-| UAT-LOCK-02 | Phase [N] | Pending |
-| UAT-LOCK-03 | Phase [N] | Pending |
-| UAT-LOCK-04 | Phase [N] | Pending |
-| DEPLOY-01 | Phase [N] | Pending |
-| DEPLOY-02 | Phase [N] | Pending |
-| DEPLOY-03 | Phase [N] | Pending |
-| DEPLOY-04 | Phase [N] | Pending |
-| DEPLOY-05 | Phase [N] | Pending |
-| ARCH-01 | Phase [N] | Pending |
-| ARCH-02 | Phase [N] | Pending |
-| ARCH-03 | Phase [N] | Pending |
+| HYG-01 | Phase 37 | Pending |
+| HYG-02 | Phase 37 | Pending |
+| HYG-03 | Phase 37 | Pending |
+| HYG-04 | Phase 37 | Pending |
+| HYG-05 | Phase 37 | Pending |
+| HYG-06 | Phase 37 | Pending |
+| HYG-07 | Phase 37 | Pending |
+| UAT-EXT-01 | Phase 38 | Pending |
+| UAT-EXT-02 | Phase 38 | Pending |
+| UAT-EXT-03 | Phase 38 | Pending |
+| UAT-EXT-04 | Phase 38 | Pending |
+| FIX-01 | Phase 38 | Pending |
+| FIX-02 | Phase 38 | Pending |
+| FIX-03 | Phase 38 | Pending |
+| FIX-04 | Phase 38 | Pending |
+| UAT-LOCK-01 | Phase 39 | Pending |
+| UAT-LOCK-02 | Phase 39 | Pending |
+| UAT-LOCK-03 | Phase 39 | Pending |
+| UAT-LOCK-04 | Phase 39 | Pending |
+| DEPLOY-01 | Phase 40 | Pending |
+| DEPLOY-02 | Phase 40 | Pending |
+| DEPLOY-03 | Phase 40 | Pending |
+| DEPLOY-04 | Phase 40 | Pending |
+| DEPLOY-05 | Phase 40 | Pending |
+| ARCH-01 | Phase 41 | Pending |
+| ARCH-02 | Phase 41 | Pending |
+| ARCH-03 | Phase 41 | Pending |
 
 **Coverage:**
 - v1 requirements: 27 total
-- Mapped to phases: 0 (pending roadmapper)
-- Unmapped: 27 ⚠️ (will resolve after roadmap)
+- Mapped to phases: 27
+- Unmapped: 0
 
 ---
+
 *Requirements defined: 2026-05-01*
-*Last updated: 2026-05-01 after initial definition for v3.2*
+*Last updated: 2026-05-01 — roadmap mapped (Phases 37-41), traceability populated by gsd-roadmapper*
