@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 **Phase:** 36 (v3.1 UAT sweep #2, Phase 35 follow-up)
 **Plan:** Phase 36 P01 complete (P02 already shipped INFRA-10 / check-vocab-seam-coverage); 2/2 plans complete
 **Status:** Milestone complete
-**Last activity:** 2026-05-01 -- Plan 36-01 complete. F36-1 (FR mangeait) defensively pinned; F36-3/F36-4 (DE kein/keine paradigm) shipped; F36-5 noAutoFix opt-in on nb-v2/de-v2/fr-bags. Version 2.9.16 -> 2.9.17. All 12 release gates green; bundle 12.68 MiB / 20 MiB cap. F36-2 + Task 4 walkthrough auto-deferred. Lockdown + skriveokt-zero re-pin to leksihjelp 2.9.17.
+**Last activity:** 2026-05-01 - Completed quick task 1: v3.1 hygiene cleanup (EXAM-01..07 status -> Complete; Phase 31 orphan deleted; Phase 25 retroactive VERIFICATION.md backfilled).
 
 Progress: [██████████] 100% (Phase 36 complete — 2/2 plans)
 
@@ -131,6 +131,12 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - VERIF-01 (browser visual verification) carried across 4 milestones -- in scope as DEBT-03
 - Version skew: package.json=2.5.0 vs manifest.json=2.4.1 -- in scope as DEBT-01
 - check-fixtures 5 pre-existing failing suites -- in scope as DEBT-02
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | v3.1 hygiene cleanup: flip EXAM-01..07 status, delete orphan Phase 31, retroactive Phase 25 VERIFICATION.md | 2026-05-01 | 57cdd41 | [1-v3-1-hygiene-cleanup-flip-exam-01-07-sta](./quick/1-v3-1-hygiene-cleanup-flip-exam-01-07-sta/) |
 
 ## Session Continuity
 
