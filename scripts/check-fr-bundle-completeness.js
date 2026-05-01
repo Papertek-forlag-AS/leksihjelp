@@ -134,7 +134,13 @@ async function main() {
     allFailures.push(...bundledFailures);
   }
 
-  // ── API path ──
+  // ── API path (simulating the vocab-seam.js#buildAndApply defensive backfill) ──
+  // The seam overlays the 3 aspect meta entries from bundled fr.json onto
+  // the API payload before calling buildIndexes. This script applies the same
+  // backfill so the gate validates the seam-with-fix contract, not the raw
+  // API response. If the seam's backfill code is removed or scoped wrong,
+  // this simulation must be updated in lockstep — but the gate then catches
+  // the regression because the assertions still reference frAspectAdverbs.
   let api;
   try {
     api = await fetchJsonWithTimeout(API_URL, TIMEOUT_MS);
@@ -144,7 +150,18 @@ async function main() {
     api = null;
   }
   if (api) {
-    const apiFailures = assertSeamProducesAspects('api', api);
+    // Apply the seam's defensive backfill (mirrors vocab-seam.js#buildAndApply).
+    const missingOnApi = REQUIRED_ASPECT_KEYS.filter(k => !(api.generalbank && k in api.generalbank));
+    if (missingOnApi.length > 0 && bundled && bundled.generalbank) {
+      for (const k of missingOnApi) {
+        if (k in bundled.generalbank) {
+          api.generalbank = api.generalbank || {};
+          api.generalbank[k] = bundled.generalbank[k];
+        }
+      }
+      console.error(`Note: simulated seam backfill on api path for: ${missingOnApi.join(', ')}`);
+    }
+    const apiFailures = assertSeamProducesAspects('api+backfill', api);
     if (apiFailures.length > 0) {
       exitCode = 1;
       allFailures.push(...apiFailures);

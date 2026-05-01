@@ -152,6 +152,29 @@
     }
   }
 
+  // F38-1 / F38-3 (Plan 38-01.2): cached one-shot loader for the bundled FR
+  // payload. Used by the seam-side defensive backfill in buildAndApply when
+  // the API/cache-served generalbank is missing the 3 aspect meta entries
+  // (aspect_passe_compose_adverbs, aspect_imparfait_adverbs,
+  // aspect_choice_pedagogy). Papertek API serves FR `generalbank` from
+  // vocabulary/lexicon/fr/ which is missing these three; bundled fr.json has
+  // them (sourced from vocabulary/core/fr/). Single fetch per page lifetime —
+  // subsequent FR hydrations reuse the parsed payload.
+  let _frBundledPromise = null;
+  function loadFrBundledOnce() {
+    if (!_frBundledPromise) {
+      _frBundledPromise = (async () => {
+        try {
+          const url = chrome.runtime.getURL('data/fr.json');
+          const res = await fetch(url);
+          if (!res.ok) return null;
+          return await res.json();
+        } catch (_) { return null; }
+      })();
+    }
+    return _frBundledPromise;
+  }
+
   async function loadBigrams(lang) { return loadBundledSidecar(`bigrams-${lang}.json`); }
   async function loadFrequency(lang) { return loadBundledSidecar(`freq-${lang}.json`); }
   async function loadPitfalls(lang) { return loadBundledSidecar(`pitfalls-${lang}.json`); }
@@ -164,6 +187,39 @@
   // ── Index building + swap ──
   async function buildAndApply(lang, raw, source) {
     if (!raw) return false;
+
+    // F38-1 / F38-3 defensive backfill (Plan 38-01.2): the Papertek API serves
+    // FR `generalbank` from vocabulary/lexicon/fr/ which is missing 3 aspect
+    // meta entries that live only in vocabulary/core/fr/generalbank.json.
+    // Bundled extension/data/fr.json has all entries (sourced from core/), so
+    // overlay the missing meta entries onto the API payload here. Narrow and
+    // surgical — does NOT broadly merge bundled data; only the specific
+    // known-stripped meta entries. Without this fix, frAspectAdverbs ends up
+    // empty in the browser and fr-aspect-hint never fires.
+    if (lang === 'fr' && raw && raw.generalbank) {
+      const required = [
+        'aspect_passe_compose_adverbs',
+        'aspect_imparfait_adverbs',
+        'aspect_choice_pedagogy',
+      ];
+      const missing = required.filter(k => !(k in raw.generalbank));
+      if (missing.length > 0) {
+        try {
+          const bundled = await loadFrBundledOnce();
+          if (bundled && bundled.generalbank) {
+            for (const k of missing) {
+              if (k in bundled.generalbank) {
+                raw.generalbank[k] = bundled.generalbank[k];
+              }
+            }
+            console.info('[lexi-vocab] FR aspect-meta backfill applied', { missing, source });
+          }
+        } catch (e) {
+          console.warn('[lexi-vocab] FR aspect-meta backfill failed (rule may be silent)', e);
+        }
+      }
+    }
+
     // Refresh enabled features (popup may have toggled mid-flight).
     const stored = await storageGet(['enabledGrammarFeatures']);
     if (stored.enabledGrammarFeatures && stored.enabledGrammarFeatures[lang]) {
