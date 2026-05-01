@@ -140,8 +140,9 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
   3. Every UAT-surfaced bug fix lands with a regression artifact in the same commit (or pre-fix commit): either a `check-fixtures` fixture or a `benchmark-texts/expectations.json` entry exercising the bug path. No bug-fix commit ships without one (school-year stakes — hard criterion, no exceptions).
   4. Any new index added to `buildIndexes` during a v3.2 fix gains a population canary in `check-vocab-seam-coverage` defending the silent-empty-index regression class (Phase 26-01 / 32-01 / 32-03 / F36-1 root cause).
   5. Phase 27 release-asset upload completed: zip rebuilt at the v3.2-head version and uploaded as a GitHub Release asset, closing Release Workflow steps 13-15 for the 2.7.0+ line.
-**Plans**: 5 anchor plans (decimal-insert fix plans appended post-walk as defects surface)
-  - [ ] 38-01-PLAN.md — UAT-EXT-01 F36-1 fr-aspect-hint browser confirm (warm-up)
+**Plans**: 6 plans (5 anchors + 1 decimal-insert fix; further decimal-inserts appended post-walk as defects surface)
+  - [x] 38-01-PLAN.md — UAT-EXT-01 F36-1 fr-aspect-hint browser confirm (warm-up; surfaced F38-1 blocker + F38-2 minor deferred)
+  - [ ] 38-01.1-PLAN.md — F38-1 fix: spell-check language routing for FR inputs + REGR fixture (BLOCKS 38-05)
   - [ ] 38-02-PLAN.md — UAT-EXT-04 Phase 30-01 popup view 9-step (canonical)
   - [ ] 38-03-PLAN.md — UAT-EXT-03 Phase 27 exam-mode 9-step (highest-stakes)
   - [ ] 38-04-PLAN.md — UAT-EXT-02 Phase 26 DE Lær mer 4+2 (final, closes F7)
