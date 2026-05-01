@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T18:10:49.933Z"
+last_updated: "2026-05-01T18:26:08.701Z"
 progress:
   total_phases: 15
   completed_phases: 10
   total_plans: 42
-  completed_plans: 32
+  completed_plans: 33
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-03/04/05 + 38-01.2-candidate pending)
-Plan: 01 complete; 02 complete (canonical popup view 9-step walk — UAT-EXT-04 clean pass, zero defects); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
-Status: Plan 38-02 closed cleanly. Phase 30-01 view-module dep-injection refactor confirmed working end-to-end in real Chrome 147 against v2.9.19. Step 6 Lær mer recorded as plan-scope N/A (content-script-only feature, properly tested in 38-04). Step 9 vocab-updates banner sub-test deferred (service-worker-driven, no manual trigger). Plan 38-03 (highest-stakes exam-mode walk — UAT-EXT-03) unblocked. F38-1 fix in v2.9.19 DRAFT release still pending walker re-walk closure.
-Last activity: 2026-05-01 — Plan 38-02 completed; commits 1f21ce0 (Task 1 walkthrough log instantiation) / a8b5845 (interim hard-pause STATE record) / c787ded (Task 2 walker outcomes recorded); UAT-EXT-04 walker sign-off Geir 2026-05-01T20:00:00+02:00
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-04/05 + 38-01.2-candidate pending)
+Plan: 01 complete; 02 complete; 03 complete (highest-stakes Phase 27 exam-mode 9-step walk — UAT-EXT-03 clean pass, zero defects); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
+Status: Plan 38-03 closed cleanly. Phase 27 exam-mode contract confirmed working end-to-end in real Chrome 147 against v2.9.19 (toggle, EKSAMENMODUS badge, amber widget border, suppression boundary holds — typos still surface, wordPrediction.dropdown + widget.pedagogyPanel suppressed, registry sampling matches). Step 8 architectural clarification: lockdown exam-mode is teacher-only (no student toggle); Phase 39 UAT-LOCK-02 scoped to assert student-toggle hidden in lockdown sidepanel host UI (lockdown-side concern, not synced leksihjelp surface). School-deployment trust validated. Plan 38-04 (final walk — DE Lær mer 4+2 — UAT-EXT-02) unblocked. F38-1 fix in v2.9.19 DRAFT release still pending walker re-walk closure.
+Last activity: 2026-05-01 — Plan 38-03 completed; commits 452c694 (Task 1 walkthrough log instantiation) / 2092d55 (interim hard-pause STATE record) / 78771b4 (Task 2 walker outcomes recorded); UAT-EXT-03 walker sign-off Geir 2026-05-01T20:30:00+02:00
 
 ## Performance Metrics
 
@@ -69,6 +69,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 38-02]: Canonical popup view 9-step walk = clean pass; Phase 30-01 view-module dep-injection refactor confirmed end-to-end in real Chrome 147; zero defects filed; Plan 38-03 unblocked
 - [Phase 38-02]: Step 6 (Lær mer) recorded as plan-scope N/A clarification — Lær mer is content-script (extension/content/spell-check.js), not popup-view; future popup-view walks should omit it
 - [Phase 38-02]: Step 9 vocab-updates banner sub-test deferred — service-worker-driven, no manual trigger from clean pre-flight; FOLLOW-UP CANDIDATE: add dev-only force-refresh affordance
+- [Phase 38-03]: Phase 27 exam-mode contract clean-pass in real Chrome 147 against v2.9.19; school-deployment trust validated
+- [Phase 38-03]: Step 8 architectural clarification: lockdown exam-mode is teacher-only (no student toggle); 'dual mode' framing was vanilla-extension projection; Phase 39 UAT-LOCK-02 scoped to assert student toggle hidden in lockdown sidepanel host UI
+- [Phase 38-03]: Inline-clarification-instead-of-finding pattern reinforced (3rd recurrence after 38-02 Step 6): use ✅ + downstream follow-up when a step's framing projects vanilla-extension UI assumptions onto a constrained downstream surface
 
 ### Pending Todos
 
@@ -95,8 +98,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Plan 38-03 Task 1 complete (UAT-EXT-03 highest-stakes exam-mode walkthrough log instantiated, commit 452c694). Task 2 hard-paused per `verification_kind: human-browser-walk` (HYG-03). Walker (Geir) performs the Phase 27 exam-mode 9-step walk against v2.9.19 in real Chrome, fills observed: fields (incl. idb_revision + reload_ts), files F38-N findings for any ❌ (default severity `major` — school-trust; `blocker` if toggle/suppression-boundary broken; `sync_status: needs-resync` + `[lockdown-resync-needed]` commit marker if `extension/exam-registry.js` touched). Step 8 (lockdown teacher-lock dual mode) has documented escape hatch to defer to Phase 39 UAT-LOCK-02 if lockdown staging unprovisioned. Agent resumes for closeout commit + SUMMARY.md after walker returns. Independent of Plan 38-01.1 walker re-walk (different surface — exam-mode is school-deployment-critical highest-stakes walk, third in locked sequence).
-Next: Orchestrator's call after walker completes UAT-EXT-03. Open work: (a) Plan 38-01.1 Task 4 walker re-walk against v2.9.19 to close F38-1; (b) Plan 38-03 Task 2 walker resume — THIS WALK; (c) Plan 38-04 DE Lær mer 4+2 walk (final, unblocked once 38-03 completes); (d) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (e) candidate 38-01.2 sidecar-pipeline regeneration; (f) any 38-03.N decimal-insert fix plans surfaced by this walk.
+Stopped at: Plan 38-03 closed cleanly. UAT-EXT-03 highest-stakes exam-mode walkthrough log committed (commits 452c694 / 2092d55 / 78771b4). Walker (Geir) signed off Steps 1-9 in real Chrome 147.0.7727.117 arm64 against v2.9.19; Steps 1-7, 9 ✅ pass; Step 8 ✅ with architectural clarification — in lockdown context exam-mode is purely teacher-controlled (no student toggle); the "dual mode" framing was a vanilla-extension projection. Phase 39 follow-up scoped: UAT-LOCK-02 must assert student-side exam-mode toggle is hidden/absent in lockdown sidepanel host UI (lockdown-side concern, not synced leksihjelp surface). Zero F38-N findings filed. School-deployment trust validated. SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-03-SUMMARY.md`. UAT-EXT-03 marked complete in REQUIREMENTS.md; ROADMAP plan-progress updated for Phase 38 (4/6 SUMMARY files now present).
+Next: Orchestrator's call. Open work: (a) Plan 38-01.1 Task 4 walker re-walk against v2.9.19 to close F38-1; (b) Plan 38-04 DE Lær mer 4+2 walk (final — UAT-EXT-02 — UNBLOCKED by 38-03 clean pass); (c) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (d) candidate 38-01.2 sidecar-pipeline regeneration.
 Follow-up candidates (post-Phase-38, surfaced by Plan 38-02): vocab-updates banner manual-trigger affordance for QA OR staging-env API drift procedure, so future walks can exercise the banner without a service-worker-only path.
 Next: Walker re-walks UAT-EXT-01 Steps 1-4 against v2.9.19 zip:
 1. Install v2.9.19 from GitHub draft release (or reload dev extension on the new commit at chrome://extensions).
