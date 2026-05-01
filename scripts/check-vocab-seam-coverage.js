@@ -477,6 +477,45 @@ function main() {
     fail(violations);
   }
 
+  // POPULATION PROBE — defends against wired-but-empty regressions.
+  // Each tuple is a canary: a known sample key that buildIndexes MUST
+  // populate from the corresponding bundled raw data. Add a tuple when
+  // shipping a new lang-specific index or fixing a population-path bug.
+  const POPULATION_CANARIES = [
+    // Phase 32-01 / Phase 36-03 (F36-1):
+    { lang: 'fr', dataPath: 'extension/data/fr.json', indexKey: 'frImparfaitToVerb', sampleKey: 'mangeait', shape: 'map' },
+    { lang: 'fr', dataPath: 'extension/data/fr.json', indexKey: 'frPasseComposeParticiples', sampleKey: 'mangé', shape: 'map' },
+    { lang: 'fr', dataPath: 'extension/data/fr.json', indexKey: 'frAuxPresensForms', sampleKey: 'ai', shape: 'set' },
+  ];
+
+  // Make the seam-core's host bindings (`self` / `globalThis`) safe to require
+  // from a Node CLI: the file unconditionally writes `self.__lexiVocabCore`
+  // at the end of its IIFE, so we have to satisfy the `self` reference.
+  if (typeof globalThis.self === 'undefined') globalThis.self = globalThis;
+  const seamCore = require(CORE_PATH);
+  let canariesChecked = 0;
+  for (const c of POPULATION_CANARIES) {
+    let raw;
+    try { raw = JSON.parse(fs.readFileSync(path.join(ROOT, c.dataPath), 'utf8')); }
+    catch (e) {
+      // Bundled data file missing (post-Phase-23 NB baseline, etc.) — skip
+      // canary, log informational.
+      process.stdout.write('[check-vocab-seam-coverage] SKIP canary ' + c.lang + '.' + c.indexKey + ' (data file missing: ' + c.dataPath + ')\n');
+      continue;
+    }
+    const built = seamCore.buildIndexes({ raw, lang: c.lang, isFeatureEnabled: () => true });
+    const idx = built[c.indexKey];
+    const has = idx && typeof idx.has === 'function' && idx.has(c.sampleKey);
+    if (!has) {
+      process.stderr.write('[check-vocab-seam-coverage] FAIL population canary: `' + c.lang + '.' + c.indexKey + '` is wired through the seam but does NOT contain `' + c.sampleKey + '` after buildIndexes.\n');
+      process.stderr.write('  This means the population path in vocab-seam-core.buildIndexes is broken or starved by feature-gating.\n');
+      process.stderr.write('  See Phase 36 F36-1 gap closure for the canonical fix shape.\n');
+      process.exit(1);
+    }
+    canariesChecked++;
+  }
+  process.stdout.write('[check-vocab-seam-coverage] population canaries — ' + canariesChecked + '/' + POPULATION_CANARIES.length + ' populated\n');
+
   process.stdout.write('[check-vocab-seam-coverage] PASS — ' + canonical.length + ' indexes, all surfaced through seam + consumer\n');
   process.exit(0);
 }

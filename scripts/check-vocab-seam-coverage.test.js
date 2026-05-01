@@ -179,12 +179,63 @@ function scenarioC() {
   return true;
 }
 
+// Scenario D — population canary fires on a starved index.
+//   Mutate vocab-seam-core.js to clear `frImparfaitToVerb` at the very end
+//   of buildIndexes (just before the final `return {`). The static-parse
+//   pass still passes (the index is wired), but the population canary in
+//   the gate must catch the now-empty Map and fail with a diagnostic that
+//   mentions both `population canary` and the canary key (`mangeait`).
+function injectStarveIntoCore(coreSrc) {
+  // Inject `frImparfaitToVerb.clear();` inside buildMoodIndexes, just before
+  // its `return { ... frImparfaitToVerb, frPasseComposeParticiples, ... }`
+  // statement. The static-parse pass still passes (the index is wired and
+  // returned), but the population canary in the gate must catch the empty
+  // Map and fail.
+  const anchor = 'return { esPresensToVerb';
+  const idx = coreSrc.indexOf(anchor);
+  if (idx < 0) {
+    throw new Error('self-test scenario D: could not find buildMoodIndexes return anchor');
+  }
+  // Find the second occurrence too — the function has TWO returns (one early
+  // for non-FR/ES path and one at the tail). We want the LATER one (tail);
+  // the LATER one has the populated maps. lastIndexOf to be safe.
+  const lastAnchorIdx = coreSrc.lastIndexOf(anchor);
+  const lineStart = coreSrc.lastIndexOf('\n', lastAnchorIdx) + 1;
+  const inject = '      frImparfaitToVerb.clear();\n';
+  return coreSrc.substring(0, lineStart) + inject + coreSrc.substring(lineStart);
+}
+
+function scenarioD() {
+  const coreBackup = readFile(CORE_PATH);
+  try {
+    const mutated = injectStarveIntoCore(coreBackup);
+    if (mutated === coreBackup) throw new Error('Scenario D: starve injection no-op');
+    writeFile(CORE_PATH, mutated);
+
+    const result = runGate();
+    const fired = (result.status === 1) &&
+      (result.stderr.includes('population canary') || result.stdout.includes('population canary')) &&
+      (result.stderr.includes('mangeait') || result.stdout.includes('mangeait'));
+    if (!fired) {
+      console.error('FAIL Scenario D: gate did not fire on starved population canary.');
+      console.error('  exit status:', result.status);
+      console.error('  stderr:', result.stderr.slice(0, 800));
+      console.error('  stdout:', result.stdout.slice(0, 800));
+      return false;
+    }
+    return true;
+  } finally {
+    writeFile(CORE_PATH, coreBackup);
+  }
+}
+
 function main() {
   const okA = scenarioA();
   const okB = scenarioB();
   const okC = scenarioC();
-  if (okA && okB && okC) {
-    console.log('check-vocab-seam-coverage:test: PASS — 3/3 scenarios green');
+  const okD = scenarioD();
+  if (okA && okB && okC && okD) {
+    console.log('check-vocab-seam-coverage:test: PASS — 4/4 scenarios green');
     process.exit(0);
   }
   process.exit(1);
