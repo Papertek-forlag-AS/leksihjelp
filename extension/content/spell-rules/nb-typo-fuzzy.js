@@ -147,6 +147,35 @@
       const { text, tokens, vocab, cursorPos, suppressed } = ctx;
       const validWords = vocab.validWords || new Set();
       const sisterValidWords = vocab.sisterValidWords || new Set(); // Phase 4 / SC-03
+
+      // F36-1: Cross-language verb-form guard. When the seam-exposed
+      // mood/aspect indexes recognise the token (in ANY language registered
+      // through the seam), suppress the typo emission. Defends against
+      // ctx.lang/vocab-state desync (vocab still on NB baseline while user
+      // typed an FR token) AND against future lang-routing regressions.
+      //
+      // The check is conservative: only the *seam-surfaced* verb-form indexes
+      // are consulted (frImparfaitToVerb, frPasseComposeParticiples,
+      // frAuxPresensForms — and any future esPreterito*/dePreterit* indexes
+      // gated by seam coverage). Empty Maps (the seam's safe default) make
+      // this a no-op for languages that haven't hydrated.
+      const FOREIGN_VERB_INDEX_KEYS = [
+        'frImparfaitToVerb', 'frPasseComposeParticiples',
+        // Add future cross-lang indexes here as they ship through the seam.
+      ];
+      const FOREIGN_VERB_SET_KEYS = ['frAuxPresensForms'];
+      function tokenIsForeignVerbForm(lc) {
+        for (const k of FOREIGN_VERB_INDEX_KEYS) {
+          const m = vocab && vocab[k];
+          if (m && typeof m.has === 'function' && m.has(lc)) return true;
+        }
+        for (const k of FOREIGN_VERB_SET_KEYS) {
+          const s = vocab && vocab[k];
+          if (s && typeof s.has === 'function' && s.has(lc)) return true;
+        }
+        return false;
+      }
+
       const out = [];
       for (let i = 0; i < tokens.length; i++) {
         const t = tokens[i];
@@ -161,6 +190,8 @@
         // gaps (kaldt in NN, klokka in NB — still genuine Norwegian).
         // Silencing fuzzy on (b) preserves Phase 4 SC-03 tolerance.
         if (sisterValidWords.has(t.word)) continue;
+        // F36-1: Cross-language verb-form guard — see definition above.
+        if (tokenIsForeignVerbForm(t.word)) continue;
         if (
           t.word.length >= 3 &&
           !validWords.has(t.word) &&
