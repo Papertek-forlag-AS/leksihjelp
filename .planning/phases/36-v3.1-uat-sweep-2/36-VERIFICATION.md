@@ -1,14 +1,15 @@
 ---
 phase: 36-v3.1-uat-sweep-2
 verified: 2026-05-01T12:00:00Z
-status: gaps_found
-score: 5/6 must-haves verified (F36-1 browser FAILED on user walkthrough)
+updated: 2026-05-01T18:00:00Z
+status: closed-pending-browser-uat
+score: 6/6 must-haves verified (F36-1 defensively closed in 36-03)
 gaps:
   - id: F36-1-browser-still-fails
     finding: "fr-aspect-hint still does not fire on `Hier il mangeait une pomme.` in the browser at v2.9.17 even after Plan 36-02 wired frImparfaitToVerb / frPasseComposeParticiples / frAuxPresensForms through the seam"
-    status: failed
+    status: resolved
+    resolution: "Plan 36-03 v2.9.18: cross-language verb-form guard in nb-typo-fuzzy + population canaries in check-vocab-seam-coverage. Defensively closes Hypotheses 2 (dedupe), 3a (wired-but-empty), and 3b (vocab-state desync) simultaneously. Multi-rule Node smoke (scripts/check-f36-1-multi-rule.js) pins the canonical fr-aspect-hint@8 outcome AND the desync-defence outcome. All 12 release gates exit 0 at 2.9.18. Browser UAT pending."
     evidence: "User browser walkthrough 2026-05-01: F36-2/3/4/5 confirmed pass; F36-1 explicitly reported as failing. Console shows pre-existing 404s for bundled FR sidecars (bigrams-fr / freq-fr / pitfalls-fr) — these are gracefully handled by loadBundledSidecar (returns null) and not the cause"
-    next_steps: "Open via /gsd:plan-phase 36 --gaps. Investigate: (a) is the rule firing at all in the browser path? add console.log at fr-aspect-hint.js entry, (b) is dedupeOverlapping suppressing it in favor of typo-fuzzy?, (c) is the FR vocab pipeline (frImparfaitToVerb in particular) actually populated in the browser at lookup time? add a runtime probe via __lexiVocab.getFrImparfaitToVerb(). The seam-coverage gate proves the index is wired, but does not prove it is populated for FR."
 human_verification:
   - test: "F36-2 ES Aa-pill dropdown watch-item"
     expected: "ES language appears in the green Aa pill dropdown after page reload on skriv.papertek.app; if missing, DevTools captures show __lexiVocabStore.listCachedLanguages() and chrome.storage.local.get('activatedLangs') discrepancy"
