@@ -343,6 +343,13 @@
       gustarPedagogy:      VOCAB.getGustarPedagogy(),
       frAspectAdverbs:     VOCAB.getFrAspectAdverbs(),
       frAspectPedagogy:    VOCAB.getFrAspectPedagogy(),
+      // Phase 36-02 (INFRA-10 gate): three FR mood-aspect indexes spread
+      // from buildMoodIndexes() and consumed by fr-aspect-hint. Without
+      // these the rule silently falls back to empty Maps/Set in the
+      // browser. Caught by check-vocab-seam-coverage.
+      frImparfaitToVerb:        VOCAB.getFrImparfaitToVerb(),
+      frPasseComposeParticiples: VOCAB.getFrPasseComposeParticiples(),
+      frAuxPresensForms:        VOCAB.getFrAuxPresensForms(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

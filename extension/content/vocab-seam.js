@@ -447,6 +447,16 @@
     getGustarPedagogy: () => (state && state.gustarPedagogy) ? state.gustarPedagogy : null,
     getFrAspectAdverbs: () => (state && state.frAspectAdverbs) ? state.frAspectAdverbs : null,
     getFrAspectPedagogy: () => (state && state.frAspectPedagogy) ? state.frAspectPedagogy : null,
+    // Phase 36-02 (INFRA-10 gate): the three FR mood-aspect indexes spread
+    // from buildMoodIndexes() — fr-aspect-hint consumes them via
+    // ctx.vocab.frImparfaitToVerb / .frPasseComposeParticiples / .frAuxPresensForms.
+    // Same bug-class as the Phase 35 v2.9.15 fix: present in buildIndexes
+    // return literal, never surfaced through the seam, so browser users got
+    // empty Maps/Set and fr-aspect-hint silently fell back to false negatives.
+    // Caught by the new check-vocab-seam-coverage release gate.
+    getFrImparfaitToVerb: () => (state && state.frImparfaitToVerb) ? state.frImparfaitToVerb : new Map(),
+    getFrPasseComposeParticiples: () => (state && state.frPasseComposeParticiples) ? state.frPasseComposeParticiples : new Map(),
+    getFrAuxPresensForms: () => (state && state.frAuxPresensForms) ? state.frAuxPresensForms : new Set(),
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;
       return enabledFeatures.has(featureId);
