@@ -163,6 +163,10 @@
             fix: fix,
             message: original + ' → ' + fix + ' (V2)',
             severity: 'warning',
+            // F36-5: V2 fix requires reordering tokens across the clause; the
+            // marker spans only the subject pronoun, so applying `fix` as an
+            // atomic substitution would corrupt the sentence. Mirror nb-v2.
+            noAutoFix: true,
           });
 
           break; // Only flag once per sentence

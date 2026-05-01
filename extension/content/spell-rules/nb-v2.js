@@ -231,6 +231,12 @@
             fix: fix,
             message: original + ' → ' + fix + ' (V2)',
             severity: 'warning',
+            // F36-5: V2 fix requires reordering tokens across the clause; the
+            // marker spans only the subject pronoun, so applying `fix` as an
+            // atomic substitution would corrupt the sentence. noAutoFix tells
+            // spell-check.js to suppress the Fiks button and the orig→fix
+            // arrow head; the explain() block carries the actionable rule.
+            noAutoFix: true,
           });
 
           // Only flag once per sentence

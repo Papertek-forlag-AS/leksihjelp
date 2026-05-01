@@ -130,6 +130,13 @@
           fix: tok.display + ' (flytt foran substantivet)',
           message: 'BAGS-adjektivet bør stå foran substantivet: "' + tok.display + '"',
           severity: 'hint',
+          // F36-5: BAGS fix is "move the adjective in front of the noun" — a
+          // structural reorder, not an atomic token substitution. The literal
+          // "fix" string above is instructional ("(flytt foran substantivet)")
+          // and would corrupt the sentence if pasted via Fiks. noAutoFix
+          // suppresses the Fiks button and orig→fix arrow head; the explain
+          // block carries the actionable rule.
+          noAutoFix: true,
         });
       }
 
