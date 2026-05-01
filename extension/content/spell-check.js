@@ -141,10 +141,10 @@
       if (!msg.enabled) { enabled = false; hideOverlay(); }
     } else if (msg.type === 'SPELL_CHECK_TOGGLED') {
       enabled = !!msg.enabled;
-      if (!enabled) hideOverlay();
+      if (!enabled) { hideOverlay(); hideButton(); }
     } else if (msg.type === 'LEXI_PAUSED') {
       paused = !!msg.paused;
-      if (paused) hideOverlay();
+      if (paused) { hideOverlay(); hideButton(); }
     }
   }
 
@@ -170,8 +170,22 @@
   // Lexical, ProseMirror) fire focus/input on the root div — but third-party
   // code sometimes bubbles events from deeper nodes, and reading text from a
   // child would miss the rest of the document.
+  // Skip our own UI: sidepanel, popup, lookup card, floating widget.
+  // Without this, the green Aa pill renders inside the dictionary search
+  // input (Plan 34 Bug B) and the spell-check overlay attaches to the
+  // popup's settings inputs.
+  function isInsideLexiUI(target) {
+    if (!target || !target.closest) return false;
+    return !!target.closest(
+      '#leksihjelp-sidepanel-root, #lh-popup-root, ' +
+      '.lh-floating-widget, .lh-lookup-card, .lh-spell-popover, .lh-spell-check-btn, ' +
+      '.lh-lang-flyout, .lh-prediction-dropdown'
+    );
+  }
+
   function resolveEditable(target) {
     if (!target || target.nodeType !== 1) return null;
+    if (isInsideLexiUI(target)) return null;
     if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
       return VOCAB.isTextInput(target) ? target : null;
     }
@@ -1151,6 +1165,7 @@
 
   function updateButtonVisibility() {
     if (!activeEl) return;
+    if (!enabled || paused) { hideButton(); return; }
     // Downstream consumers (lockdown webapp, future skriveokt-zero) set
     // host.__lexiSpellBtnAlwaysVisible = true so the green Aa appears as
     // soon as the editor is focused — useful when the editor is the page's
