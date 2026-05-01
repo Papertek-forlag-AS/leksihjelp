@@ -1065,6 +1065,14 @@ function initSearch() {
     initGrammarSettings,
     audioEnabled: true,
     BACKEND_URL,
+    // Phase 35.1: dictionary lang-pills are dictionary-scoped only.
+    // Clicking ES to look up a Spanish word should NOT switch the
+    // student's writing/spell-check language. Mirrors lockdown's
+    // sidepanel host (writing-test/student/leksihjelp-sidepanel-host.js)
+    // — same intent, same opt-out. The Settings panel's foreign-language
+    // picker remains the SSO write for "what am I learning" (that one
+    // legitimately drives spell-check).
+    broadcastLanguageChange: false,
     onLanguageChanged: () => {
       // Lang switcher mutated viewState.currentLang — keep settings list in
       // sync (active highlight + audio-cache pill).
