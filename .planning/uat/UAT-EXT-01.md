@@ -79,3 +79,18 @@ Use one bullet per defect; file a finding for every ❌:
 - [ ] All steps pass (no ❌ above)
 - [x] Findings filed: `F38-1, F38-2`
 - [x] Walker signs off: `Geir 2026-05-01T17:00:00+02:00`
+
+## Re-walk after F38-1 fix (v2.9.19)
+
+Walker re-walked Steps 1–4 against v2.9.19 (sideloaded from `extension/` directory on Mac, ~17:55 2026-05-01).
+
+1. **Step 1 (dot under `j'ai vu`):** ❌ — no dot anywhere on `Pendant que je marchais, j'ai vu un chien.`
+2. **Step 2 (hover tooltip):** ❌ — N/A, blocked by Step 1
+3. **Step 3 (popover with Lær mer):** ❌ — N/A, blocked by Step 1
+4. **Step 4 (pedagogy panel):** ❌ — N/A, blocked by Step 1
+
+**Critical negative check (NB false-fire):** ✅ — NB spell-check no longer flags `j'ai` ("Jai står ikke i ordboken, kanskje du mente j'aime?" popover is GONE). Branch C fix (`nb-typo-fuzzy` elision strip) verified working in real Chrome.
+
+**Outcome:** Partial closure. `nb-typo-fuzzy` fix is real and stays in v2.9.19. `fr-aspect-hint` silence root cause was misdiagnosed — F38-1 reopened. v2.9.19 GitHub Release stays as Draft (do not promote to Latest until fr-aspect-hint actually fires).
+
+Walker sign-off (re-walk): `Geir 2026-05-01T17:55:00+02:00`
