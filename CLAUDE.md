@@ -445,6 +445,28 @@ When EXAM-09 lands:
 - **Content scripts** (`floating-widget.js`, `word-prediction.js`, `spell-check.js`, etc.) run downstream via a Chrome-API shim. In the webapp the shim is `lockdown/public/js/leksihjelp-loader.js`; in zero the shim lives alongside the synced files. Avoid hard dependencies on extension-only APIs (e.g. `chrome.tabs`) — keep `chrome.runtime`/`chrome.storage` usage inside what the shims provide (`onMessage`, `sendMessage`, `storage.local.get/set`, `runtime.getURL`).
 - **`extension/exam-registry.js`** is also a synced surface (webapp today; zero when EXAM-09 lands). Adding a new entry — i.e. a new non-rule UI surface getting an exam marker — requires re-running each downstream consumer's sync so the registry stays in step.
 - **Bumping `package.json` version** signals a downstream sync is needed. After a change that affects shared files, bump the version (matches the rule for `manifest.json` in the Release Workflow above) so consumers can pin and audit it.
+- **Commit-message marker `[lockdown-resync-needed]`** — when a commit modifies any synced surface, include `[lockdown-resync-needed]` somewhere in the commit message (title, body, or trailer all acceptable). The synced-surface set:
+  - `extension/content/`
+  - `extension/popup/views/`
+  - `extension/exam-registry.js`
+  - `extension/styles/content.css`
+  - `extension/data/`
+  - `extension/i18n/`
+
+  **Why:** Downstream consumers (lockdown webapp's `node scripts/sync-leksihjelp.js`, skriveokt-zero's analogue) scope their re-sync windows by scanning git log for the marker since their last consumed version. Without it, downstream maintainers must manually diff every commit since their last sync — error-prone, gets skipped under time pressure (root cause of the Phase 30-02 4-orphan-file class).
+
+  **Enforcement:** `npm run check-synced-surface-version` (HYG-05 release gate) prints the `[lockdown-resync-needed]` marker as a copy-paste hint when it fires on an un-bumped synced-surface diff. The gate enforces the version bump, not the marker itself, but it surfaces the marker recommendation at the exact moment someone is about to forget it.
+
+  **Retroactive scope:** Pre-Phase-37 commits don't carry the marker (convention didn't exist). The retroactive catch-up ledger lives at `.planning/deferred/lockdown-resync-pending.md` — doc-based, no git history rewrite.
+
+  **Example:**
+  ```
+  fix(content): correct spell-check dot color for nb-sarskriving rule
+
+  [lockdown-resync-needed]
+
+  Closes F38-3.
+  ```
 - **Downstream-only quick fixes** to synced trees over there are fine for testing, but the canonical change still belongs *here*. The downstream CLAUDE.md documents the agreement: ports fixes upstream before merging.
 - **Popup view modules** at `extension/popup/views/` are a synced surface (Phase 30). They are scaffolded with explicit dep injection: each `mountXView(container, deps)` accepts an explicit deps object (vocab, storage, runtime, t, audioEnabled, …). Changing a view's dep contract is a breaking change for the lockdown sidepanel host (`/Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js`) — keep contracts additive, default new fields, and re-run the lockdown sidepanel's manual UAT (Plan 30-03 / future) when shipping. The release-gate `npm run check-popup-deps` enforces that view modules don't use implicit globals (`chrome.*`, `window.__lexi*`, `document.getElementById` outside container scope).
 - **Audio is suppressed in lockdown by passing `audioEnabled: false`** to `mountDictionaryView`. The `extension/audio/` tree is also explicitly NOT in `lockdown/scripts/sync-leksihjelp.js`. Both safeguards must remain — adding audio to lockdown without explicit user sign-off violates the "school deployment, no MB-level downloads" constraint.
