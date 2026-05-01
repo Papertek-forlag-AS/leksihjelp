@@ -250,6 +250,7 @@
         e.preventDefault();
         e.stopPropagation();
         panel.hidden = true;
+        pedagogyPanelExpanded = false; // Phase 35 (F6): explicit user collapse
         if (btn) {
           btn.setAttribute('aria-expanded', 'false');
           btn.textContent = t('laer_mer_button');
@@ -404,6 +405,14 @@
   const dismissed = new Set();
   let pendingAdvanceIdx = -1;
   let posRefreshRaf = null;
+  // Phase 35 (F6): Tab navigation between markers calls showPopover() which
+  // rebuilds the popover from scratch — that previously reset the Lær mer
+  // panel to collapsed even though the user had explicitly opened it.
+  // We persist the expanded/collapsed choice across Tab navigation by
+  // remembering it module-side. Reset only on explicit dismissal paths
+  // (Esc on panel, panel toggle close, hidePopover from decline / applyFix /
+  // click-outside / blur).
+  let pedagogyPanelExpanded = false;
   // Phase 5 / UX-02: popup Settings toggle subscriber. Plan 04 writes the key;
   // this module hydrates on init and re-reads via chrome.storage.onChanged so
   // a live toggle flips the active popover layout without a re-open.
@@ -518,7 +527,14 @@
   }
 
   function showPopover(idx, finding) {
+    // Phase 35 (F6): preserve pedagogy panel open/close state across the
+    // hidePopover() rebuild. hidePopover() resets the flag (so non-rebuild
+    // dismissal paths — click-outside, Esc-on-popover, decline, applyFix —
+    // start the next popover collapsed), but Tab navigation between markers
+    // is a rebuild-not-a-dismissal so we restore the pre-hide value here.
+    const _wasExpanded = pedagogyPanelExpanded;
     hidePopover();
+    pedagogyPanelExpanded = _wasExpanded;
 
     // Phase 27: dual-marker gate. If exam mode is on AND this finding's rule
     // has rule.explain.exam.safe = false (e.g. de-prep-case Lær mer pedagogy
@@ -650,6 +666,16 @@
         const uiLang = (self.__lexiI18n && typeof self.__lexiI18n.getUiLanguage === 'function')
           ? self.__lexiI18n.getUiLanguage() : 'nb';
         let built = false;
+        // Phase 35 (F6): pre-expand panel if the user opened it on a prior
+        // marker and is now Tab-navigating to a new marker. Without this, the
+        // rebuilt popover always starts collapsed.
+        if (pedagogyPanelExpanded) {
+          panel.innerHTML = renderPedagogyPanel(finding.pedagogy, uiLang);
+          built = true;
+          panel.hidden = false;
+          laerMerBtn.setAttribute('aria-expanded', 'true');
+          laerMerBtn.textContent = t('laer_mer_close');
+        }
         laerMerBtn.addEventListener('click', () => {
           if (panel.hidden) {
             if (!built) {
@@ -659,10 +685,12 @@
             panel.hidden = false;
             laerMerBtn.setAttribute('aria-expanded', 'true');
             laerMerBtn.textContent = t('laer_mer_close');
+            pedagogyPanelExpanded = true; // Phase 35 (F6)
           } else {
             panel.hidden = true;
             laerMerBtn.setAttribute('aria-expanded', 'false');
             laerMerBtn.textContent = t('laer_mer_button');
+            pedagogyPanelExpanded = false; // Phase 35 (F6)
           }
           // Re-position popover since height changed.
           if (markers[activePopoverIdx]) positionPopover(markers[activePopoverIdx].rect);
@@ -934,6 +962,10 @@
     if (popover) popover.remove();
     popover = null;
     activePopoverIdx = -1;
+    // Phase 35 (F6): default reset so the next OPEN-FRESH starts collapsed.
+    // showPopover() saves/restores this around its internal hidePopover() call
+    // so Tab navigation between markers preserves the user's choice.
+    pedagogyPanelExpanded = false;
   }
 
   // ── Manual spell-check button + toast (Phase 18, Plan 02) ──
