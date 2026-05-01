@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 ## Current Position
 
 Phase: 37 (Hygiene, Templates & Pre-flight) — In Progress
-Plan: 03 complete (3/4 plans done — 01, 03, 04 shipped; 02 remaining)
-Status: HYG-07 pre-flight script live; HYG-03 verification_kind convention documented; HYG-06 [lockdown-resync-needed] convention adopted
-Last activity: 2026-05-01 — Plan 37-03 complete (check-vocab-deployment.js + npm script)
+Plan: 01 complete (3/4 plans done — 01, 03, 04 shipped; 02 remaining)
+Status: HYG-01/02/03 satisfied (UAT walkthrough/finding templates + auto-mode pause convention); HYG-07 pre-flight script live; HYG-06 [lockdown-resync-needed] convention adopted
+Last activity: 2026-05-01 — Plan 37-01 complete (UAT templates HYG-01/02 + verification_kind: human-browser-walk auto-mode pause HYG-03)
 
 ## Performance Metrics
 
@@ -52,6 +52,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - REGR (FIX-02) is HARD criterion, no exceptions — school-year stakes
 - [Phase 37]: 37-04: [lockdown-resync-needed] commit-message convention adopted; doc-based ledger pattern at .planning/deferred/
 - [Phase 37-hygiene-templates-pre-flight]: HYG-07 pre-flight: re-implemented upstream computeRevision inline (zero-dep CommonJS) and compare hex8 suffix only (date prefix shifts on UTC-day rollover); per-language drift report with actionable fix lines; explicitly NOT a release gate
+- [Phase 37-01]: UAT templates' HTML usage comment placed AFTER frontmatter (gsd-tools.cjs `frontmatter get` regex requires file to start with `---`); literal `TBD` placeholders in frontmatter values keep parsed output clean
+- [Phase 37-01]: `verification_kind: human-browser-walk` documented as top-level CLAUDE.md `##` section (placed before `## graphify`) — cross-cutting GSD convention, sits with Release Workflow / Downstream consumers as canonical agent instruction
 
 ### Pending Todos
 
