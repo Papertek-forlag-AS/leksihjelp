@@ -1,5 +1,49 @@
 # Milestones
 
+## v3.1 Polish & Intelligence (Shipped: 2026-05-01)
+
+**Phases completed:** 13 phases (24-36 + Phase 28.1 deferred by design), 32 plans, 23/23 in-scope requirements satisfied. EXAM-09 deferred (skriveokt-zero not yet shipped).
+
+**Timeline:** 2026-04-27 → 2026-05-01 (5 days)
+**Released versions:** 2.5.0 → 2.9.18 (18 published versions)
+**Release gates:** 12 (added INFRA-08 benchmark-coverage, INFRA-09 governance-data, INFRA-10 vocab-seam-coverage)
+**Bundle:** 12.68 MiB / 20 MiB cap; NB baseline 130 KB / 200 KB cap
+
+**Delivered (one sentence):** Compound-word dictionary intelligence, an expandable "Lær mer" pedagogy panel covering DE preps + FR aspect + ES por/para + ES gustar-class (10 verbs), per-feature exam-mode markers with student toggle + lockdown teacher-lock + cross-app sync, shared popup view modules unifying extension popup with the lockdown sidepanel host, and an INFRA-10 release gate that defends the entire vocab seam from silent-empty regressions.
+
+**Key accomplishments:**
+
+1. **Compound Word Intelligence** (Phase 24) — `decomposeCompound`-powered popup search suggests compounds from partial input (e.g., "chefsstu" → "Chefsstuhl"); compound card displays pedagogical note explaining last-component-determines-gender with clickable component navigation + "Tilbake til [compound]" back-link; qualified translation guess assembled from component translations. Built atop the v3.0 IndexedDB vocab cache.
+
+2. **"Lær mer" Pedagogy Panel** (Phases 26 + 32) — Spell-check popover gains an expandable teaching panel rendering case badges, summary, paragraph explanation, correct/incorrect example pairs, Wechselpräposition motion-vs-location pairs, and `colloquial_note` asides. Trilingual (nb/nn/en) data sourced from papertek-vocabulary `pedagogy` field. Phase 32 extended pattern to FR (`fr-aspect-hint` — first FR pedagogy block, passé-composé vs imparfait soft-hint), ES por/para (data-led migration), and ES gustar-class (1 → 10 verbs: encantar/interesar/doler/etc, fixture extended to ≥30 cases at ≥80% recall). New `check-explain-contract` pedagogy-shape branch + paired self-test; new `check-pedagogy-shape` gate.
+
+3. **Exam Mode** (Phases 27 + 28 + 29) — Per-feature `exam: { safe, reason, category }` marker on every spell-check rule + new `extension/exam-registry.js` for non-rule UI surfaces (dictionary popup, conjugation tables, TTS, word prediction, pedagogy panels, side panel). Student-facing toggle in popup with EKSAMENMODUS badge + amber widget border. Lockdown teacher-lock via new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` profile — `firestore.rules` enum + Cloud Functions enum + locales (nb/nn/en) + `applyExamModeLock` writer + classroom illustration. Five resource profiles consistent across firestore + Cloud Functions + UI. New `check-exam-marker` release gate. Default-conservative classification with `exam.safe=false` on lookup-shaped grammar rules pending browser-baseline audit (Phase 33 flipped where appropriate).
+
+4. **Shared Popup View Modules** (Phase 30) — Extracted `extension/popup/popup.js` user-facing surfaces into `extension/popup/views/{dictionary,settings,pause,report}-view.js` with explicit dependency injection (no `chrome.*` / `window.__lexi*` / unscoped `getElementById` — enforced by new `check-popup-deps` gate + paired self-test). Lockdown's stub `<input>+<div>` sidepanel replaced with `leksihjelp-sidepanel-host.js` that mounts the synced view modules with limited deps (`audioEnabled: false`, no auth/payment, no exam-toggle). Three independent safeguards keep audio out of lockdown.
+
+5. **Phase 30-04 dict-state-builder + lockdown sync hygiene** (Phase 33) — Lifted `flattenBanks` / `BANK_TO_POS` / `genusToGender` from sidepanel-host stubs into a shared module so lockdown gets full inflection index + NB enrichment + working language switcher + working direction toggle (was hardcoded to ES) + visible ordbok tab inside EKSAMENMODUS envelope. Re-ran lockdown sync to mirror Phase 26/27 surfaces. Browser-baseline `exam.safe` audit flipped lookup-shaped rules where appropriate.
+
+6. **INFRA-10 vocab-seam-coverage release gate** (Phase 36) — Static-parses `vocab-seam-core.js`'s `buildIndexes` return literal (incl. `...moodIndexes` recursive resolution), enumerates every key, asserts each non-exempt key has matching `getX()` getter on `vocab-seam.js` AND matching entry in `spell-check.js`'s `runCheck()` `vocab` consumer composition. Paired `:test` self-test. Caught three additional seam-bug instances (`frImparfaitToVerb`, `frPasseComposeParticiples`, `frAuxPresensForms`) on first run that the v2.9.15 ad-hoc fix had missed. Plus population canaries asserting indexes are non-empty under the default preset, defending against the seam-bug class that took down Phase 35 verification.
+
+7. **UAT debt closure cycle** (Phases 34 + 35 + 36) — Three-phase consolidated walkthrough sequence: Phase 34 surfaced 7 findings (F1-F7); Phase 35 closed F1/F2/F3/F5/F6 (FR aspect-hint trigger, ES gustar/doler data, DE Wechselpräposition, Tab-nav focus-restore race) plus deferred F7 to a vanilla extension UAT session; Phase 36 closed F36-1..F36-5 (FR partial spell-check priority/dedupe, ES Aa-pill watch-item, DE kein/keine paradigm, `noAutoFix` opt-in on structural rules) and added the INFRA-10 process gate that defends against the regression class going forward.
+
+8. **Pre-archive hygiene** (Quick Task 1) — Flipped EXAM-01..EXAM-07 in REQUIREMENTS.md from "Planned" → "Complete" to match verification reality. Deleted orphan `.planning/phases/31-fr-rule-suite/` directory (only CONTEXT.md, never made it into roadmap; FR work shipped under Phase 32). Backfilled retroactive `25-VERIFICATION.md` documenting out-of-band commits 41aa4e6 / 72c9c29 / f655552 / 2438f49 for the Phase 25 success criteria that shipped in earlier branch work without formal phase execution.
+
+**Known Tech Debt (deferred to v3.2 by design):**
+
+- Browser UAT backlog (6 walkthroughs): F36-1 fr-aspect-hint browser confirmation; F7 Phase 26 NN + EN Lær mer locale walks; Phase 30 lockdown sidepanel 8-step staging UAT; Phase 26 6 DE Lær mer browser walks (partial); Phase 27 9-step exam-mode walk; Phase 30-01 9-step extension popup view walk.
+- Lockdown-stb production Firebase deploy outstanding (firestore rules + Cloud Functions for EXAM-10; staging-lockdown deployed 2026-04-28).
+- Lockdown papertek.app production hosting deploy outstanding (Phase 30 sidepanel host; staging-lockdown deployed).
+- Phase 28.1 (skriveokt-zero exam-mode sync) un-defer when skriveokt-zero ships to consumers.
+- Pre-existing FR sidecar 404 console noise (bigrams-fr / freq-fr / pitfalls-fr) — gracefully handled, visible in DevTools only.
+
+**See:**
+- `.planning/milestones/v3.1-ROADMAP.md` — full phase-by-phase roadmap
+- `.planning/milestones/v3.1-REQUIREMENTS.md` — final traceability (23/23)
+- `.planning/milestones/v3.1-MILESTONE-AUDIT.md` — audit report (tech_debt, all in-scope requirements satisfied)
+
+---
+
 ## v3.0 Data-Source Migration (Shipped: 2026-04-27)
 
 **Phases completed:** 1 phase (23), 8 plans, 16/16 requirements satisfied.

@@ -77,40 +77,33 @@ they're working on.
 - ✓ **Update detection + manual refresh** — v3.0, startup revision check; "Nye ordlister tilgjengelig" notice; atomic cache replacement
 - ✓ **Silent v2→v3 migration** — v3.0, onInstalled trigger; bundled vocab removed (20 files); only NB baseline ships in zip
 - ✓ **Release gates: SC-06 carve-out + baseline cap** — v3.0, sanctioned bootstrap fetch exception; 200 KB baseline cap with paired self-test
+- ✓ **Compound Word Intelligence in popup** — v3.1, popup search suggests compounds from partial input (e.g., "chefsstu" → "Chefsstuhl"); compound card shows pedagogical "last component decides gender" note with clickable component navigation + "Tilbake til [compound]" back-link; qualified translation guess from component translations (COMP-01..04)
+- ✓ **UX Polish & Tech Debt** — v3.1, NB/EN/NN language buttons, Chrome Side Panel for "Fest" (macOS fix), spell-check Tab marker navigation, ~20-char spell-check threshold, 3-char word-prediction floor, version alignment, fixture triage to exit-0, schema-mismatch banner, BUNDLED_LANGS cleanup (POPUP-01/02, SPELL-01..03, DEBT-01..05)
+- ✓ **"Lær mer" pedagogy panel** — v3.1, expandable teaching panel in spell-check popover for DE preps + Wechselpräpositionen (motion-vs-location pairs) with case badges, summary, paragraph explanation, correct/incorrect example pairs, colloquial-note asides; trilingual (nb/nn/en) data sourced from papertek-vocabulary (PED-01..06)
+- ✓ **FR/ES pedagogy via data-led pattern** — v3.1, `fr-aspect-hint` rule (first FR pedagogy block, passé-composé vs imparfait soft-hint), ES por/para data-migration, ES gustar-class extended 1 → 10 verbs (encantar/interesar/doler/etc); fixture extended ≥30 cases at ≥80% recall; `check-explain-contract` pedagogy-shape branch + paired self-test (PHASE-32-A/B/C)
+- ✓ **Exam Mode** — v3.1, per-feature `exam: { safe, reason, category }` marker on every spell-rule + `extension/exam-registry.js` for non-rule UI surfaces; student popup toggle + EKSAMENMODUS badge + amber widget border + lockdown teacher-lock via new `RESOURCE_PROFILES.LEKSIHJELP_EXAM` profile (firestore + Cloud Functions enums + locales + classroom illustration); `check-exam-marker` release gate (EXAM-01..08, EXAM-10)
+- ✓ **Shared popup view modules** — v3.1, extracted `extension/popup/popup.js` user-facing surfaces into `popup/views/{dictionary,settings,pause,report}-view.js` with explicit dep injection; lockdown stub sidepanel replaced with `leksihjelp-sidepanel-host.js` mounting synced view modules with limited deps (`audioEnabled: false`, no auth/payment, no exam-toggle); `check-popup-deps` release gate enforces no implicit globals
+- ✓ **dict-state-builder + lockdown sync hygiene** — v3.1 (Phase 33), shared `dict-state-builder` module gives lockdown sidepanel full vocab state on first paint (full inflection index, NB enrichment, working language switcher, working direction toggle); ordbok tab visible inside EKSAMENMODUS envelope; lockdown sync re-run mirrors Phase 26/27 surfaces; `exam.safe` browser-baseline audit flipped lookup-shaped rules where appropriate
+- ✓ **INFRA-10 vocab-seam-coverage release gate** — v3.1 (Phase 36), static-parses `buildIndexes` return literal (incl. recursive `...moodIndexes` resolution); asserts every non-exempt key has matching `getX()` getter on `vocab-seam.js` AND matching entry in `spell-check.js` `vocab` consumer composition; population canaries assert non-empty under default preset; paired `:test` self-test. Caught three additional seam-bug instances on first run (`frImparfaitToVerb`, `frPasseComposeParticiples`, `frAuxPresensForms`) — long-term defense against the regression class that took down Phase 35 verification
 
 ### Active
 
-## Current Milestone: v3.1 Polish & Intelligence
-
-**Goal:** Compound word intelligence in the popup (prediction, pedagogical notes, translation guess), accumulated UX polish (language buttons, spell-check navigation, side panel, word prediction min chars), and tech-debt cleanup (version alignment, fixture triage, VERIF-01).
-
-**Target capabilities:**
-- Compound word prediction in popup search (partial input → compound suggestion)
-- Compound popup pedagogy ("last word decides gender") + back-navigation
-- Qualified compound translation guess ("kvalifisert gjetning av det sammensatte ordets betydning")
-- Fix NB/EN/NN language button switching in popup
-- Chrome Side Panel API to replace "Fest" popup (macOS fix)
-- Spell-check marker navigation (Tab cycling through markers)
-- Spell-check minimum text threshold (~20 chars)
-- Word prediction minimum 3 chars before showing suggestions
-- Version alignment (package.json / manifest.json / index.html)
-- check-fixtures triage (5 pre-existing failing suites)
-- Browser visual verification (VERIF-01 — carried across 4 milestones)
+(No active milestone — v3.1 shipped 2026-05-01. Run `/gsd:new-milestone` to define v3.2.)
 
 ### Deferred
 
-**Carry-over tech-debt:**
+**Carry-over tech-debt (post-v3.1):**
 
+- v3.1 browser UAT backlog (6 walkthroughs deferred to v3.2): F36-1 fr-aspect-hint browser confirmation; F7 Phase 26 NN/EN locale Lær mer walks; Phase 30 lockdown sidepanel 8-step staging UAT; Phase 26 6 DE Lær mer browser walks; Phase 27 9-step exam-mode walk; Phase 30-01 9-step extension popup view walk
+- Lockdown-stb production Firebase deploy (firestore.rules + Cloud Functions for EXAM-10) — staging-lockdown deployed 2026-04-28; user-gated production deploy outstanding
+- Lockdown papertek.app production hosting deploy (Phase 30 sidepanel host) — staging-lockdown deployed; user-gated production deploy outstanding
+- Phase 28.1 (skriveokt-zero exam-mode sync, EXAM-09) — un-defer when skriveokt-zero ships to consumers
 - NN phrase-infinitive triage (~214 `papertek-vocabulary` verbbank entries)
 - Leksi-in-skriv integration: embed spell-check/prediction as native feature inside `skriv.papertek.app` (memory `project_lexi_in_skriv_integration.md`)
 - `papertek-vocabulary` data gaps: `markeres` s-passiv; `setningen` NB bestemt form; NN vocab gaps (ven, skin, heile, sykle, sy)
 - Future promotion: move `CROSS_DIALECT_MAP` from `nb-dialect-mix.js` into `papertek-vocabulary` for cross-app reuse
-- Vocab-seam parity gate: `check-vocab-seam-parity` to assert every `buildIndexes()` key has a matching getter (recurring v1.0/v2.0 gap)
-- Browser visual verification (VERIF-01) — deferred from v2.0 → v2.1 → v2.2 → v3.0; accumulated 12 deferred tests
-- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 vs index.html=2.4.1
+- Pre-existing FR sidecar 404 console noise (bigrams-fr / freq-fr / pitfalls-fr) — gracefully handled, DevTools-only
 - SCHEMA-01 developer-view UX: `lexi:schema-mismatch` popup subscriber missing (dormant while schema_version=1)
-- Stale `BUNDLED_LANGS` list in `vocab-seam.js` includes deleted nn/en files (cosmetic)
-- check-fixtures exits 1 from 5 pre-existing suites (de/doc-drift, nb/homophone, nb/saerskriving, nn/typo, de/verb-final)
 
 **Future candidates:**
 
@@ -160,14 +153,17 @@ they're working on.
 - v3.0 shipped in 1 day (2026-04-27, 28 commits) across 1 consolidated phase.
 - 10 release gates enforced on every release (fixtures, explain-contract + self-test, rule-CSS wiring + self-test, feature-independent indexes, network silence, bundle size, benchmark-coverage, governance-data, stateful-rule-invalidation, baseline-bundle-size).
 
-**Current state (post-v3.0):**
-- 16/16 v3.0 requirements shipped; 12/12 v2.2; 11/12 v2.1; 42/42 v2.0; 19/19 v1.0.
-- Vocabulary data now fetched from Papertek API on install, cached in IndexedDB. Only NB baseline (~130 KB) ships bundled.
-- 59 spell-check rule files in plugin architecture; core engine ~3k LOC; 21,091 LOC total JS.
-- 53+ fixture suites + 12 å/og fixtures. 64 unit tests, all passing.
-- 10 release gates. Bundle 7.61 MiB (62% headroom, down from 12.59 MiB).
-- Dictionary intelligence: false-friend warnings + sense-grouped translations in popup + floating-widget.
-- Browser visual verification still pending (VERIF-01 carried from v2.0 → v2.1 → v2.2 → v3.0 → next milestone).
+**Current state (post-v3.1):**
+- 23/23 v3.1 in-scope requirements satisfied (EXAM-09 deferred by design); 16/16 v3.0; 12/12 v2.2; 11/12 v2.1; 42/42 v2.0; 19/19 v1.0.
+- Released versions: 2.5.0 → 2.9.18 (18 published versions over v3.1 cycle).
+- 12 release gates (added INFRA-08 benchmark-coverage, INFRA-09 governance-data, INFRA-10 vocab-seam-coverage; check-exam-marker for Phase 27; check-popup-deps for Phase 30; check-pedagogy-shape for Phase 26).
+- Bundle 12.68 MiB / 20 MiB cap; NB baseline 130 KB / 200 KB cap.
+- 57 fixture suites all P=R=F1=1.000.
+- Compound-word intelligence in popup (prediction, pedagogy, back-nav, translation guess).
+- "Lær mer" pedagogy panel covering DE preps + Wechselpräpositionen + FR aspect + ES por/para + ES gustar-class (10 verbs).
+- Exam Mode: per-feature `exam: { safe, reason, category }` markers, student popup toggle with EKSAMENMODUS badge + amber widget border, lockdown teacher-lock via `RESOURCE_PROFILES.LEKSIHJELP_EXAM` (staging-lockdown deployed; production user-gated).
+- Shared popup view modules (`popup/views/`) consumed by extension popup AND lockdown sidepanel host with limited deps (`audioEnabled: false`, no auth).
+- Browser UAT backlog deferred to v3.2 (6 walkthroughs, see Deferred section).
 
 ## Constraints
 
@@ -217,6 +213,14 @@ they're working on.
 | **IDB rename lexi-vocab v3** (v3.0) | Clean break from v2 `leksihjelp-vocab` v2 store; old DB sits inert | ✓ Good — avoids dual-shape support; migration downloads fresh data |
 | **Consolidated v3.0 into single phase** (v3.0) | 1M context window allows one 8-plan phase instead of 3-4 smaller phases | ✓ Good — shipped in 1 day; dependency chains within the phase were natural wave ordering |
 | **SC-06 sanctioned bootstrap exception** (v3.0) | Service-worker fetch is the only network path; spell-check + word-prediction stay offline | ✓ Good — belt-and-braces: header doc + self-test plants fetch in bootstrap and asserts gate stays green |
+| **Per-feature exam markers, default-conservative** (v3.1 Phase 27) | Exam regulations require browser-native-spellcheck parity; classify lookup-shaped grammar rules `safe=false` until browser-baseline audit confirms parity | ✓ Good — Phase 33 followed up with the audit and flipped where appropriate; `check-exam-marker` gate prevents new features shipping unclassified |
+| **`exam-registry.js` for non-rule UI surfaces** (v3.1 Phase 27) | Rules use `rule.exam`; non-rule surfaces (popup, conjugation tables, TTS) need their own marker shape | ✓ Good — synced to lockdown via existing pipeline; teacher-lock uses same registry |
+| **Dep injection for popup view modules** (v3.1 Phase 30) | View modules need to mount in extension popup AND lockdown sidepanel without behavior change; explicit deps = no implicit globals | ✓ Good — `check-popup-deps` gate enforces no `chrome.*` / `window.__lexi*` / unscoped `getElementById`; lockdown sidepanel hosts the same code with limited deps |
+| **`audioEnabled: false` in lockdown** (v3.1 Phase 30) | Audio is leksihjelp's only premium-cost surface; lockdown is a school deployment, no MB-level downloads | ✓ Good — three independent safeguards (renderResults gate + host never passes real playAudio + `extension/audio/` excluded from sync) |
+| **INFRA-10 vocab-seam-coverage gate** (v3.1 Phase 36) | Phase 26-01 / 32-01 / 32-03 each shipped indexes through gates green that were silently empty in browser; static-parse `buildIndexes` literal + assert seam wiring | ✓ Good — caught 3 additional seam-bug instances on first run beyond the v2.9.15 ad-hoc fix; the regression class is now structurally defended |
+| **Population canaries in seam-coverage gate** (v3.1 Phase 36-03) | Asserting indexes exist isn't enough — they need to be non-empty under the default preset (the user's actual baseline) | ✓ Good — defensively closed F36-1 even before browser UAT; rule cannot recur |
+| **Cross-language verb-form guard in nb-typo-fuzzy** (v3.1 Phase 36-03) | FR `mangeait` was being flagged as NB typo because nb-typo-fuzzy didn't check for cross-language verb forms before suggesting | ✓ Good — F36-1 root cause closed; rule no longer claims foreign-language tokens |
+| **Custom split: hygiene now, UAT to v3.2** (v3.1 Quick Task 1) | 14 tech-debt items split into "do now" (hygiene + orphan cleanup) vs "do as v3.2 phase" (browser UAT batch); avoids cleanup phase scope creep | ✓ Good — milestone archive is hygiene-clean; UAT consolidated as v3.2 entry point |
 
 ---
-*Last updated: 2026-04-27 after v3.1 milestone start (Polish & Intelligence)*
+*Last updated: 2026-05-01 after v3.1 milestone (Polish & Intelligence) shipped*

@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: completed
-last_updated: "2026-05-01T10:11:41.520Z"
-last_activity: 2026-05-01 -- Plan 36-01 complete. F36-1 (FR mangeait) defensively pinned; F36-3/F36-4 (DE kein/keine paradigm) shipped; F36-5 noAutoFix opt-in on nb-v2/de-v2/fr-bags. Version 2.9.16 -> 2.9.17. All 12 release gates green; bundle 12.68 MiB / 20 MiB cap. F36-2 + Task 4 walkthrough auto-deferred. Lockdown + skriveokt-zero re-pin to leksihjelp 2.9.17.
+last_updated: "2026-05-01T10:46:46.774Z"
+last_activity: "2026-05-01 - Completed quick task 1: v3.1 hygiene cleanup (EXAM-01..07 status -> Complete; Phase 31 orphan deleted; Phase 25 retroactive VERIFICATION.md backfilled)."
 progress:
-  total_phases: 14
+  total_phases: 13
   completed_phases: 9
   total_plans: 32
   completed_plans: 25
@@ -16,20 +16,18 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-27)
+See: .planning/PROJECT.md (updated 2026-05-01 after v3.1)
 
 **Core value:** Norwegian students write foreign languages better -- with correct words, correct form, and confidence in pronunciation -- without leaving the page they're working on.
-**Current focus:** v3.1 Polish & Intelligence -- Phase 24 ready to plan
+**Current focus:** Planning next milestone (v3.2). Browser UAT backlog from v3.1 to be incorporated.
 
 ## Position
 
-**Milestone:** v3.1 Polish & Intelligence (cleanup phase)
-**Phase:** 36 (v3.1 UAT sweep #2, Phase 35 follow-up)
-**Plan:** Phase 36 P01 complete (P02 already shipped INFRA-10 / check-vocab-seam-coverage); 2/2 plans complete
-**Status:** Milestone complete
-**Last activity:** 2026-05-01 - Completed quick task 1: v3.1 hygiene cleanup (EXAM-01..07 status -> Complete; Phase 31 orphan deleted; Phase 25 retroactive VERIFICATION.md backfilled).
+**Milestone:** v3.1 Polish & Intelligence — SHIPPED 2026-05-01 (tagged v3.1)
+**Status:** Archived to `.planning/milestones/v3.1-*` — 13 phases (incl. Phase 28.1 deferred), 32 plans, 23/23 in-scope requirements satisfied
+**Last activity:** 2026-05-01 - Archived v3.1 milestone (Polish & Intelligence). MILESTONES.md updated with full accomplishments; PROJECT.md evolved (validated: COMP/POPUP/SPELL/PED/PHASE-32/EXAM groups + view modules + INFRA-10 gate); ROADMAP.md collapsed v3.1 to <details> block; REQUIREMENTS.md deleted (fresh for v3.2). Run /gsd:new-milestone to define v3.2.
 
-Progress: [██████████] 100% (Phase 36 complete — 2/2 plans)
+Progress: v3.1 [██████████] 100%
 
 ## Performance Metrics
 
