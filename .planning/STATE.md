@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T14:02:01.202Z"
+last_updated: "2026-05-01T14:03:46.607Z"
 progress:
   total_phases: 14
   completed_phases: 9
   total_plans: 36
-  completed_plans: 26
+  completed_plans: 28
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 37 (Hygiene, Templates & Pre-flight) — not yet planned
-Plan: —
-Status: Roadmap complete, awaiting `/gsd:plan-phase 37`
-Last activity: 2026-05-01 — Roadmap created with 5 phases (37→41), 27/27 requirements mapped
+Phase: 37 (Hygiene, Templates & Pre-flight) — In Progress
+Plan: 03 complete (3/4 plans done — 01, 03, 04 shipped; 02 remaining)
+Status: HYG-07 pre-flight script live; HYG-03 verification_kind convention documented; HYG-06 [lockdown-resync-needed] convention adopted
+Last activity: 2026-05-01 — Plan 37-03 complete (check-vocab-deployment.js + npm script)
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Production deploys explicitly OUT of scope; runbook + sign-off is the v3.2 deliverable (PROD-01/PROD-02 deferred to v3.3 user-gated)
 - REGR (FIX-02) is HARD criterion, no exceptions — school-year stakes
 - [Phase 37]: 37-04: [lockdown-resync-needed] commit-message convention adopted; doc-based ledger pattern at .planning/deferred/
+- [Phase 37-hygiene-templates-pre-flight]: HYG-07 pre-flight: re-implemented upstream computeRevision inline (zero-dep CommonJS) and compare hex8 suffix only (date prefix shifts on UTC-day rollover); per-language drift report with actionable fix lines; explicitly NOT a release gate
 
 ### Pending Todos
 
@@ -74,5 +75,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Roadmap complete (5 phases, 37→41), 27/27 requirements mapped, ready for `/gsd:plan-phase 37`.
-Next: `/gsd:plan-phase 37`
+Stopped at: Completed 37-hygiene-templates-pre-flight/37-03-PLAN.md (HYG-07 vocab-deployment pre-flight script).
+Next: Execute remaining Plan 37-02 (UAT templates HYG-01/02 + check-version-alignment HYG-04 + check-synced-surface-version HYG-05).
