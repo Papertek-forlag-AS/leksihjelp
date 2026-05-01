@@ -433,6 +433,20 @@
     getDecomposeCompoundStrict: () => (state && state.decomposeCompoundStrict) ? state.decomposeCompoundStrict : null,
     getGrammarTables: () => (state && state.grammarTables) ? state.grammarTables : {},
     getSPassivForms: () => (state && state.sPassivForms) ? state.sPassivForms : new Map(),
+    // Phase 35.1 (UAT regression): pedagogy and class-membership indexes
+    // built by vocab-seam-core but never surfaced through the seam, so the
+    // spell-check.js consumer (which composes ctx.vocab from VOCAB.getX()
+    // calls) silently fed an empty map/set into every pedagogy-attaching
+    // rule (de-prep-case, es-por-para, es-gustar, fr-aspect-hint). Result:
+    // no Lær mer popovers in the browser, plus es-gustar / fr-aspect-hint
+    // false negatives on extended verbs / canonical trigger sentences.
+    // Node fixture-runner bypassed the seam (passed raw indexes object
+    // directly), which is why every gate stayed green.
+    getPrepPedagogy: () => (state && state.prepPedagogy) ? state.prepPedagogy : new Map(),
+    getGustarClassVerbs: () => (state && state.gustarClassVerbs) ? state.gustarClassVerbs : new Set(),
+    getGustarPedagogy: () => (state && state.gustarPedagogy) ? state.gustarPedagogy : null,
+    getFrAspectAdverbs: () => (state && state.frAspectAdverbs) ? state.frAspectAdverbs : null,
+    getFrAspectPedagogy: () => (state && state.frAspectPedagogy) ? state.frAspectPedagogy : null,
     isFeatureEnabled: (featureId) => {
       if (enabledFeatures.size === 0) return true;
       return enabledFeatures.has(featureId);

@@ -333,6 +333,16 @@
       decomposeCompoundStrict: VOCAB.getDecomposeCompoundStrict(),
       // Phase 19: s-passive form recognition for NB/NN rules.
       sPassivForms:          VOCAB.getSPassivForms(),
+      // Phase 35.1 (UAT regression): pedagogy + class-membership indexes
+      // for the four pedagogy-attaching rules. Without these, the rules
+      // silently fall back to empty maps/sets and never attach pedagogy,
+      // so the Lær mer button never renders. See vocab-seam.js comment
+      // block at the matching getter definitions.
+      prepPedagogy:        VOCAB.getPrepPedagogy(),
+      gustarClassVerbs:    VOCAB.getGustarClassVerbs(),
+      gustarPedagogy:      VOCAB.getGustarPedagogy(),
+      frAspectAdverbs:     VOCAB.getFrAspectAdverbs(),
+      frAspectPedagogy:    VOCAB.getFrAspectPedagogy(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });
