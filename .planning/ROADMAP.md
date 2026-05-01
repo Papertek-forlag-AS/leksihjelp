@@ -140,12 +140,13 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
   3. Every UAT-surfaced bug fix lands with a regression artifact in the same commit (or pre-fix commit): either a `check-fixtures` fixture or a `benchmark-texts/expectations.json` entry exercising the bug path. No bug-fix commit ships without one (school-year stakes — hard criterion, no exceptions).
   4. Any new index added to `buildIndexes` during a v3.2 fix gains a population canary in `check-vocab-seam-coverage` defending the silent-empty-index regression class (Phase 26-01 / 32-01 / 32-03 / F36-1 root cause).
   5. Phase 27 release-asset upload completed: zip rebuilt at the v3.2-head version and uploaded as a GitHub Release asset, closing Release Workflow steps 13-15 for the 2.7.0+ line.
-**Plans**: 6 plans (5 anchors + 1 decimal-insert fix; further decimal-inserts appended post-walk as defects surface)
+**Plans**: 7 plans (5 anchors + 2 decimal-insert fixes; further decimal-inserts appended post-walk as defects surface)
   - [x] 38-01-PLAN.md — UAT-EXT-01 F36-1 fr-aspect-hint browser confirm (warm-up; surfaced F38-1 blocker + F38-2 minor deferred)
-  - [ ] 38-01.1-PLAN.md — F38-1 fix: spell-check language routing for FR inputs + REGR fixture (BLOCKS 38-05)
-  - [ ] 38-02-PLAN.md — UAT-EXT-04 Phase 30-01 popup view 9-step (canonical)
-  - [ ] 38-03-PLAN.md — UAT-EXT-03 Phase 27 exam-mode 9-step (highest-stakes)
-  - [ ] 38-04-PLAN.md — UAT-EXT-02 Phase 26 DE Lær mer 4+2 (final, closes F7)
+  - [x] 38-01.1-PLAN.md — F38-1 (v1) fix: nb-typo-fuzzy elision-strip + REGR fixture (partial closure; v2.9.19 draft)
+  - [ ] 38-01.2-PLAN.md — F38-1 (v2) + F38-3 fix: vocab-seam FR aspect-meta defensive backfill + Node-side regression artifact (BLOCKS 38-05; leksihjelp-only contained)
+  - [x] 38-02-PLAN.md — UAT-EXT-04 Phase 30-01 popup view 9-step (canonical)
+  - [x] 38-03-PLAN.md — UAT-EXT-03 Phase 27 exam-mode 9-step (highest-stakes)
+  - [x] 38-04-PLAN.md — UAT-EXT-02 Phase 26 DE Lær mer 4+2 (final, closes F7)
   - [ ] 38-05-PLAN.md — FIX-04 Phase 27 release-asset upload (closure)
 
 ### Phase 39: Lockdown Sync + Staging UAT
@@ -185,7 +186,7 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 37. Hygiene, Templates & Pre-flight | 4/4 | Complete    | 2026-05-01 |
-| 38. Extension UAT Batch + Bug-Fix Loop + REGR | 5/6 | In Progress|  |
+| 38. Extension UAT Batch + Bug-Fix Loop + REGR | 6/7 | In Progress|  |
 | 39. Lockdown Sync + Staging UAT | 0/0 | Not started | - |
 | 40. Deploy Runbook Authoring | 0/0 | Not started | - |
 | 41. Milestone Archive | 0/0 | Not started | - |

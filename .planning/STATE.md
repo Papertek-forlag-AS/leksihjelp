@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T18:38:00.520Z"
+last_updated: "2026-05-01T20:31:29.706Z"
 progress:
   total_phases: 15
   completed_phases: 10
-  total_plans: 42
-  completed_plans: 34
+  total_plans: 43
+  completed_plans: 35
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 + 04 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-05 + 38-01.2-candidate pending)
-Plan: 01 complete; 02 complete; 03 complete; 04 complete (final walk — Phase 26 DE Lær mer 4+2 — UAT-EXT-02 clean pass, zero defects, Phase 35 F7 closed); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
-Status: Plan 38-04 closed cleanly. Phase 26 DE Lær mer pedagogy contract confirmed working end-to-end in real Chrome 147 against v2.9.19 (de-prep-case acc/dat triggers + Wechselpräpositionen movement/location framing + full 9-prep table render under default NB locale; NN + EN cross-locale Lær mer panels render correctly on DE pedagogy). Phase 35 F7 deferred carry-over (NN/EN locale Lær mer never walked in real browser) explicitly CLOSED by Steps 5+6. F38-2 partial-NN gap remains scoped to FR-aspect-hint-pedagogy specifically (DE pedagogy NN render is healthy — distinct surface). Zero F38-N findings filed. Locked Phase 38 walk sequence COMPLETE (warm-up ✅ → canonical ✅ → highest-stakes ✅ → final ✅). HYG-03 hard-pause discipline validated end-to-end for the fourth time. Plan 38-05 release asset still BLOCKED on F38-1 closure.
-Last activity: 2026-05-01 — Plan 38-04 completed; commits cc0ea5e (Task 1 walkthrough log instantiation) / 7c60a7b (interim hard-pause STATE record) / c2e2e9c (Task 2 walker outcomes recorded); UAT-EXT-02 walker sign-off Geir 2026-05-01T20:50:00+02:00
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 + 04 + 01.1 + 01.2 complete; 38-05 release-asset plan pending; browser re-walk deferred outside plans pending Saturday staging on stb-lockdown.app)
+Plan: 01 + 02 + 03 + 04 complete; 01.1 complete (Task 4 walker re-walk surfaced regression → 01.2 spawned); 01.2 complete (F38-1 v2 fix shipped — root cause: API serves FR generalbank from lexicon/fr/ missing 3 aspect meta entries; defensive seam-side backfill from bundled fr.json; v2.9.20 DRAFT GitHub Release)
+Status: Plan 38-01.2 closed cleanly. F38-1 status flipped from `open` (REOPENED) back to `closed` with Resolution v2 documenting actual proximate cause. F38-3 status flipped to `partial-deferred-to-future-plan` (aspect-hint half closes here; FR typo-coverage gap on `pelle`/`Francais`/cedilla deferred — upstream Papertek-API data work). All 14 release gates green + new check-fr-bundle-completeness regression gate green. v2.9.20 GitHub Release created as DRAFT (NOT Latest) — promotion gates on deferred browser re-walk after Saturday staging. Both fix commit (addbb64) and version-bump commit (07dc423) carry [lockdown-resync-needed] markers. NO files modified under lockdown/ or papertek-vocabulary/. Plan 38-05 release-asset plan still pending (now actually unblocked since F38-1 closed-pending-rewalk).
+Last activity: 2026-05-01 — Plan 38-01.2 completed; commits 1542499 (Task 1 RED regression artifact) / addbb64 (Task 2 GREEN seam fix + F38-1/F38-3 finding updates) / 07dc423 (Task 3 v2.9.20 version bump). GitHub Release v2.9.20 DRAFT with lexi-extension.zip uploaded.
 
 ## Performance Metrics
 
@@ -73,6 +73,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 38-03]: Step 8 architectural clarification: lockdown exam-mode is teacher-only (no student toggle); 'dual mode' framing was vanilla-extension projection; Phase 39 UAT-LOCK-02 scoped to assert student toggle hidden in lockdown sidepanel host UI
 - [Phase 38-03]: Inline-clarification-instead-of-finding pattern reinforced (3rd recurrence after 38-02 Step 6): use ✅ + downstream follow-up when a step's framing projects vanilla-extension UI assumptions onto a constrained downstream surface
 - [Phase 38-04]: UAT-EXT-02 final walk = clean pass on all 6 walks (4 NB DE + 2 cross-locale NN/EN); Phase 35 F7 deferred carry-over (NN/EN locale Lær mer) explicitly CLOSED via Steps 5+6; F38-2 partial-NN gap remains scoped to FR-aspect-hint-pedagogy specifically (DE pedagogy NN render is healthy — distinct surface); zero F38-N findings filed; locked Phase 38 walk sequence complete (warm-up → canonical → highest-stakes → final all clean); HYG-03 hard-pause discipline validated end-to-end for the fourth time
+- [Phase 38-extension-uat-batch-bug-fix-loop-regr]: F38-1 v2 closure: actual proximate cause was Papertek API serving FR generalbank from lexicon/fr/ (865 keys) missing aspect meta entries; bundled fr.json has them; narrow seam-side defensive backfill in vocab-seam.js#buildAndApply leksihjelp-only
+- [Phase 38-extension-uat-batch-bug-fix-loop-regr]: F38-3 partial-deferred: aspect-hint silence half closes with F38-1; FR typo-coverage gap (Francais cedilla, pelle typo) deferred to future plan as upstream Papertek-API data work (FR typobank empty in both bundled and API)
+- [Phase 38-extension-uat-batch-bug-fix-loop-regr]: GitHub Release v2.9.20 ships as DRAFT pending deferred browser re-walk after Saturday staging on stb-lockdown.app; lockdown re-sync gated on same
 
 ### Pending Todos
 
@@ -92,7 +95,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - **HYG-07 risk:** If papertek-vocabulary deployment lags HEAD, Phase 37 carries papertek-vocabulary repo work as a sub-step (direct repo access at `/Users/geirforbord/Papertek/papertek-vocabulary`). Cross-app blast radius applies.
 - **Cross-repo coordination:** UAT-LOCK-03 needs a PR against the lockdown repo's sync script — coordinate during Phase 39 plan.
 - **Auto-mode + human-browser-walk:** HYG-03 is the unblocker — without `verification_kind: human-browser-walk` frontmatter discipline, auto-mode will skip Phase 38 verification (Pitfall 2 — root cause of v3.1's six-walkthrough deferral). ✅ Validated end-to-end in Plan 38-01.
-- **F38-1 (blocker, closed pending re-walk):** Fix shipped in v2.9.19 draft release. Root cause was BRANCH C — multi-language nb-typo-fuzzy F36-1 guard checked literal token against unelided frAuxPresensForms set (token 'j'ai' vs set entry 'ai'); fixed by adding ELISION_RE strip. Status reverts to `open` if walker re-walk of UAT-EXT-01 Steps 1-4 against v2.9.19 fails. See `.planning/uat/findings/F38-1.md` Resolution section.
+- **F38-1 (blocker, closed v2 pending re-walk):** Fix shipped in v2.9.20 DRAFT release. Root cause v2: Papertek API serves FR generalbank from `lexicon/fr/` (865 keys) MISSING 3 aspect meta entries (`aspect_passe_compose_adverbs`, `aspect_imparfait_adverbs`, `aspect_choice_pedagogy`); bundled `extension/data/fr.json` has all 866 keys but `BUNDLED_LANGS = ['nb']` forced FR through API path. Fix: narrow defensive backfill in `vocab-seam.js#buildAndApply` overlays missing meta entries from bundled fr.json before calling buildIndexes. The 38-01.1 BRANCH C fix (nb-typo-fuzzy elision strip) was real-but-symptomatic and stays in tree. Status reverts to `open` if walker re-walk of UAT-EXT-01 Steps 1-4 against v2.9.20 fails. See `.planning/uat/findings/F38-1.md` Resolution v2 section. Regression artifact: `scripts/check-fr-bundle-completeness.js`.
 - **Sidecar-pipeline gap (deferred to 38-01.2 candidate):** freq-{lang}.json, pitfalls-{lang}.json, bigrams-{lang}.json (FR/DE/ES) + pitfalls-nb.json all 404. loadBundledSidecar handles 404 gracefully so absence is not a blocker. Sidecar generation is upstream Papertek-API/sync-vocab territory per data-logic separation philosophy.
 - **F38-2 (minor, deferred):** NN locale partial — popover button labels translate but explanation body stays in NB. NOT a Phase 38 blocker per walker classification; Phase 38-04 will accumulate more NN signal. See `.planning/uat/findings/F38-2.md`.
 
