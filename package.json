@@ -60,6 +60,7 @@
     "check-popup-deps:test": "node scripts/check-popup-deps.test.js",
     "check-vocab-seam-coverage": "node scripts/check-vocab-seam-coverage.js",
     "check-vocab-seam-coverage:test": "node scripts/check-vocab-seam-coverage.test.js",
+    "check-vocab-deployment": "node scripts/check-vocab-deployment.js",
     "build-popup-views-css": "node scripts/build-popup-views-css.js",
     "test:vocab-store": "node --test extension/content/vocab-store.test.js",
     "test:vocab-seam": "node --test extension/content/vocab-seam.test.js",
