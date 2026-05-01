@@ -379,12 +379,16 @@ After making changes to files under `extension/`:
 11. Validate governance data bank presence and shape (INFRA-09):
    - `npm run check-governance-data` — must exit 0. Checks that governance data banks (`registerbank`, `collocationbank`, `phrasebank`) in bundled vocab have correct structural shape when present. Passes when no governance banks exist yet (pre-data-sync state).
    - Paired self-test: `npm run check-governance-data:test` — plants a data file with a broken registerbank (missing required fields), confirms the gate fires; plants a well-formed data file, confirms the gate passes; verifies baseline (no governance data) also passes.
-12. Update the version in all three places:
+12. Validate vocab-seam coverage (INFRA-10):
+   - `npm run check-vocab-seam-coverage` — must exit 0. Static-parses `extension/content/vocab-seam-core.js`'s `buildIndexes` return literal (including `...moodIndexes` spread, recursively resolved into the `buildMoodIndexes` function's return), enumerates every key, and asserts each non-exempt key has both a matching `get<PascalCase>` getter on `extension/content/vocab-seam.js`'s `self.__lexiVocab = { … }` object AND a matching entry in `extension/content/spell-check.js`'s `runCheck()` `const vocab = { … }` consumer composition. Exits 1 with a per-violation diagnostic — including the exact copy-paste fix line for both files — on any deviation. EXEMPT list documents diagnostic / closure-bound / non-spell-check surface keys (e.g. `wordList`, `nounLemmaGenus`, `bigrams`, `typoBank`, `grammarTables`, `predictCompound`); GETTER_OVERRIDES handles non-default casing (e.g. `nnInfinitiveClasses` → `getNNInfinitiveClasses`).
+   - Paired self-test: `npm run check-vocab-seam-coverage:test` — plants a scratch index in core only → confirms gate fires; plants the same scratch in core + seam + consumer → confirms gate passes; runs against clean HEAD → confirms gate passes. All file mutations guarded by try/finally with backup-restore.
+   - Why this gate exists: Phase 26-01, 32-01, and 32-03 each added a new index to `buildIndexes` (prepPedagogy, frAspectPedagogy, gustarPedagogy, …) without surfacing it through `vocab-seam.js` or wiring `spell-check.js`. All 11 prior gates stayed green because the Node fixture-runner passes raw `buildIndexes` output directly to `core.check()`, bypassing the browser seam. Browser users got empty Maps/Sets and silent rules — the de-prep-case Lær mer button never rendered, es-gustar was silent on extended verbs, fr-aspect-hint was silent on canonical triggers. The seam fix shipped in v2.9.15 (commit 7f55b1c). On its first run this gate caught three more instances of the same bug-class — `frImparfaitToVerb`, `frPasseComposeParticiples`, `frAuxPresensForms` — that the v2.9.15 fix missed; those wirings landed alongside the gate in Phase 36-02. This gate prevents the next instance.
+13. Update the version in all three places:
     - `extension/manifest.json` (the Chrome extension version)
     - `package.json` (the project version)
     - `backend/public/index.html` (the landing page display version)
-13. Rebuild the zip: `npm run package`
-14. Upload the zip as a GitHub Release asset
+14. Rebuild the zip: `npm run package`
+15. Upload the zip as a GitHub Release asset
 
 The `check-bundle-size` script owns measurement and minification; never manually minify `extension/data/*.json` in the source tree — keep the repo copies pretty-printed for contributor readability.
 
