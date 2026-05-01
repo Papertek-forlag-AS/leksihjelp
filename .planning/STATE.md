@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T16:00:28.942Z"
+last_updated: "2026-05-01T18:10:49.933Z"
 progress:
   total_phases: 15
   completed_phases: 10
   total_plans: 42
-  completed_plans: 31
+  completed_plans: 32
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (1/6 plans complete; Plan 38-01.1 Tasks 1-3 of 4 complete, Task 4 hard-paused for walker re-walk)
-Plan: 01 complete; 01.1 Tasks 1-3 complete (RED fixture / GREEN fix / version bump + draft release v2.9.19); 01.1 Task 4 hard-paused (walker re-walk required to fully close F38-1)
-Status: F38-1 fix shipped to draft GitHub Release v2.9.19. nb-typo-fuzzy now strips FR elision (j', n', s', etc.) before the cross-language verb-form guard. Regression fixture fr-aspect-pos-f38-1-canonical pins the bug path; all 14 release gates green. Awaits walker re-walk of UAT-EXT-01 Steps 1-4 against v2.9.19 zip; if green, promote draft release to Latest and proceed to Plan 38-02.
-Last activity: 2026-05-01 — Plan 38-01.1 Tasks 1-3 shipped; commits 744aec8 (RED fixture) / 8214f4d (GREEN fix) / c54caed (version bump); GitHub Release v2.9.19 (DRAFT) with lexi-extension.zip asset uploaded
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-03/04/05 + 38-01.2-candidate pending)
+Plan: 01 complete; 02 complete (canonical popup view 9-step walk — UAT-EXT-04 clean pass, zero defects); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
+Status: Plan 38-02 closed cleanly. Phase 30-01 view-module dep-injection refactor confirmed working end-to-end in real Chrome 147 against v2.9.19. Step 6 Lær mer recorded as plan-scope N/A (content-script-only feature, properly tested in 38-04). Step 9 vocab-updates banner sub-test deferred (service-worker-driven, no manual trigger). Plan 38-03 (highest-stakes exam-mode walk — UAT-EXT-03) unblocked. F38-1 fix in v2.9.19 DRAFT release still pending walker re-walk closure.
+Last activity: 2026-05-01 — Plan 38-02 completed; commits 1f21ce0 (Task 1 walkthrough log instantiation) / a8b5845 (interim hard-pause STATE record) / c787ded (Task 2 walker outcomes recorded); UAT-EXT-04 walker sign-off Geir 2026-05-01T20:00:00+02:00
 
 ## Performance Metrics
 
@@ -66,6 +66,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 38-extension-uat-batch-bug-fix-loop-regr]: [Phase 38-01.1]: F38-1 root cause is BRANCH C (multi-language nb-typo-fuzzy F36-1 guard, elision-side miss) — guard checked frAuxPresensForms.has(t.word) against literal token but tokenizer emits 'j'ai' while set contains 'ai'; fixed by adding ELISION_RE strip
 - [Phase 38-extension-uat-batch-bug-fix-loop-regr]: [Phase 38-01.1]: companion popup.js LANGUAGE_CHANGED broadcast moved out of try/catch (was branch A latent bug, not F38-1 critical path but bundled here)
 - [Phase 38-extension-uat-batch-bug-fix-loop-regr]: [Phase 38-01.1]: GitHub Release v2.9.19 created as DRAFT pending Task 4 walker re-walk; honours plan's no-publish-without-approval constraint; promote to Latest after re-walk evidence appended to UAT-EXT-01.md
+- [Phase 38-02]: Canonical popup view 9-step walk = clean pass; Phase 30-01 view-module dep-injection refactor confirmed end-to-end in real Chrome 147; zero defects filed; Plan 38-03 unblocked
+- [Phase 38-02]: Step 6 (Lær mer) recorded as plan-scope N/A clarification — Lær mer is content-script (extension/content/spell-check.js), not popup-view; future popup-view walks should omit it
+- [Phase 38-02]: Step 9 vocab-updates banner sub-test deferred — service-worker-driven, no manual trigger from clean pre-flight; FOLLOW-UP CANDIDATE: add dev-only force-refresh affordance
 
 ### Pending Todos
 
@@ -92,7 +95,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Plan 38-02 Task 1 complete (UAT-EXT-04 canonical walkthrough log instantiated, commit 1f21ce0). Task 2 hard-paused per `verification_kind: human-browser-walk` (HYG-03). Walker (Geir) performs the 9-step Phase 30-01 popup view canonical walk against v2.9.19 in real Chrome, fills observed: fields + signs off, then files F38-N findings for any ❌. Agent resumes for closeout commit + SUMMARY.md after walker returns. Independent of Plan 38-01.1 walker re-walk (different surface — popup views vs spell-check pipeline; walks can interleave).
+Stopped at: Plan 38-02 closed cleanly. UAT-EXT-04 canonical walkthrough log committed (commits 1f21ce0 / a8b5845 / c787ded). Walker (Geir) signed off Steps 1-9 in real Chrome 147 against v2.9.19; Steps 1, 2, 3, 4, 5, 7, 8 ✅; Step 6 ⚠️ N/A plan-scope clarification (Lær mer is content-script, not popup-view); Step 9 ✅ pause toggle, banner sub-test deferred (service-worker-driven). Zero F38-N findings filed. SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-02-SUMMARY.md`. UAT-EXT-04 marked complete in REQUIREMENTS.md; ROADMAP plan-progress updated for Phase 38.
+Next: Orchestrator's call. Open work: (a) Plan 38-01.1 Task 4 walker re-walk against v2.9.19 to close F38-1 (independent of 38-02); (b) Plan 38-03 highest-stakes exam-mode walk — UNBLOCKED by 38-02 clean pass; (c) Plan 38-04 DE Lær mer 4+2 walk; (d) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (e) candidate 38-01.2 sidecar-pipeline regeneration (deferral from 38-01).
+Follow-up candidates (post-Phase-38, surfaced by Plan 38-02): vocab-updates banner manual-trigger affordance for QA OR staging-env API drift procedure, so future walks can exercise the banner without a service-worker-only path.
 Next: Walker re-walks UAT-EXT-01 Steps 1-4 against v2.9.19 zip:
 1. Install v2.9.19 from GitHub draft release (or reload dev extension on the new commit at chrome://extensions).
 2. Set popup foreign-language=French, NB locale.
