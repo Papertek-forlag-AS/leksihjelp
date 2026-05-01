@@ -88,6 +88,20 @@
       return out;
     },
     check(ctx) {
+      // F36-1 diagnostic probe — REMOVE AFTER DIAGNOSIS
+      if (typeof console !== 'undefined' && !globalThis.__lexiF36Probe) {
+        globalThis.__lexiF36Probe = true;
+        try {
+          const v = ctx && ctx.vocab;
+          console.log('[F36-1 probe] fr-aspect-hint.check entered', {
+            ctxLang: ctx && ctx.lang,
+            frImparfaitToVerbSize: v && v.frImparfaitToVerb && v.frImparfaitToVerb.size,
+            hasMangeait: v && v.frImparfaitToVerb && v.frImparfaitToVerb.has('mangeait'),
+            validWordsHasMangeait: v && v.validWords && v.validWords.has('mangeait'),
+            tokensSample: (ctx && ctx.tokens || []).slice(0, 6).map(t => t.word),
+          });
+        } catch (e) { console.warn('[F36-1 probe] failed', e); }
+      }
       if (ctx.lang !== 'fr') return [];
       if (!ctx.sentences || !tokensInSentence) return [];
 

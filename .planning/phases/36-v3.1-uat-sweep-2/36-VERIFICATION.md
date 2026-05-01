@@ -162,3 +162,112 @@ F36-2 watch-item passed in the same walkthrough.
 
 _Verified: 2026-05-01T12:00:00Z_
 _Verifier: Claude (gsd-verifier)_
+
+---
+
+## F36-1 Gap Closure Diagnosis (Plan 36-03)
+
+### DevTools query procedure (run after loading the v2.9.18 build)
+
+```js
+// a. Confirm vocab seam state
+await new Promise(r => setTimeout(r, 500)); // let hydration settle
+__lexiVocab.getLanguage()
+__lexiVocab.getFrImparfaitToVerb().size
+__lexiVocab.getFrImparfaitToVerb().get('mangeait')
+__lexiVocab.getValidWords().has('mangeait')
+
+// b. Confirm rule registration
+self.__lexiSpellRules.filter(r => r.id === 'fr-aspect-hint').length
+self.__lexiSpellRules.filter(r => (r.languages || []).includes('fr')).map(r => r.id + '@' + r.priority)
+
+// c. Type 'Hier il mangeait une pomme.' into a contenteditable / textarea
+//    on skriv.papertek.app, watch console.
+//    Expected log: [F36-1 probe] fr-aspect-hint.check entered { ctxLang: 'fr',
+//                  frImparfaitToVerbSize: 3331, hasMangeait: true, ... }
+//    If log NEVER appears   -> Hypothesis 1 (rule not loaded OR ctxLang !== 'fr')
+//    If log appears, hasMangeait: false -> Hypothesis 3 (vocab not hydrated for FR)
+//    If log appears, hasMangeait: true but typo wins in popover -> Hypothesis 2 (dedupe)
+
+// d. Inspect popover after clicking the marker
+document.querySelector('.lh-spell-popover')?.outerHTML
+```
+
+### Hypothesis test outcomes (Plan 36-03 Node-side validation)
+
+Multi-rule Node repro (`nb-typo-fuzzy` + `fr-aspect-hint` registered together against
+`extension/data/fr.json` via `buildIndexes`, then `core.check('Hier il mangeait une pomme.', vocab, { lang })`):
+
+```
+frImparfaitToVerb size: 3331 has(mangeait): true
+validWords has(mangeait): true
+[ctx=nb, vocab=fr] []                       ← typo-fuzzy silenced by FR validWords; aspect-hint gated by lang!=='fr'
+[ctx=fr, vocab=fr] ["fr-aspect-hint@8"]     ← only aspect-hint fires; typo correctly skips known FR token
+```
+
+Conclusion: with vocab carrying FR indexes, typo-fuzzy DOES NOT flag `mangeait` regardless
+of ctx.lang (because `validWords.has('mangeait')` is true and the early-skip wins). When
+ctx.lang === 'fr', aspect-hint fires. The Node path is clean. The browser failure mode
+must therefore be one of:
+
+- **Hypothesis 1 (rule not loaded):** fr-aspect-hint never registered for the active lang
+  router. Probe absent log proves this.
+- **Hypothesis 3a (vocab not hydrated):** `frImparfaitToVerb` is empty in the seam at
+  type-time (NB baseline only; FR target never hydrated). Probe shows `frImparfaitToVerbSize: 0`.
+- **Hypothesis 3b (vocab hydrated wrong-language):** ctx.lang stays 'nb' (NB baseline)
+  while user typed an FR token. NB validWords lacks `mangeait` → typo flags it; aspect-hint
+  filters out by `languages: ['fr']`. Probe shows `ctxLang: 'nb', validWordsHasMangeait: false`.
+- **Hypothesis 2 (dedupe):** Both rules fire, but `dedupeOverlapping` (priority-ascending,
+  lower wins) keeps typo@50 over fr-aspect-hint@65. Probe shows aspect-hint emitted but
+  popover renders typo.
+
+### Root cause selection
+
+**Defensively closed: Hypotheses 2 and 3b both neutralised by Plan 36-03 Task 2's
+cross-language verb-form guard in `nb-typo-fuzzy`.** Hypothesis 3a (FR vocab not
+populated) is now defended by the population canaries added to
+`check-vocab-seam-coverage` (Task 3): a regression that wires the index but starves
+the population path will fail the gate at CI time, not in the user's browser.
+
+The user-visible symptom (`mangeait` flagged as typo with FR set) cannot recur because:
+
+1. If FR is hydrated (Hypothesis 1/2/3a all happy path), `validWords.has('mangeait')` is
+   true → typo-fuzzy's existing `validWords.has(t.word)` early-skip wins. Aspect-hint
+   fires when ctx.lang === 'fr'.
+2. If FR is partially hydrated (vocab carries FR indexes but ctx.lang stuck on 'nb'),
+   the new `tokenIsForeignVerbForm()` guard sees `frImparfaitToVerb.has('mangeait')`
+   and suppresses the typo emission. No false-positive even in the desync state.
+3. If FR is fully unhydrated (frImparfaitToVerb is empty AND validWords lacks mangeait),
+   typo-fuzzy may still flag the token — but this is the same failure mode any user
+   sees when typing in a language they haven't activated; outside scope of F36-1.
+
+### Defensive gates
+
+- **nb-typo-fuzzy cross-language verb-form guard** (Task 2): consults the seam-exposed
+  `frImparfaitToVerb` / `frPasseComposeParticiples` / `frAuxPresensForms` indexes; if
+  the token is recognised in any of them, suppress the typo emission. Empty Maps (NB
+  baseline default) are safe no-ops.
+- **check-vocab-seam-coverage population canaries** (Task 3): after the existing
+  static-parse pass, runs `buildIndexes` against `extension/data/fr.json` and asserts
+  `frImparfaitToVerb.has('mangeait')`, `frPasseComposeParticiples.has('mangé')`, and
+  `frAuxPresensForms.has('ai')`. Catches "wired-but-empty" regressions.
+- **Multi-rule Node repro fixture** (Task 2): `tests-shaped` regression check pins
+  the `[ctx=fr, vocab=fr] = ["fr-aspect-hint@8"]` outcome. Re-runnable from the
+  command line in <1s.
+
+### Browser human verification (post-2.9.18 install)
+
+Type `Hier il mangeait une pomme.` with Aa=FR. Click the marker on `mangeait`.
+Run `document.querySelector('.lh-spell-popover')?.outerHTML`. Expected: `rule_id`
+contains `fr-aspect-hint`, never `typo`.
+
+If symptom recurs, capture the four DevTools query blocks above and re-open as F36-1b
+gap with the captures attached. Defensive guard in nb-typo-fuzzy means the canonical
+symptom (`typo` flag on `mangeait`) cannot recur even if Hypothesis 3b is true; only
+Hypothesis 1 (rule never loaded) could keep `fr-aspect-hint` silent.
+
+### Downstream consumer notes
+
+Lockdown webapp and skriveokt-zero re-sync `extension/content/spell-rules/nb-typo-fuzzy.js`.
+Both should re-pin to leksihjelp 2.9.18 to inherit the cross-language verb-form guard.
+
