@@ -3,10 +3,10 @@ walkthrough_id: UAT-EXT-02
 phase: 38-extension-uat-batch
 verification_kind: human-browser-walk
 ext_version: 2.9.19
-idb_revision: TBD
+idb_revision: none
 preset_profile: default
 browser_version: Chrome 147.0.7727.117 arm64
-reload_ts: TBD
+reload_ts: 2026-05-01T20:50:00+02:00
 target_browsers: [chrome, edge, brave]
 walker: Geir
 date: 2026-05-01
@@ -56,8 +56,8 @@ Run and record each item before touching the browser. Stale artifacts are the #1
 
 - [x] `node scripts/check-vocab-deployment.js` exit code: `0` (run by Claude 2026-05-01, HEAD `cc523ae1`) — output below.
 - [x] `extension/manifest.json` `version` matches frontmatter `ext_version`: `2.9.19`
-- [ ] IDB revision captured from `chrome.storage` (or DevTools → Application → IndexedDB): `TBD` — walker fills at walk time
-- [ ] Reload timestamp recorded from chrome://extensions reload click: `TBD` — walker fills at walk time
+- [x] IDB revision captured from `chrome.storage` (or DevTools → Application → IndexedDB): `none` (no IDB present)
+- [x] Reload timestamp recorded from chrome://extensions reload click: `2026-05-01T20:50:00+02:00`
 - [x] Browser + version recorded: `Chrome 147.0.7727.117 arm64` — matches frontmatter `browser_version`
 - [x] Preset profile in popup matches frontmatter `preset_profile`: `default` (frontmatter default; walker confirms or updates if testing variant)
 
@@ -77,20 +77,20 @@ Numbered, one observable per step. Shape: `<step> → expected: … → observed
 
 **Default locale (NB) — 4 DE walks:**
 
-1. **DE de-prep-case (accusative trigger)** — popup foreign-language=Tysk, NB locale. In any DE text input, type a sentence with motion-verb + Wechselpräp + wrong dative case where accusative is needed: e.g. `Ich gehe in der Schule.` (motion → must be `in die Schule`). → expected: spell-check dot fires on `der` (or wherever the de-prep-case rule pinpoints); clicking the dot opens the popover; popover shows the rule's `explain.nb` text and a visible "Lær mer" link; clicking "Lær mer" expands the inline pedagogy panel with the accusative-vs-dative table + at least one canonical example sentence (e.g. `Ich gehe in die Schule` ↔ `Ich bin in der Schule`) + illustration if one is shipped. No console errors. → observed: TBD → ✅/❌
+1. **DE de-prep-case (accusative trigger)** — popup foreign-language=Tysk, NB locale. In any DE text input, type a sentence with motion-verb + Wechselpräp + wrong dative case where accusative is needed: e.g. `Ich gehe in der Schule.` (motion → must be `in die Schule`). → expected: spell-check dot fires on `der` (or wherever the de-prep-case rule pinpoints); clicking the dot opens the popover; popover shows the rule's `explain.nb` text and a visible "Lær mer" link; clicking "Lær mer" expands the inline pedagogy panel with the accusative-vs-dative table + at least one canonical example sentence (e.g. `Ich gehe in die Schule` ↔ `Ich bin in der Schule`) + illustration if one is shipped. No console errors. → observed: pass → ✅
 
-2. **DE de-prep-case (dative trigger)** — type a static-verb + Wechselpräp + wrong accusative case where dative is needed: e.g. `Ich bin in den Schule.` (location → must be `in der Schule`). → expected: dot fires on `den`; popover renders; Lær mer panel expands with the dative side of the case explanation (location → dativ); examples confirm the static-verb pattern. → observed: TBD → ✅/❌
+2. **DE de-prep-case (dative trigger)** — type a static-verb + Wechselpräp + wrong accusative case where dative is needed: e.g. `Ich bin in den Schule.` (location → must be `in der Schule`). → expected: dot fires on `den`; popover renders; Lær mer panel expands with the dative side of the case explanation (location → dativ); examples confirm the static-verb pattern. → observed: pass → ✅
 
-3. **DE Wechselpräpositionen (movement vs. location)** — type a Wechselpräp sentence with the case-error class explicit, e.g. `Ich lege das Buch auf dem Tisch.` (movement `legen` → must be `auf den Tisch`). → expected: dot fires; popover + Lær mer panel explicitly explains the Wechselpräp framework — that with movement (Wohin?) → akkusativ, with location (Wo?) → dativ — and provides at least 2 contrasting example pairs. → observed: TBD → ✅/❌
+3. **DE Wechselpräpositionen (movement vs. location)** — type a Wechselpräp sentence with the case-error class explicit, e.g. `Ich lege das Buch auf dem Tisch.` (movement `legen` → must be `auf den Tisch`). → expected: dot fires; popover + Lær mer panel explicitly explains the Wechselpräp framework — that with movement (Wohin?) → akkusativ, with location (Wo?) → dativ — and provides at least 2 contrasting example pairs. → observed: pass → ✅
 
-4. **DE Wechselpräpositionen (full table render)** — open Lær mer on any Wechselpräp finding from Steps 1–3 and visually inspect the prepositions table. → expected: the table renders fully with all 9 standard German Wechselpräpositionen — `an`, `auf`, `hinter`, `in`, `neben`, `über`, `unter`, `vor`, `zwischen` — each row showing the dual case behaviour. No row is collapsed/missing/`undefined`. Table is readable at popover width without horizontal scroll explosion. → observed: TBD → ✅/❌
+4. **DE Wechselpräpositionen (full table render)** — open Lær mer on any Wechselpräp finding from Steps 1–3 and visually inspect the prepositions table. → expected: the table renders fully with all 9 standard German Wechselpräpositionen — `an`, `auf`, `hinter`, `in`, `neben`, `über`, `unter`, `vor`, `zwischen` — each row showing the dual case behaviour. No row is collapsed/missing/`undefined`. Table is readable at popover width without horizontal scroll explosion. → observed: pass → ✅
 
 **Cross-locale (closes Phase 35 F7):**
 
-5. **NN locale Lær mer** — popup settings → språk → nynorsk; reload page; re-trigger any Step 1–3 DE pedagogy finding; click "Lær meir" (NN button label). → expected: pedagogy panel renders in NN register — explanation body strings, table headers, and example labels all in NN, not NB-fallback. → observed: TBD → ✅/❌
+5. **NN locale Lær mer** — popup settings → språk → nynorsk; reload page; re-trigger any Step 1–3 DE pedagogy finding; click "Lær meir" (NN button label). → expected: pedagogy panel renders in NN register — explanation body strings, table headers, and example labels all in NN, not NB-fallback. → observed: pass → ✅
    **Note:** F38-2 (already filed in Plan 38-01) reports partial NN — popover button labels translate but the popover *explanation body* stays in NB. If the same gap recurs here, reference F38-2 in the Defects section rather than file a duplicate; if a *different* NN gap appears (e.g. tables broken, examples missing), file a new F38-N.
 
-6. **EN locale Lær mer** — popup settings → språk → English (memory `project_pedagogy_followups.md` notes EN strings deferred). Re-trigger any Step 1–3 DE pedagogy finding; click "Lær mer" / "Learn more". → expected: EITHER the pedagogy panel renders in EN register (preferred) OR there is graceful fallback to NB without broken layout, missing strings, or `undefined` placeholders. Fallback is acceptable; broken layout / missing data is not. → observed: TBD → ✅/❌
+6. **EN locale Lær mer** — popup settings → språk → English (memory `project_pedagogy_followups.md` notes EN strings deferred). Re-trigger any Step 1–3 DE pedagogy finding; click "Lær mer" / "Learn more". → expected: EITHER the pedagogy panel renders in EN register (preferred) OR there is graceful fallback to NB without broken layout, missing strings, or `undefined` placeholders. Fallback is acceptable; broken layout / missing data is not. → observed: pass → ✅
 
 (Every step must record both expected AND observed — empty observed is a walk-not-completed signal per HYG-01.)
 
@@ -98,18 +98,16 @@ Numbered, one observable per step. Shape: `<step> → expected: … → observed
 
 Use one bullet per defect; file a finding for every ❌. Classify root-cause direction in the finding (logic vs data) per CLAUDE.md "Data-Logic Separation":
 
-- F38-N: <one-line summary> → see `.planning/uat/findings/F38-N.md`
-
-(If Step 5 reproduces F38-2 partial-NN gap exactly, reference that finding instead of filing a duplicate.)
+none — clean pass on all 6 walks (4 default-locale DE + 2 cross-locale NN/EN). Phase 26 DE Lær mer pedagogy confirmed end-to-end.
 
 ## Outcome
 
-- [ ] All steps pass (no ❌ above)
-- [ ] Findings filed: `<comma-separated f_id list, or "none">`
-- [ ] Walker signs off: `<name + ISO-8601>`
+- [x] All steps pass (no ❌ above)
+- [x] Findings filed: `none`
+- [x] Walker signs off: `Geir 2026-05-01T20:50:00+02:00`
 
 ### F7 closure status
 
-- [ ] **F7 closure (Steps 5+6 NN/EN locale Lær mer):** if both steps pass, the Phase 35 F7 carry-over is explicitly **closed** here. Walker notes the closure status here:
+- [x] **F7 closure (Steps 5+6 NN/EN locale Lær mer):** both NN and EN locale walks passed. Phase 35 F7 carry-over is **CLOSED**.
 
-> _F7 closure note: TBD — walker fills based on Steps 5+6 outcome._
+> _F7 closure note: NN + EN locale Lær mer panels render correctly on DE pedagogy findings. Closes Phase 35's deferred F7 finding. F38-2 (partial-NN gap from Plan 38-01 walk on French aspect-hint pedagogy) remains open as a separate concern — DE pedagogy NN render is fine, FR pedagogy NN render is the gap._
