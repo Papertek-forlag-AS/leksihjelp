@@ -97,6 +97,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [x] **Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)** — Close the v3.1 audit's integration gap and cross-phase tech debt: complete Phase 30-04 dict-state-builder extraction (lift sidepanel host's stub flattenBanks/BANK_TO_POS/genusToGender into a shared module, populate full inflection index + NB enrichment + language-switcher state-on-first-paint, fix direction toggle hardcoded to ES, fix B-blocker where exam profile hides ordbok tab); re-run lockdown `sync-leksihjelp.js` to mirror Phase 26/27 surfaces; browser-baseline research to flip `exam.safe=true` on lookup-shaped grammar rules that don't exceed Chrome native parity (Phase 27-01 default-conservative call)
 - [ ] **Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)** — Close all v3.1 deferred manual browser walkthroughs in one consolidated session: Phase 29-03/30 lockdown exam-mode E2E on staging-lockdown (lock mechanism + dictionary parity + audio-suppression + Phase 28 dev-button regression), 6 Phase 26 Lær mer DE walkthroughs (dativ badge colour, Wechsel pair rendering, Esc collapse, NN locale, EN locale, Tab nav state reset), 3 Phase 32 walkthroughs (FR aspect_choice / ES por-para / extended ES gustar-class verbs render correctly in the Lær mer panel)
 - [x] **Phase 35: v3.1 UAT Follow-ups (GAP CLOSURE from Phase 34)** — Triage findings raised during Phase 34 walkthrough: F1 FR `fr-aspect-hint` rule does not fire on canonical trigger `Hier il mangeait une pomme` (rule logic or FR verb-aspect inflection index gap); F2/F3 ES `es-gustar` extended verbs (encantar/doler/etc) don't fire AND `duele` is flagged as out-of-dictionary (papertek-vocabulary data gap: `doler` conjugations missing from ES vocab); F5 DE `de-prep-case` Wechselpräposition does not fire on `in der Schule` (rule trigger or movement/state heuristic gap); F6 Tab navigation between spell-check markers auto-collapses the Lær mer panel after ~1s (focus-restore timer race in spell-popover); F7 NN/EN locale Lær mer walkthroughs (criterion 3.5/3.6) deferred to a leksihjelp-extension UAT session — UI language toggle does not exist in the lockdown sidepanel by design (completed 2026-05-01)
+- [ ] **Phase 36: v3.1 UAT Sweep #2 (FOLLOW-UP from Phase 35)** — Close second-wave findings surfaced during Phase 35 browser walkthrough: F36-1 FR `mangeait` flagged as typo not aspect-hint (priority/dedupe vs vocab gap); F36-2 watch-item for ES Aa-pill dropdown race; F36-3/F36-4 DE indefinite-article gender mismatches `kein Zeit`/`keine Mann` not flagged; F36-5 `Fiks` button wrongly offered on no-auto-fix structural rules; F36-6 INFRA-10 `check-vocab-seam-coverage` release gate (long-term fix for the seam-bug class that took down Phase 35 verification — pedagogy maps shipped through gates green but were silently empty in the browser)
 
 ## Phase Details
 
@@ -343,6 +344,26 @@ Plans:
 **Plans:** 1/1 plans complete
 Plans:
 - [ ] 35-01-PLAN.md — Triage + fix all six findings; cross-repo papertek-vocabulary data PR(s) for F2/F3; leksihjelp logic PRs for F1/F5/F6; extension UAT for F7; 35-VERIFICATION.md with per-finding pass/fail
+
+### Phase 36: v3.1 UAT Sweep #2 (FOLLOW-UP from Phase 35)
+
+**Goal:** Close the second wave of findings surfaced during the Phase 35 browser walkthrough. Phase 35 itself uncovered a major regression (pedagogy seam bug — fixed in v2.9.15) and a smaller decoupling bug (dictionary lang-pills driving spell-check — fixed in v2.9.16). Five additional findings were captured but deferred so Phase 35 didn't balloon. Phase 36 closes them, plus adds a process-level gate to prevent the seam-bug class of regression from happening again.
+**Requirements:** None new (follow-up gap closure)
+**Depends on:** Phase 35 (this is its follow-up)
+**Cross-repo:** Possibly — F36-3/F36-4 may need DE noun-context data if root cause is data-side
+
+**Success Criteria** (what must be TRUE):
+  1. **F36-1 FR partial spell-check:** Determine whether `fr-aspect-hint` fires on `Hier il mangeait une pomme` in the live browser (or whether the typo-fuzzy rule out-flags it via dedupeOverlapping). If aspect-hint loses to typo, fix the priority/dedupe ordering OR fix the FR vocab so `mangeait` is recognised as a valid imparfait form (not flagged as out-of-dictionary in the first place). Phase 35 fixture suite must stay P=R=F1=1.000.
+  2. **F36-2 Aa-pill ES dropdown** (watch-item): User reported ES missing from the green-Aa language dropdown despite ES being downloaded. Resolved on its own after a reload (likely IndexedDB caught up). File as watch-item — re-test in Phase 36 walkthrough; if it recurs, investigate `getActivatedLangs` ↔ `__lexiVocabStore.listCachedLanguages` race condition.
+  3. **F36-3 DE `kein Zeit` not flagged:** `Zeit` is feminine (`die Zeit`), so the indefinite article should be `keine` not `kein`. Currently no marker fires. Likely de-gender or a missing kein-paradigm rule. Trigger: `Ich habe kein Zeit.` should fire on `kein` with suggestion `keine`.
+  4. **F36-4 DE `keine Mann` not flagged:** Mirror case — `Mann` is masculine, so the indefinite article should be `kein` not `keine`. Trigger: `Ich sehe keine Mann.` should fire on `keine` with suggestion `kein`.
+  5. **F36-5 "Fiks" wrongly offered for v2-mistakes:** Some structural rule findings (word-order / V2 / verb-final) currently render with a `Fiks` button even though their fix can't be expressed as an atomic string substitution. Auto-applying the fix paste literal instruction text into the document. Affected rules: identify the set during triage; ensure each carries `noAutoFix: true` so the popover suppresses Fiks (mechanism already exists at `spell-check.js:642` — just needs all relevant rules to opt in).
+  6. **F36-6 Process gate (INFRA-10):** Add `npm run check-vocab-seam-coverage` release gate that asserts every key returned by `vocab-seam-core.buildIndexes` has a matching `getX()` getter in `vocab-seam.js` AND a matching entry in `spell-check.js`'s vocab object construction. Paired `:test` self-test variant. Catches the Phase 26-01 / 32-01 / 32-03 class of regression where a new index ships through gates green but is silently empty in the browser. This gate is the long-term fix for the bug class that took down Phase 35 verification.
+  7. All release-workflow gates (now 12 with the new one) exit 0; one or more leksihjelp version bumps signal lockdown + skriveokt-zero downstream consumers to re-pin.
+
+**Plans:** 0/1 plan (planned)
+Plans:
+- [ ] 36-01-PLAN.md — Triage + fix F36-1/F36-3/F36-4/F36-5; verify F36-2 watch-item; ship F36-6 process gate; 36-VERIFICATION.md with per-finding pass/fail
 
 ### Phase 32: FR/ES Pedagogy (Lær mer)
 
