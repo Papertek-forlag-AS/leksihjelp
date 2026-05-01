@@ -64,7 +64,39 @@ $ npm run check-fixtures 2>&1 | grep "fr/aspect-hint"
 
 ## F36-3 / F36-4: DE `kein`/`keine` paradigm
 
-(See Task 2 section below)
+**Status:** FIXED
+
+### Changes
+
+- `extension/content/spell-rules/de-gender.js`:
+  - `ARTICLE_GENUS` extended with `'keine': 'f'` (mirrors `eine: f`).
+  - New `KEIN_PARADIGM` map (`m: kein, f: keine, n: kein`) used when the offending article is itself in the negative-indefinite paradigm. Without this, `keine Mann` would suggest `der` (definite) — wrong paradigm.
+  - New manual block for bare `kein` before a feminine noun (mirrors the existing `ein` patch). The reverse direction (`keine` before m/n nouns) is handled by the main loop via `ARTICLE_GENUS['keine']` + `KEIN_PARADIGM`.
+
+### Data
+
+- `Mann` is `m`, `Zeit` is `f`, `Auto` is `n`, `Buch` is `n` in `extension/data/de.json` — verified via Node repro. No data side-patch needed.
+
+### New fixtures (in `fixtures/de/grammar.jsonl`)
+
+| id | text | expected |
+| -- | ---- | -------- |
+| de-gender-kein-fem-1 | "Ich habe kein Zeit." | gender → keine |
+| de-gender-keine-masc-1 | "Ich sehe keine Mann." | gender → kein |
+| de-gender-keine-neut-1 | "Ich sehe keine Buch." | gender → kein |
+| de-gender-keine-fem-clean | "Ich habe keine Zeit." | (clean) |
+| de-gender-kein-neut-clean | "Ich habe kein Auto." | (clean) |
+| de-gender-kein-masc-clean | "Ich habe kein Mann." | (clean) |
+
+### Evidence
+
+```
+$ npm run check-fixtures 2>&1 | grep "de/grammar"
+[de/grammar] P=1.000 R=1.000 F1=1.000  18/18 pass
+```
+
+Full suite exit=0.
+
 
 ## F36-5: Structural-rule Fiks-button suppression
 

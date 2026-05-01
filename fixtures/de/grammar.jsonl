@@ -10,3 +10,9 @@
 {"id":"case-1776961657245","text":"Der Buch ist gut.","expected":[{"rule_id":"gender","start":0,"end":3,"suggestion":"Das"}],"comment":"this time a good explination","status":"ok"}
 {"id":"case-1776961670368","text":"Ich habe ein eine ärztin.","expected":[{"rule_id":"de-capitalization","start":18,"end":24,"suggestion":"Ärztin"}],"comment":"","status":"ok"}
 {"id":"case-1776961686861","text":"Ich habe ein die änderung.","expected":[{"rule_id":"de-capitalization","start":17,"end":25,"suggestion":"Änderung"}],"comment":"","status":"ok"}
+{"id":"de-gender-kein-fem-1","text":"Ich habe kein Zeit.","expected":[{"rule_id":"gender","start":9,"end":13,"suggestion":"keine"}],"comment":"F36-3: kein (m/n) before feminine Zeit -> keine"}
+{"id":"de-gender-keine-masc-1","text":"Ich sehe keine Mann.","expected":[{"rule_id":"gender","start":9,"end":14,"suggestion":"kein"}],"comment":"F36-4: keine (f) before masculine Mann -> kein (stay in kein-paradigm)"}
+{"id":"de-gender-keine-neut-1","text":"Ich sehe keine Buch.","expected":[{"rule_id":"gender","start":9,"end":14,"suggestion":"kein"}],"comment":"F36-4: keine (f) before neuter Buch -> kein (stay in kein-paradigm)"}
+{"id":"de-gender-keine-fem-clean","text":"Ich habe keine Zeit.","expected":[],"comment":"F36-3: keine + feminine = correct, no flag"}
+{"id":"de-gender-kein-neut-clean","text":"Ich habe kein Auto.","expected":[],"comment":"F36-4: kein + neuter = correct, no flag"}
+{"id":"de-gender-kein-masc-clean","text":"Ich habe kein Mann.","expected":[],"comment":"F36-4: kein + masculine = correct, no flag"}

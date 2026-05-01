@@ -4,7 +4,9 @@
  * Flags Nominative article-noun pairs where the article's grammatical gender 
  * does not match the noun's gender.
  * 
- * Target articles: der (m), die (f), das (n), eine (f).
+ * Target articles: der (m), die (f), das (n), eine (f), keine (f).
+ * Manual gendered checks also fire on bare `ein` (masc/neut) + feminine noun
+ * and bare `kein` (masc/neut) + feminine noun (Phase 36-01 / F36-3, F36-4).
  *
  * Rule ID: 'gender'
  */
@@ -19,12 +21,19 @@
     'die': 'f',
     'das': 'n',
     'eine': 'f',
+    'keine': 'f', // F36-4: negative indefinite, feminine + plural
   };
   const GENUS_ARTICLE = {
     'm': 'der',
     'f': 'die',
     'n': 'das',
   };
+
+  // F36-4: indefinite-negative paradigm. When the original article is keine/kein
+  // (negative indefinite), suggest within the same paradigm rather than crossing
+  // over to definite ('der'/'die'/'das'). Mirrors how the existing 'ein' check
+  // suggests 'eine' (not 'die') for feminine mismatches.
+  const KEIN_PARADIGM = { 'm': 'kein', 'f': 'keine', 'n': 'kein' };
 
   const GENUS_TO_LABEL_KEY = { m: 'gender_label_m', f: 'gender_label_f', n: 'gender_label_n' };
 
@@ -89,7 +98,11 @@
             const isDativeFem = actual === 'f' && articleTok.word === 'der' && preArt && DATIVE_PREPS.has(preArt.word);
             
             if (!isDativeFem) {
-              const correctArticle = GENUS_ARTICLE[actual];
+              // F36-4: stay in the kein-paradigm when the original was keine/kein.
+              const inKeinParadigm = articleTok.word === 'keine' || articleTok.word === 'kein';
+              const correctArticle = inKeinParadigm
+                ? KEIN_PARADIGM[actual]
+                : GENUS_ARTICLE[actual];
               if (correctArticle) {
                 out.push({
                   rule_id: 'gender',
@@ -119,6 +132,24 @@
             actualGenus: 'f',
             fix: matchCase(prev.display, 'eine'),
             message: `Kjønn: "${prev.display} ${t.display}" skulle vært "eine ${t.display}"`,
+          });
+        }
+
+        // F36-3: Manual check for bare 'kein' (masc/neut form) before a
+        // feminine noun. Mirrors the 'ein' patch above. The reverse direction
+        // (feminine 'keine' before a masc/neut noun, F36-4) is handled by the
+        // main loop because 'keine' is now in ARTICLE_GENUS.
+        if (prev && prev.word === 'kein' && nounGenus.get(t.word) === 'f') {
+          out.push({
+            rule_id: 'gender',
+            priority: rule.priority,
+            start: prev.start,
+            end: prev.end,
+            original: prev.display,
+            noun_display: t.display,
+            actualGenus: 'f',
+            fix: matchCase(prev.display, 'keine'),
+            message: `Kjønn: "${prev.display} ${t.display}" skulle vært "keine ${t.display}"`,
           });
         }
       }
