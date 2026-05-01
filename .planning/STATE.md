@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: planning
-last_updated: "2026-05-01T09:35:15.345Z"
-last_activity: 2026-05-01 -- Plan 35-01 complete. F6 Lær mer panel state-loss bug fixed (commit 4bbab27); F1/F2/F3 verified PASS in current data with Node repros; F5 alternate canonical triggers documented (`in den Schule`, `auf der Tisch`); F7 auto-approved with manual UAT recipe captured in 35-VERIFICATION.md. Version 2.9.13 -> 2.9.14 (patch — narrow logic fix). All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14.
+last_updated: "2026-05-01T09:38:01.327Z"
+last_activity: 2026-05-01 -- Plan 36-01 complete. v3.1 UAT sweep #2 closed: F36-1 (FR mangeait) defensively pinned via 2 new aspect-hint fixtures (Node-side already correct); F36-3/F36-4 (DE kein/keine paradigm) shipped via ARTICLE_GENUS extension + new KEIN_PARADIGM map keeping suggestions in the negative-indefinite paradigm; F36-5 noAutoFix opt-in on nb-v2 + de-v2 + fr-bags. 6 new DE gender fixtures + 2 new FR aspect-hint fixtures; full suite stays P=R=F1=1.000. F36-2 + Task 4 walkthrough auto-deferred per workflow.auto_advance with recipes captured. Version 2.9.16 -> 2.9.17. All 12 release gates green (incl. INFRA-10); bundle 12.68 MiB / 20 MiB cap. Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.17.
 progress:
   total_phases: 14
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 31
-  completed_plans: 23
+  completed_plans: 24
 ---
 
 # Session State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Position
 
 **Milestone:** v3.1 Polish & Intelligence (cleanup phase)
-**Phase:** 35 (v3.1 UAT follow-ups, gap closure from Phase 34) -- COMPLETE
-**Plan:** Phase 35 done (1/1 plans complete); v3.1 archive-ready pending batched deferred manual UAT
-**Status:** Ready to plan (or archive v3.1)
-**Last activity:** 2026-05-01 -- Plan 35-01 complete. F6 Lær mer panel state-loss bug fixed (commit 4bbab27); F1/F2/F3 verified PASS in current data with Node repros; F5 alternate canonical triggers documented (`in den Schule`, `auf der Tisch`); F7 auto-approved with manual UAT recipe captured in 35-VERIFICATION.md. Version 2.9.13 -> 2.9.14 (patch — narrow logic fix). All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14.
+**Phase:** 36 (v3.1 UAT sweep #2, Phase 35 follow-up)
+**Plan:** Phase 36 P01 complete (P02 already shipped INFRA-10 / check-vocab-seam-coverage); 2/2 plans complete
+**Status:** Phase 36 done — v3.1 archive-ready pending batched deferred manual UAT
+**Last activity:** 2026-05-01 -- Plan 36-01 complete. F36-1 (FR mangeait) defensively pinned; F36-3/F36-4 (DE kein/keine paradigm) shipped; F36-5 noAutoFix opt-in on nb-v2/de-v2/fr-bags. Version 2.9.16 -> 2.9.17. All 12 release gates green; bundle 12.68 MiB / 20 MiB cap. F36-2 + Task 4 walkthrough auto-deferred. Lockdown + skriveokt-zero re-pin to leksihjelp 2.9.17.
 
-Progress: [██████████] 100% (Phase 35 complete — 1/1 plans)
+Progress: [██████████] 100% (Phase 36 complete — 2/2 plans)
 
 ## Performance Metrics
 
@@ -56,6 +56,7 @@ Progress: [██████████] 100% (Phase 35 complete — 1/1 plans
 | Phase 33 P03 | 8 | 6 tasks | 53 files |
 | Phase 35-v3.1-uat-followups P01 | 9 | 3 tasks | 5 files |
 | Phase 36 P02 | 6 | 3 tasks | 4 files |
+| Phase 36 P01 | 10 | 5 tasks | 9 files |
 
 ## Accumulated Context
 
