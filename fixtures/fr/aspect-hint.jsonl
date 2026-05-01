@@ -94,3 +94,8 @@
 {"id":"fr-aspect-neg-041","text":"Hier elle a parlé avec son ami","lang":"fr","expected":[]}
 {"id":"fr-aspect-neg-042","text":"Souvent elle dormait chez nous","lang":"fr","expected":[]}
 {"id":"fr-aspect-neg-043","text":"Tous les jours il travaillait à la maison","lang":"fr","expected":[]}
+// Phase 36-01 / F36-1: pin canonical UAT sentence (terminating period) so the
+// "Hier il mangeait une pomme." regression cannot silently regress to a typo
+// finding. Mirrors pos-002 with explicit period to cover sentence-final tokenisation.
+{"id":"fr-aspect-pos-f36-1-period","text":"Hier il mangeait une pomme.","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":16,"suggestion":"mangeait"}]}
+{"id":"fr-aspect-neg-f36-1-clean","text":"Hier il a mangé une pomme.","lang":"fr","expected":[]}
