@@ -475,6 +475,25 @@ When EXAM-09 lands:
 
 If somebody on the lockdown side modified `public/leksihjelp/**` directly to fix something they noticed, mirror that change here, bump version, and have them re-sync. Don't leave the divergence — the next `npm install` over there will silently revert their fix.
 
+## Auto-mode pause convention: `verification_kind: human-browser-walk`
+
+Phase plan files in `.planning/phases/<phase>/<phase>-<plan>-PLAN.md` may declare a `verification_kind` field in their YAML frontmatter. The value `human-browser-walk` signals that the phase requires real-browser verification by a human walker and **cannot be auto-advanced**.
+
+**How agents detect it:**
+```bash
+node ~/.claude/get-shit-done/bin/gsd-tools.cjs frontmatter get <plan-file> --field verification_kind
+# Returns "human-browser-walk" when set, null when absent.
+```
+
+**Required behavior:** Any agent running auto-mode (`/gsd:auto`, `/gsd:execute-phase` auto-loop, `/gsd:plan-phase` auto-loop) MUST query `verification_kind` on each plan before advancing. If the value is `human-browser-walk`, the agent halts the loop, surfaces the walkthrough requirement (point the user at `.planning/uat/TEMPLATE-walkthrough.md` to instantiate), and waits for explicit user resume. Do NOT auto-advance past human-browser-walk plans on the assumption that "the gates passed."
+
+**Why:** v3.1 deferred six browser walkthroughs (Phases 26, 27, 30-01, 30-02, F36-1) because auto-mode advanced past them without ever pausing for verification — release gates passed, but the actual browser surface was never exercised. CONTEXT Pitfall 2 names this as the root cause. This convention closes the class.
+
+**Example:** Phase 38 plan files declare `verification_kind: human-browser-walk` in their frontmatter. Running `/gsd:auto` on Phase 38 surfaces:
+> "Phase 38 plan 01 requires a human browser walk — instantiate `.planning/uat/TEMPLATE-walkthrough.md` to `.planning/uat/UAT-EXT-01.md`, complete pre-flight + steps, file findings against `.planning/uat/TEMPLATE-finding.md`, then resume."
+
+Companion templates: `.planning/uat/TEMPLATE-walkthrough.md` (pre-flight + numbered steps) and `.planning/uat/TEMPLATE-finding.md` (defect record with HARD-required `regression_fixture_id`).
+
 ## graphify
 
 This project has a graphify knowledge graph at graphify-out/.
