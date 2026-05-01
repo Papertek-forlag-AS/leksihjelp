@@ -20,7 +20,7 @@ Requirements for v3.2. Each maps to a roadmap phase.
 
 ### Extension UAT (Browser Walkthroughs)
 
-- [ ] **UAT-EXT-01**: F36-1 fr-aspect-hint browser confirmation — passé-composé vs imparfait soft-hint dot fires AND Lær mer panel renders in actual Chrome, verification log instantiates HYG-01 template
+- [x] **UAT-EXT-01**: F36-1 fr-aspect-hint browser confirmation — passé-composé vs imparfait soft-hint dot fires AND Lær mer panel renders in actual Chrome, verification log instantiates HYG-01 template
 - [ ] **UAT-EXT-02**: Phase 26 DE Lær mer browser walks — 4 default-locale walks (de-prep-case + Wechselpräpositionen) + 2 NN/EN locale walks (closes F7 from Phase 35), verification logs instantiate HYG-01 template
 - [ ] **UAT-EXT-03**: Phase 27 exam-mode 9-step walkthrough — toggle on/off, EKSAMENMODUS badge, amber widget border, suppression behavior across rules, lockdown teacher-lock dual mode, verification log instantiates HYG-01 template (highest stakes — school deployment trust)
 - [ ] **UAT-EXT-04**: Phase 30-01 popup view 9-step walkthrough — load extension, search, lang switch, direction toggle, compound suggestion, Lær mer popover, settings, account section, pause, vocab-updates banner; verification log instantiates HYG-01 template
@@ -103,7 +103,7 @@ All 27 v1 requirements mapped to exactly one phase by gsd-roadmapper on 2026-05-
 | HYG-05 | Phase 37 | Complete |
 | HYG-06 | Phase 37 | Complete |
 | HYG-07 | Phase 37 | Complete |
-| UAT-EXT-01 | Phase 38 | Pending |
+| UAT-EXT-01 | Phase 38 | Complete |
 | UAT-EXT-02 | Phase 38 | Pending |
 | UAT-EXT-03 | Phase 38 | Pending |
 | UAT-EXT-04 | Phase 38 | Pending |

@@ -184,7 +184,7 @@ See: `.planning/milestones/v3.1-ROADMAP.md` for full phase detail and success cr
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 37. Hygiene, Templates & Pre-flight | 4/4 | Complete    | 2026-05-01 |
-| 38. Extension UAT Batch + Bug-Fix Loop + REGR | 0/5 | Not started | - |
+| 38. Extension UAT Batch + Bug-Fix Loop + REGR | 1/5 | In Progress|  |
 | 39. Lockdown Sync + Staging UAT | 0/0 | Not started | - |
 | 40. Deploy Runbook Authoring | 0/0 | Not started | - |
 | 41. Milestone Archive | 0/0 | Not started | - |

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T14:10:38.046Z"
+last_updated: "2026-05-01T17:30:00.000Z"
 progress:
   total_phases: 14
   completed_phases: 10
-  total_plans: 36
-  completed_plans: 29
+  total_plans: 41
+  completed_plans: 30
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 37 (Hygiene, Templates & Pre-flight) — Complete (4/4 plans shipped)
-Plan: 02 complete (HYG-04 + HYG-05 release gates landed)
-Status: All Phase 37 requirements satisfied (HYG-01..HYG-07). Release-gate suite extended from 12 to 14 entries. Ready for `/gsd:plan-phase 38`.
-Last activity: 2026-05-01 — Plan 37-02 complete (check-version-alignment HYG-04 + check-synced-surface-version HYG-05 with paired self-tests, registered as Release Workflow steps 14-15)
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (1/5 plans complete)
+Plan: 01 complete (UAT-EXT-01 warm-up walkthrough — F36-1 fr-aspect-hint browser confirmation)
+Status: Warm-up walk surfaced 1 blocker (F38-1) + 1 deferred minor (F38-2). F38-1 requires decimal-insert fix plan (38-01.1) BEFORE Plan 38-05 ships the release asset (FIX-04 must not bundle a known-blocker build). F38-2 deferred per walker — Phase 38-04 (DE Lær mer 4+2 walk) accumulates more NN signal.
+Last activity: 2026-05-01 — Plan 38-01 complete; HYG-03 hard-pause discipline validated end-to-end (auto-mode paused at human-browser-walk checkpoint; walker resumed manually)
 
 ## Performance Metrics
 
@@ -58,6 +58,11 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 37-02]: HYG-05 self-test cleanup uses non-destructive `git reset --soft BEFORE_SHA` instead of `--hard` — preserves any unrelated dirty files in working tree, so the self-test is safe to run mid-development without clobbering pending work
 - [Phase 37-02]: extension/data/*.json no-exclusion in HYG-05 honored per CONTEXT lock; vocab-sync-with-version-bump is the canonical pattern, the noise floor is the right tradeoff
 - [Phase 37-02]: [lockdown-resync-needed] commit-message hint coupled directly into HYG-05 failure diagnostic — pulls HYG-06 nudge into the surface where developers will actually see it (at gate-failure time, in copy-pastable form)
+- [Phase 38-01]: F38-1 (blocker) requires decimal-insert fix plan (38-01.1) BEFORE Plan 38-05 ships the release asset; FIX-04 must not bundle a known-blocker build
+- [Phase 38-01]: F38-2 (NN locale partial) deferred per walker — NOT decimal-inserted into Phase 38; Phase 38-04 (DE Lær mer 4+2 walk, includes NN+EN cross-locale walks) accumulates more NN signal before dedicated NN coverage phase
+- [Phase 38-01]: Sidecar-pipeline gap is universal (pitfalls-nb.json also 404 in Step 6 console), not FR-specific — F38-1 fix should regenerate sidecars for all 6 languages, not just FR
+- [Phase 38-01]: F38-1 proximate-cause hypothesis: per-input language not propagating popup foreign-language to spell-check seam (NB rules fire on French tokens) — fix plan to verify
+- [Phase 38-01]: HYG-03 hard-pause discipline validated end-to-end: auto-mode paused at human-browser-walk checkpoint despite system reminder; closed exactly the Pitfall 2 class STATE v3.2 entry called out
 
 ### Pending Todos
 
@@ -68,7 +73,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - Phase 27 9-step exam-mode walk → UAT-EXT-03 / Phase 38
 - Phase 30-01 9-step extension popup view walk → UAT-EXT-04 / Phase 38
 - Phase 30-02 8-step staging-lockdown sidepanel UAT → UAT-LOCK-02 / Phase 39
-- F36-1 fr-aspect-hint browser confirm → UAT-EXT-01 / Phase 38
+- ~~F36-1 fr-aspect-hint browser confirm → UAT-EXT-01 / Phase 38~~ ✅ Complete (Plan 38-01, 2026-05-01) — surfaced F38-1 blocker + F38-2 minor deferred
 - Lockdown-stb production Firebase deploy runbook → DEPLOY-01 / Phase 40 (deploy itself = PROD-01, deferred)
 - Lockdown papertek.app production hosting deploy runbook → DEPLOY-02 / Phase 40 (deploy itself = PROD-02, deferred)
 
@@ -76,10 +81,15 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 - **HYG-07 risk:** If papertek-vocabulary deployment lags HEAD, Phase 37 carries papertek-vocabulary repo work as a sub-step (direct repo access at `/Users/geirforbord/Papertek/papertek-vocabulary`). Cross-app blast radius applies.
 - **Cross-repo coordination:** UAT-LOCK-03 needs a PR against the lockdown repo's sync script — coordinate during Phase 39 plan.
-- **Auto-mode + human-browser-walk:** HYG-03 is the unblocker — without `verification_kind: human-browser-walk` frontmatter discipline, auto-mode will skip Phase 38 verification (Pitfall 2 — root cause of v3.1's six-walkthrough deferral).
+- **Auto-mode + human-browser-walk:** HYG-03 is the unblocker — without `verification_kind: human-browser-walk` frontmatter discipline, auto-mode will skip Phase 38 verification (Pitfall 2 — root cause of v3.1's six-walkthrough deferral). ✅ Validated end-to-end in Plan 38-01.
+- **F38-1 (blocker, open):** fr-aspect-hint silent in real Chrome — French input scored against NB dictionary; FR sidecars 404; sidecar-pipeline gap universal across languages. Requires decimal-insert fix plan (38-01.1) BEFORE Plan 38-05 release asset. See `.planning/uat/findings/F38-1.md`.
+- **F38-2 (minor, deferred):** NN locale partial — popover button labels translate but explanation body stays in NB. NOT a Phase 38 blocker per walker classification; Phase 38-04 will accumulate more NN signal. See `.planning/uat/findings/F38-2.md`.
 
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Plan 38-01 Task 1 complete (`.planning/uat/UAT-EXT-01.md` instantiated for F36-1 fr-aspect-hint warm-up walkthrough; commit 92ea7eb). HARD-PAUSED at Task 2 per `verification_kind: human-browser-walk` — walker (Geir) must perform the browser walk in real Chrome, populate pre-flight evidence + observed fields, file F38-N findings for any ❌, and sign off. Auto-mode advance is forbidden until walker resumes.
-Next: Walker resumes Plan 38-01 Task 2 → walks fr-aspect-hint in Chrome (steps 1-6 drafted in UAT-EXT-01.md) → on completion, agent commits the populated walkthrough log + any findings, writes 38-01-SUMMARY.md, advances to Plan 38-02.
+Stopped at: Plan 38-01 complete (warm-up walkthrough UAT-EXT-01, F36-1 fr-aspect-hint browser confirmation). Walker signed off 2026-05-01T17:00:00+02:00 on ext_version 2.9.18 / Chrome 147.0.7727.117 arm64. Surfaced F38-1 (blocker) + F38-2 (minor, deferred). Plan commits: 92ea7eb (Task 1), 8294e25 (interim STATE), 66248a7 (Task 2 walker artifacts). SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-01-SUMMARY.md`.
+Next: Orchestrator decision. Two open paths (likely interleaved):
+- (a) Append decimal-insert fix plan 38-01.1 to close F38-1 blocker (regenerate sidecars for all 6 languages + audit per-input language propagation popup → spell-check seam + add `regression_fixture_id` per HYG-02). MUST land before Plan 38-05 release asset.
+- (b) Proceed to Plan 38-02 (canonical popup view 9-step walkthrough — independent surface, can run in parallel with F38-1 fix work).
+F38-2 explicitly deferred per walker — NOT actionable in Phase 38.
