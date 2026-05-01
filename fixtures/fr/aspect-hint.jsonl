@@ -99,3 +99,22 @@
 // finding. Mirrors pos-002 with explicit period to cover sentence-final tokenisation.
 {"id":"fr-aspect-pos-f36-1-period","text":"Hier il mangeait une pomme.","lang":"fr","expected":[{"rule_id":"fr-aspect-hint","start":8,"end":16,"suggestion":"mangeait"}]}
 {"id":"fr-aspect-neg-f36-1-clean","text":"Hier il a mangé une pomme.","lang":"fr","expected":[]}
+// Phase 38-01.1 / F38-1: pin the canonical UAT-EXT-01 Step 1 reproduction sentence —
+// "Pendant que je marchais, j'ai vu un chien." Walker reported NB-typo-curated firing
+// on `j'ai` ("Jai står ikke i ordboken, kanskje du mente j'aime?") in real Chrome with
+// popup foreign-language=fr. The browser-only proximate cause is the popup picker's
+// `LANGUAGE_CHANGED` broadcast being gated behind a try/catch on `loadDictionary` /
+// `loadGrammarFeatures` — when those throw (e.g. FR vocab not yet downloaded), the
+// broadcast never fires and content scripts run with stale `currentLang`. Fixed in
+// the companion commit.
+//
+// The sentence itself is GRAMMATICALLY CORRECT French (`Pendant que` introduces a
+// background imparfait clause, and the main clause `j'ai vu` is foreground passé
+// composé — the canonical narrative aspect-pair). It should NOT fire fr-aspect-hint.
+// `Pendant que` is also NOT in the imparfait-adverb set (only `tandis que` is), so
+// even if the adverb-detection scan ran, no flag would emit. This negative fixture
+// pins both: that the rule doesn't false-fire on the canonical UAT sentence, AND
+// that under `lang: 'fr'` the fixture runner doesn't mis-route to NB rules (the
+// rule-language filter in spell-check-core enforces this — file-side regression
+// guard against future cross-language leakage).
+{"id":"fr-aspect-neg-f38-1-canonical","text":"Pendant que je marchais, j'ai vu un chien.","lang":"fr","expected":[]}
