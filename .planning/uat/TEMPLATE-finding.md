@@ -1,18 +1,29 @@
+---
+f_id: F38-1
+severity: blocker
+sync_status: extension-only
+regression_fixture_id: TBD
+walkthrough_id: UAT-EXT-XX
+discovered: TBD
+status: open
+---
+
 <!--
 This is a TEMPLATE. Copy to `.planning/uat/findings/F<phase>-<seq>.md` and fill placeholders.
 The `regression_fixture_id` field is HARD-required per FIX-02 — school-year stakes, no exceptions.
+
+Frontmatter field guidance:
+- f_id: F<phase>-<seq>; formalises F36-1 precedent (e.g. F38-1)
+- severity: blocker | major | minor | trivial
+- sync_status: synced-upstream | needs-resync | extension-only
+- regression_fixture_id: e.g. fixtures/<lang>/<rule>.jsonl#<id>
+                          OR benchmark-texts/expectations.json#<id>
+                          HARD requirement, school-year stakes
+- walkthrough_id: back-reference to the walkthrough (e.g. UAT-EXT-01)
+- discovered: ISO-8601
+- status: open | fixing | closed
 -->
 
----
-f_id: F38-1                              # F<phase>-<seq>; formalises F36-1 precedent
-severity: blocker                        # blocker | major | minor | trivial
-sync_status: extension-only              # synced-upstream | needs-resync | extension-only
-regression_fixture_id: fixtures/<lang>/<rule>.jsonl#<id>
-                                         # OR benchmark-texts/expectations.json#<id> — HARD requirement, school-year stakes
-walkthrough_id: UAT-EXT-XX               # back-reference to walkthrough
-discovered: <ISO-8601>
-status: open                             # open | fixing | closed
----
 
 # F<phase>-<seq>: <one-line summary>
 

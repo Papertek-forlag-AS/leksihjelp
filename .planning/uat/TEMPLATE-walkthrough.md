@@ -1,22 +1,34 @@
+---
+walkthrough_id: UAT-EXT-XX
+phase: 38-extension-uat-batch
+verification_kind: human-browser-walk
+ext_version: TBD
+idb_revision: TBD
+preset_profile: default
+browser_version: TBD
+reload_ts: TBD
+target_browsers: [chrome, edge, brave]
+walker: TBD
+date: TBD
+---
+
 <!--
 This is a TEMPLATE. Copy to `.planning/uat/<walkthrough_id>.md` and fill placeholders before walking.
 The `verification_kind: human-browser-walk` field triggers /gsd:auto hard-pause per CLAUDE.md GSD references —
 agents running auto-mode MUST stop and surface the walkthrough requirement instead of advancing.
+
+Frontmatter field guidance:
+- walkthrough_id: matches REQUIREMENTS.md ID (e.g. UAT-EXT-01)
+- ext_version: fill from extension/manifest.json — guards stale-zip walks
+- idb_revision: fill from chrome.storage / DevTools IndexedDB — guards stale-data walks
+- preset_profile: default | basic | full — guards Phase 05.1 feature-gating regression class
+- browser_version: e.g. "Chrome 138.0.6962.42"
+- reload_ts: ISO-8601 — chrome://extensions reload timestamp
+- target_browsers: list (chrome, edge, brave, …)
+- walker: human walker name
+- date: ISO-8601 walk date
 -->
 
----
-walkthrough_id: UAT-EXT-XX               # matches REQUIREMENTS.md ID
-phase: 38-extension-uat-batch
-verification_kind: human-browser-walk    # HYG-03 hook trigger — auto-mode pauses on this value
-ext_version: <fill from manifest.json>   # guards stale-zip walks
-idb_revision: <fill from chrome.storage> # guards stale-data walks
-preset_profile: default                  # default | basic | full — guards Phase 05.1 feature-gating regression class
-browser_version: <fill>                  # e.g. "Chrome 138.0.6962.42"
-reload_ts: <ISO-8601>                    # chrome://extensions reload timestamp
-target_browsers: [chrome, edge, brave]   # list
-walker: <name>
-date: <ISO-8601>
----
 
 # Walkthrough: <short title>
 
