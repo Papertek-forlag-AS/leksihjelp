@@ -96,6 +96,7 @@ See: `.planning/milestones/v3.0-ROADMAP.md` for full phase detail and success cr
 - [ ] **Phase 28.1: Skriveokt-Zero Exam-Mode Sync (GAP CLOSURE)** — Close EXAM-09 for the **second** downstream consumer (Tauri desktop app at `lockdown/skriveokt-zero/`): extend its `scripts/sync-leksihjelp.js` to copy `extension/exam-registry.js`, wire the Tauri loader equivalent to inject it before consumers, refresh stale `src/leksihjelp/*.js`, wire teacher-lock writer in the Tauri exam-profile path, update leksihjelp `CLAUDE.md` to document both consumers
 - [x] **Phase 33: v3.1 Cleanup — Phase 30-04 + Lockdown Sync + exam.safe Audit (GAP CLOSURE)** — Close the v3.1 audit's integration gap and cross-phase tech debt: complete Phase 30-04 dict-state-builder extraction (lift sidepanel host's stub flattenBanks/BANK_TO_POS/genusToGender into a shared module, populate full inflection index + NB enrichment + language-switcher state-on-first-paint, fix direction toggle hardcoded to ES, fix B-blocker where exam profile hides ordbok tab); re-run lockdown `sync-leksihjelp.js` to mirror Phase 26/27 surfaces; browser-baseline research to flip `exam.safe=true` on lookup-shaped grammar rules that don't exceed Chrome native parity (Phase 27-01 default-conservative call)
 - [ ] **Phase 34: v3.1 Browser UAT Sweep (GAP CLOSURE)** — Close all v3.1 deferred manual browser walkthroughs in one consolidated session: Phase 29-03/30 lockdown exam-mode E2E on staging-lockdown (lock mechanism + dictionary parity + audio-suppression + Phase 28 dev-button regression), 6 Phase 26 Lær mer DE walkthroughs (dativ badge colour, Wechsel pair rendering, Esc collapse, NN locale, EN locale, Tab nav state reset), 3 Phase 32 walkthroughs (FR aspect_choice / ES por-para / extended ES gustar-class verbs render correctly in the Lær mer panel)
+- [ ] **Phase 35: v3.1 UAT Follow-ups (GAP CLOSURE from Phase 34)** — Triage findings raised during Phase 34 walkthrough: F1 FR `fr-aspect-hint` rule does not fire on canonical trigger `Hier il mangeait une pomme` (rule logic or FR verb-aspect inflection index gap); F2/F3 ES `es-gustar` extended verbs (encantar/doler/etc) don't fire AND `duele` is flagged as out-of-dictionary (papertek-vocabulary data gap: `doler` conjugations missing from ES vocab); F5 DE `de-prep-case` Wechselpräposition does not fire on `in der Schule` (rule trigger or movement/state heuristic gap); F6 Tab navigation between spell-check markers auto-collapses the Lær mer panel after ~1s (focus-restore timer race in spell-popover); F7 NN/EN locale Lær mer walkthroughs (criterion 3.5/3.6) deferred to a leksihjelp-extension UAT session — UI language toggle does not exist in the lockdown sidepanel by design
 
 ## Phase Details
 
@@ -323,6 +324,25 @@ Plans:
 **Plans:** 1 plan
 Plans:
 - [ ] 34-01-PLAN.md — Consolidated browser UAT walkthrough (lockdown exam-mode E2E + sidepanel dictionary parity + Phase 26 DE Lær mer + Phase 32 FR/ES pedagogy) + 34-VERIFICATION.md authoring with per-criterion pass/fail and finding dispositions
+
+### Phase 35: v3.1 UAT Follow-ups (GAP CLOSURE from Phase 34)
+
+**Goal:** Resolve all findings raised during Phase 34 walkthrough so v3.1 can be archived. Mix of leksihjelp logic (F1, F5, F6), papertek-vocabulary data (F2/F3), and a deferred extension-side manual UAT (F7). Phase 34's F4 (top-bar pill amber tint + EKSAMEN suffix in lockdown editor-toolbar) shipped as in-flight fix during the walk and is NOT a Phase 35 deliverable.
+**Requirements:** None new (gap closure)
+**Depends on:** Phase 34 (this is its follow-up)
+**Cross-repo:** F2/F3 modifies papertek-vocabulary (ES verb data); F1 and F5 may also need data + logic changes
+
+**Success Criteria** (what must be TRUE):
+  1. **F1 FR aspect-hint:** rule fires on `Hier il mangeait une pomme` and the existing fixture suite stays at P=R=F1=1.000. Whether root cause is logic or data, the trigger sentence shows a P3 hint dot in a clean run.
+  2. **F2/F3 ES gustar/doler:** `doler` and its conjugations present in ES vocab; `es-gustar` fires on `El encanta la música` (encantar) and similar trigger cases for the extended verb set; `duele` is no longer flagged as out-of-dictionary.
+  3. **F5 DE Wechselpräposition:** `in der Schule` (movement → accusative) fires `de-prep-case` with the Wechselpräposition pair pedagogy, OR the trigger gap is documented and a different canonical trigger sentence is established for the Phase 26 walkthrough.
+  4. **F6 Tab nav auto-Esc:** Pressing Tab between markers no longer auto-collapses the Lær mer panel after ~1s. Panel state per marker is independent and the user-driven Esc remains the only collapse trigger.
+  5. **F7 NN/EN locale:** Phase 26 sub-checks 3.5 (NN) and 3.6 (EN) executed in a vanilla extension UAT session; results captured in 35-VERIFICATION.md.
+  6. All release-workflow gates exit 0; cross-repo PRs landed in papertek-vocabulary as needed; one or more leksihjelp version bumps signal lockdown + skriveokt-zero downstream consumers to re-pin.
+
+**Plans:** 0/1 plan (planned)
+Plans:
+- [ ] 35-01-PLAN.md — Triage + fix all six findings; cross-repo papertek-vocabulary data PR(s) for F2/F3; leksihjelp logic PRs for F1/F5/F6; extension UAT for F7; 35-VERIFICATION.md with per-finding pass/fail
 
 ### Phase 32: FR/ES Pedagogy (Lær mer)
 
