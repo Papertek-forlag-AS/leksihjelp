@@ -1,60 +1,32 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.1
-milestone_name: Polish & Intelligence
-status: completed
-last_updated: "2026-05-01T10:46:46.774Z"
-last_activity: "2026-05-01 - Completed quick task 1: v3.1 hygiene cleanup (EXAM-01..07 status -> Complete; Phase 31 orphan deleted; Phase 25 retroactive VERIFICATION.md backfilled)."
+milestone: v3.2
+milestone_name: UAT & Deploy Prep
+status: active
+last_updated: "2026-05-01T11:00:00.000Z"
+last_activity: "2026-05-01 - Started milestone v3.2 (UAT & Deploy Prep). Defining requirements."
 progress:
-  total_phases: 13
-  completed_phases: 9
-  total_plans: 32
-  completed_plans: 25
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Session State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-05-01 after v3.1)
+See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 **Core value:** Norwegian students write foreign languages better -- with correct words, correct form, and confidence in pronunciation -- without leaving the page they're working on.
-**Current focus:** Planning next milestone (v3.2). Browser UAT backlog from v3.1 to be incorporated.
+**Current focus:** v3.2 UAT & Deploy Prep — walk v3.1 features in browser, fix surfaced bugs, sync to lockdown, validate in lockdown-staging, prepare prod deploy runbooks.
 
-## Position
+## Current Position
 
-**Milestone:** v3.1 Polish & Intelligence — SHIPPED 2026-05-01 (tagged v3.1)
-**Status:** Archived to `.planning/milestones/v3.1-*` — 13 phases (incl. Phase 28.1 deferred), 32 plans, 23/23 in-scope requirements satisfied
-**Last activity:** 2026-05-01 - Archived v3.1 milestone (Polish & Intelligence). MILESTONES.md updated with full accomplishments; PROJECT.md evolved (validated: COMP/POPUP/SPELL/PED/PHASE-32/EXAM groups + view modules + INFRA-10 gate); ROADMAP.md collapsed v3.1 to <details> block; REQUIREMENTS.md deleted (fresh for v3.2). Run /gsd:new-milestone to define v3.2.
-
-Progress: v3.1 [██████████] 100%
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 1 (v3.1)
-- Cumulative across milestones: 91 plans shipped (Phase 26 added 3)
-
-| Phase | Plan | Duration (min) | Tasks | Files |
-| ----- | ---- | -------------- | ----- | ----- |
-| 26    | 03   | 12             | 4     | 6     |
-| 27    | 01   | 18             | 2     | 62    |
-| 27    | 02   | 2              | 2     | 4     |
-| 27    | 03   | 22             | 3     | 12    |
-| 29    | 01   | 12             | 2     | 6     |
-| 29    | 02   | 22             | 3     | 5     |
-| Phase 30 P01 | 14 | 1 tasks | 9 files |
-| Phase 30 P01 | 50 | 3 tasks | 11 files |
-| Phase 30 P02 | 10 | 4 tasks | 8 files |
-| Phase 32-fr-es-pedagogy P02 | 12 | 2 tasks | 5 files |
-| Phase 32-fr-es-pedagogy P01 | 23 | 3 tasks | 9 files |
-| Phase 32 P03 | 75 | 2 tasks | 8 files |
-| Phase 33 P01 | 32 | 4 tasks | 5 files |
-| Phase 33 P02 | 2 min | 3 tasks | 18 files |
-| Phase 33 P03 | 8 | 6 tasks | 53 files |
-| Phase 35-v3.1-uat-followups P01 | 9 | 3 tasks | 5 files |
-| Phase 36 P02 | 6 | 3 tasks | 4 files |
-| Phase 36 P01 | 10 | 5 tasks | 9 files |
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-01 — Milestone v3.2 started
 
 ## Accumulated Context
 
@@ -62,81 +34,26 @@ Progress: v3.1 [██████████] 100%
 
 Decisions are logged in PROJECT.md Key Decisions table.
 
-- v3.1 roadmap: 2 consolidated phases (user preference for fewer, larger phases with 1M context)
-- Phase 24 = feature work (COMP), Phase 25 = polish + debt (POPUP + SPELL + DEBT)
-- 24-01: Simple filter scan over nounGenus keys for compound prediction
-- 24-02: Exact decomposition before fallback search; simple translation concatenation for guess; decomposeCompound as verification
-- 26-02: Use env-var injection (LEXI_PEDAGOGY_GATE_EXTRA_TARGETS) for self-test target injection instead of regex source mutation; gate stays informational pre-26-01
-- [Phase 26-laer-mer-pedagogy-ui]: 26-01: prepPedagogy Map keyed by ASCII+umlaut variants; pedagogy block rides on finding object, NOT through explain() (preserves contract)
-- [Phase 26]: Lær mer panel: stacked-only wechsel layout (no side-by-side variant) — popover fixed at ~320px makes container queries unnecessary
-- [Phase 26]: Confirmed uiLanguage storage key (not 'language') — strings.js _initI18n is canonical
-- [Phase 27-01]: exam marker shape `{ safe, reason, category }` lands on every rule + new exam-registry.js for non-rule surfaces
-- [Phase 27-01]: Default-conservative classification: lookup-shaped grammar rules safe=false pending browser-baseline research; collocation/quotation-suppression promoted to safe=true (lexical/scaffolding)
-- [Phase 27-01]: de-prep-case is the sole dual-marker case today (rule.exam grammar-lookup + rule.explain.exam pedagogy via Object.assign-wrapped explain)
-- [Phase 27]: 27-02: check-exam-marker gate; registry entries require category (strict surface), rules accept it as optional but validate closed set when present; hard-fail by default per CONTEXT.md
-- [Phase 27-03]: Filter findings post-CORE.check rather than pre-iteration — keeps spell-check-core pure; functionally identical effect (dot + popover both suppressed because finding is dropped before render)
-- [Phase 27-03]: Cached examMode + onChanged listener per content script — avoids per-keystroke storage reads; live toggle handled by hideOverlay + reschedule
-- [Phase 27-03]: Lockdown lock defensively forces examMode=true if only examModeLocked set; toggle disabled+ON; "Slått på av lærer" caption shown
-- [Phase 27-03]: exam-registry.js registered in manifest BEFORE floating-widget/word-prediction/spell-check; without correct order the fail-safe path hides everything even when examMode is off
-- [Phase 27-03]: Version bumped to 2.7.0 (manifest + package + landing page) — signals lockdown to re-pin per CLAUDE.md
-- [Phase 29]: 29-01: Locked LEKSIHJELP_EXAM as fifth resource profile in lockdown — label 'Eksamen med Leksihjelp', envelope { leksihjelp:true, lexinIframe:false, spellEngineOptions:['off'] }; no dual-engine variant
-- [Phase 29]: 29-01: Promoted PROFILE_LABELS_NN and PROFILE_LABELS_EN to first-class exports from shared/resource-profile.js (deviation: plan's <interfaces> overclaimed they existed)
-- [Phase 29]: 29-02: Five-value resourceProfile enum is now consistent across firestore.rules + createTest.js + toggleResourceAccess.js (+ test); lockdown commits d7825eb (enum) + b35b409 (writer)
-- [Phase 29]: 29-02: applyExamModeLock helper is module-level (not class method) and called twice — initial paint with prevProfile=null (clear branch is intentional no-op there) + on-change handler as sibling branch beside BSPC-01, sequenced AFTER applyEnvelopeToDOM so the leksihjelp bundle is alive when its examMode listener fires
-- [Phase 29]: 29-02: Production deploy (lockdown-stb) DEFERRED per user instruction; staging-lockdown deployed cleanly
-- [Phase 30]: Plan 30-01 Task 1 only landed (skeletons + check-popup-deps gate); Task 2 logic-migration + Task 3 human-verify deferred — recommend re-planning Task 2 as four smaller per-view sub-plans to preserve incremental smoke-test discipline
-- [Phase 30]: 30-01: Sub-step A (dictionary view) FULL extraction; Sub-step B (settings view) PARTIAL — UI lang + darkmode + 2 toggles; pause + report kept inline; CSS extraction deferred. Audio gated behind deps.audioEnabled. viewState shared-state pattern (single source of truth).
-- [Phase 30]: 30-01 Task 3 human-verify auto-approved per workflow.auto_advance=true; 9-step browser walkthrough logged for deferred manual verification (extension not yet shipping to paying users).
-- [Phase 30]: 30-02: lockdown sidepanel-host as the lockdown-only inclusion contract (declares what to mount with what deps; bug fixes go upstream and re-sync); audioEnabled:false hardcoded with three independent safeguards (renderResults gate + host never passes real playAudio + extension/audio/ NOT in sync); showSection in lockdown surfaces only grammar+darkmode (uiLanguage:false explicit deviation from plan-text spirit since plan text omitted it).
-- [Phase 30]: 30-02: deleted ~150-line stub search implementation in writing-environment.js (LEKSI_BANKS, leksiRenderCard, leksiTranslation, leksihjelpPerformSearch, search input listener) — that logic now lives upstream in dictionary-view.js and is sync'd in.
-- [Phase 30]: 30-02: static <script src> for view modules in elev.html (not LEKSI_BUNDLE) since views have no chrome.* / __lexi* implicit deps (enforced by check-popup-deps); decouples view loading from bootLeksihjelp lifecycle.
-- [Phase 30]: 30-02: check-popup-deps inserted as numbered Release Workflow step 7 in CLAUDE.md (between exam-marker step 6 and bundle-size now step 8); subsequent steps renumbered 7-13 -> 8-14.
-- [Phase 30]: 30-02: version bumped 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html — signals lockdown to re-pin.
-- [Phase 30]: 30-02: production deploy to papertek.app explicitly NOT done (staging-lockdown branch pushed only); user takes the production deploy decision separately per auto-mode-but-no-prod-deploy rule.
-- [Phase 32-02]: Followed Phase 26 finding.pedagogy contract over plan <interfaces> proposal — pedagogy rides on the finding object (not via explain() return); explain() pre-templates {nb,nn} from pedagogy.subtypes[patternType] with {fix}/{wrong} substitution. Avoids breaking check-explain-contract while still surfacing the rich Lær mer panel.
-- [Phase 32-02]: ES pedagogy uses semantic_category: 'preposition' (no DE-style 'case' field); check-pedagogy-shape's case-validator doesn't reject because synthetic ctx ('durch die Schule') doesn't trigger es-por-para patterns. Gate exits informational-PASS.
-- [Phase 32-02]: Subtype keys mirror the rule's existing patternType discriminators verbatim (purpose / beneficiary / deadline / duration). Pedagogy lives on the *suggested-fix* preposition (para_prep carries purpose+beneficiary+deadline; por_prep carries duration).
-- [Phase 32-02]: Side-patched extension/data/es.json directly because deployed papertek-vocabulary Vercel API hadn't picked up the lexicon edit; documented as recognised future-sync no-op (same pattern as 32-03 chore commit b2a4be2).
-- [Phase 32]: 32-01: FR aspect-hint rule (P3 hint, P=R=F1=1.000, 86 fixtures) + first FR pedagogy block (aspect_choice) sourced from papertek-vocabulary; check-explain-contract extended with optional pedagogy-shape branch + 3 paired scratch scenarios; version bumped 2.9.9 → 2.9.11
-- [Phase 32]: 32-03: Lexical verb_class marker on verbbank entries (vs inline grammar-table list); shared pedagogy under grammarbank.pedagogy.{class_name}; explain() returns pedagogy (not finding.pedagogy — gustar is not a case-prep so the check-pedagogy-shape VALID_CASES validator wouldn't accept it); PREPOSITION_COLLISIONS guard prevents sobre→sobrar false positives
-- [Phase 33]: 33-01: lifted buildDictState + buildInflectionIndex into shared dict-state-builder.js; popup.js delegates via posMapper/genusMapper opts so i18n labels stay popup-side; lockdown sidepanel host populateDictState updated (STAGED, not committed — Plan 33-03 lands cross-repo coordination)
-- [Phase 33]: 33-01: exam-profile ordbok-hide audit claim INVESTIGATED, not present — getSpellEngineEnvelope('exam') already returns leksihjelp:true post-Phase-29 redesign; no fix needed
-- [Phase 33]: 33-02: lockdown sync mirrored 18 files (1 new fr-aspect-hint.js, 17 modified); sync script + LEKSI_BUNDLE order verified correct as-is — no script edits needed; 4 orphan upstream working-tree changes flowed through as faithful mirror per CLAUDE.md downstream-consumers contract
-- [Phase 33]: 33-03: exam.safe audit closed — 22/49 lookup-shaped rules flipped to safe=true (NB/EN/FR/ES/DE single-token typo banks + gender/elision/contraction/coordination/agreement); 27 stayed safe=false with one-line `// exam-audit 33-03:` annotation (5 pedagogy popovers, 11 multi-token, 5 doc-drift, 6 context-aux/mood); version 2.9.11 -> 2.9.12 aligned across 3 files; all 24 release gates green
-- [Phase 35-v3.1-uat-followups]: F1/F2/F3 verified PASS in current data; no cross-repo papertek-vocabulary PR needed (Phase 34 failures attributed to stale-deploy or human-verifier UI artifacts)
-- [Phase 35-v3.1-uat-followups]: F5 docs-only fix: in der Schule is correct German; documented in den Schule + auf der Tisch as canonical Wechselpräposition triggers (rejected semantic motion detection as low-precision speculative grammar)
-- [Phase 35-v3.1-uat-followups]: F6 fixed via module-level pedagogyPanelExpanded flag with save/restore around hidePopover() inside showPopover(); hidePopover() default-resets so dismissal paths still start collapsed
-- [Phase 36]: 36-02: INFRA-10 gate static-parses buildIndexes return literal incl. ...moodIndexes spread; EXEMPT list documents non-spell-check surface keys
-- [Phase 36]: 36-02: drive-by fix wired 3 more FR mood-aspect indexes (frImparfaitToVerb, frPasseComposeParticiples, frAuxPresensForms) the v2.9.15 fix missed — same Phase 35 bug-class
+(v3.1 phase-level decisions archived to .planning/milestones/v3.1-* — see archive for full history)
 
 ### Pending Todos
 
-- Phase 26 human verification deferred (6 browser walkthroughs in 26-VERIFICATION.md) — approve in a later session
-- Phase 27 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 27-03-PLAN.md `<how-to-verify>` block) — approve in a later session
-- Phase 30-01 human browser verification deferred (Task 3 auto-approved per auto-mode policy; 9 walkthrough steps in 30-01-PLAN.md `<how-to-verify>` block: load extension, search, lang switch, direction toggle, compound suggestion, Lær mer popover, settings, account section, pause, vocab-updates banner) — approve in a later session before merging to v3.1 release branch
-- Phase 30-02 staging-lockdown UAT deferred (8-step walkthrough captured in 30-02-SUMMARY.md "User Setup Required" section: create leksihjelp-enabled test, join as student, switch to Leksihjelp tab, verify dictionary view renders without audio buttons, verify EKSAMENMODUS badge under LEKSIHJELP_EXAM profile, verify settings shows only grammar+darkmode, verify dark mode toggle scoped to sidepanel) — approve before production papertek.app deploy
-- Phase 30-02 production papertek.app deploy outstanding: run `firebase deploy --only hosting --project lockdown-stb` from /Users/geirforbord/Papertek/lockdown after staging UAT passes (deferred per user instruction this run)
-- Lockdown loader needs to either include the synced extension/exam-registry.js before leksihjelp scripts OR provide host.__lexiExamRegistry via shim — without either, fail-safe path hides every surface in lockdown context
-- Phase 27 release: bump done at 2.6.0 → 2.7.0; rebuild zip via `npm run package` and upload as GitHub Release asset (Release Workflow steps 11-13)
-- Phase 29-02 production deploy outstanding: run `firebase deploy --only firestore:rules,functions --project lockdown-stb` from /Users/geirforbord/Papertek/lockdown after Plan 29-03 staging browser verification passes (deferred per user instruction this run)
+(Carried over from v3.1; in scope for v3.2)
 
-### Roadmap Evolution
-
-- Phase 27 added: Exam Mode — per-feature examSafe markers, student toggle, teacher control in lockdown variant, release gate. Big architecture change touching every feature module. Captured 2026-04-28; user flagged as high priority.
+- Phase 26 human verification deferred (6 DE Lær mer browser walkthroughs in 26-VERIFICATION.md)
+- Phase 26 NN + EN locale Lær mer walks (F7 from Phase 35)
+- Phase 27 human browser verification deferred (9-step exam-mode walk in 27-03-PLAN.md `<how-to-verify>`)
+- Phase 30-01 human browser verification deferred (9-step extension popup view walk in 30-01-PLAN.md `<how-to-verify>`)
+- Phase 30-02 staging-lockdown UAT (8-step walkthrough in 30-02-SUMMARY.md "User Setup Required")
+- F36-1 fr-aspect-hint browser confirmation
+- Lockdown-stb production Firebase deploy (firestore.rules + Cloud Functions for EXAM-10) — runbook in v3.2 scope; deploy itself deferred
+- Lockdown papertek.app production hosting deploy (Phase 30 sidepanel host) — runbook in v3.2 scope; deploy itself deferred
 
 ### Blockers/Concerns
 
-- VERIF-01 (browser visual verification) carried across 4 milestones -- in scope as DEBT-03
-- Version skew: package.json=2.5.0 vs manifest.json=2.4.1 -- in scope as DEBT-01
-- check-fixtures 5 pre-existing failing suites -- in scope as DEBT-02
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 1 | v3.1 hygiene cleanup: flip EXAM-01..07 status, delete orphan Phase 31, retroactive Phase 25 VERIFICATION.md | 2026-05-01 | 57cdd41 | [1-v3-1-hygiene-cleanup-flip-exam-01-07-sta](./quick/1-v3-1-hygiene-cleanup-flip-exam-01-07-sta/) |
+(None at milestone start)
 
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Completed 35-01-PLAN.md (v3.1 UAT Follow-ups). F6 panel-state fix shipped (commit 4bbab27); F1/F2/F3 confirmed PASS in current data with Node repros; F5 alternate canonical trigger documented; F7 auto-approved per workflow.auto_advance with manual UAT recipe captured. Version 2.9.13 -> 2.9.14 across three files. All 11 release gates green; bundle 12.68 MiB / 20.00 MiB. v3.1 milestone now archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14. Previous (2026-04-30): Completed 33-02-PLAN.md (lockdown sync). 18 files refreshed in lockdown public/leksihjelp/, committed as beadf6b on staging branch (NOT pushed; Plan 33-03 owns version bump + push). Sync script + LEKSI_BUNDLE order verified correct as-is. 4 orphan upstream changes flowed through; flagged for separate triage. Previous (2026-04-29): Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
+Stopped at: Just started v3.2 — defining requirements via /gsd:new-milestone workflow.

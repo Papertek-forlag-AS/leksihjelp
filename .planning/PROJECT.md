@@ -88,7 +88,15 @@ they're working on.
 
 ### Active
 
-(No active milestone — v3.1 shipped 2026-05-01. Run `/gsd:new-milestone` to define v3.2.)
+## Current Milestone: v3.2 UAT & Deploy Prep
+
+**Goal:** Walk through everything v3.1 shipped, fix what UAT surfaces, sync fixes to lockdown, validate in lockdown-staging, and leave production deploys (Firebase + papertek.app hosting) primed for confident user-gated execution after the milestone closes.
+
+**Target features:**
+- All 6 carry-over extension UAT walkthroughs (F36-1 fr-aspect-hint browser confirm; F7 Phase 26 NN+EN locale Lær mer; Phase 26 6 DE Lær mer browser walks; Phase 27 9-step exam-mode walk; Phase 30-01 9-step extension popup view walk; Phase 30 lockdown sidepanel 8-step staging UAT)
+- Bug-fix loop driven by UAT findings (extension-side fixes first, then sync to lockdown-leksihjelp)
+- Lockdown-staging end-to-end validation after sync (lockdown context, NOT skriv.papertek.app)
+- Production-deploy readiness artifacts (deploy runbooks / pre-flight checklists for firestore.rules + Cloud Functions for EXAM-10 and papertek.app sidepanel host) — actual deploys deferred, ease-of-execution is the in-scope deliverable
 
 ### Deferred
 
@@ -223,4 +231,4 @@ they're working on.
 | **Custom split: hygiene now, UAT to v3.2** (v3.1 Quick Task 1) | 14 tech-debt items split into "do now" (hygiene + orphan cleanup) vs "do as v3.2 phase" (browser UAT batch); avoids cleanup phase scope creep | ✓ Good — milestone archive is hygiene-clean; UAT consolidated as v3.2 entry point |
 
 ---
-*Last updated: 2026-05-01 after v3.1 milestone (Polish & Intelligence) shipped*
+*Last updated: 2026-05-01 after starting v3.2 milestone (UAT & Deploy Prep)*
