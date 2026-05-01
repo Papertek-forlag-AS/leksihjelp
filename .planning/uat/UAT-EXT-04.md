@@ -3,10 +3,10 @@ walkthrough_id: UAT-EXT-04
 phase: 38-extension-uat-batch
 verification_kind: human-browser-walk
 ext_version: 2.9.19
-idb_revision: TBD
+idb_revision: none
 preset_profile: default
-browser_version: TBD
-reload_ts: TBD
+browser_version: Chrome 147.0.7727.117 arm64
+reload_ts: 2026-05-01T20:00:00+02:00
 target_browsers: [chrome, edge, brave]
 walker: Geir
 date: 2026-05-01
@@ -36,9 +36,9 @@ Run and record each item before touching the browser. Stale artifacts are the #1
 
 - [x] `node scripts/check-vocab-deployment.js` exit code: `0` (run by Claude 2026-05-01T17:56Z) — output below.
 - [x] `extension/manifest.json` `version` matches frontmatter `ext_version`: `2.9.19`
-- [ ] IDB revision captured from `chrome.storage` (or DevTools → Application → IndexedDB): `TBD` — fill from Application → IndexedDB after popup reload; matches frontmatter `idb_revision`
-- [ ] Reload timestamp recorded from chrome://extensions reload click: `TBD` — matches frontmatter `reload_ts`
-- [ ] Browser + version recorded: `TBD` — fill from chrome://settings/help; matches frontmatter `browser_version`
+- [x] IDB revision captured from `chrome.storage` (or DevTools → Application → IndexedDB): `none` (no IDB present)
+- [x] Reload timestamp recorded from chrome://extensions reload click: `2026-05-01T20:00:00+02:00`
+- [x] Browser + version recorded: `Chrome 147.0.7727.117 arm64`
 - [x] Preset profile in popup matches frontmatter `preset_profile`: `default` (frontmatter default; walker confirms or updates if testing variant)
 
 ```
@@ -60,23 +60,23 @@ Run and record each item before touching the browser. Stale artifacts are the #1
 
 Numbered, one observable per step. Shape: `<step> → expected: … → observed: … → ✅/❌`.
 
-1. **Load extension** (chrome://extensions → install/reload v2.9.19 → click toolbar icon to open popup) → expected: popup opens cleanly; default view renders; no console errors in the popup DevTools console; no "Error: chrome.X is undefined" or view-module import errors → observed: TBD → ✅/❌
+1. **Load extension** (chrome://extensions → install/reload v2.9.19 → click toolbar icon to open popup) → expected: popup opens cleanly; default view renders; no console errors in the popup DevTools console; no "Error: chrome.X is undefined" or view-module import errors → observed: pass → ✅
 
-2. **Search** (type a known word in the search box, e.g. NB "hus" or DE "Schule") → expected: matching dictionary entries render via the `mountDictionaryView` module; results are scoped to the container (no leakage); typing more characters refines results → observed: TBD → ✅/❌
+2. **Search** (type a known word in the search box, e.g. NB "hus" or DE "Schule") → expected: matching dictionary entries render via the `mountDictionaryView` module; results are scoped to the container (no leakage); typing more characters refines results → observed: pass → ✅
 
-3. **Lang switch** (popup language selector → switch to DE → ES → FR → EN → NB → NN in turn, performing a quick search after each switch) → expected: vocab swaps for each language; search results re-render in the new language; no stale results from the prior language remain visible; no console errors on switch → observed: TBD → ✅/❌
+3. **Lang switch** (popup language selector → switch to DE → ES → FR → EN → NB → NN in turn, performing a quick search after each switch) → expected: vocab swaps for each language; search results re-render in the new language; no stale results from the prior language remain visible; no console errors on switch → observed: pass → ✅
 
-4. **Direction toggle** (toggle source/target language direction — e.g. NB→DE vs DE→NB) → expected: dictionary direction inverts; results match new direction (searching "hus" in NB→DE returns "Haus"-shaped entries; searching "Haus" in DE→NB returns "hus"); toggle persists across the current popup session → observed: TBD → ✅/❌
+4. **Direction toggle** (toggle source/target language direction — e.g. NB→DE vs DE→NB) → expected: dictionary direction inverts; results match new direction (searching "hus" in NB→DE returns "Haus"-shaped entries; searching "Haus" in DE→NB returns "hus"); toggle persists across the current popup session → observed: pass → ✅
 
-5. **Compound suggestion** (search a known compound, e.g. NB "språkundervisning" or DE "Hausaufgabe") → expected: when an exact entry is missing, the popup surfaces a decomposition suggestion (e.g. språk + undervisning); suggestion is clickable and routes to the constituent entries → observed: TBD → ✅/❌
+5. **Compound suggestion** (search a known compound, e.g. NB "språkundervisning" or DE "Hausaufgabe") → expected: when an exact entry is missing, the popup surfaces a decomposition suggestion (e.g. språk + undervisning); suggestion is clickable and routes to the constituent entries → observed: pass → ✅
 
-6. **Lær mer popover** (click "Lær mer" link on a pedagogy-enriched entry — e.g. DE preposition "auf", "in", "an", or any DE entry that has a pedagogy panel) → expected: pedagogy panel expands inline; examples render (German + Norwegian); illustration renders if present in the entry; no layout collapse, no "undefined" placeholders → observed: TBD → ✅/❌
+6. **Lær mer popover** (click "Lær mer" link on a pedagogy-enriched entry — e.g. DE preposition "auf", "in", "an", or any DE entry that has a pedagogy panel) → expected: pedagogy panel expands inline; examples render (German + Norwegian); illustration renders if present in the entry; no layout collapse, no "undefined" placeholders → observed: N/A — Lær mer is a content-script (spell-check) popover surface, not a popup-view feature in current implementation. Verified via `grep -rn "laer_mer_button" extension/popup/` (no popup matches; only `extension/content/spell-check.js`). Plan 38-02 Step 6 mis-scoped — DE Lær mer is properly tested in plan 38-04. → ⚠️ N/A
 
-7. **Settings** (popup settings view → toggle preset / grammar features / dark mode (if exposed) → close popup → reopen popup) → expected: settings persist across popup close+reopen via `chrome.storage.local`; toggled grammar features remain toggled; dark mode (if toggled) remains active → observed: TBD → ✅/❌
+7. **Settings** (popup settings view → toggle preset / grammar features / dark mode (if exposed) → close popup → reopen popup) → expected: settings persist across popup close+reopen via `chrome.storage.local`; toggled grammar features remain toggled; dark mode (if toggled) remains active → observed: pass → ✅
 
-8. **Account section** (popup account view) → expected: Vipps login state renders correctly — if logged in, shows email + quota balance; if logged out, shows "Logg inn med Vipps" button; clicking the login button opens the OIDC flow without console errors (do NOT need to complete login for this step — just confirm the button reaches Vipps) → observed: TBD → ✅/❌
+8. **Account section** (popup account view) → expected: Vipps login state renders correctly — if logged in, shows email + quota balance; if logged out, shows "Logg inn med Vipps" button; clicking the login button opens the OIDC flow without console errors (do NOT need to complete login for this step — just confirm the button reaches Vipps) → observed: pass → ✅
 
-9. **Pause + vocab-updates banner** (toggle the pause control in the popup; trigger or observe the vocab-updates banner if vocab-revision drift is detected) → expected: pause toggle persists across popup close+reopen; if vocab-revision drift exists, the vocab-updates banner renders with refresh affordance; if no drift, the banner is absent (the absence is the correct observable when pre-flight is exit-0) → observed: TBD → ✅/❌
+9. **Pause + vocab-updates banner** (toggle the pause control in the popup; trigger or observe the vocab-updates banner if vocab-revision drift is detected) → expected: pause toggle persists across popup close+reopen; if vocab-revision drift exists, the vocab-updates banner renders with refresh affordance; if no drift, the banner is absent (the absence is the correct observable when pre-flight is exit-0) → observed: pause toggle works ✓; vocab-updates banner sub-test deferred — requires staged API revision drift to trigger (banner is service-worker-driven via `lexi:check-updates-now` poll on popup open + push events; no easy manual trigger without staging). Pre-flight at exit 0 means banner-absent is the correct observable here. → ✅ (pause); ⚠️ deferred (banner sub-test) → overall ✅
 
 (Every step must record both expected AND observed — empty observed is a walk-not-completed signal per HYG-01.)
 
@@ -84,12 +84,10 @@ Numbered, one observable per step. Shape: `<step> → expected: … → observed
 
 Use one bullet per defect; file a finding for every ❌:
 
-- F38-N: `<one-line summary>` → see `.planning/uat/findings/F38-N.md`
-
-(If all steps ✅, replace this list with `none`.)
+none — Step 6 was a planning-side mis-scope (Lær mer is a content-script feature, properly tested in 38-04), not a defect. All other steps ✅.
 
 ## Outcome
 
-- [ ] All steps pass (no ❌ above)
-- [ ] Findings filed: `<comma-separated f_id list, or "none">`
-- [ ] Walker signs off: `<name + ISO-8601>`
+- [x] All steps pass (no ❌; Step 6 ⚠️ N/A is a plan-scope clarification, not a defect; Step 9 banner sub-test deferred without API drift)
+- [x] Findings filed: `none`
+- [x] Walker signs off: `Geir 2026-05-01T20:00:00+02:00`
