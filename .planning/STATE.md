@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v3.1
 milestone_name: Polish & Intelligence
 status: planning
-last_updated: "2026-04-30T22:06:24.346Z"
-last_activity: "2026-04-30 -- Plan 33-03 complete. exam.safe audit: 22 lookup-shaped rules flipped to safe=true (NB/EN/DE/ES/FR single-token banks + gender/elision/contraction/coordination/agreement); 27 stayed with one-line audit comment (pedagogy / multi-token / doc-drift / context-dependent aux/mood). Version bumped 2.9.11 -> 2.9.12 across manifest.json + package.json + backend/public/index.html. All 24 release gates green (check-fixtures, check-explain-contract+test, check-rule-css-wiring+test, check-spellcheck-features, check-network-silence+test, check-exam-marker+test, check-popup-deps+test, check-bundle-size, check-baseline-bundle-size+test, check-benchmark-coverage+test, check-governance-data+test, check-pedagogy-shape+test, check-stateful-rule-invalidation+test, test:vocab-store/seam/popup-views/dict-state-builder). Bundle 12.67 MiB / 20 MiB cap. NB baseline 130 KB / 200 KB cap. Final ship step: leksihjelp main pushed; lockdown staging branch (beadf6b from 33-02) pushed."
+last_updated: "2026-05-01T06:45:05.085Z"
+last_activity: "2026-05-01 -- Plan 35-01 complete. v3.1 UAT follow-ups closed: F6 Lær mer panel state-loss bug fixed (pedagogyPanelExpanded module flag + save/restore around hidePopover; commit 4bbab27); F1/F2/F3 verified PASS in current data via Node repros (no cross-repo papertek-vocabulary PR needed); F5 docs-only — `in der Schule` is correct German, alternate canonical triggers `in den Schule` + `auf der Tisch` documented; F7 NN/EN locale walkthroughs auto-approved per workflow.auto_advance with recipe captured. Version 2.9.13 -> 2.9.14. All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred manual UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7)."
 progress:
-  total_phases: 12
-  completed_phases: 7
-  total_plans: 27
-  completed_plans: 21
+  total_phases: 13
+  completed_phases: 8
+  total_plans: 29
+  completed_plans: 22
 ---
 
 # Session State
@@ -24,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-04-27)
 ## Position
 
 **Milestone:** v3.1 Polish & Intelligence (cleanup phase)
-**Phase:** 33 (v3.1 cleanup) -- COMPLETE
-**Plan:** Phase 33 done (3/3 plans complete); next milestone work or close v3.1
-**Status:** Ready to plan
-**Last activity:** 2026-04-30 -- Plan 33-03 complete. exam.safe audit: 22 lookup-shaped rules flipped to safe=true (NB/EN/DE/ES/FR single-token banks + gender/elision/contraction/coordination/agreement); 27 stayed with one-line audit comment (pedagogy / multi-token / doc-drift / context-dependent aux/mood). Version bumped 2.9.11 -> 2.9.12 across manifest.json + package.json + backend/public/index.html. All 24 release gates green (check-fixtures, check-explain-contract+test, check-rule-css-wiring+test, check-spellcheck-features, check-network-silence+test, check-exam-marker+test, check-popup-deps+test, check-bundle-size, check-baseline-bundle-size+test, check-benchmark-coverage+test, check-governance-data+test, check-pedagogy-shape+test, check-stateful-rule-invalidation+test, test:vocab-store/seam/popup-views/dict-state-builder). Bundle 12.67 MiB / 20 MiB cap. NB baseline 130 KB / 200 KB cap. Final ship step: leksihjelp main pushed; lockdown staging branch (beadf6b from 33-02) pushed.
+**Phase:** 35 (v3.1 UAT follow-ups, gap closure from Phase 34) -- COMPLETE
+**Plan:** Phase 35 done (1/1 plans complete); v3.1 archive-ready pending batched deferred manual UAT
+**Status:** Ready to plan (or archive v3.1)
+**Last activity:** 2026-05-01 -- Plan 35-01 complete. F6 Lær mer panel state-loss bug fixed (commit 4bbab27); F1/F2/F3 verified PASS in current data with Node repros; F5 alternate canonical triggers documented (`in den Schule`, `auf der Tisch`); F7 auto-approved with manual UAT recipe captured in 35-VERIFICATION.md. Version 2.9.13 -> 2.9.14 (patch — narrow logic fix). All 11 release gates green; bundle 12.68 MiB / 20 MiB cap. v3.1 milestone archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14.
 
-Progress: [██████████] 100% (Phase 33 complete — 3/3 plans)
+Progress: [██████████] 100% (Phase 35 complete — 1/1 plans)
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Progress: [██████████] 100% (Phase 33 complete — 3/3 plans
 | Phase 33 P01 | 32 | 4 tasks | 5 files |
 | Phase 33 P02 | 2 min | 3 tasks | 18 files |
 | Phase 33 P03 | 8 | 6 tasks | 53 files |
+| Phase 35-v3.1-uat-followups P01 | 9 | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 33]: 33-01: exam-profile ordbok-hide audit claim INVESTIGATED, not present — getSpellEngineEnvelope('exam') already returns leksihjelp:true post-Phase-29 redesign; no fix needed
 - [Phase 33]: 33-02: lockdown sync mirrored 18 files (1 new fr-aspect-hint.js, 17 modified); sync script + LEKSI_BUNDLE order verified correct as-is — no script edits needed; 4 orphan upstream working-tree changes flowed through as faithful mirror per CLAUDE.md downstream-consumers contract
 - [Phase 33]: 33-03: exam.safe audit closed — 22/49 lookup-shaped rules flipped to safe=true (NB/EN/FR/ES/DE single-token typo banks + gender/elision/contraction/coordination/agreement); 27 stayed safe=false with one-line `// exam-audit 33-03:` annotation (5 pedagogy popovers, 11 multi-token, 5 doc-drift, 6 context-aux/mood); version 2.9.11 -> 2.9.12 aligned across 3 files; all 24 release gates green
+- [Phase 35-v3.1-uat-followups]: F1/F2/F3 verified PASS in current data; no cross-repo papertek-vocabulary PR needed (Phase 34 failures attributed to stale-deploy or human-verifier UI artifacts)
+- [Phase 35-v3.1-uat-followups]: F5 docs-only fix: in der Schule is correct German; documented in den Schule + auf der Tisch as canonical Wechselpräposition triggers (rejected semantic motion detection as low-precision speculative grammar)
+- [Phase 35-v3.1-uat-followups]: F6 fixed via module-level pedagogyPanelExpanded flag with save/restore around hidePopover() inside showPopover(); hidePopover() default-resets so dismissal paths still start collapsed
 
 ### Pending Todos
 
@@ -126,5 +130,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
-Last session: 2026-04-30
-Stopped at: Completed 33-02-PLAN.md (lockdown sync). 18 files refreshed in lockdown public/leksihjelp/, committed as beadf6b on staging branch (NOT pushed; Plan 33-03 owns version bump + push). Sync script + LEKSI_BUNDLE order verified correct as-is. 4 orphan upstream changes flowed through; flagged for separate triage. Previous (2026-04-29): Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
+Last session: 2026-05-01
+Stopped at: Completed 35-01-PLAN.md (v3.1 UAT Follow-ups). F6 panel-state fix shipped (commit 4bbab27); F1/F2/F3 confirmed PASS in current data with Node repros; F5 alternate canonical trigger documented; F7 auto-approved per workflow.auto_advance with manual UAT recipe captured. Version 2.9.13 -> 2.9.14 across three files. All 11 release gates green; bundle 12.68 MiB / 20.00 MiB. v3.1 milestone now archive-ready pending batched deferred extension UAT (Phase 26 + 27 + 30-01 + 30-02 + 35 F7). Lockdown + skriveokt-zero downstream consumers should re-pin to leksihjelp 2.9.14. Previous (2026-04-30): Completed 33-02-PLAN.md (lockdown sync). 18 files refreshed in lockdown public/leksihjelp/, committed as beadf6b on staging branch (NOT pushed; Plan 33-03 owns version bump + push). Sync script + LEKSI_BUNDLE order verified correct as-is. 4 orphan upstream changes flowed through; flagged for separate triage. Previous (2026-04-29): Completed 30-02-PLAN.md (all four tasks). Task 1 extended lockdown sync script to copy extension/popup/views/ + extension/styles/popup-views.css (latter graceful no-op until Plan 30-01 sub-step E ships). Task 2 created /Users/geirforbord/Papertek/lockdown/public/js/writing-test/student/leksihjelp-sidepanel-host.js (lockdown-only IIFE host; mounts dictionary + settings views with audioEnabled:false + showSection limited to grammar+darkmode); replaced ~150-line stub search in writing-environment.js with real sidepanel mount; bumped writing-environment marker to v4.10.0; loaded view modules + host via static <script src> in elev.html. Task 3 updated leksihjelp CLAUDE.md downstream-consumers section + inserted check-popup-deps as numbered Release Workflow step 7 (renumbered 7-13 -> 8-14); bumped version 2.7.0 -> 2.8.0 across manifest.json + package.json + backend/public/index.html. Task 4 ran all 15 release gates clean; cross-repo commits landed (leksihjelp 98f4a9a + lockdown 1193e56 on staging branch); pushed origin/staging successfully; production deploy to papertek.app explicitly NOT done. Plan 30-03 (skriveokt-zero parity, deferred Phase 28.1) remains.
