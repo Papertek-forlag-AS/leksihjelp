@@ -117,13 +117,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PED-04 | Phase 26 | Complete |
 | PED-05 | Phase 26 | Complete |
 | PED-06 | Phase 26 | Complete |
-| EXAM-01 | Phase 27 | Planned |
-| EXAM-02 | Phase 27 | Planned |
-| EXAM-03 | Phase 27 | Planned |
-| EXAM-04 | Phase 27 | Planned |
-| EXAM-05 | Phase 27 | Planned |
-| EXAM-06 | Phase 27 | Planned |
-| EXAM-07 | Phase 27 | Planned |
+| EXAM-01 | Phase 27 | Complete |
+| EXAM-02 | Phase 27 | Complete |
+| EXAM-03 | Phase 27 | Complete |
+| EXAM-04 | Phase 27 | Complete |
+| EXAM-05 | Phase 27 | Complete |
+| EXAM-06 | Phase 27 | Complete |
+| EXAM-07 | Phase 27 | Complete |
 | EXAM-08 | Phase 28 | Complete (plumbing) — staged on lockdown 2026-04-28 |
 | EXAM-09 | Phase 28.1 | Deferred (skriveokt-zero not yet shipped — not blocking v3.1; un-defer when zero ships to schools) |
 | EXAM-10 | Phase 29 | Code Complete (29-01 UX surface + 29-02 firestore enum + writer landed; staging-lockdown deployed 2026-04-28; lockdown-stb prod deploy DEFERRED, browser verification 29-03 pending) |
@@ -137,3 +137,5 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements updated: 2026-04-28 — Phase 25 closed, Phase 26 (Lær mer pedagogy UI) added; v3.1 audit reset EXAM-08 → reassigned to Phase 28 (lockdown webapp exam-mode sync); EXAM-09 added for skriveokt-zero (Tauri sibling consumer) → assigned to Phase 28.1*
+
+*Hygiene 2026-05-01 — v3.1 milestone audit flipped EXAM-01..EXAM-07 Planned -> Complete (verification passed via Phase 27-03; audit reference .planning/v3.1-MILESTONE-AUDIT.md).*
