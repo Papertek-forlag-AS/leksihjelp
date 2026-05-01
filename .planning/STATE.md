@@ -92,7 +92,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Plan 38-01.1 Tasks 1-3 of 4 complete. Task 4 hard-paused per `verification_kind: human-browser-walk`. Plan commits: 744aec8 (Task 1 RED fixture) / 8214f4d (Task 2 GREEN fix — nb-typo-fuzzy elision strip + popup.js LANGUAGE_CHANGED hardening) / c54caed (Task 3 version bump v2.9.18 → v2.9.19). All 14 release gates green. GitHub Release v2.9.19 created as DRAFT with lexi-extension.zip asset (12.68 MiB). SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-01.1-SUMMARY.md`. F38-1 status flipped to `closed` with regression_fixture_id `fixtures/fr/aspect-hint.jsonl` resolved.
+Stopped at: Plan 38-02 Task 1 complete (UAT-EXT-04 canonical walkthrough log instantiated, commit 1f21ce0). Task 2 hard-paused per `verification_kind: human-browser-walk` (HYG-03). Walker (Geir) performs the 9-step Phase 30-01 popup view canonical walk against v2.9.19 in real Chrome, fills observed: fields + signs off, then files F38-N findings for any ❌. Agent resumes for closeout commit + SUMMARY.md after walker returns. Independent of Plan 38-01.1 walker re-walk (different surface — popup views vs spell-check pipeline; walks can interleave).
 Next: Walker re-walks UAT-EXT-01 Steps 1-4 against v2.9.19 zip:
 1. Install v2.9.19 from GitHub draft release (or reload dev extension on the new commit at chrome://extensions).
 2. Set popup foreign-language=French, NB locale.
