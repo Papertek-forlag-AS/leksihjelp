@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: UAT & Deploy Prep
 status: unknown
-last_updated: "2026-05-01T18:26:08.701Z"
+last_updated: "2026-05-01T18:38:00.520Z"
 progress:
   total_phases: 15
   completed_phases: 10
   total_plans: 42
-  completed_plans: 33
+  completed_plans: 34
 ---
 
 # Session State
@@ -22,10 +22,10 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-04/05 + 38-01.2-candidate pending)
-Plan: 01 complete; 02 complete; 03 complete (highest-stakes Phase 27 exam-mode 9-step walk — UAT-EXT-03 clean pass, zero defects); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
-Status: Plan 38-03 closed cleanly. Phase 27 exam-mode contract confirmed working end-to-end in real Chrome 147 against v2.9.19 (toggle, EKSAMENMODUS badge, amber widget border, suppression boundary holds — typos still surface, wordPrediction.dropdown + widget.pedagogyPanel suppressed, registry sampling matches). Step 8 architectural clarification: lockdown exam-mode is teacher-only (no student toggle); Phase 39 UAT-LOCK-02 scoped to assert student-toggle hidden in lockdown sidepanel host UI (lockdown-side concern, not synced leksihjelp surface). School-deployment trust validated. Plan 38-04 (final walk — DE Lær mer 4+2 — UAT-EXT-02) unblocked. F38-1 fix in v2.9.19 DRAFT release still pending walker re-walk closure.
-Last activity: 2026-05-01 — Plan 38-03 completed; commits 452c694 (Task 1 walkthrough log instantiation) / 2092d55 (interim hard-pause STATE record) / 78771b4 (Task 2 walker outcomes recorded); UAT-EXT-03 walker sign-off Geir 2026-05-01T20:30:00+02:00
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 + 04 complete; 38-01.1 Task 4 still hard-paused for walker re-walk; 38-05 + 38-01.2-candidate pending)
+Plan: 01 complete; 02 complete; 03 complete; 04 complete (final walk — Phase 26 DE Lær mer 4+2 — UAT-EXT-02 clean pass, zero defects, Phase 35 F7 closed); 01.1 Tasks 1-3 complete with Task 4 hard-paused (walker re-walk required to fully close F38-1)
+Status: Plan 38-04 closed cleanly. Phase 26 DE Lær mer pedagogy contract confirmed working end-to-end in real Chrome 147 against v2.9.19 (de-prep-case acc/dat triggers + Wechselpräpositionen movement/location framing + full 9-prep table render under default NB locale; NN + EN cross-locale Lær mer panels render correctly on DE pedagogy). Phase 35 F7 deferred carry-over (NN/EN locale Lær mer never walked in real browser) explicitly CLOSED by Steps 5+6. F38-2 partial-NN gap remains scoped to FR-aspect-hint-pedagogy specifically (DE pedagogy NN render is healthy — distinct surface). Zero F38-N findings filed. Locked Phase 38 walk sequence COMPLETE (warm-up ✅ → canonical ✅ → highest-stakes ✅ → final ✅). HYG-03 hard-pause discipline validated end-to-end for the fourth time. Plan 38-05 release asset still BLOCKED on F38-1 closure.
+Last activity: 2026-05-01 — Plan 38-04 completed; commits cc0ea5e (Task 1 walkthrough log instantiation) / 7c60a7b (interim hard-pause STATE record) / c2e2e9c (Task 2 walker outcomes recorded); UAT-EXT-02 walker sign-off Geir 2026-05-01T20:50:00+02:00
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Decisions are logged in PROJECT.md Key Decisions table.
 - [Phase 38-03]: Phase 27 exam-mode contract clean-pass in real Chrome 147 against v2.9.19; school-deployment trust validated
 - [Phase 38-03]: Step 8 architectural clarification: lockdown exam-mode is teacher-only (no student toggle); 'dual mode' framing was vanilla-extension projection; Phase 39 UAT-LOCK-02 scoped to assert student toggle hidden in lockdown sidepanel host UI
 - [Phase 38-03]: Inline-clarification-instead-of-finding pattern reinforced (3rd recurrence after 38-02 Step 6): use ✅ + downstream follow-up when a step's framing projects vanilla-extension UI assumptions onto a constrained downstream surface
+- [Phase 38-04]: UAT-EXT-02 final walk = clean pass on all 6 walks (4 NB DE + 2 cross-locale NN/EN); Phase 35 F7 deferred carry-over (NN/EN locale Lær mer) explicitly CLOSED via Steps 5+6; F38-2 partial-NN gap remains scoped to FR-aspect-hint-pedagogy specifically (DE pedagogy NN render is healthy — distinct surface); zero F38-N findings filed; locked Phase 38 walk sequence complete (warm-up → canonical → highest-stakes → final all clean); HYG-03 hard-pause discipline validated end-to-end for the fourth time
 
 ### Pending Todos
 
@@ -98,8 +99,8 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Plan 38-04 Task 1 complete (UAT-EXT-02 walkthrough log instantiated, commit cc0ea5e); Task 2 hard-paused per `verification_kind: human-browser-walk` (HYG-03). Walker (Geir) performs Phase 26 DE Lær mer 4+2 walk against v2.9.19 in real Chrome — 4 NB walks (de-prep-case acc/dat + Wechselpräpositionen movement/location + full table) + 2 cross-locale walks (NN + EN) that close the Phase 35 F7 deferred carry-over. Walker fills observed: fields incl. idb_revision + reload_ts; files F38-N findings for any ❌ classifying logic vs data root-cause direction (data root-causes route through papertek-vocabulary per CLAUDE.md Data-Logic Separation); updates F7 closure note in Outcome section. Sidecar 404s for DE explicitly out-of-scope per F38-1. Agent resumes for closeout commit + SUMMARY.md after walker returns. Final walk in locked Phase 38 sequence — independent of Plan 38-01.1 walker re-walk (different surface).
-Next: Orchestrator's call after walker completes UAT-EXT-02. Open work: (a) Plan 38-01.1 Task 4 walker re-walk against v2.9.19 to close F38-1; (b) Plan 38-04 Task 2 walker resume — THIS WALK; (c) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (d) candidate 38-01.2 sidecar-pipeline regeneration; (e) any 38-04.N decimal-insert fix plans surfaced by this walk (logic defects extension-only; data defects route via papertek-vocabulary + sync-vocab + version bump + [lockdown-resync-needed]).
+Stopped at: Plan 38-04 closed cleanly. UAT-EXT-02 final walkthrough log committed (commits cc0ea5e / 7c60a7b / c2e2e9c). Walker (Geir) signed off all 6 walks in real Chrome 147.0.7727.117 arm64 against v2.9.19 — Steps 1-4 (DE NB-locale: de-prep-case acc/dat + Wechselpräpositionen movement/location + full 9-prep table render) ✅ pass; Steps 5-6 (NN + EN locale on DE pedagogy) ✅ pass. Phase 35 F7 deferred carry-over (NN/EN locale Lær mer never walked in real browser) explicitly CLOSED. F38-2 (FR-aspect-hint-pedagogy-specific NN gap from Plan 38-01) remains open as a separate, narrower scope — DE pedagogy NN render verified healthy here. Zero F38-N findings filed. Locked Phase 38 walk sequence COMPLETE: warm-up ✅ → canonical ✅ → highest-stakes ✅ → final ✅. SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-04-SUMMARY.md`. UAT-EXT-02 marked complete in REQUIREMENTS.md; ROADMAP plan-progress updated for Phase 38 (5/6 SUMMARY files now present).
+Next: **Orchestrator decision point — do NOT auto-advance to Plan 38-05.** Two paths: (1) Spin Plan 38-01.2 for actual F38-1 closure (deep aspect-adverb data-load gap; root cause identified as API/IDB stripping `generalbank.aspect_*_adverbs`), THEN Plan 38-05 ships clean. (2) Ship v2.9.19 with F38-1 partially open (Branch C nb-typo-fuzzy fix in; fr-aspect-hint silence pushed to next phase), proceed straight to Plan 38-05. Open work: (a) Plan 38-01.1 Task 4 walker re-walk to close F38-1 first branch (REOPENED); (b) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (c) candidate 38-01.2 sidecar-pipeline regeneration; (d) F38-2 future NN coverage phase (post-Phase-38).
 Follow-up candidates (post-Phase-38, surfaced by Plan 38-02): vocab-updates banner manual-trigger affordance for QA OR staging-env API drift procedure, so future walks can exercise the banner without a service-worker-only path.
 Next: Walker re-walks UAT-EXT-01 Steps 1-4 against v2.9.19 zip:
 1. Install v2.9.19 from GitHub draft release (or reload dev extension on the new commit at chrome://extensions).
