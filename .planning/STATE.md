@@ -81,5 +81,5 @@ Decisions are logged in PROJECT.md Key Decisions table.
 ## Session Continuity
 
 Last session: 2026-05-01
-Stopped at: Completed 37-hygiene-templates-pre-flight/37-02-PLAN.md (HYG-04 + HYG-05 release gates with paired self-tests; registered as Release Workflow steps 14-15). All 4 plans of Phase 37 now complete.
-Next: `/gsd:plan-phase 38` (extension UAT batch — first phase that can rely on the Phase 37 discipline infrastructure).
+Stopped at: Plan 38-01 Task 1 complete (`.planning/uat/UAT-EXT-01.md` instantiated for F36-1 fr-aspect-hint warm-up walkthrough; commit 92ea7eb). HARD-PAUSED at Task 2 per `verification_kind: human-browser-walk` — walker (Geir) must perform the browser walk in real Chrome, populate pre-flight evidence + observed fields, file F38-N findings for any ❌, and sign off. Auto-mode advance is forbidden until walker resumes.
+Next: Walker resumes Plan 38-01 Task 2 → walks fr-aspect-hint in Chrome (steps 1-6 drafted in UAT-EXT-01.md) → on completion, agent commits the populated walkthrough log + any findings, writes 38-01-SUMMARY.md, advances to Plan 38-02.
