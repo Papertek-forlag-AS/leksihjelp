@@ -1,0 +1,7 @@
+# Adds a "Sponsor" button to the GitHub repo header.
+# Sponsorships fund the free, offline parts of Leksihjelp (dictionary,
+# spell-check, word-prediction). The Vipps subscription on leksihjelp.no
+# is a separate product covering the ElevenLabs TTS API cost.
+
+github: Papertek-forlag-AS
+custom: ["https://leksihjelp.no"]
