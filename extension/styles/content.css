@@ -1002,13 +1002,13 @@
   background: #f59e0b !important;  /* amber-500 */
 }
 
-/* P3 hint — grey dotted underline, word-width span — Phase 6 */
+/* P3 hint — solid 3px orange bar, word-width — F38-4 fix
+   Phase 6 originally used border-bottom-only (height:auto, background:none)
+   but border-bottom didn't paint reliably. Switch to a solid 3px bar same
+   as P1/P2 markers, distinguished only by color (orange vs amber/red). */
 #lexi-spell-overlay .lh-spell-dot.lh-spell-hint {
-  width: auto !important;
-  height: auto !important;
-  border-radius: 0 !important;
-  background: none !important;
-  border-bottom: 2px dotted #94a3b8;  /* slate-400 */
+  height: 3px;
+  border-radius: 2px;
   position: absolute;
   pointer-events: auto;
   cursor: pointer;
