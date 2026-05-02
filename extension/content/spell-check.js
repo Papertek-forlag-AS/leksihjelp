@@ -646,12 +646,16 @@
     } else {
       // Structural rules (de-verb-final, de-separable-verb) set noAutoFix:true
       // because their fix can't be expressed as an atomic string substitution
-      // \u2014 they require moving tokens across the clause. For those, suppress
-      // the Fiks button (clicking it would paste literal instruction text
-      // like "(flytt til slutten)" into the document) and hide the
-      // "orig \u2192 fix" head, since the fix string is just the original. The
-      // explain block carries the actionable instruction for the student.
-      const headHtml = finding.noAutoFix
+      // \u2014 they require moving tokens across the clause.
+      //
+      // F38-4 follow-up: P3 hint rules (e.g. fr-aspect-hint, es-imperfecto-hint)
+      // set finding.fix to the same string as finding.original because the
+      // rule can't know which aspect/mood the student MEANT \u2014 the pedagogy
+      // lives in explain(). Treat fix === original the same as noAutoFix so
+      // we don't render a Fiks button that loops forever (replacing token
+      // with itself \u2192 retokenize \u2192 rule fires again \u2192 same popover).
+      const noAutoFix = finding.noAutoFix || (finding.fix === finding.original);
+      const headHtml = noAutoFix
         ? `<div class="lh-spell-head"><span class="lh-spell-orig">${escapeHtml(finding.original)}</span>${registerBadgeHtml}</div>`
         : `<div class="lh-spell-head">
             <span class="lh-spell-orig">${escapeHtml(finding.original)}</span>
@@ -659,7 +663,7 @@
             <span class="lh-spell-fix-text">${escapeHtml(suggestions[0])}</span>
             ${registerBadgeHtml}
           </div>`;
-      const fixBtnHtml = finding.noAutoFix
+      const fixBtnHtml = noAutoFix
         ? ''
         : '<button type="button" class="lh-spell-btn lh-spell-accept">\u2713 Fiks</button>';
       popover.innerHTML = `
