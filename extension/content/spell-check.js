@@ -478,11 +478,14 @@
       overlay.appendChild(dot);
       markers.push({ el: dot, finding, rect });
       positionDot(dot, rect);
-      // Phase 6: hint markers span the full word width instead of being a small dot
+      // Phase 6 / F38-4: hint markers span the full word width.
+      // Height stays at the CSS default (3px) so the solid-color P3 hint
+      // background actually paints. Pre-F38-4 the hint marker had inline
+      // height=0 and relied on a border-bottom for visibility, but on the
+      // 3px-fixed-position dot the border didn't paint reliably across hosts.
       if (finding.severity === 'hint') {
         const wordWidth = rect.width || (rect.right - rect.left);
         dot.style.width = wordWidth + 'px';
-        dot.style.height = '0';
         dot.style.top = (rect.bottom || (rect.top + rect.height)) + 'px';
         dot.style.left = rect.left + 'px';
       }

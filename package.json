@@ -1,6 +1,6 @@
 {
   "name": "@papertek/leksihjelp",
-  "version": "2.9.24",
+  "version": "2.9.25",
   "description": "Chrome extension for Norwegian students learning foreign languages",
   "files": [
     "extension/content/",
