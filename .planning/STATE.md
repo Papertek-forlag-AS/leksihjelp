@@ -101,6 +101,39 @@ Decisions are logged in PROJECT.md Key Decisions table.
 
 ## Session Continuity
 
+Last session: 2026-05-02 (continuation of 05-01)
+Stopped at: stb-lockdown.app live with leksihjelp v2.9.27 — F38-1 fix shipped to staging for Saturday friend testing.
+
+**Session arc (2026-05-01 → 02):**
+1. Plan 38-01.1 Task 4 walker re-walk against v2.9.19 → confirmed nb-typo-fuzzy NB false-fire on `j'ai` is silenced (Branch C fix worked) but fr-aspect-hint itself still silent → F38-1 reopened.
+2. Browser-side debug instrumentation in fr-aspect-hint.js revealed `frAspectAdverbs` empty in browser despite `imparfait_to_verb_size: 3331` populated → root cause identified as API serving FR `generalbank` from `lexicon/fr/` shape that's missing the 3 aspect meta entries (`aspect_passe_compose_adverbs`, `aspect_imparfait_adverbs`, `aspect_choice_pedagogy`).
+3. Plan 38-01.2 (autonomous, no human-browser-walk) shipped a defensive seam-side backfill in `vocab-seam.js` + new regression gate `scripts/check-fr-bundle-completeness.js` + v2.9.20 DRAFT GitHub Release. F38-1 closed (v2). F38-3 partial-deferred (typo coverage half is upstream Papertek work — empty FR typobank).
+4. Walker re-walk against v2.9.20 confirmed rule fires (`findingsCount: 1`, marker rendered) but visually invisible. Iterated through v2.9.21 → v2.9.27 chasing the visibility regression. Root cause: `.lh-spell-dot.lh-spell-hint` master rule had `!important` overrides + spell-check.js inline `height: 0` + JS pre-positioning. File F38-4, fix shipped at v2.9.26 (CSS) + v2.9.25 (JS height) + v2.9.27 (Fiks button suppression when `fix === finding.original` to prevent infinite popover loop on hint findings).
+5. Walker confirmed v2.9.27 visually shows orange P3-hint markers, popover renders with Lær mer, no Fiks loop.
+6. F38-5 filed: fr-aspect-hint over-fires on cross-clause narrative structures (`Pendant que je marchais, j'ai vu un chien` is correct French). Deferred — rule still useful on intra-clause mismatches like `Hier je mangeais une pomme`.
+7. Synced lockdown to v2.9.27 (commit dc4b7dc), deployed to stb-lockdown.app via `firebase deploy --only hosting` (commit 12915fa logs the deploy in DEPLOYMENTS.md).
+
+**Phase 38 inventory (Monday's starting state):**
+- 38-01 ✅ / 38-01.1 ✅ / 38-01.2 ✅ / 38-02 ✅ / 38-03 ✅ / 38-04 ✅ — all 6 plans complete in this phase.
+- 38-05 (release-asset upload to GitHub Release Latest) **still pending** — v2.9.27 has not been tagged or uploaded as a Latest release. v2.9.20 is the existing DRAFT.
+- F38-1 ✅ closed | F38-4 ✅ closed | F38-2 ⏳ deferred | F38-3 ⏳ partial-deferred | F38-5 ⏳ deferred (all three: minor/non-blocking, defer to v3.3 or later).
+
+**Synced surfaces touched this session (lockdown impact, all carried `[lockdown-resync-needed]`):** vocab-seam.js, spell-check.js, styles/content.css, fr-aspect-hint.js (rule). Resynced + deployed dc4b7dc, so lockdown is at parity.
+
+**Recommended next steps for Monday:**
+1. **Plan 38-05** — version bump verification on v2.9.27 (already aligned), `npm run package` rebuild (already done), tag `v2.9.27` and upload zip as GitHub Release Latest (replacing or alongside the v2.9.20 DRAFT).
+2. **Friday→Saturday friend feedback intake** — file new findings against v2.9.27 if testers surface anything; otherwise close the loop and Phase 38 is done.
+3. **Phase 39 (Lockdown Sync + Staging UAT)** — formal UAT walks on lockdown sidepanel surfaces (UAT-LOCK-01..04). Phases 40 (deploy runbooks) + 41 (milestone archive) follow.
+
+**Critical Phase 38 lessons captured for future phases:**
+- API path divergence (`/core/<lang>` vs `/bundle/<lang>`) burned us — Phase 38 RESEARCH erred curling `/core/fr` and getting a false positive. Future fix-paths investigating Papertek API gaps must curl the EXACT endpoint the extension uses (search `extension/content/vocab-store.js` for `API_BASE`).
+- The rule "broaden BUNDLED_LANGS" (revert this session) didn't work because the IDB cache layer had its own state issues — bundled load isn't always preferred over cache. Defensive backfill in `buildAndApply` is the cleaner pattern.
+- Visual-regression iteration on CSS+JS combinations (this session: 7 version bumps to chase the height/color/!important issue) suggests the next session should add a smoke test or storybook for marker visual rendering — `check-rule-css-wiring` currently only checks that the binding EXISTS, not that it actually paints. Possible Phase 41 archive item or v3.3 backlog.
+
+---
+
+(Pre-2026-05-02 history continues below for reference.)
+
 Last session: 2026-05-01
 Stopped at: Plan 38-04 closed cleanly. UAT-EXT-02 final walkthrough log committed (commits cc0ea5e / 7c60a7b / c2e2e9c). Walker (Geir) signed off all 6 walks in real Chrome 147.0.7727.117 arm64 against v2.9.19 — Steps 1-4 (DE NB-locale: de-prep-case acc/dat + Wechselpräpositionen movement/location + full 9-prep table render) ✅ pass; Steps 5-6 (NN + EN locale on DE pedagogy) ✅ pass. Phase 35 F7 deferred carry-over (NN/EN locale Lær mer never walked in real browser) explicitly CLOSED. F38-2 (FR-aspect-hint-pedagogy-specific NN gap from Plan 38-01) remains open as a separate, narrower scope — DE pedagogy NN render verified healthy here. Zero F38-N findings filed. Locked Phase 38 walk sequence COMPLETE: warm-up ✅ → canonical ✅ → highest-stakes ✅ → final ✅. SUMMARY at `.planning/phases/38-extension-uat-batch-bug-fix-loop-regr/38-04-SUMMARY.md`. UAT-EXT-02 marked complete in REQUIREMENTS.md; ROADMAP plan-progress updated for Phase 38 (5/6 SUMMARY files now present).
 Next: **Orchestrator decision point — do NOT auto-advance to Plan 38-05.** Two paths: (1) Spin Plan 38-01.2 for actual F38-1 closure (deep aspect-adverb data-load gap; root cause identified as API/IDB stripping `generalbank.aspect_*_adverbs`), THEN Plan 38-05 ships clean. (2) Ship v2.9.19 with F38-1 partially open (Branch C nb-typo-fuzzy fix in; fr-aspect-hint silence pushed to next phase), proceed straight to Plan 38-05. Open work: (a) Plan 38-01.1 Task 4 walker re-walk to close F38-1 first branch (REOPENED); (b) Plan 38-05 release asset (still BLOCKED on F38-1 closure); (c) candidate 38-01.2 sidecar-pipeline regeneration; (d) F38-2 future NN coverage phase (post-Phase-38).
