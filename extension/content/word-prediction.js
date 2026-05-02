@@ -29,7 +29,6 @@
   let selectedIndex = -1;
   let enabled = true;
   let currentLang = 'en';
-  let lexiPaused = false; // Global pause state
   let predictionTimer = null; // debounce timer for prediction
   let prefixIndex = new Map(); // 2-3 char prefix → [indices into VOCAB.getWordList()]
   let recentWords = [];    // Last 20 selected words per language
@@ -106,10 +105,9 @@
 
   async function init() {
     await initI18n();
-    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'lexiPaused', 'examMode']);
+    const stored = await chromeStorageGet(['language', 'predictionEnabled', 'examMode']);
     currentLang = stored.language || 'en';
     enabled = stored.predictionEnabled === true;
-    lexiPaused = stored.lexiPaused || false;
     examMode = !!stored.examMode;
 
     // Live-toggle awareness for examMode.
@@ -124,7 +122,6 @@
     await loadRecentWords(currentLang);
     createDropdown();
     attachGlobalListeners();
-    if (lexiPaused) updatePauseBadge();
 
     // Rebuild local derived state (prefix index + tense sets) once the seam
     // has vocab loaded. Seam's onReady queue handles late subscribers.
@@ -150,11 +147,6 @@
         // change which forms make it into the wordList). We refresh our
         // prefix index + tense sets when the seam signals ready.
         VOCAB.onReady(refreshFromVocab);
-      }
-      if (msg.type === 'LEXI_PAUSED') {
-        lexiPaused = msg.paused;
-        if (lexiPaused) hideDropdown();
-        updatePauseBadge();
       }
       if (msg.type === 'UI_LANGUAGE_CHANGED') {
         setUiLanguage(msg.uiLanguage);
@@ -469,7 +461,7 @@
   }
 
   function handleInput(e) {
-    if (!enabled || lexiPaused) return;
+    if (!enabled) return;
     const el = e.target;
     if (!VOCAB.isTextInput(el)) return;
     schedulePrediction(el);
@@ -478,7 +470,7 @@
   // Fallback for rich-text editors (CKEditor, TinyMCE, etc.) that intercept
   // beforeinput and do their own DOM updates, which can suppress native input events.
   function handleKeyup(e) {
-    if (!enabled || lexiPaused) return;
+    if (!enabled) return;
     // Skip non-character keys
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
          'Shift', 'Control', 'Alt', 'Meta', 'CapsLock',
@@ -502,7 +494,6 @@
   }
 
   function runPrediction(el) {
-    if (lexiPaused) return;
     // Phase 27: word-prediction dropdown is non-exam-safe (wordPrediction.dropdown).
     // Bail at the entry point so no work runs and the dropdown never opens.
     if (examMode) {
@@ -1102,7 +1093,7 @@
       ? `<div class="lh-pred-vis-flere" role="button" tabindex="-1">${escapeHtml(visLabel)} ${visChevron}</div>`
       : '';
 
-    dropdown.innerHTML = itemsHtml + visFlereHtml + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="${escapeAttr(t('pred_switch_lang'))}">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">${escapeHtml(t('pred_tab_hint'))}</span><button class="lh-pred-pause" title="${escapeAttr(lexiPaused ? t('pred_resume') : t('pred_pause'))}">${lexiPaused ? '\u25B6' : '\u23F8'}</button></div>`;
+    dropdown.innerHTML = itemsHtml + visFlereHtml + `<div class="lh-pred-footer"><img src="${chrome.runtime.getURL('assets/icon-16.png')}" class="lh-pred-icon" alt=""><button class="lh-pred-lang" title="${escapeAttr(t('pred_switch_lang'))}">${LANG_LABELS[currentLang] || currentLang.toUpperCase()}</button><span class="lh-pred-hint">${escapeHtml(t('pred_tab_hint'))}</span><button class="lh-pred-pause" title="${escapeAttr(t('pred_pause'))}">\u23F8</button></div>`;
 
     attachDropdownHandlers(el);
   }
@@ -1129,7 +1120,7 @@
       pauseBtn.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        togglePause();
+        disablePredictionsQuick();
       });
     }
 
@@ -1254,51 +1245,36 @@
     return new Promise(resolve => chrome.storage.local.set(obj, resolve));
   }
 
-  function togglePause() {
-    lexiPaused = !lexiPaused;
-    chrome.storage.local.set({ lexiPaused });
+  function disablePredictionsQuick() {
+    enabled = false;
+    chrome.storage.local.set({ predictionEnabled: false });
     // Cancel any pending prediction timer
     if (predictionTimer) {
       clearTimeout(predictionTimer);
       predictionTimer = null;
     }
-    // Broadcast to other tabs via the service worker
-    chrome.runtime.sendMessage({ type: 'LEXI_PAUSED', paused: lexiPaused });
-    updatePauseBadge();
-    if (lexiPaused) {
-      hideDropdown();
-    } else {
-      // Resuming — re-run prediction on current element if available
-      if (activeElement) schedulePrediction(activeElement);
-    }
+    hideDropdown();
+    showToast(t('toast_prediction_disabled'));
+  }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'lh-toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('visible');
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }, 10);
   }
 
   function hideDropdown() {
     if (!dropdown) return;
     dropdown.classList.remove('visible');
     selectedIndex = -1;
-  }
-
-  // ── Pause badge (shows when predictions are paused, allows resume) ──
-  let pauseBadge = null;
-
-  function updatePauseBadge() {
-    if (lexiPaused) {
-      if (!pauseBadge) {
-        pauseBadge = document.createElement('div');
-        pauseBadge.id = 'lexi-pause-badge';
-        pauseBadge.innerHTML = `<img src="${chrome.runtime.getURL('assets/icon-16.png')}" alt=""><span>${escapeHtml(t('pred_paused'))}</span><button title="${escapeAttr(t('pred_resume_short'))}">\u25B6</button>`;
-        pauseBadge.querySelector('button').addEventListener('mousedown', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          togglePause();
-        });
-        document.documentElement.appendChild(pauseBadge);
-      }
-      pauseBadge.classList.add('visible');
-    } else {
-      if (pauseBadge) pauseBadge.classList.remove('visible');
-    }
   }
 
   // ── Sentence-start capitalization ──

@@ -138,7 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPinButton();
   initFestOnboarding();
   initSkrivButton();
-  initPauseButton();
   initAuth();
   initReportForm();
   initVocabUpdateNotice();
@@ -383,8 +382,25 @@ async function initFirstRunPicker() {
           await chromeStorageSet({ language: lang });
           chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
 
-          picker.classList.add('hidden');
-          resolve();
+          // Show step 2: Grammar level
+          document.getElementById('lang-pick-options').classList.add('hidden');
+          document.getElementById('lang-pick-progress').classList.add('hidden');
+          const grammarPicker = document.getElementById('grammar-picker');
+          grammarPicker.classList.remove('hidden');
+
+          grammarPicker.querySelectorAll('.grammar-pick-btn').forEach(gBtn => {
+            gBtn.addEventListener('click', async () => {
+              const level = gBtn.dataset.level;
+              await applyPreset(level);
+              picker.classList.add('hidden');
+              resolve();
+            });
+          });
+
+          document.getElementById('grammar-pick-skip')?.addEventListener('click', () => {
+            picker.classList.add('hidden');
+            resolve();
+          });
         } catch (err) {
           console.error('Language download failed:', err);
           status.textContent = !navigator.onLine ? t('picker_failed_offline') : t('picker_failed');
@@ -1482,30 +1498,7 @@ function initSkrivButton() {
 }
 
 // ── Pause Button ───────────────────────────────────────────
-async function initPauseButton() {
-  const pauseBtn = document.getElementById('pause-btn');
-  const pauseLabel = pauseBtn.querySelector('.pause-label');
-
-  // Load saved pause state
-  const paused = await chromeStorageGet('lexiPaused');
-  if (paused) {
-    pauseBtn.classList.add('paused');
-    pauseLabel.textContent = t('nav_start');
-  }
-
-  pauseBtn.addEventListener('click', async () => {
-    const isPaused = pauseBtn.classList.toggle('paused');
-    pauseLabel.textContent = isPaused ? t('nav_start') : t('nav_pause');
-
-    await chromeStorageSet({ lexiPaused: isPaused });
-
-    // Broadcast to all content scripts
-    chrome.runtime.sendMessage({
-      type: 'LEXI_PAUSED',
-      paused: isPaused
-    });
-  });
-}
+// DELETED in Phase 39-01: moved to contextual pause buttons and settings toggle.
 
 // Phase 30-01: initDarkMode moved into extension/popup/views/settings-view.js
 

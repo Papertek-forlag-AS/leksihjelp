@@ -123,6 +123,7 @@
 
     function showPlaceholder() {
       results.innerHTML = `<div class="results-placeholder"><p>${t('search_placeholder_text')}</p></div>`;
+      container.classList.remove('has-searched');
     }
 
     function tryDecomposeQuery(query) {
@@ -496,11 +497,35 @@
       }
     }
 
+    function renderPedagogy(entry) {
+      if (!host.__lexiSpellRules || !entry.word) return '';
+      // Only for DE word-order rules currently
+      if (state.currentLang !== 'de') return '';
+      
+      const rules = host.__lexiSpellRules.filter(r => r.id === 'de-v2' || r.id === 'de-verb-final');
+      let html = '';
+      
+      for (const rule of rules) {
+        if (typeof rule.explain !== 'function') continue;
+        const explanation = rule.explain({ original: entry.word, fix: '...', display: entry.word });
+        const text = explanation[getUiLanguage()] || explanation.nb || '';
+        if (text) {
+          html += `<div class="result-pedagogy">
+            <span class="pedagogy-icon">💡</span>
+            <span class="pedagogy-text">${sanitizeWarning(text)}</span>
+          </div>`;
+        }
+      }
+      return html;
+    }
+
     function renderResults(resultsList, options = {}) {
       if (!resultsList.length) {
         results.innerHTML = `<div class="results-placeholder"><p>${t('search_no_results')}</p></div>`;
+        container.classList.remove('has-searched');
         return;
       }
+      container.classList.add('has-searched');
 
       const compoundNavStack = state.compoundNavStack || [];
       const backLinkHtml = compoundNavStack.length > 0
@@ -532,8 +557,8 @@
             </div>
             ${renderFalseFriends(enrichedEntry)}
             ${renderSenses(enrichedEntry) || `<div class="result-translation">${escapeHtml(getTranslation(entry))}</div>`}
-            ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}
-            <div class="result-meta">
+            ${renderPedagogy(entry)}
+            ${inflectionHint ? `<div class="inflection-hint">${escapeHtml(inflectionHint)}</div>` : ''}            <div class="result-meta">
               <span class="result-pos">${escapeHtml(entry.partOfSpeech || '')}</span>
               ${entry.gender && isFeatureEnabled('grammar_articles') ? `<span class="result-gender">${escapeHtml(entry.gender)}</span>` : ''}
               ${entry.plural && isFeatureEnabled('grammar_plural') ? `<span class="result-plural">${escapeHtml(entry.plural)}</span>` : ''}

@@ -75,6 +75,143 @@
     return _tables;
   }
 
+  // ── Pedagogy data fallback (Phase 39) ──
+  const PEDAGOGY_FALLBACK = {
+    aus: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>aus</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>aus</em> styrer alltid dativ.',
+        en: 'The preposition <em>aus</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'aus der Schule', incorrect: 'aus die Schule', translation: { nb: 'fra skolen', nn: 'frå skulen', en: 'from school' } },
+        { correct: 'aus dem Haus', incorrect: 'aus das Haus', translation: { nb: 'ut av huset', nn: 'ut av huset', en: 'out of the house' } },
+      ]
+    },
+    bei: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>bei</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>bei</em> styrer alltid dativ.',
+        en: 'The preposition <em>bei</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'bei dem Lehrer', incorrect: 'bei den Lehrer', translation: { nb: 'hos læreren', nn: 'hos læraren', en: 'at the teacher\'s' } },
+      ]
+    },
+    mit: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>mit</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>mit</em> styrer alltid dativ.',
+        en: 'The preposition <em>mit</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'mit dem Auto', incorrect: 'mit das Auto', translation: { nb: 'med bilen', nn: 'med bilen', en: 'with the car' } },
+      ]
+    },
+    nach: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>nach</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>nach</em> styrer alltid dativ.',
+        en: 'The preposition <em>nach</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'nach dem Essen', incorrect: 'nach das Essen', translation: { nb: 'etter maten', nn: 'etter maten', en: 'after the meal' } },
+      ]
+    },
+    seit: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>seit</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>seit</em> styrer alltid dativ.',
+        en: 'The preposition <em>seit</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'seit einem Jahr', incorrect: 'seit ein Jahr', translation: { nb: 'siden et år', nn: 'sidan eit år', en: 'for a year' } },
+      ]
+    },
+    von: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>von</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>von</em> styrer alltid dativ.',
+        en: 'The preposition <em>von</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'von dem Freund', incorrect: 'von den Freund', translation: { nb: 'fra vennen', nn: 'frå venen', en: 'from the friend' } },
+      ]
+    },
+    zu: {
+      case: 'dativ',
+      note: {
+        nb: 'Preposisjonen <em>zu</em> styrer alltid dativ.',
+        nn: 'Preposisjonen <em>zu</em> styrer alltid dativ.',
+        en: 'The preposition <em>zu</em> always takes the dative case.',
+      },
+      examples: [
+        { correct: 'zu der Oma', incorrect: 'zu die Oma', translation: { nb: 'til bestemor', nn: 'til bestemor', en: 'to grandma' } },
+      ]
+    },
+    durch: {
+      case: 'akkusativ',
+      note: {
+        nb: 'Preposisjonen <em>durch</em> styrer alltid akkusativ.',
+        nn: 'Preposisjonen <em>durch</em> styrer alltid akkusativ.',
+        en: 'The preposition <em>durch</em> always takes the accusative case.',
+      },
+      examples: [
+        { correct: 'durch den Wald', incorrect: 'durch dem Wald', translation: { nb: 'gjennom skogen', nn: 'gjennom skogen', en: 'through the forest' } },
+      ]
+    },
+    'für': {
+      case: 'akkusativ',
+      note: {
+        nb: 'Preposisjonen <em>für</em> styrer alltid akkusativ.',
+        nn: 'Preposisjonen <em>für</em> styrer alltid akkusativ.',
+        en: 'The preposition <em>für</em> always takes the accusative case.',
+      },
+      examples: [
+        { correct: 'für den Vater', incorrect: 'für dem Vater', translation: { nb: 'til/for faren', nn: 'til/for faren', en: 'for the father' } },
+      ]
+    },
+    gegen: {
+      case: 'akkusativ',
+      note: {
+        nb: 'Preposisjonen <em>gegen</em> styrer alltid akkusativ.',
+        nn: 'Preposisjonen <em>gegen</em> styrer alltid akkusativ.',
+        en: 'The preposition <em>gegen</em> always takes the accusative case.',
+      },
+      examples: [
+        { correct: 'gegen den Strom', incorrect: 'gegen dem Strom', translation: { nb: 'mot strømmen', nn: 'mot straumen', en: 'against the current' } },
+      ]
+    },
+    ohne: {
+      case: 'akkusativ',
+      note: {
+        nb: 'Preposisjonen <em>ohne</em> styrer alltid akkusativ.',
+        nn: 'Preposisjonen <em>ohne</em> styrer alltid akkusativ.',
+        en: 'The preposition <em>ohne</em> always takes the accusative case.',
+      },
+      examples: [
+        { correct: 'ohne den Hund', incorrect: 'ohne dem Hund', translation: { nb: 'uten hunden', nn: 'utan hunden', en: 'without the dog' } },
+      ]
+    },
+    um: {
+      case: 'akkusativ',
+      note: {
+        nb: 'Preposisjonen <em>um</em> styrer alltid akkusativ.',
+        nn: 'Preposisjonen <em>um</em> styrer alltid akkusativ.',
+        en: 'The preposition <em>um</em> always takes the accusative case.',
+      },
+      examples: [
+        { correct: 'um den Tisch', incorrect: 'um dem Tisch', translation: { nb: 'rundt bordet', nn: 'rundt bordet', en: 'around the table' } },
+      ]
+    }
+  };
+
   // Check if an article's possible case readings overlap with required cases
   function hasOverlap(articleReadings, requiredCases) {
     for (const r of articleReadings) {
@@ -212,10 +349,10 @@
                 prep: ctx.tokens[i].display,
                 requiredCase: caseNames.join('/'),
                 message: ctx.tokens[i].display + ' + ' + ctx.tokens[j].display + ' → ' + suggestion,
-                severity: 'warning',
+                severity: 'error',
               };
-              const ped1 = prepPedagogy.get((ctx.tokens[i].word || '').toLowerCase());
-              if (ped1) f1.pedagogy = ped1;
+              const pkey1 = (ctx.tokens[i].word || '').toLowerCase();
+              f1.pedagogy = prepPedagogy.get(pkey1) || PEDAGOGY_FALLBACK[pkey1] || null;
               findings.push(f1);
               break;
             }
@@ -238,10 +375,10 @@
                   prep: ctx.tokens[i].display,
                   requiredCase: caseNames.join('/'),
                   message: ctx.tokens[i].display + ' + ' + ctx.tokens[j].display + ' → ' + suggestion,
-                  severity: 'warning',
+                  severity: 'error',
                 };
-                const ped2 = prepPedagogy.get((ctx.tokens[i].word || '').toLowerCase());
-                if (ped2) f2.pedagogy = ped2;
+                const pkey2 = (ctx.tokens[i].word || '').toLowerCase();
+                f2.pedagogy = prepPedagogy.get(pkey2) || PEDAGOGY_FALLBACK[pkey2] || null;
                 findings.push(f2);
               }
               break;

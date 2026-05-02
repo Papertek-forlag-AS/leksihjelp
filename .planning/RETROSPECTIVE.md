@@ -214,7 +214,30 @@
 
 ---
 
+## Milestone: v3.2 — UAT, Polish & Deploy
+
+**Shipped:** 2026-05-02 (Phase 39-01)
+**Phases:** 2 (38 Batch UAT, 39 UX Polish)
+**Plans:** 6
+**Duration:** 2 days (2026-05-01 → 2026-05-02)
+
+### What Was Built
+
+- **Granular Pausing System** — Replaced global `lexiPaused` with feature-specific toggles accessible via contextual Pause buttons on the word prediction dropdown, dictionary widget, and 'Aa' pill (right-click). Added `widgetEnabled` master toggle to Settings.
+- **Robust Skriv Button** — Switched pencil icon visibility from CSS `:has` to a DOM-class-driven logic (`.has-searched`), ensuring it only appears after the initial placeholder is dismissed.
+- **Global UI Persistence** — Added position saving for the TTS widget to `chrome.storage.local`, matching the behavior of the dictionary card.
+- **Onboarding Enrichment** — Integrated grammar level selection (Lite/Middels/Alt) into the first-run language download flow.
+
+### Key Lessons
+
+1. **Granular control reduces user friction.** Single global "Pause" states are blunt instruments. Students often want to silence one intrusive feature (like word prediction) while keeping others (like dictionary lookup) active. Direct, contextual toggles provide this without forcing them into a nested settings menu.
+2. **CSS `:has` is powerful but can be brittle in complex DOMs.** Toggling a class on a high-level container via JavaScript is often more predictable and easier to debug than complex pseudo-class selectors when visibility depends on state transitions managed by multiple JS modules.
+3. **Multimodal UAT (Screenshots) is high-ROI.** Triaging `leksiscreenshots` surfaced non-obvious UI friction points that aren't caught by automated fixture tests or developer-led walkthroughs.
+
+---
+
 ## Milestone: v3.0 — Data-Source Migration
+...
 
 **Shipped:** 2026-04-27
 **Phases:** 1 (consolidated — 8 plans in a single phase)

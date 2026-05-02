@@ -6,9 +6,9 @@ status: unknown
 last_updated: "2026-05-01T20:31:29.706Z"
 progress:
   total_phases: 15
-  completed_phases: 10
-  total_plans: 43
-  completed_plans: 35
+  completed_phases: 11
+  total_plans: 44
+  completed_plans: 36
 ---
 
 # Session State
@@ -22,10 +22,12 @@ See: .planning/PROJECT.md (updated 2026-05-01 after starting v3.2)
 
 ## Current Position
 
-Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 + 04 + 01.1 + 01.2 complete; 38-05 release-asset plan pending; browser re-walk deferred outside plans pending Saturday staging on stb-lockdown.app)
-Plan: 01 + 02 + 03 + 04 complete; 01.1 complete (Task 4 walker re-walk surfaced regression → 01.2 spawned); 01.2 complete (F38-1 v2 fix shipped — root cause: API serves FR generalbank from lexicon/fr/ missing 3 aspect meta entries; defensive seam-side backfill from bundled fr.json; v2.9.20 DRAFT GitHub Release)
-Status: Plan 38-01.2 closed cleanly. F38-1 status flipped from `open` (REOPENED) back to `closed` with Resolution v2 documenting actual proximate cause. F38-3 status flipped to `partial-deferred-to-future-plan` (aspect-hint half closes here; FR typo-coverage gap on `pelle`/`Francais`/cedilla deferred — upstream Papertek-API data work). All 14 release gates green + new check-fr-bundle-completeness regression gate green. v2.9.20 GitHub Release created as DRAFT (NOT Latest) — promotion gates on deferred browser re-walk after Saturday staging. Both fix commit (addbb64) and version-bump commit (07dc423) carry [lockdown-resync-needed] markers. NO files modified under lockdown/ or papertek-vocabulary/. Plan 38-05 release-asset plan still pending (now actually unblocked since F38-1 closed-pending-rewalk).
-Last activity: 2026-05-01 — Plan 38-01.2 completed; commits 1542499 (Task 1 RED regression artifact) / addbb64 (Task 2 GREEN seam fix + F38-1/F38-3 finding updates) / 07dc423 (Task 3 v2.9.20 version bump). GitHub Release v2.9.20 DRAFT with lexi-extension.zip uploaded.
+Phase: 39 (UX Polish & Contextual Pausing) — COMPLETED
+Plan: 39-01 complete.
+Status: Successfully implemented granular pausing, fixed Skriv button visibility/tooltip, added TTS widget position persistence, and implemented first-run grammar picker. All validation passed.
+Last activity: 2026-05-02 — Phase 39-01 completed.
+
+Phase: 38 (Extension UAT Batch + Bug Fix Loop + REGR) — In progress (Plans 01 + 02 + 03 + 04 + 01.1 + 01.2 complete; 38-05 release-asset plan pending)
 
 ## Performance Metrics
 

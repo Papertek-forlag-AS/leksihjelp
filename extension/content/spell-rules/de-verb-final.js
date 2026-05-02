@@ -51,6 +51,36 @@
       category: "grammar-lookup",
     },
     severity: 'warning',
+    // Phase 39: Rich pedagogy for verb-final word order
+    pedagogy: {
+      note: {
+        nb: 'I tyske leddsetninger (setninger som starter med ord som <em>dass, weil, wenn, ob</em>) skal det bøyde verbet alltid stå helt til slutt.',
+        nn: 'I tyske leddsetningar (setningar som startar med ord som <em>dass, weil, wenn, ob</em>) skal det bøygde verbet alltid stå heilt til slutt.',
+        en: 'In German subordinate clauses (starting with words like <em>dass, weil, wenn, ob</em>), the finite verb must always go at the very end.',
+      },
+      examples: [
+        { 
+          correct: '...dass er krank ist.', 
+          incorrect: '...dass er ist krank.', 
+          translation: { nb: '...at han er syk.', nn: '...at han er sjuk.', en: '...that he is sick.' } 
+        },
+        { 
+          correct: '...weil ich keine Zeit habe.', 
+          incorrect: '...weil ich habe keine Zeit.', 
+          translation: { nb: '...fordi jeg ikke har tid.', nn: '...fordi eg ikkje har tid.', en: '...because I have no time.' } 
+        },
+        { 
+          correct: '...wenn du morgen kommst.', 
+          incorrect: '...wenn du kommst morgen.', 
+          translation: { nb: '...hvis du kommer i morgen.', nn: '...hvis du kjem i morgon.', en: '...if you come tomorrow.' } 
+        }
+      ],
+      extra: {
+        nb: 'Husk: Hvis du har to verb (f.eks. et modalverb + infinitiv), skal det bøyde verbet stå aller sist: <em>"...weil ich es <strong>kann</strong>"</em>.',
+        nn: 'Hugs: Viss du har to verb (t.d. eit modalverb + infinitiv), skal det bøygde verbet stå aller sist: <em>"...weil ich es <strong>kann</strong>"</em>.',
+        en: 'Note: If you have two verbs (e.g., modal + infinitive), the finite verb goes last: <em>"...weil ich es <strong>kann</strong>"</em>.'
+      }
+    },
     explain: function (finding) {
       return {
         nb: 'I tyske leddsetninger skal det bøyde verbet stå til slutt. Vurder å flytte <em>' + escapeHtml(finding.display || finding.original) + '</em> til slutten av leddsetningen.',
@@ -157,6 +187,7 @@
             noAutoFix: true,
             message: 'Verbet skal stå til slutt i leddsetningen: "' + verbTok.display + '"',
             severity: 'warning',
+            pedagogy: rule.pedagogy,
           });
 
           // Only flag the first violation per subordinate clause

@@ -85,7 +85,7 @@
       <div class="language-picker-content glass">
         <h3 data-i18n="picker_title">Hvilket fremmedspråk lærer du?</h3>
         <p class="settings-note" data-i18n="picker_note">Ordboken lastes ned for bruk offline</p>
-        <div class="language-picker-buttons">
+        <div id="lang-pick-options" class="language-picker-buttons">
           <button class="lang-pick-btn" data-lang="de">
             <span class="lang-pick-flag">🇩🇪</span>
             <span class="lang-pick-name" data-i18n="lang_de">Tysk</span>
@@ -103,6 +103,23 @@
         <div id="lang-pick-progress" class="hidden">
           <p id="lang-pick-status" data-i18n="picker_downloading">Laster ned...</p>
         </div>
+      </div>
+
+      <div id="grammar-picker" class="hidden">
+        <h2 data-i18n="settings_grammar_title">Grammatikk i ordboken</h2>
+        <p class="picker-note" data-i18n="settings_grammar_note">Hvor mye grammatikk vil du se?</p>
+        <div class="grammar-pick-options">
+          <button class="grammar-pick-btn" data-level="lite">
+            <span class="grammar-pick-name" data-i18n="grammar_level_lite">Lite</span>
+          </button>
+          <button class="grammar-pick-btn" data-level="middels">
+            <span class="grammar-pick-name" data-i18n="grammar_level_middels">Middels</span>
+          </button>
+          <button class="grammar-pick-btn" data-level="alt">
+            <span class="grammar-pick-name" data-i18n="grammar_level_alt">Alt</span>
+          </button>
+        </div>
+        <button id="grammar-pick-skip" class="btn-link" data-i18n="picker_skip">Velg senere i innstillinger</button>
       </div>
     </div>
 
@@ -246,6 +263,16 @@
         </label>
       </div>
 
+      <div class="settings-group glass">
+        <h3 data-i18n="settings_widget_title">Hurtigoppslag</h3>
+        <label class="toggle-row">
+          <span data-i18n="settings_widget_toggle">Dobbelklikk på et ord for å oversette</span>
+          <input type="checkbox" id="setting-widget" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <p class="settings-note" data-i18n="settings_widget_note">Viser en liten boks med oversettelse og uttale når du markerer tekst eller dobbelklikker</p>
+      </div>
+
       <!-- Phase 27: Exam mode toggle ── -->
       <div class="settings-group glass" id="exam-mode-group">
         <h3 data-i18n="examModeLabel">Eksamenmodus</h3>
@@ -339,15 +366,6 @@
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
         <span data-i18n="nav_dictionary">Ordbok</span>
-      </button>
-      <button id="pause-btn" class="nav-btn pause-nav-btn" data-i18n-title="nav_pause_title" title="Sett Leksihjelp på pause">
-        <svg class="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>
-        </svg>
-        <svg class="play-icon hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        <span class="pause-label" data-i18n="nav_pause">Pause</span>
       </button>
       <button class="nav-btn" data-view="settings" title="Innstillinger">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

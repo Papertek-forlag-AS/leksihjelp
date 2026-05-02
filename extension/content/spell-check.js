@@ -32,7 +32,6 @@
 
   // ── State ──
   let enabled = false;
-  let paused = false;
   let activeEl = null;
   let debounceTimer = null;
 
@@ -55,15 +54,28 @@
     console.log('[lexi-spell]', ...args);
   }
 
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'lh-toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.classList.add('visible');
+      setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }, 10);
+  }
+
   async function init() {
-    const stored = await storageGet(['spellCheckEnabled', 'lexiPaused']);
-    paused = !!stored.lexiPaused;
+    const stored = await storageGet(['spellCheckEnabled']);
     // Spell-check is on by default (helps every student, not only dyslexia users).
     // Independent of predictionEnabled so users can keep spell-check while
     // turning predictions off.
     enabled = stored.spellCheckEnabled !== false;
 
-    warn('init', { lang: VOCAB.getLanguage(), enabled, paused, spellCheckEnabled: stored.spellCheckEnabled });
+    warn('init', { lang: VOCAB.getLanguage(), enabled, spellCheckEnabled: stored.spellCheckEnabled });
 
     // Vocab is loaded by vocab-seam.js; just wait for it to be ready.
     // The seam's onReady queue handles late subscribers deterministically.
@@ -119,7 +131,6 @@
         state: () => ({
           lang: VOCAB.getLanguage(),
           enabled,
-          paused,
           activeEl,
           findings: lastFindings,
           markers: markers.length,
@@ -142,9 +153,6 @@
     } else if (msg.type === 'SPELL_CHECK_TOGGLED') {
       enabled = !!msg.enabled;
       if (!enabled) { hideOverlay(); hideButton(); }
-    } else if (msg.type === 'LEXI_PAUSED') {
-      paused = !!msg.paused;
-      if (paused) { hideOverlay(); hideButton(); }
     }
   }
 
@@ -280,11 +288,11 @@
       debounceTimer = null;
       runCheck();
     }, 800);
-  }
-
   function runCheck() {
-    if (!activeEl || !enabled || paused) {
-      dbg('runCheck skip', { activeEl: !!activeEl, enabled, paused });
+    if (!activeEl || !enabled) {
+      dbg('runCheck skip', { activeEl: !!activeEl, enabled });
+      return;
+    }
       hideOverlay();
       return;
     }
@@ -1193,7 +1201,12 @@
       if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
       if (pendingClickTimer) { clearTimeout(pendingClickTimer); pendingClickTimer = null; }
       if (dragState) dragState.longPressed = true;
-      showLangFlyout();
+      
+      enabled = false;
+      chrome.storage.local.set({ spellCheckEnabled: false });
+      hideOverlay();
+      hideButton();
+      showToast(t('toast_spellcheck_disabled'));
     });
 
     (document.fullscreenElement || document.body).appendChild(spellCheckBtn);
@@ -1223,7 +1236,7 @@
 
   function updateButtonVisibility() {
     if (!activeEl) return;
-    if (!enabled || paused) { hideButton(); return; }
+    if (!enabled) { hideButton(); return; }
     // Downstream consumers (lockdown webapp, future skriveokt-zero) set
     // host.__lexiSpellBtnAlwaysVisible = true so the green Aa appears as
     // soon as the editor is focused — useful when the editor is the page's

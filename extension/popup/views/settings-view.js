@@ -38,7 +38,7 @@
       onUiLanguageChange,
     } = deps;
     const showSection = deps.showSection || {
-      uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true,
+      uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true, widget: true,
     };
 
     const cleanups = [];
@@ -116,6 +116,21 @@
         bind(toggle, 'change', async () => {
           await storage.set({ predictionEnabled: toggle.checked });
           runtime.sendMessage({ type: 'PREDICTION_TOGGLED', enabled: toggle.checked });
+        });
+      })();
+    }
+
+    // ── Widget toggle ──────────────────────────────────
+    if (showSection.widget !== false) {
+      (async () => {
+        const toggle = container.querySelector('#setting-widget');
+        if (!toggle) return;
+        const enabled = await storage.get('widgetEnabled');
+        // Default to true if never set
+        toggle.checked = enabled !== false;
+        bind(toggle, 'change', async () => {
+          await storage.set({ widgetEnabled: toggle.checked });
+          runtime.sendMessage({ type: 'WIDGET_ENABLED_CHANGED', enabled: toggle.checked });
         });
       })();
     }

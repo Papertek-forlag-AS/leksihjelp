@@ -53,26 +53,6 @@ chrome.runtime.onInstalled.addListener((details) => {
       title: t('ctx_read'),
       contexts: ['selection']
     });
-
-    chrome.contextMenus.create({
-      id: 'lexi-separator',
-      type: 'separator',
-      contexts: ['editable']
-    });
-
-    chrome.contextMenus.create({
-      id: 'lexi-toggle-predictions',
-      title: t('ctx_pause_predictions'),
-      contexts: ['editable']
-    });
-  });
-
-  // Set initial context menu title based on stored pause state
-  chrome.storage.local.get('lexiPaused', (result) => {
-    const paused = result.lexiPaused || false;
-    chrome.contextMenus.update('lexi-toggle-predictions', {
-      title: paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
-    }).catch(() => {});
   });
 
   // Plan 23-03 + 23-05: bootstrap / migrate vocab into IndexedDB.
@@ -133,16 +113,6 @@ async function broadcastToAllTabs(msg) {
   }
 }
 
-async function togglePause() {
-  const result = await chrome.storage.local.get('lexiPaused');
-  const newState = !result.lexiPaused;
-  await chrome.storage.local.set({ lexiPaused: newState });
-  chrome.contextMenus.update('lexi-toggle-predictions', {
-    title: newState ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
-  }).catch(() => {});
-  await broadcastToAllTabs({ type: 'LEXI_PAUSED', paused: newState });
-}
-
 // ── Context Menu Click ──
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
@@ -160,10 +130,6 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       text: info.selectionText
     }).catch(() => {});
   }
-
-  if (info.menuItemId === 'lexi-toggle-predictions') {
-    await togglePause();
-  }
 });
 
 // ── Keyboard shortcut commands ──
@@ -178,22 +144,13 @@ chrome.commands.onCommand.addListener(async (command) => {
   if (command === 'read-selection') {
     chrome.tabs.sendMessage(tab.id, { type: 'TRIGGER_TTS' }).catch(() => {});
   }
-
-  if (command === 'toggle-pause') {
-    await togglePause();
-  }
 });
 
 // ── Message routing ──
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Relay settings changes to all content scripts
-  if (msg.type === 'LANGUAGE_CHANGED' || msg.type === 'PREDICTION_TOGGLED' || msg.type === 'AUTH_CHANGED' || msg.type === 'LEXI_PAUSED') {
+  if (msg.type === 'LANGUAGE_CHANGED' || msg.type === 'PREDICTION_TOGGLED' || msg.type === 'AUTH_CHANGED' || msg.type === 'WIDGET_ENABLED_CHANGED') {
     broadcastToAllTabs(msg);
-    if (msg.type === 'LEXI_PAUSED') {
-      chrome.contextMenus.update('lexi-toggle-predictions', {
-        title: msg.paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
-      }).catch(() => {});
-    }
   }
 
   // UI language changed — update context menu titles
@@ -201,12 +158,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     setUiLanguage(msg.uiLanguage);
     chrome.contextMenus.update('lexi-lookup', { title: t('ctx_lookup') }).catch(() => {});
     chrome.contextMenus.update('lexi-tts', { title: t('ctx_read') }).catch(() => {});
-    chrome.storage.local.get('lexiPaused', (res) => {
-      const paused = res.lexiPaused || false;
-      chrome.contextMenus.update('lexi-toggle-predictions', {
-        title: paused ? t('ctx_resume_predictions') : t('ctx_pause_predictions')
-      }).catch(() => {});
-    });
   }
 
   // Error report — delegated from spell-check content script (SC-06 network silence)

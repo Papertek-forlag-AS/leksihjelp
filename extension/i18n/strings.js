@@ -21,7 +21,7 @@ const _STRINGS = {
     pin_title: 'Hold Leksihjelp åpen i eget vindu',
     fest_onboarding_title: 'Fest Leksihjelp ved siden av nettsiden',
     fest_onboarding_body: 'Trykk «Fest» øverst for å åpne ordboka i sidepanelet, så ligger den klar mens du leser og skriver — uten å lukke seg.',
-    skriv_btn_title: 'Åpne skriveokt — et privat skriveområde i nettleseren der teksten lagres lokalt på din maskin (ingen sky, ingen innlogging).',
+    skriv_btn_title: 'Trenger du et sted å skrive? Åpne Skriveøkt',
     settings_title: 'Innstillinger',
 
     // ── Pin overlay ──
@@ -162,12 +162,18 @@ const _STRINGS = {
 
     settings_prediction_title: 'Ordforslag',
     settings_prediction_toggle: 'Aktiver ordforslag ved skriving',
+    settings_widget_title: 'Hurtigoppslag',
+    settings_widget_toggle: 'Dobbelklikk på et ord for å oversette',
+    settings_widget_note: 'Viser en liten boks med oversettelse og uttale når du markerer tekst eller dobbelklikker',
     settings_spellcheck_alternates_title: 'Skriveforslag',
     settings_spellcheck_alternates_toggle: 'Vis alternative skriveforslag',
     settings_spellcheck_alternates_note: 'Viser opptil 3 forslag om gangen i stedet for bare ett',
     settings_grammar_title: 'Grammatikk i ordboken',
     settings_grammar_note: 'Hvor mye grammatikk vil du se?',
     settings_grammar_customize: 'Tilpass selv',
+    grammar_level_lite: 'Lite',
+    grammar_level_middels: 'Middels',
+    grammar_level_alt: 'Alt',
     settings_darkmode_title: 'Mørk modus',
     settings_darkmode_toggle: 'Bruk mørkt tema',
     settings_darkmode_note: 'Følger systeminnstilling hvis ikke valgt manuelt',
@@ -175,6 +181,11 @@ const _STRINGS = {
     shortcut_lookup: 'Slå opp markert tekst',
     shortcut_read: 'Les opp markert tekst',
     shortcut_pause: 'Pause/gjenoppta Leksihjelp',
+
+    // ── Toasts (Phase 39) ──
+    toast_prediction_disabled: 'Ordforslag slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
+    toast_widget_disabled: 'Hurtigoppslag slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
+    toast_spellcheck_disabled: 'Stavekontroll slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
 
     // ── UI language setting ──
     settings_ui_language_title: 'Visningsspråk',
@@ -291,7 +302,7 @@ const _STRINGS = {
     pin_title: 'Hald Leksihjelp ope i eige vindauge',
     fest_onboarding_title: 'Fest Leksihjelp ved sida av nettsida',
     fest_onboarding_body: 'Trykk «Fest» øvst for å opne ordboka i sidepanelet, så ligg ho klar medan du les og skriv — utan å lukke seg.',
-    skriv_btn_title: 'Opne skriveøkt — eit privat skriveområde i nettlesaren der teksten vert lagra lokalt på maskina di (ingen sky, ingen innlogging).',
+    skriv_btn_title: 'Treng du ein stad å skrive? Opne Skriveøkt',
     settings_title: 'Innstillingar',
 
     pin_overlay_title: 'Fest Leksihjelp til verktøylinjen',
@@ -418,12 +429,18 @@ const _STRINGS = {
 
     settings_prediction_title: 'Ordforslag',
     settings_prediction_toggle: 'Aktiver ordforslag ved skriving',
+    settings_widget_title: 'Hurtigoppslag',
+    settings_widget_toggle: 'Dobbelklikk på et ord for å oversette',
+    settings_widget_note: 'Viser en liten boks med oversettelse og uttale når du markerer tekst eller dobbelklikker',
     settings_spellcheck_alternates_title: 'Skriveforslag',
     settings_spellcheck_alternates_toggle: 'Vis alternative skriveforslag',
     settings_spellcheck_alternates_note: 'Viser opptil 3 forslag om gongen i staden for berre eitt',
     settings_grammar_title: 'Grammatikk i ordboka',
-    settings_grammar_note: 'Kor mykje grammatikk vil du sjå?',
+    settings_grammar_note: 'Kor mye grammatikk vil du sjå?',
     settings_grammar_customize: 'Tilpass sjølv',
+    grammar_level_lite: 'Lite',
+    grammar_level_middels: 'Middels',
+    grammar_level_alt: 'Alt',
     settings_darkmode_title: 'Mørk modus',
     settings_darkmode_toggle: 'Bruk mørkt tema',
     settings_darkmode_note: 'Følgjer systeminnstillinga viss ikkje vald manuelt',
@@ -431,6 +448,11 @@ const _STRINGS = {
     shortcut_lookup: 'Slå opp markert tekst',
     shortcut_read: 'Les opp markert tekst',
     shortcut_pause: 'Pause/gjenoppta Leksihjelp',
+
+    // ── Toasts (Phase 39) ──
+    toast_prediction_disabled: 'Ordforslag slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
+    toast_widget_disabled: 'Hurtigoppslag slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
+    toast_spellcheck_disabled: 'Stavekontroll slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
 
     settings_ui_language_title: 'Visningsspråk',
     settings_ui_language_note: 'Språk for knappar og menyar i Leksihjelp',
@@ -540,7 +562,7 @@ const _STRINGS = {
     pin_title: 'Keep Leksihjelp open in a separate window',
     fest_onboarding_title: 'Pin Leksihjelp next to the page',
     fest_onboarding_body: 'Click "Pin" at the top to open the dictionary in the side panel — it stays alongside the page while you read and write, instead of closing.',
-    skriv_btn_title: 'Open Skriveokt — a private writing space in your browser where text is saved locally on your device (no cloud, no sign-in).',
+    skriv_btn_title: 'Need a place to write? Open Skriveøkt',
     settings_title: 'Settings',
 
     pin_overlay_title: 'Pin Leksihjelp to the toolbar',
@@ -668,9 +690,15 @@ const _STRINGS = {
 
     settings_prediction_title: 'Word predictions',
     settings_prediction_toggle: 'Enable word predictions while typing',
+    settings_widget_title: 'Quick Lookup',
+    settings_widget_toggle: 'Double-click a word to translate',
+    settings_widget_note: 'Shows a small card with translation and pronunciation when you select text or double-click',
     settings_grammar_title: 'Grammar in dictionary',
     settings_grammar_note: 'How much grammar do you want to see?',
     settings_grammar_customize: 'Customize',
+    grammar_level_lite: 'Lite',
+    grammar_level_middels: 'Middels',
+    grammar_level_alt: 'Full',
     settings_darkmode_title: 'Dark mode',
     settings_darkmode_toggle: 'Use dark theme',
     settings_darkmode_note: 'Follows system setting if not set manually',
@@ -678,6 +706,11 @@ const _STRINGS = {
     shortcut_lookup: 'Look up selected text',
     shortcut_read: 'Read selected text aloud',
     shortcut_pause: 'Pause/resume Leksihjelp',
+
+    // ── Toasts (Phase 39) ──
+    toast_prediction_disabled: 'Word prediction turned off. Re-enable in Leksihjelp settings.',
+    toast_widget_disabled: 'Quick lookup turned off. Re-enable in Leksihjelp settings.',
+    toast_spellcheck_disabled: 'Spell-check turned off. Re-enable in Leksihjelp settings.',
 
     settings_ui_language_title: 'Display language',
     settings_ui_language_note: 'Language for buttons and menus in Leksihjelp',

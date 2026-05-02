@@ -73,6 +73,31 @@
       category: "grammar-lookup",
     },
     severity: 'warning',
+    // Phase 39: Rich pedagogy for V2 word order in main clauses
+    pedagogy: {
+      note: {
+        nb: 'I tyske hovedsetninger skal det bøyde verbet alltid stå på plass 2, selv om du starter setningen med noe annet enn subjektet.',
+        nn: 'I tyske hovudsetningar skal det bøygde verbet alltid stå på plass 2, sjølv om du startar setninga med noko anna enn subjektet.',
+        en: 'In German main clauses, the finite verb must always be at position 2, even if you start the sentence with something other than the subject.',
+      },
+      examples: [
+        { 
+          correct: 'Heute <strong>geht</strong> er nach Hause.', 
+          incorrect: 'Heute er <strong>geht</strong> nach Hause.', 
+          translation: { nb: 'I dag går han hjem.', nn: 'I dag går han heim.', en: 'Today he goes home.' } 
+        },
+        { 
+          correct: 'Jetzt <strong>habe</strong> ich Zeit.', 
+          incorrect: 'Jetzt ich <strong>habe</strong> tid.', 
+          translation: { nb: 'Nå har jeg tid.', nn: 'No har eg tid.', en: 'Now I have time.' } 
+        }
+      ],
+      extra: {
+        nb: 'Tips: Hvis du starter setningen med et adverb (som <em>Heute, Jetzt, Dann</em>), må verbet komme rett etterpå.',
+        nn: 'Tips: Viss du startar setninga med eit adverb (som <em>Heute, Jetzt, Dann</em>), må verbet kome rett etterpå.',
+        en: 'Tip: If you start the sentence with an adverb (like <em>Heute, Jetzt, Dann</em>), the verb must follow immediately.'
+      }
+    },
     explain: function (finding) {
       return {
         nb: 'I tyske hovedsetninger skal verbet stå på plass 2. Skriv <em>' + escapeHtml(finding.fix) + '</em> i stedet for <em>' + escapeHtml(finding.original) + '</em>.',
@@ -167,6 +192,7 @@
             // marker spans only the subject pronoun, so applying `fix` as an
             // atomic substitution would corrupt the sentence. Mirror nb-v2.
             noAutoFix: true,
+            pedagogy: rule.pedagogy,
           });
 
           break; // Only flag once per sentence

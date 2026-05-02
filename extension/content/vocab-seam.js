@@ -49,7 +49,6 @@
   let state = null;
   let currentLang = 'en';
   let ready = false;
-  let paused = false;
   let enabledFeatures = new Set();
   const readyCallbacks = [];
 
@@ -391,9 +390,8 @@
 
   // ── Init ──
   async function init() {
-    const stored = await storageGet(['language', 'lexiPaused']);
+    const stored = await storageGet(['language']);
     currentLang = stored.language || 'en';
-    paused = !!stored.lexiPaused;
 
     if (chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(onMessage);
@@ -412,8 +410,6 @@
       hydrateTarget(currentLang);
     } else if (msg.type === 'GRAMMAR_FEATURES_CHANGED') {
       hydrateTarget(currentLang);
-    } else if (msg.type === 'LEXI_PAUSED') {
-      paused = !!msg.paused;
     }
   }
 
@@ -437,7 +433,7 @@
     getWordList: () => (state && state.wordList) ? state.wordList : [],
     getLanguage: () => currentLang,
     isReady: () => ready,
-    isPaused: () => paused,
+    isPaused: () => false,
     isTextInput,
     onReady(cb) {
       if (typeof cb !== 'function') return;
