@@ -12,7 +12,8 @@
   "rewrites": [
     { "source": "/lexi-extension.zip", "destination": "/api/download" },
     { "source": "/fremtidsplaner", "destination": "/fremtidsplaner.html" },
-    { "source": "/vilkar", "destination": "/vilkar.html" }
+    { "source": "/vilkar", "destination": "/vilkar.html" },
+    { "source": "/personvern", "destination": "/personvern.html" }
   ],
   "crons": [
     {
