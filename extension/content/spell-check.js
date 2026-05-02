@@ -775,6 +775,9 @@
           const surrounding = activeEl ? (activeEl.value || activeEl.textContent || '').slice(
             Math.max(0, finding.start - 40), finding.end + 40
           ) : '';
+          // Privacy: URL deliberately NOT sent. Rule + token + 80-char
+          // context + language is enough to debug; URL adds privacy risk
+          // for marginal debugging value.
           sendReport({
             type: 'spell',
             ruleId: finding.rule_id || finding.type,
@@ -782,7 +785,6 @@
             suggestion: finding.fix || (finding.suggestions && finding.suggestions[0]) || '',
             context: surrounding,
             language: lang,
-            url: window.location.href,
           }).then(ok => {
             sendBtn.textContent = ok ? '✓ Sendt — takk!' : '✗ Kunne ikke sendes';
             setTimeout(() => {
