@@ -958,11 +958,11 @@
 #lexi-spell-overlay .lh-spell-quotation-suppression { background: transparent; } /* pre-pass, never surfaces */
 #lexi-spell-overlay .lh-spell-register { background: #f59e0b; }  /* amber — P2 warn, Phase 6 REG-01 */
 #lexi-spell-overlay .lh-spell-collocation { background: #f59e0b; }  /* amber — P2 warn, Phase 6 REG-02 */
-#lexi-spell-overlay .lh-spell-redundancy { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 6 REG-03 */
+#lexi-spell-overlay .lh-spell-redundancy { background: #fcd34d; }  /* P3 hint, Phase 6 REG-03 */
 #lexi-spell-overlay .lh-spell-nb-v2 { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-01 */
 #lexi-spell-overlay .lh-spell-de-v2 { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-02 */
 #lexi-spell-overlay .lh-spell-de-verb-final { background: #f59e0b; }  /* amber — P2 warn, Phase 7 WO-03 */
-#lexi-spell-overlay .lh-spell-fr-bags { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 7 WO-04 */
+#lexi-spell-overlay .lh-spell-fr-bags { background: #fcd34d; }  /* P3 hint, Phase 7 WO-04 */
 #lexi-spell-overlay .lh-spell-de-perfekt-aux { background: #f59e0b; }  /* amber — P2 warn, Phase 8 DE-03 */
 #lexi-spell-overlay .lh-spell-nb-compound-gender { background: #f59e0b; }  /* amber — P2 warn, Phase 17 COMP-04 */
 #lexi-spell-overlay .lh-spell-nb-demonstrative-gender { background: #f59e0b; }  /* amber — P1 error, Phase 18 SPELL-02 */
@@ -975,12 +975,12 @@
 #lexi-spell-overlay .lh-spell-es-personal-a { background: #f59e0b; }  /* amber — P2 warn, Phase 9 ES-03 */
 #lexi-spell-overlay .lh-spell-fr-elision { background: #38bdf8; }  /* blue — P1 error, Phase 10 FR-01 */
 #lexi-spell-overlay .lh-spell-fr-etre-avoir { background: #f59e0b; }  /* amber — P2 warn, Phase 10 FR-02 */
-#lexi-spell-overlay .lh-spell-fr-pp-agreement { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 10 FR-03 */
+#lexi-spell-overlay .lh-spell-fr-pp-agreement { background: #fcd34d; }  /* P3 hint, Phase 10 FR-03 */
 #lexi-spell-overlay .lh-spell-es-subjuntivo { background: #f59e0b; }  /* amber — P2 warn, Phase 11 MOOD-01 */
-#lexi-spell-overlay .lh-spell-es-imperfecto-hint { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 11 MOOD-02 */
+#lexi-spell-overlay .lh-spell-es-imperfecto-hint { background: #fcd34d; }  /* P3 hint, Phase 11 MOOD-02 */
 #lexi-spell-overlay .lh-spell-fr-subjonctif { background: #f59e0b; }  /* amber — P2 warn, Phase 11 MOOD-03 */
-#lexi-spell-overlay .lh-spell-fr-aspect-hint { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 32-01 */
-#lexi-spell-overlay .lh-spell-es-pro-drop { background: rgba(245, 158, 11, 0.25); border-bottom: 2px dotted #f59e0b; }  /* P3 hint, Phase 12 PRON-01 */
+#lexi-spell-overlay .lh-spell-fr-aspect-hint { background: #fcd34d; }  /* P3 hint, Phase 32-01 */
+#lexi-spell-overlay .lh-spell-es-pro-drop { background: #fcd34d; }  /* P3 hint, Phase 12 PRON-01 */
 #lexi-spell-overlay .lh-spell-es-gustar { background: #f59e0b; }  /* amber — P2 warn, Phase 12 PRON-02 */
 #lexi-spell-overlay .lh-spell-fr-clitic-order { background: #f59e0b; }  /* amber — P2 warn, Phase 12 PRON-03 */
 #lexi-spell-overlay .lh-spell-doc-drift-de-address { background: #f59e0b; }  /* amber — P2 warn, Phase 13 DOC-01 */
