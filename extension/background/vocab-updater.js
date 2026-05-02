@@ -58,13 +58,14 @@
     const store = getStore();
     if (!store) throw new Error('vocab-store not available');
     const url = `${store.API_BASE}/revisions`;
+    const headers = store.API_KEY ? { 'X-API-Key': store.API_KEY } : {};
 
     // AbortController-based timeout so the call cannot hang the service
     // worker indefinitely. fetch ignores the timeout silently if signal is
     // not supported (older Node).
     let timeoutId;
     const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-    const fetchOpts = ctrl ? { signal: ctrl.signal } : {};
+    const fetchOpts = ctrl ? { headers, signal: ctrl.signal } : { headers };
     if (ctrl) {
       timeoutId = setTimeout(() => ctrl.abort(), REVISIONS_TIMEOUT_MS);
     }

@@ -28,8 +28,27 @@
 
   // ── Constants ──
   const API_BASE = 'https://papertek-vocabulary.vercel.app/api/vocab/v1';
+  // V3 endpoints (manifest, etc.) live at /api/vocab/, not /api/vocab/v1/.
+  // Exposed separately so callers don't hand-roll string surgery to drop /v1.
+  const V3_API_BASE = 'https://papertek-vocabulary.vercel.app/api/vocab';
   const SITE_BASE = 'https://papertek-vocabulary.vercel.app';
   const SUPPORTED_SCHEMA_VERSION = 1;
+
+  // Papertek vocab API key (intentionally semi-public).
+  //
+  // Why this is committed in plaintext:
+  //   The leksihjelp extension is a public Chrome Web Store artifact. Anyone
+  //   who downloads the .crx can extract every constant inside it within
+  //   minutes. Hiding a bundled key would be security theater. The Papertek
+  //   operator issued this `lk_` (internal-tier) key with that reality in
+  //   mind: rate-limiting at the API tier protects the surface, not key
+  //   secrecy. If abuse occurs, the operator rotates the key (marks the old
+  //   one inactive, issues a new one); we ship a patch release; users update.
+  //
+  // See SECURITY.md for the full rotation procedure.
+  // Do NOT replace this with `ck_` / other tier keys — those are not for
+  // public-extension use.
+  const API_KEY = 'lk_fb6208e2568958c8e245293587e3705317e23526ab2ab7b1eeb5b4e2678e074c';
 
   const DB_NAME = 'lexi-vocab';        // renamed from legacy 'leksihjelp-vocab'
   const DB_VERSION = 3;                // bump invalidates the v2 stores
@@ -171,7 +190,7 @@
    */
   async function fetchBundle(lang, opts) {
     const url = `${API_BASE}/bundle/${lang}`;
-    const headers = {};
+    const headers = { 'X-API-Key': API_KEY };
     if (opts && opts.ifNoneMatch) {
       headers['If-None-Match'] = opts.ifNoneMatch;
     }
@@ -417,7 +436,9 @@
     // v1 cache adapter (plan 23-02 surface)
     SUPPORTED_SCHEMA_VERSION,
     API_BASE,
+    V3_API_BASE,
     SITE_BASE,
+    API_KEY,
     getCachedBundle,
     putCachedBundle,
     getCachedRevisions,
