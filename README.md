@@ -39,8 +39,6 @@ Ordbok, uttale og skrivehjelp for norske elever som lerer fremmedsprak.
 | Spansk  | ~250 ord  | Fungerer | Fungerer |
 | Fransk  | ~250 ord  | Fungerer | Fungerer |
 
-Bidrag med mer vokabular er svart velkomne! Se [CONTRIBUTING.md](CONTRIBUTING.md).
-
 **Planlagt:** Norsk bokmaal og nynorsk (rettskrivingshjelp).
 
 ---
@@ -111,22 +109,19 @@ Se [CLAUDE.md](CLAUDE.md) for detaljert arkitekturdokumentasjon.
 
 ---
 
-## Bidra
+## Tilbakemeldinger
 
-Vi onsker bidrag! Spesielt:
-
-- **Vokabular** — flere ord, bedre oversettelser, eksempelsetninger
-- **Norsk BM/NN** — rettskrivingshjelp pa norsk
-- **Tilgjengelighet** — forbedringer for dyslektikere (fonter, kontrast, lesestotte)
-- **Nye sprak** — utvidelse til flere sprak i norsk skole
-- **Feilretting** — bugs og forbedringer
-
-Se [CONTRIBUTING.md](CONTRIBUTING.md) for hvordan du kommer i gang.
+Leksihjelp vedlikeholdes av Papertek forlag AS med AI-assistanse, og vi
+tar ikke imot pull requests. Har du funnet en feil eller savner noe?
+Apne et [issue pa GitHub](../../issues) — vi leser alt. Se
+[CONTRIBUTING.md](CONTRIBUTING.md) for detaljer.
 
 ---
 
 ## Lisens
 
-MIT — se [LICENSE](LICENSE).
+[PolyForm Noncommercial 1.0.0](LICENSE) — kildekoden er offentlig
+tilgjengelig for ikke-kommersiell bruk, gransking og modifikasjon. For
+kommersiell bruk eller distribusjon, kontakt post@papertek.no.
 
 Laget av [Papertek forlag AS](https://www.papertek.no) for norske elever.

@@ -12,6 +12,7 @@ import { setCorsHeaders, rateLimit, getClientIp } from '../_utils.js';
 import { verifySessionToken } from '../_jwt.js';
 import { getFirestoreDb } from '../_firebase.js';
 import { recalculateQuota, DEFAULT_MAX_BALANCE } from '../_quota.js';
+import { computeEntitlements } from '../_entitlements.js';
 
 export default async function handler(req, res) {
   setCorsHeaders(res, req);
@@ -82,6 +83,7 @@ export default async function handler(req, res) {
         stripeExpiresAt: userData.stripeExpiresAt || null,
         quotaBalance,
         quotaMaxBalance,
+        entitlements: computeEntitlements(userData),
       },
     });
   } catch (err) {

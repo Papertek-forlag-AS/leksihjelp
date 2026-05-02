@@ -26,6 +26,7 @@ try {
 // Import handlers
 import ttsHandler from './api/tts.js';
 import verifyHandler from './api/verify.js';
+import entitlementsHandler from './api/entitlements.js';
 import vippsLoginHandler from './api/auth/vipps-login.js';
 import exchangeCodeHandler from './api/auth/exchange-code.js';
 import vippsCallbackHandler from './api/auth/vipps-callback.js';
@@ -112,6 +113,7 @@ const server = createServer(async (req, res) => {
   const routes = {
     '/api/tts': ttsHandler,
     '/api/verify': verifyHandler,
+    '/api/entitlements': entitlementsHandler,
     '/api/auth/vipps-login': vippsLoginHandler,
     '/api/auth/exchange-code': exchangeCodeHandler,
     '/api/auth/vipps-callback': vippsCallbackHandler,
@@ -145,6 +147,7 @@ server.listen(PORT, () => {
   console.log(`\n  Routes:`);
   console.log(`   - POST /api/verify`);
   console.log(`   - POST /api/tts`);
+  console.log(`   - GET  /api/entitlements`);
   console.log(`   - GET  /api/auth/vipps-login`);
   console.log(`   - POST /api/auth/exchange-code`);
   console.log(`   - GET  /api/auth/vipps-callback`);
