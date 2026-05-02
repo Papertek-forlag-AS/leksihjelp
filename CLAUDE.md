@@ -116,21 +116,25 @@ leksihjelp/
 6. Redirects to landing page with token
 
 **Subscription flow (Vipps monthly):**
-1. Authenticated user clicks "Abonner" (29 kr/mnd)
-2. Extension calls `POST /api/auth/subscribe` with Bearer token
+1. Authenticated user clicks "Abonner — 49 kr/mnd (Vipps)"
+2. Extension calls `POST /api/auth/subscribe` with Bearer token + `plan: 'monthly'`
 3. Backend creates Vipps Recurring agreement
 4. Returns `vippsConfirmationUrl` — user approves in Vipps app
 5. Vipps sends webhook when agreement activates
 6. Daily cron job creates charges for due agreements
 
-**Stripe yearly payment:**
-1. Authenticated user clicks "Betal 290 kr/år"
-2. Extension calls `POST /api/auth/create-checkout` with Bearer token
-3. Backend creates a Stripe Checkout Session (one-time payment, 290 NOK)
-4. Returns `checkoutUrl` — user completes payment on Stripe's hosted page
-5. Stripe sends `checkout.session.completed` webhook
-6. Webhook handler activates subscription for 365 days
-7. Daily cron job deactivates expired subscriptions
+**Subscription flow (Vipps yearly):**
+1. Authenticated user clicks "Betal 490 kr/år (Vipps)"
+2. Extension calls `POST /api/auth/subscribe` with Bearer token + `plan: 'yearly'`
+3. Backend creates Vipps Recurring agreement (yearly cadence)
+4. Returns `vippsConfirmationUrl` — user approves in Vipps app
+5. Vipps sends webhook when agreement activates
+
+**Stripe yearly payment (legacy code path, not surfaced in current popup):**
+The Stripe Checkout flow at `backend/api/auth/create-checkout.js` (290 NOK
+yearly) is retained as a fallback / legacy path but is NOT exposed in the
+current popup UI — the popup only surfaces Vipps monthly (49) and Vipps
+yearly (490). If you're touching payments, prefer the Vipps paths.
 
 ---
 
