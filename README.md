@@ -1,80 +1,91 @@
 # Leksihjelp
 
-Ordbok, uttale og skrivehjelp for norske elever som lerer fremmedsprak.
+Ordbok, stavekontroll, uttale og skrivehjelp for norske elever.
 
-**Leksihjelp** er en Chrome/Edge-utvidelse laget for norske elever som laerer tysk, spansk eller fransk. Den gir ordbok med grammatikk, tekst-til-tale med naturlig uttale, og ordforslag mens du skriver. Utvidelsen er spesielt utviklet for a vaere nyttig for elever med dysleksi.
+**Leksihjelp** er en Chrome/Edge-utvidelse for elever som skriver på
+bokmål, nynorsk, engelsk, tysk, spansk eller fransk. Den gir toveis
+ordbok med grammatikk, stavekontroll med pedagogiske forklaringer,
+naturlig tekst-til-tale og smarte ordforslag mens du skriver.
+Utvidelsen er spesielt utviklet for å være nyttig for elever med
+dysleksi.
 
-> Hosted versjon med premium-stemmer: [leksihjelp.no](https://leksihjelp.no)
+> Hostet versjon med premium-stemmer: [leksihjelp.no](https://leksihjelp.no)
 
 ---
 
 ## Funksjoner
 
 ### Ordbok
-- Sook norsk &rarr; malsprak og malsprak &rarr; norsk
-- Vis grammatikk: booyning, kjonn, kasus, komparativ/superlativ
-- Tilpass grammatikkvisning etter ditt niva (velg hvilke tider, kasus osv. du vil se)
-- Hoyreklikk pa markert tekst for oppslag
+- Toveis oppslag mellom alle seks språk (norsk ↔ målspråk og målspråk ↔ norsk)
+- Bøyninger, kjønn, kasus, komparativ/superlativ
+- Tilpass grammatikkvisning etter ditt nivå (velg hvilke tider, kasus osv. du vil se)
+- Sammensatte ord brytes ned og forklares (tysk og norsk)
+- Høyreklikk på markert tekst for oppslag
 - Fungerer offline — all vokabular er buntet i utvidelsen
 
+### Stavekontroll
+- 54+ grammatikkregler med tydelige forklaringer (ikke bare røde streker)
+- Egne regler per språk: ordstilling, å/og-forveksling, kjønn, modalverb,
+  sammensetning, kasus, dialektblanding
+- "Lær mer"-popover med pedagogisk forklaring og eksempler
+- Bokmål ↔ nynorsk: oppdager dialektblanding og feil målform
+
 ### Uttale (tekst-til-tale)
-- Marker tekst pa en nettside &rarr; flytende avspillingswidget
+- Marker tekst på en nettside → flytende avspillingswidget med ordsynk
 - Premium: ElevenLabs-stemmer med naturlig uttale (krever abonnement)
-- Gratis: Nettleserens innebygde stemmer (fungerer alltid)
+- Gratis: nettleserens innebygde stemmer (fungerer alltid, også offline)
 - Justerbar hastighet og stemmevelger
 
 ### Ordforslag
-- Foreslaar ord mens du skriver i tekstfelt
-- Fuzzy matching som taler skrivefeil (nyttig for dyslektikere)
-- Fonetisk matching — foreslaar riktig ord selv naar du skriver slik det hoores ut
-- Fungerer i vanlige tekstfelt, `<textarea>` og `contenteditable`-elementer (inkl. UDIR proovesystem)
+- Foreslår ord mens du skriver i tekstfelt
+- Fuzzy matching som tåler skrivefeil (nyttig for dyslektikere)
+- Fonetisk matching — foreslår riktig ord selv når du skriver slik det høres ut
+- Kontekstbevisst (riktig verbform etter pronomen, kjønn etter artikkel)
+- Fungerer i vanlige tekstfelt, `<textarea>` og `contenteditable`-elementer (inkl. UDIRs prøvesystem)
+
+### Sidepanel
+- Fest ordboken som sidepanel i nettleseren — alltid synlig mens du skriver
 
 ---
 
-## Sprak
+## Språk
 
-| Sprak   | Ordbok | Uttale | Ordforslag |
-|---------|--------|--------|------------|
-| Tysk    | ~1200 ord | Fungerer | Fungerer |
-| Spansk  | ~250 ord  | Fungerer | Fungerer |
-| Fransk  | ~250 ord  | Fungerer | Fungerer |
-
-**Planlagt:** Norsk bokmaal og nynorsk (rettskrivingshjelp).
+| Språk          | Ordbok | Stavekontroll | Uttale   | Ordforslag |
+|----------------|--------|---------------|----------|------------|
+| Bokmål         | ✓      | ✓             | ✓        | ✓          |
+| Nynorsk        | ✓      | ✓             | ✓        | ✓          |
+| Engelsk        | ✓      | ✓             | ✓        | ✓          |
+| Tysk           | ✓      | ✓             | ✓        | ✓          |
+| Spansk         | ✓      | ✓             | ✓        | ✓          |
+| Fransk         | ✓      | ✓             | ✓        | ✓          |
 
 ---
 
 ## Installasjon
 
-### For brukere
-
 Last ned utvidelsen fra [GitHub Releases](../../releases) eller fra [leksihjelp.no](https://leksihjelp.no):
 
 1. Last ned `lexi-extension.zip`
 2. Pakk ut zip-filen
-3. Apne `chrome://extensions/` (eller `edge://extensions/`)
-4. Sla pa "Utviklermodus"
+3. Åpne `chrome://extensions/` (eller `edge://extensions/`)
+4. Slå på "Utviklermodus"
 5. Klikk "Last inn upakket utvidelse"
 6. Velg den utpakkede mappen
 
-### For utviklere
+---
 
-Se [CONTRIBUTING.md](CONTRIBUTING.md) for komplett oppsett av utviklingsmiljoo.
-
-Kort versjon:
+## Kjøre koden lokalt (for innsyn / gransking)
 
 ```bash
-# Klon repoet
 git clone https://github.com/Papertek-forlag-AS/leksihjelp.git
 cd leksihjelp
 
-# Installer backend-avhengigheter
+# Last inn utvidelsen i Chrome/Edge:
+# chrome://extensions/ → Utviklermodus → Last inn upakket → velg extension/
+
+# Backend trengs kun for premium-uttale og innlogging:
 cd backend && npm install && cd ..
-
-# Last inn utvidelsen i Chrome/Edge
-# Apne chrome://extensions/ → Utviklermodus → Last inn upakket → velg extension/
-
-# Start lokal backend (krever .env — se backend/.env.example)
-node backend/local-server.js
+node backend/local-server.js  # krever .env — se backend/.env.example
 ```
 
 ---
@@ -86,24 +97,7 @@ node backend/local-server.js
 - **Autentisering:** Vipps MobilePay (OIDC) + Stripe (kortbetaling)
 - **Database:** Firebase Firestore
 - **TTS:** ElevenLabs API (premium) / Web Speech API (gratis fallback)
-- **Vokabular:** Buntet JSON fra Papertek API
-
----
-
-## Arkitektur
-
-```
-Chrome/Edge-utvidelse          Vercel Backend              Eksterne tjenester
-┌─────────────────┐    ┌──────────────────┐    ┌───────────────────┐
-│  popup.js        │    │  Auth endpoints  │    │  Vipps MobilePay  │
-│  floating-widget │◄──►│  TTS proxy       │◄──►│  ElevenLabs       │
-│  word-prediction │    │  Webhooks        │    │  Stripe           │
-└─────────────────┘    └───────┬──────────┘    └───────────────────┘
-                               │
-                        ┌──────▼──────┐
-                        │  Firestore  │
-                        └─────────────┘
-```
+- **Vokabular:** Synkronisert fra Papertek API
 
 Se [CLAUDE.md](CLAUDE.md) for detaljert arkitekturdokumentasjon.
 
@@ -113,7 +107,7 @@ Se [CLAUDE.md](CLAUDE.md) for detaljert arkitekturdokumentasjon.
 
 Leksihjelp vedlikeholdes av Papertek forlag AS med AI-assistanse, og vi
 tar ikke imot pull requests. Har du funnet en feil eller savner noe?
-Apne et [issue pa GitHub](../../issues) — vi leser alt. Se
+Åpne et [issue på GitHub](../../issues) — vi leser alt. Se
 [CONTRIBUTING.md](CONTRIBUTING.md) for detaljer.
 
 ---
