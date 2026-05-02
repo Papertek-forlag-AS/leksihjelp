@@ -28,6 +28,20 @@ const { execSync } = require('child_process');
 // Configuration
 const V3_API_BASE = process.env.PAPERTEK_VOCAB_API || 'https://papertek-vocabulary.vercel.app/api/vocab';
 const LEGACY_API_BASE = process.env.PAPERTEK_API_BASE || 'https://www.papertek.no';
+
+// Build-time API key for the Papertek vocabulary API. SEPARATE from the
+// extension's bundled `lk_…` key so CI can rotate the build-time key
+// independently of shipped extension code. Initial value can be the same
+// as the extension key during rollout, but should be issued as a distinct
+// key (e.g. `ck_…` ci-tier) once available.
+const PAPERTEK_VOCAB_API_KEY = process.env.PAPERTEK_VOCAB_API_KEY;
+if (!PAPERTEK_VOCAB_API_KEY) {
+  console.error('Error: PAPERTEK_VOCAB_API_KEY env var is required.');
+  console.error('  Set it in your shell or CI secret store before running this script.');
+  console.error('  See README ("Vocab API authentication") for context.');
+  process.exit(1);
+}
+const VOCAB_AUTH_HEADERS = { 'X-API-Key': PAPERTEK_VOCAB_API_KEY };
 const OUTPUT_DIR = path.join(__dirname, '..', 'extension', 'data');
 const AUDIO_DIR = path.join(__dirname, '..', 'extension', 'audio');
 
@@ -67,7 +81,7 @@ const BANKS = [
 const GOVERNANCE_BANKS = ['collocationbank', 'grammarbank'];
 
 async function fetchJson(url) {
-  const response = await fetch(url);
+  const response = await fetch(url, { headers: VOCAB_AUTH_HEADERS });
   if (!response.ok) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
   }
@@ -262,7 +276,7 @@ function buildLanguageData(langCode, entries, manifest, nbEntries = null) {
 async function fetchGovernanceBanks(langCode) {
   try {
     const url = `${V3_API_BASE}/v3/export/${langCode}`;
-    const response = await fetch(url);
+    const response = await fetch(url, { headers: VOCAB_AUTH_HEADERS });
     if (!response.ok) return {};
     const data = await response.json();
     const result = {};

@@ -593,7 +593,14 @@ async function ensureAudioPack(lang) {
     const hasAudio = await window.__lexiVocabStore.hasAudioCached(lang);
     if (hasAudio) return;
 
-    const manifest = await fetch(`${window.__lexiVocabStore.API_BASE}/v3/manifest`).then(r => r.json());
+    // V3_API_BASE (no `/v1` segment) — the previous use of API_BASE produced
+    // `…/api/vocab/v1/v3/manifest` which 404'd silently (try/catch + null
+    // short-circuit below masked it). The audio-pack download path is
+    // currently dormant per vocab-store.js#downloadAudioPack, so this fix is
+    // forward-only — no user impact today.
+    const store = window.__lexiVocabStore;
+    const headers = store?.API_KEY ? { 'X-API-Key': store.API_KEY } : {};
+    const manifest = await fetch(`${store.V3_API_BASE}/v3/manifest`, { headers }).then(r => r.json());
     const audioEndpoint = manifest?.languages?.[lang]?.audioEndpoint;
     if (!audioEndpoint) return;
 

@@ -134,6 +134,34 @@ test('fetchBundle 200 with matching schema returns body', async () => {
   assert.strictEqual(r.body.revision, 'rev-1');
 });
 
+test('fetchBundle sends X-API-Key header on every request (auth rollout)', async () => {
+  // Papertek API enforces X-API-Key authentication. The key is bundled into
+  // vocab-store.js as a plain constant — see the comment near API_KEY in
+  // vocab-store.js for why that's intentional. This test pins the contract:
+  // every fetchBundle call must include the header, regardless of opts.
+  let seenHeaders = null;
+  const fetchImpl = async (url, opts) => {
+    seenHeaders = opts?.headers || {};
+    return jsonResponse(200, { schema_version: 1, revision: 'rev-1' });
+  };
+  const store = freshSandbox({ fetchImpl });
+  await store.fetchBundle('de');
+  assert.ok(seenHeaders, 'fetch was not invoked');
+  assert.match(
+    String(seenHeaders['X-API-Key'] || ''),
+    /^lk_[0-9a-f]{64}$/,
+    'X-API-Key header missing or wrong shape'
+  );
+  // Header should also be present alongside If-None-Match on revalidation.
+  await store.fetchBundle('de', { ifNoneMatch: '"rev-1"' });
+  assert.match(String(seenHeaders['X-API-Key'] || ''), /^lk_/);
+  assert.strictEqual(seenHeaders['If-None-Match'], '"rev-1"');
+  // And API_KEY must be exposed on the store surface for non-fetchBundle
+  // callers (vocab-updater /revisions, popup /v3/manifest) to read.
+  assert.match(String(store.API_KEY || ''), /^lk_[0-9a-f]{64}$/);
+  assert.strictEqual(store.V3_API_BASE, 'https://papertek-vocabulary.vercel.app/api/vocab');
+});
+
 test('fetchBundle forwards If-None-Match header when ifNoneMatch supplied', async () => {
   let seenHeaders = null;
   const fetchImpl = async (url, opts) => {

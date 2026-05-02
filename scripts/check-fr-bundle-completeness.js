@@ -42,6 +42,13 @@ const FR_BUNDLED_PATH = path.join(ROOT, 'extension/data/fr.json');
 const API_URL = 'https://papertek-vocabulary.vercel.app/api/vocab/v1/bundle/fr';
 const TIMEOUT_MS = 10000;
 
+const PAPERTEK_VOCAB_API_KEY = process.env.PAPERTEK_VOCAB_API_KEY;
+if (!PAPERTEK_VOCAB_API_KEY) {
+  process.stderr.write('[check-fr-bundle-completeness] FAIL: PAPERTEK_VOCAB_API_KEY env var is required.\n');
+  process.stderr.write('  fix: set it in your shell or CI secret store before running. See README.\n');
+  process.exit(1);
+}
+
 const REQUIRED_ASPECT_KEYS = [
   'aspect_passe_compose_adverbs',
   'aspect_imparfait_adverbs',
@@ -54,7 +61,10 @@ async function fetchJsonWithTimeout(url, timeoutMs) {
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'X-API-Key': PAPERTEK_VOCAB_API_KEY },
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
     return await res.json();
   } finally {

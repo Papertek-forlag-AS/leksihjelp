@@ -54,6 +54,13 @@ const REVISIONS_URL = 'https://papertek-vocabulary.vercel.app/api/vocab/v1/revis
 const TIMEOUT_MS = 10000;
 const SUPPORTED_LANGUAGES = ['nb', 'nn', 'de', 'es', 'fr', 'en'];
 
+const PAPERTEK_VOCAB_API_KEY = process.env.PAPERTEK_VOCAB_API_KEY;
+if (!PAPERTEK_VOCAB_API_KEY) {
+  process.stderr.write('[check-vocab-deployment] FAIL: PAPERTEK_VOCAB_API_KEY env var is required.\n');
+  process.stderr.write('  fix: set it in your shell or CI secret store before running. See README.\n');
+  process.exit(1);
+}
+
 /**
  * Re-implementation of papertek-vocabulary/lib/_bundle.js#computeRevision.
  * Kept inline so this script stays zero-dep and CommonJS. If the upstream
@@ -149,7 +156,10 @@ async function main() {
   const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
   let res;
   try {
-    res = await fetch(REVISIONS_URL, { signal: ctrl.signal });
+    res = await fetch(REVISIONS_URL, {
+      signal: ctrl.signal,
+      headers: { 'X-API-Key': PAPERTEK_VOCAB_API_KEY },
+    });
   } catch (e) {
     clearTimeout(timer);
     fail(

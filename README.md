@@ -103,6 +103,36 @@ Se [CLAUDE.md](CLAUDE.md) for detaljert arkitekturdokumentasjon.
 
 ---
 
+## Vocab API authentication (for reviewers / contributors)
+
+The Papertek vocab API enforces an `X-API-Key` header. This repo holds two
+related keys, intentionally separated:
+
+- **Extension key** — embedded in `extension/content/vocab-store.js` as a
+  plain `lk_…` constant. **This is intentional, not a leak.** A Chrome
+  Web Store extension is a public artifact: anyone can unpack the `.crx`
+  and read every constant inside it. Hiding a bundled key is security
+  theater. The Papertek operator issued this key (`internal` tier) with
+  that reality in mind — abuse is mitigated by API-side rate-limiting,
+  not key secrecy. If the key gets abused, the operator marks it
+  inactive, issues a new one, we ship a patch release, users update.
+  See [SECURITY.md](SECURITY.md).
+
+- **Build-script key** — read from `process.env.PAPERTEK_VOCAB_API_KEY`
+  by `scripts/sync-vocab.js`, `scripts/check-vocab-deployment.js`, and
+  `scripts/check-fr-bundle-completeness.js`. Stored as a CI secret, never
+  committed. Kept distinct from the extension key so CI rotation doesn't
+  require an extension release.
+
+For local development, export the same key your CI uses:
+
+```bash
+export PAPERTEK_VOCAB_API_KEY='lk_...'
+npm run sync-vocab  # uses the env var; the extension uses its own bundled key
+```
+
+---
+
 ## Tilbakemeldinger
 
 Leksihjelp vedlikeholdes av Papertek forlag AS med AI-assistanse, og vi
