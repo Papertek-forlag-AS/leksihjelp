@@ -75,7 +75,6 @@
                 original: t.display,
                 fix: matchCase(t.display, inf),
                 message: `Etter "${modalTok.display}" skal verbet stå i infinitiv: "${inf}"`,
-                pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-modal-verb') : null,
               });
             }
             // Once we find a verb (correct or not), we stop looking for this modal

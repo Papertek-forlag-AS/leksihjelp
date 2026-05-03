@@ -173,7 +173,6 @@
             wrongCopula: usedCopula,
             message: ctx.tokens[i].display + ' + ' + ctx.tokens[adjIdx].display + ' → ' + fix,
             severity: 'warning',
-            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('es-ser-estar') : null,
           });
         }
       }

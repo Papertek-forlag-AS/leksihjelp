@@ -201,6 +201,13 @@
       .slice()
       .sort((a, b) => (a.priority || 999) - (b.priority || 999));
 
+    // Phase 39+: rulePedagogy is keyed by rule_id (centralized "Lær mer"
+    // lessons sourced from papertek-vocabulary's grammarbank.pedagogy).
+    // Auto-attach by finding.rule_id below, so adding a new pedagogy entry
+    // for an existing rule is a pure data change in papertek-vocabulary —
+    // no leksihjelp-side wiring needed.
+    const rulePedagogy = (vocab && vocab.rulePedagogy) || null;
+
     const findings = [];
     for (const rule of rules) {
       try {
@@ -210,6 +217,15 @@
           // so the DOM adapter can map to the correct CSS tier.
           for (const f of out) {
             if (!f.severity && rule.severity) f.severity = rule.severity;
+            // Auto-attach pedagogy: rule_id-keyed remote lesson takes
+            // precedence over the rule's inline rule.pedagogy literal,
+            // and explicit f.pedagogy from the rule's own lookup wins
+            // over both (e.g. es-por-para keys by `fix` word, de-prep-case
+            // keys by preposition+case).
+            if (!f.pedagogy && f.rule_id) {
+              const remote = rulePedagogy ? rulePedagogy.get(f.rule_id) : null;
+              f.pedagogy = remote || rule.pedagogy || null;
+            }
           }
           findings.push(...out);
         }
@@ -233,6 +249,15 @@
         if (Array.isArray(out) && out.length) {
           for (const f of out) {
             if (!f.severity && rule.severity) f.severity = rule.severity;
+            // Auto-attach pedagogy: rule_id-keyed remote lesson takes
+            // precedence over the rule's inline rule.pedagogy literal,
+            // and explicit f.pedagogy from the rule's own lookup wins
+            // over both (e.g. es-por-para keys by `fix` word, de-prep-case
+            // keys by preposition+case).
+            if (!f.pedagogy && f.rule_id) {
+              const remote = rulePedagogy ? rulePedagogy.get(f.rule_id) : null;
+              f.pedagogy = remote || rule.pedagogy || null;
+            }
           }
           findings.push(...out);
         }

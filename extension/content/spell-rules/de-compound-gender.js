@@ -148,7 +148,6 @@
           suffix: inference.suffix,
           inferredGenus: inference.genus,
           message: `Sammensatt: "${prev.display} ${t.display}" — ${inference.suffix} er ${inference.genus}, riktig artikkel: ${correctArticle}`,
-          pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-compound-gender') : null,
         });
       }
       return out;

@@ -126,7 +126,6 @@
             stem: stem,
             message: tok.display + ' → ' + stem + ' ... ' + matchedPrefix + ' (trennbar)',
             severity: 'warning',
-            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-separable-verb') : null,
           });
 
           break; // One flag per sentence

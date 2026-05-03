@@ -187,9 +187,7 @@
             noAutoFix: true,
             message: 'Verbet skal stå til slutt i leddsetningen: "' + verbTok.display + '"',
             severity: 'warning',
-            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy)
-              ? (ctx.vocab.rulePedagogy.get('de-verb-final') || rule.pedagogy)
-              : rule.pedagogy,
+            // pedagogy auto-attached by core.
           });
 
           // Only flag the first violation per subordinate clause

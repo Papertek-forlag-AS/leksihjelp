@@ -1,6 +1,6 @@
 {
   "name": "@papertek/leksihjelp",
-  "version": "2.9.30",
+  "version": "2.9.31",
   "description": "Chrome extension for Norwegian students learning foreign languages",
   "files": [
     "extension/content/",
@@ -45,6 +45,8 @@
     "check-explain-contract:test": "node scripts/check-explain-contract.test.js",
     "check-pedagogy-shape": "node scripts/check-pedagogy-shape.js",
     "check-pedagogy-shape:test": "node scripts/check-pedagogy-shape.test.js",
+    "check-pedagogy-id-coverage": "node scripts/check-pedagogy-id-coverage.js",
+    "check-pedagogy-id-coverage:test": "node scripts/check-pedagogy-id-coverage.test.js",
     "check-network-silence": "node scripts/check-network-silence.js",
     "check-network-silence:test": "node scripts/check-network-silence.test.js",
     "check-spellcheck-features": "node scripts/check-spellcheck-features.js",

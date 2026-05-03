@@ -114,7 +114,6 @@
                   actualGenus: actual,
                   fix: matchCase(articleTok.display, correctArticle),
                   message: `Kjønn: "${articleTok.display} ${t.display}" skulle vært "${correctArticle} ${t.display}"`,
-                  pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-gender') : null,
                 });
               }
             }
@@ -133,7 +132,6 @@
             actualGenus: 'f',
             fix: matchCase(prev.display, 'eine'),
             message: `Kjønn: "${prev.display} ${t.display}" skulle vært "eine ${t.display}"`,
-            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-gender') : null,
           });
         }
 
@@ -152,7 +150,6 @@
             actualGenus: 'f',
             fix: matchCase(prev.display, 'keine'),
             message: `Kjønn: "${prev.display} ${t.display}" skulle vært "keine ${t.display}"`,
-            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-gender') : null,
           });
         }
       }

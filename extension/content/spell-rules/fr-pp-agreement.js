@@ -172,9 +172,6 @@
           original: ppToken.display,
           fix: suggestion,
           message: `Samsvarsboyning: "${ppToken.display}" -> "${suggestion}"`,
-          pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy)
-            ? ctx.vocab.rulePedagogy.get('fr-pp-agreement')
-            : null,
         });
       }
       return out;
