@@ -192,8 +192,8 @@
             // marker spans only the subject pronoun, so applying `fix` as an
             // atomic substitution would corrupt the sentence. Mirror nb-v2.
             noAutoFix: true,
-            pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy) 
-              ? (ctx.vocab.grammarPedagogy.get('de-v2') || rule.pedagogy)
+            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) 
+              ? (ctx.vocab.rulePedagogy.get('de-v2') || rule.pedagogy)
               : rule.pedagogy,
           });
 

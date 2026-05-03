@@ -278,8 +278,8 @@
             fix: fix,
             participle: candidate.display,
             message: `Passe compose: "${original} ... ${candidate.display}" -> "${fix} ... ${candidate.display}"`,
-            pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy)
-              ? ctx.vocab.grammarPedagogy.get('fr-etre-avoir')
+            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy)
+              ? ctx.vocab.rulePedagogy.get('fr-etre-avoir')
               : null,
           });
           break; // Only flag the first participle match per auxiliary

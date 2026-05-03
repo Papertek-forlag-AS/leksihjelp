@@ -99,8 +99,8 @@
         .replace(/&lt;\/svg&gt;/gi, '</svg>')
         .replace(/&lt;g(.*?)&gt;/gi, '<g$1>')
         .replace(/&lt;\/g&gt;/gi, '</g>')
-        .replace(/&lt;(circle|rect|line|polyline|polygon|text|path|ellipse)(.*?)&gt;/gi, '<$1$2>')
-        .replace(/&lt;\/(circle|rect|line|polyline|polygon|text|path|ellipse)&gt;/gi, '</$1>')
+        .replace(/&lt;(circle|rect|line|polyline|polygon|path|text|tspan|ellipse)(.*?)&gt;/gi, '<$1$2>')
+        .replace(/&lt;\/(circle|rect|line|polyline|polygon|path|text|tspan|ellipse)&gt;/gi, '</$1>')
         .replaceAll('&quot;', '"'); // restore attributes
     }
 

@@ -187,8 +187,8 @@
             noAutoFix: true,
             message: 'Verbet skal stå til slutt i leddsetningen: "' + verbTok.display + '"',
             severity: 'warning',
-            pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy)
-              ? (ctx.vocab.grammarPedagogy.get('de-verb-final') || rule.pedagogy)
+            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy)
+              ? (ctx.vocab.rulePedagogy.get('de-verb-final') || rule.pedagogy)
               : rule.pedagogy,
           });
 

@@ -71,6 +71,7 @@
               original: t.display,
               fix: capitalized,
               message: `Stor forbokstav: "${t.display}" → "${capitalized}"`,
+              pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('de-capitalization') : null,
             });
           }
         }

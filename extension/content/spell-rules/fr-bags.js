@@ -137,8 +137,8 @@
           // suppresses the Fiks button and orig→fix arrow head; the explain
           // block carries the actionable rule.
           noAutoFix: true,
-          pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy)
-            ? ctx.vocab.grammarPedagogy.get('fr-bags')
+          pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy)
+            ? ctx.vocab.rulePedagogy.get('fr-bags')
             : null,
         });
       }

@@ -174,27 +174,25 @@ function validatePedagogy(ped) {
   if (!ped || typeof ped !== 'object' || Array.isArray(ped)) {
     return { ok: false, code: 'PEDAGOGY_NOT_OBJECT', detail: 'pedagogy must be a plain object' };
   }
-  if (!VALID_CASES.has(ped.case)) {
+  // Optional: case
+  if (ped.case !== undefined && !VALID_CASES.has(ped.case)) {
     return {
       ok: false,
       code: 'PEDAGOGY_BAD_CASE',
       detail: 'pedagogy.case=' + JSON.stringify(ped.case) + ' (expected one of: akkusativ, dativ, wechsel, genitiv)',
     };
   }
-  if (!isRegisterTriple(ped.summary)) {
-    return {
-      ok: false,
-      code: 'PEDAGOGY_BAD_SUMMARY',
-      detail: 'pedagogy.summary must be {nb, nn, en} with all non-empty strings',
-    };
+  // Optional register triples (Phase 39: structural rules may use note instead of summary/explanation)
+  if (ped.summary !== undefined && !isRegisterTriple(ped.summary)) {
+    return { ok: false, code: 'PEDAGOGY_BAD_SUMMARY', detail: 'pedagogy.summary must be {nb, nn, en} triple' };
   }
-  if (!isRegisterTriple(ped.explanation)) {
-    return {
-      ok: false,
-      code: 'PEDAGOGY_BAD_EXPLANATION',
-      detail: 'pedagogy.explanation must be {nb, nn, en} with all non-empty strings',
-    };
+  if (ped.explanation !== undefined && !isRegisterTriple(ped.explanation)) {
+    return { ok: false, code: 'PEDAGOGY_BAD_EXPLANATION', detail: 'pedagogy.explanation must be {nb, nn, en} triple' };
   }
+  if (ped.note !== undefined && !isRegisterTriple(ped.note)) {
+    return { ok: false, code: 'PEDAGOGY_BAD_NOTE', detail: 'pedagogy.note must be {nb, nn, en} triple' };
+  }
+
   if (ped.case === 'wechsel') {
     const wp = ped.wechsel_pair;
     if (!wp || typeof wp !== 'object' || !wp.motion || !wp.location) {
@@ -214,17 +212,12 @@ function validatePedagogy(ped) {
       if (!ex || typeof ex !== 'object') {
         return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '] is not an object' };
       }
-      if (!isNonEmptyString(ex.correct)) {
-        return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '].correct must be non-empty string' };
+      // Examples can be a simple corrected sentence or a correct/incorrect pair
+      if (ex.correct === undefined && ex.sentence === undefined) {
+         return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '] must have correct or sentence' };
       }
-      if (!isNonEmptyString(ex.incorrect)) {
-        return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '].incorrect must be non-empty string' };
-      }
-      if (!isRegisterTriple(ex.translation)) {
+      if (ex.translation && !isRegisterTriple(ex.translation)) {
         return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '].translation must be {nb, nn, en} non-empty' };
-      }
-      if (ex.note !== undefined && !isRegisterTriple(ex.note)) {
-        return { ok: false, code: 'PEDAGOGY_BAD_EXAMPLE', detail: 'examples[' + i + '].note (if present) must be {nb, nn, en} non-empty' };
       }
     }
   }
@@ -234,6 +227,18 @@ function validatePedagogy(ped) {
       code: 'PEDAGOGY_BAD_COLLOQUIAL_NOTE',
       detail: 'pedagogy.colloquial_note (if present) must be {nb, nn, en} non-empty',
     };
+  }
+  if (ped.extra !== undefined && !isRegisterTriple(ped.extra)) {
+    return {
+      ok: false,
+      code: 'PEDAGOGY_BAD_EXTRA',
+      detail: 'pedagogy.extra must be {nb, nn, en} triple',
+    };
+  }
+  if (ped.visual !== undefined) {
+    if (!ped.visual.svg || !isNonEmptyString(ped.visual.svg)) {
+      return { ok: false, code: 'PEDAGOGY_BAD_VISUAL', detail: 'pedagogy.visual must have svg string' };
+    }
   }
   if (ped.contraction !== undefined) {
     const c = ped.contraction;
@@ -253,10 +258,10 @@ function validatePedagogy(ped) {
 // findings under this ctx — that's fine; the gate validates SHAPE on whatever
 // findings are produced, it does not require every rule to fire.
 function buildCtx(lang) {
-  const text = 'durch die Schule';
+  const text = 'durch der Schule';
   const tokens = [
     { word: 'durch',  display: 'durch',  start: 0,  end: 5,  sentenceIndex: 0 },
-    { word: 'die',    display: 'die',    start: 6,  end: 9,  sentenceIndex: 0 },
+    { word: 'der',    display: 'der',    start: 6,  end: 9,  sentenceIndex: 0 },
     { word: 'schule', display: 'Schule', start: 10, end: 16, sentenceIndex: 0 },
   ];
   const sentences = [{ start: 0, end: tokens.length }];
@@ -275,14 +280,25 @@ function buildCtx(lang) {
     }],
   ]);
 
+  const rulePedagogy = new Map([
+    ['de-prep-case', {
+      note: { nb: 'Preposisjon', nn: 'Preposisjon', en: 'Preposition' },
+      examples: [
+        { correct: 'durch die Schule', incorrect: 'durch der Schule', translation: { nb: 'gjennom skolen', nn: 'gjennom skulen', en: 'through the school' } }
+      ]
+    }],
+  ]);
+
   return {
     lang: lang || 'de',
     text,
     tokens,
     sentences,
+    getTagged: (idx) => tokens[idx],
     vocab: {
       nounGenus,
       prepPedagogy,
+      rulePedagogy,
       validWords: new Set(),
       verbInfinitive: new Map(),
       wordList: [],

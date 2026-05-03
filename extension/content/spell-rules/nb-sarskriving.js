@@ -113,6 +113,7 @@
               original: `${prev.display} ${t.display}`,
               fix: prev.display + t.display.toLowerCase(),
               message: `Særskriving: "${prev.display} ${t.display}" skrives som ett ord`,
+              pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('nb-sarskriving') : null,
             });
           }
         }

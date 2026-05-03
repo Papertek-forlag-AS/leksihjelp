@@ -484,7 +484,7 @@
     getDecomposeCompound: () => (state && state.decomposeCompound) ? state.decomposeCompound : null,
     getDecomposeCompoundStrict: () => (state && state.decomposeCompoundStrict) ? state.decomposeCompoundStrict : null,
     getGrammarTables: () => (state && state.grammarTables) ? state.grammarTables : {},
-    getGrammarPedagogy: () => (state && state.grammarPedagogy) ? state.grammarPedagogy : new Map(),
+    getRulePedagogy: () => (state && state.rulePedagogy) ? state.rulePedagogy : new Map(),
     getSPassivForms: () => (state && state.sPassivForms) ? state.sPassivForms : new Map(),
     // Phase 35.1 (UAT regression): pedagogy and class-membership indexes
     // built by vocab-seam-core but never surfaced through the seam, so the

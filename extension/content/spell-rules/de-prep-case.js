@@ -272,7 +272,7 @@
       // (check-explain-contract gate). The pedagogy block rides on the
       // finding object directly, NOT through explain().
       const prepPedagogy = (ctx.vocab && ctx.vocab.prepPedagogy) || new Map();
-      const grammarPedagogy = (ctx.vocab && ctx.vocab.grammarPedagogy) || new Map();
+      const rulePedagogy = (ctx.vocab && ctx.vocab.rulePedagogy) || new Map();
       const findings = [];
 
       for (const sentence of ctx.sentences) {
@@ -353,7 +353,7 @@
                 severity: 'error',
               };
               const pkey1 = (ctx.tokens[i].word || '').toLowerCase();
-              f1.pedagogy = prepPedagogy.get(pkey1) || grammarPedagogy.get('de-prep-case') || PEDAGOGY_FALLBACK[pkey1] || null;
+              f1.pedagogy = prepPedagogy.get(pkey1) || rulePedagogy.get('de-prep-case') || PEDAGOGY_FALLBACK[pkey1] || null;
               findings.push(f1);
               break;
             }
@@ -379,7 +379,7 @@
                   severity: 'error',
                 };
                 const pkey2 = (ctx.tokens[i].word || '').toLowerCase();
-                f2.pedagogy = prepPedagogy.get(pkey2) || grammarPedagogy.get('de-prep-case') || PEDAGOGY_FALLBACK[pkey2] || null;
+                f2.pedagogy = prepPedagogy.get(pkey2) || rulePedagogy.get('de-prep-case') || PEDAGOGY_FALLBACK[pkey2] || null;
                 findings.push(f2);
               }
               break;

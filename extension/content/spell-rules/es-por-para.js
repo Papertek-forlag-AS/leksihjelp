@@ -116,11 +116,12 @@
     return { nb, nn };
   }
 
-  function attachExplain(finding, prepPedagogy) {
+  function attachExplain(finding, prepPedagogy, rulePedagogy) {
     // The pedagogy block lives on the *target* preposition (the suggested
     // fix), since pedagogy explains the correct form. Pull from the lexicon
     // map by the lowercase fix word.
-    const ped = prepPedagogy && prepPedagogy.get(String(finding.fix || '').toLowerCase());
+    const ped = (prepPedagogy && prepPedagogy.get(String(finding.fix || '').toLowerCase()))
+              || (rulePedagogy && rulePedagogy.get('es-por-para'));
     if (!ped) return;
     finding.pedagogy = ped;
     const tmpl = templateFromSubtype(ped, finding.patternType, finding.fix, finding.original);
@@ -163,6 +164,7 @@
       const { tokens, vocab, cursorPos } = ctx;
       const { HUMAN_NOUNS } = getTables();
       const prepPedagogy = (vocab && vocab.prepPedagogy) || new Map();
+      const rulePedagogy = (vocab && vocab.rulePedagogy) || new Map();
       const findings = [];
 
       for (let i = 0; i < tokens.length; i++) {
@@ -201,7 +203,7 @@
               message: t.display + ' + infinitivo -> para',
               severity: 'warning',
             };
-            attachExplain(f, prepPedagogy);
+            attachExplain(f, prepPedagogy, rulePedagogy);
             findings.push(f);
             continue;
           }
@@ -218,7 +220,7 @@
               message: t.display + ' + ' + next.display + ' ' + next2.display + ' -> para',
               severity: 'warning',
             };
-            attachExplain(f, prepPedagogy);
+            attachExplain(f, prepPedagogy, rulePedagogy);
             findings.push(f);
             continue;
           }
@@ -235,7 +237,7 @@
               message: t.display + ' + ' + next.display + ' ' + next2.display + ' -> para',
               severity: 'warning',
             };
-            attachExplain(f, prepPedagogy);
+            attachExplain(f, prepPedagogy, rulePedagogy);
             findings.push(f);
             continue;
           }
@@ -252,7 +254,7 @@
               message: t.display + ' + ' + next.display + ' -> para',
               severity: 'warning',
             };
-            attachExplain(f, prepPedagogy);
+            attachExplain(f, prepPedagogy, rulePedagogy);
             findings.push(f);
             continue;
           }
@@ -272,7 +274,7 @@
               message: t.display + ' + duracion -> por',
               severity: 'warning',
             };
-            attachExplain(f, prepPedagogy);
+            attachExplain(f, prepPedagogy, rulePedagogy);
             findings.push(f);
             continue;
           }

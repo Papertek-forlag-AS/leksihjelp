@@ -151,6 +151,7 @@
                   trigger: matched,
                   message: ctx.tokens[j].display + ' -> ' + fixCased + ' (after ' + matched + ')',
                   severity: 'warning',
+                  pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('es-subjuntivo') : null,
                 });
               }
               break; // Stop scanning after first verb

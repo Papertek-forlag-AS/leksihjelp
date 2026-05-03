@@ -359,7 +359,7 @@
       frPasseComposeParticiples: VOCAB.getFrPasseComposeParticiples(),
       frAuxPresensForms:        VOCAB.getFrAuxPresensForms(),
       grammarTables:            VOCAB.getGrammarTables(),
-      grammarPedagogy:          VOCAB.getGrammarPedagogy(),
+      rulePedagogy:             VOCAB.getRulePedagogy(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });
@@ -908,17 +908,19 @@
     };
     const parts = [];
 
-    // Case badge
-    const caseKey = pedagogy.case || 'akkusativ';
-    const badgeLabel = t('case_label_' + caseKey) || caseKey.toUpperCase();
-    parts.push(`<div class="lh-spell-pedagogy-header">
-      <span class="lh-spell-pedagogy-case-badge lh-spell-pedagogy-case-badge--${escapeAttr(caseKey)}">${escapeHtml(badgeLabel)}</span>`);
+    // Case badge (only for morphological rules)
+    if (pedagogy.case) {
+      const caseKey = pedagogy.case;
+      const badgeLabel = t('case_label_' + caseKey) || caseKey.toUpperCase();
+      parts.push(`<div class="lh-spell-pedagogy-header">
+        <span class="lh-spell-pedagogy-case-badge lh-spell-pedagogy-case-badge--${escapeAttr(caseKey)}">${escapeHtml(badgeLabel)}</span>`);
 
-    // Optional contraction annotation
-    if (pedagogy.contraction && pedagogy.contraction.from && pedagogy.contraction.article) {
-      parts.push(`<span class="lh-spell-pedagogy-contraction">= ${escapeHtml(pedagogy.contraction.from)} + ${escapeHtml(pedagogy.contraction.article)}</span>`);
+      // Optional contraction annotation
+      if (pedagogy.contraction && pedagogy.contraction.from && pedagogy.contraction.article) {
+        parts.push(`<span class="lh-spell-pedagogy-contraction">= ${escapeHtml(pedagogy.contraction.from)} + ${escapeHtml(pedagogy.contraction.article)}</span>`);
+      }
+      parts.push(`</div>`);
     }
-    parts.push(`</div>`);
 
     // Summary + explanation paragraphs + general note
     const summary = pick(pedagogy.summary);
@@ -1533,8 +1535,8 @@
       .replace(/&lt;\/svg&gt;/gi, '</svg>')
       .replace(/&lt;g(.*?)&gt;/gi, '<g$1>')
       .replace(/&lt;\/g&gt;/gi, '</g>')
-      .replace(/&lt;(circle|rect|line|polyline|polygon|text|path|ellipse)(.*?)&gt;/gi, '<$1$2>')
-      .replace(/&lt;\/(circle|rect|line|polyline|polygon|text|path|ellipse)&gt;/gi, '</$1>')
+      .replace(/&lt;(circle|rect|line|polyline|polygon|path|text|tspan|ellipse)(.*?)&gt;/gi, '<$1$2>')
+      .replace(/&lt;\/(circle|rect|line|polyline|polygon|path|text|tspan|ellipse)&gt;/gi, '</$1>')
       .replaceAll('&quot;', '"'); // restore attributes
   }
 

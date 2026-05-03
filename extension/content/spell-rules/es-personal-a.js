@@ -143,6 +143,7 @@
             fix: 'a ' + next.display + ' ' + next2.display,
             message: 'Falta "a" personal: ' + next.display + ' ' + next2.display + ' -> a ' + next.display + ' ' + next2.display,
             severity: 'warning',
+            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('es-personal-a') : null,
           });
           continue;
         }
@@ -160,6 +161,7 @@
             fix: 'a ' + next.display,
             message: 'Falta "a" personal: ' + next.display + ' -> a ' + next.display,
             severity: 'warning',
+            pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('es-personal-a') : null,
           });
           continue;
         }

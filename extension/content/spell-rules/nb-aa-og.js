@@ -114,6 +114,7 @@
               fix: matchCase(t.display, 'å'),
               suggestions: [matchCase(t.display, 'å')],
               message: `Forveksling: "og" etter verb/adjektiv som tar infinitiv. Prøv "å".`,
+              pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('nb-aa-og') : null,
             });
             if (suppressed) suppressed.add(i);
           }
@@ -142,6 +143,7 @@
               fix: matchCase(t.display, 'og'),
               suggestions: [matchCase(t.display, 'og')],
               message: `Forveksling: "å" foran ikke-verb. Prøv "og".`,
+              pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('nb-aa-og') : null,
             });
             if (suppressed) suppressed.add(i);
             continue;
@@ -160,6 +162,7 @@
               fix: matchCase(t.display, 'og'),
               suggestions: [matchCase(t.display, 'og')],
               message: `Forveksling: "å" mellom to ikke-verb. Prøv "og".`,
+              pedagogy: (ctx.vocab && ctx.vocab.rulePedagogy) ? ctx.vocab.rulePedagogy.get('nb-aa-og') : null,
             });
             if (suppressed) suppressed.add(i);
           }

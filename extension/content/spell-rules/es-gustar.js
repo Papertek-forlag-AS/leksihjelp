@@ -126,8 +126,8 @@
       // Phase 32-03: cache the shared pedagogy block on first run so explain()
       // (called by the popover surface, sometimes outside any ctx) can render
       // the "Lær mer" structured content without re-reading vocab.
-      if (!_cachedPedagogy && ctx.vocab && ctx.vocab.gustarPedagogy) {
-        _cachedPedagogy = ctx.vocab.gustarPedagogy;
+      if (!_cachedPedagogy && ctx.vocab) {
+        _cachedPedagogy = ctx.vocab.gustarPedagogy || (ctx.vocab.rulePedagogy && (ctx.vocab.rulePedagogy.get('gustar_class') || ctx.vocab.rulePedagogy.get('es-gustar')));
       }
 
       const presensToVerb = ctx.vocab && ctx.vocab.esPresensToVerb;
@@ -206,6 +206,7 @@
             fix: suggestion,
             message: verbDisplay + ' requires dative clitic: ' + suggestion,
             severity: 'warning',
+            pedagogy: _cachedPedagogy,
           });
         }
       }
