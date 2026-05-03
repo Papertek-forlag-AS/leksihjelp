@@ -382,7 +382,11 @@ async function initFirstRunPicker() {
           await chromeStorageSet({ language: lang });
           chrome.runtime.sendMessage({ type: 'LANGUAGE_CHANGED', language: lang });
 
-          // Show step 2: Grammar level
+          // Show step 2: Grammar level — hide the entire language-step
+          // wrapper (title + note + buttons + skip) so it doesn't bleed
+          // through behind the grammar picker.
+          const langContent = picker.querySelector('.language-picker-content');
+          if (langContent) langContent.classList.add('hidden');
           document.getElementById('lang-pick-options').classList.add('hidden');
           document.getElementById('lang-pick-progress').classList.add('hidden');
           const grammarPicker = document.getElementById('grammar-picker');
