@@ -358,6 +358,8 @@
       frImparfaitToVerb:        VOCAB.getFrImparfaitToVerb(),
       frPasseComposeParticiples: VOCAB.getFrPasseComposeParticiples(),
       frAuxPresensForms:        VOCAB.getFrAuxPresensForms(),
+      grammarTables:            VOCAB.getGrammarTables(),
+      grammarPedagogy:          VOCAB.getGrammarPedagogy(),
     };
 
     let findings = CORE.check(text, vocab, { cursorPos: cursor, lang });

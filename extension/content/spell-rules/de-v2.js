@@ -179,11 +179,11 @@
           const verbToken = ctx.tokens[i + 1];
           const original = subjToken.display + ' ' + verbToken.display;
           const fix = verbToken.display + ' ' + subjToken.display;
-
           findings.push({
-            rule_id: 'de-v2',
-            start: subjToken.start,
-            end: subjToken.end,
+            rule_id: rule.id,
+            priority: rule.priority,
+            start: ctx.tokens[i].start,
+            end: ctx.tokens[i].end,
             original: original,
             fix: fix,
             message: original + ' → ' + fix + ' (V2)',
@@ -192,7 +192,9 @@
             // marker spans only the subject pronoun, so applying `fix` as an
             // atomic substitution would corrupt the sentence. Mirror nb-v2.
             noAutoFix: true,
-            pedagogy: rule.pedagogy,
+            pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy) 
+              ? (ctx.vocab.grammarPedagogy.get('de-v2') || rule.pedagogy)
+              : rule.pedagogy,
           });
 
           break; // Only flag once per sentence

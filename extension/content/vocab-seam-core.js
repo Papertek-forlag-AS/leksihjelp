@@ -1552,10 +1552,14 @@
 
     // Grammar tables from synced grammarbank (replaces inline grammar-tables.js data)
     const grammarTables = {};
+    const grammarPedagogy = new Map();
     if (raw && raw.grammarbank) {
       for (const [id, entry] of Object.entries(raw.grammarbank)) {
         if (entry.type === 'grammar_table' && entry.table && entry.data) {
           grammarTables[entry.table] = entry.data;
+        } else if (entry.note || entry.explanation || entry.summary || entry.visual) {
+          // It's a pedagogy entry (structural rule lesson)
+          grammarPedagogy.set(id, entry);
         }
       }
     }
@@ -1647,6 +1651,8 @@
       // Grammar tables from synced grammarbank. Keyed by table name
       // (e.g., "prep_case", "sein_verbs"). Empty when grammarbank not synced.
       grammarTables,
+      // Structural pedagogy lookup (Phase 39). Keyed by entry ID (e.g. "de-v2").
+      grammarPedagogy,
       // Phase 19: s-passive form recognition index for NB/NN.
       // Maps s-passive forms to { baseVerb, isDeponent }. Empty for non-NB/NN.
       sPassivForms,

@@ -152,6 +152,9 @@
             fix: matchCase ? matchCase(t.display, correctForm) : correctForm,
             participle: candidate.display,
             message: `Perfekt: "${t.display} ... ${candidate.display}" skulle vart "${correctForm} ... ${candidate.display}"`,
+            pedagogy: (ctx.vocab && ctx.vocab.grammarPedagogy) 
+              ? ctx.vocab.grammarPedagogy.get('de-perfekt-aux') 
+              : null,
           });
           break; // Only flag the first participle match per auxiliary
         }
