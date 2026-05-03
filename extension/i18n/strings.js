@@ -139,7 +139,7 @@ const _STRINGS = {
     // ── Settings ──
     settings_back: '← Tilbake',
     settings_language_title: 'Språk',
-    settings_language_note: 'Velg språk for ordbok og ordforslag',
+    settings_language_note: 'Velg språk for ordbok og ordprediksjon',
     settings_delete_title: 'Slett nedlastet språk',
     settings_delete_confirm: 'Vil du slette {lang}? Ordbok og lydfiler fjernes. Du kan laste ned igjen senere.',
     settings_download_confirm: '{lang} er ikke lastet ned ennå.\n\nDette laster ned ordbok og uttale (~30–50 MB).\n\nVil du fortsette?',
@@ -184,7 +184,7 @@ const _STRINGS = {
     shortcut_pause: 'Pause/gjenoppta Leksihjelp',
 
     // ── Toasts (Phase 39) ──
-    toast_prediction_disabled: 'Ordforslag slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
+    toast_prediction_disabled: 'Ordprediksjon slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
     toast_widget_disabled: 'Hurtigoppslag slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
     toast_spellcheck_disabled: 'Stavekontroll slått av. Kan slås på igjen i Leksihjelp-innstillinger.',
 
@@ -216,7 +216,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillinger',
-    nav_pause_title: 'Pause Leksihjelp midlertidig: skrur av ordforslag, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dem på igjen. Påvirker ikke ordboka.',
+    nav_pause_title: 'Pause Leksihjelp midlertidig: skrur av ordprediksjon, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dem på igjen. Påvirker ikke ordboka.',
 
     // ── Widget (floating-widget.js) ──
     widget_title: 'Leksihjelp — Uttale',
@@ -252,9 +252,9 @@ const _STRINGS = {
     compound_back_link: 'Tilbake til «{word}»',
     pred_tab_hint: 'Tab for å velge',
     pred_switch_lang: 'Bytt språk',
-    pred_pause: 'Pause ordforslag',
-    pred_resume: 'Fortsett ordforslag',
-    pred_paused: 'Ordforslag pauset',
+    pred_pause: 'Pause ordprediksjon',
+    pred_resume: 'Fortsett ordprediksjon',
+    pred_paused: 'Ordprediksjon pauset',
     pred_resume_short: 'Fortsett',
     pred_vis_flere: 'Vis flere',
     pred_vis_faerre: 'Vis færre',
@@ -268,8 +268,8 @@ const _STRINGS = {
     // ── Context menus (service worker) ──
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
-    ctx_pause_predictions: 'Pause ordforslag',
-    ctx_resume_predictions: 'Fortsett ordforslag',
+    ctx_pause_predictions: 'Pause ordprediksjon',
+    ctx_resume_predictions: 'Fortsett ordprediksjon',
 
     // ── First-run UI language picker ──
     ui_picker_title: 'Velg språk / Choose language',
@@ -407,7 +407,7 @@ const _STRINGS = {
 
     settings_back: '← Tilbake',
     settings_language_title: 'Språk',
-    settings_language_note: 'Vel språk for ordbok og ordforslag',
+    settings_language_note: 'Vel språk for ordbok og ordprediksjon',
     settings_delete_title: 'Slett nedlasta språk',
     settings_delete_confirm: 'Vil du sletta {lang}? Ordbok og lydfiler vert fjerna. Du kan laste ned igjen seinare.',
     settings_download_confirm: '{lang} er ikkje lasta ned enno.\n\nDette lastar ned ordbok og uttale (~30–50 MB).\n\nVil du halde fram?',
@@ -452,7 +452,7 @@ const _STRINGS = {
     shortcut_pause: 'Pause/gjenoppta Leksihjelp',
 
     // ── Toasts (Phase 39) ──
-    toast_prediction_disabled: 'Ordforslag slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
+    toast_prediction_disabled: 'Ordprediksjon slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
     toast_widget_disabled: 'Hurtigoppslag slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
     toast_spellcheck_disabled: 'Stavekontroll slått av. Kan slås på igjen i Leksihjelp-innstillingar.',
 
@@ -481,7 +481,7 @@ const _STRINGS = {
     nav_pause: 'Pause',
     nav_start: 'Start',
     nav_settings: 'Innstillingar',
-    nav_pause_title: 'Pausa Leksihjelp mellombels: skrur av ordforslag, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dei på att. Påverkar ikkje ordboka.',
+    nav_pause_title: 'Pausa Leksihjelp mellombels: skrur av ordprediksjon, uttaleknapp og stavekontroll på alle nettsider. Klikk «Start» for å slå dei på att. Påverkar ikkje ordboka.',
 
     widget_title: 'Leksihjelp — Uttale',
     widget_close: 'Lukk',
@@ -515,9 +515,9 @@ const _STRINGS = {
     compound_back_link: 'Tilbake til «{word}»',
     pred_tab_hint: 'Tab for å velje',
     pred_switch_lang: 'Byt språk',
-    pred_pause: 'Pause ordforslag',
-    pred_resume: 'Hald fram ordforslag',
-    pred_paused: 'Ordforslag pausa',
+    pred_pause: 'Pause ordprediksjon',
+    pred_resume: 'Hald fram ordprediksjon',
+    pred_paused: 'Ordprediksjon pausa',
     pred_resume_short: 'Hald fram',
     pred_vis_flere: 'Vis fleire',
     pred_vis_faerre: 'Vis færre',
@@ -530,8 +530,8 @@ const _STRINGS = {
 
     ctx_lookup: 'Slå opp "%s" i Leksihjelp',
     ctx_read: 'Les opp "%s" med Leksihjelp',
-    ctx_pause_predictions: 'Pause ordforslag',
-    ctx_resume_predictions: 'Hald fram ordforslag',
+    ctx_pause_predictions: 'Pause ordprediksjon',
+    ctx_resume_predictions: 'Hald fram ordprediksjon',
 
     ui_picker_title: 'Vel språk / Choose language',
     ui_picker_note: 'Du kan endre dette seinare i innstillingar',
