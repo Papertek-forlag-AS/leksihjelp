@@ -388,14 +388,34 @@ async function initFirstRunPicker() {
           const grammarPicker = document.getElementById('grammar-picker');
           grammarPicker.classList.remove('hidden');
 
-          grammarPicker.querySelectorAll('.grammar-pick-btn').forEach(gBtn => {
-            gBtn.addEventListener('click', async () => {
-              const level = gBtn.dataset.level;
-              await applyPreset(level);
+          // Render preset buttons from grammarFeatures.presets — single source
+          // of truth shared with the settings-page pills (initGrammarSettings).
+          await loadGrammarFeatures(lang);
+          const optionsEl = grammarPicker.querySelector('.grammar-pick-options');
+          optionsEl.innerHTML = '';
+          const presets = (grammarFeatures && Array.isArray(grammarFeatures.presets))
+            ? grammarFeatures.presets : [];
+          if (presets.length === 0) {
+            // No presets for this language → skip the grammar step.
+            picker.classList.add('hidden');
+            resolve();
+            return;
+          }
+          for (const preset of presets) {
+            const btn = document.createElement('button');
+            btn.className = 'grammar-pick-btn';
+            btn.dataset.level = preset.id;
+            const span = document.createElement('span');
+            span.className = 'grammar-pick-name';
+            span.textContent = preset.name;
+            btn.appendChild(span);
+            btn.addEventListener('click', async () => {
+              await applyPreset(preset.id);
               picker.classList.add('hidden');
               resolve();
             });
-          });
+            optionsEl.appendChild(btn);
+          }
 
           document.getElementById('grammar-pick-skip')?.addEventListener('click', () => {
             picker.classList.add('hidden');
@@ -774,6 +794,8 @@ function updatePresetHighlight() {
 }
 
 async function applyPreset(presetId) {
+  if (!grammarFeatures) await loadGrammarFeatures(viewState.currentLang);
+  if (!grammarFeatures || !Array.isArray(grammarFeatures.presets)) return;
   const preset = grammarFeatures.presets.find(p => p.id === presetId);
   if (!preset) return;
   enabledFeatures = getPresetFeatures(preset);

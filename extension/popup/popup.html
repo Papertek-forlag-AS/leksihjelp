@@ -108,17 +108,7 @@
       <div id="grammar-picker" class="hidden">
         <h2 data-i18n="settings_grammar_title">Grammatikk i ordboken</h2>
         <p class="picker-note" data-i18n="settings_grammar_note">Hvor mye grammatikk vil du se?</p>
-        <div class="grammar-pick-options">
-          <button class="grammar-pick-btn" data-level="lite">
-            <span class="grammar-pick-name" data-i18n="grammar_level_lite">Lite</span>
-          </button>
-          <button class="grammar-pick-btn" data-level="middels">
-            <span class="grammar-pick-name" data-i18n="grammar_level_middels">Middels</span>
-          </button>
-          <button class="grammar-pick-btn" data-level="alt">
-            <span class="grammar-pick-name" data-i18n="grammar_level_alt">Alt</span>
-          </button>
-        </div>
+        <div class="grammar-pick-options"></div>
         <button id="grammar-pick-skip" class="btn-link" data-i18n="picker_skip">Velg senere i innstillinger</button>
       </div>
     </div>
@@ -255,12 +245,13 @@
       </div>
 
       <div class="settings-group glass">
-        <h3 data-i18n="settings_prediction_title">Ordforslag</h3>
+        <h3 data-i18n="settings_prediction_title">Ordprediksjon</h3>
         <label class="toggle-row">
-          <span data-i18n="settings_prediction_toggle">Aktiver ordforslag ved skriving</span>
+          <span data-i18n="settings_prediction_toggle">Aktiver ordprediksjon ved skriving</span>
           <input type="checkbox" id="setting-prediction" checked>
           <span class="toggle-slider"></span>
         </label>
+        <p class="settings-note" data-i18n="settings_prediction_note">Forslag dukker opp etter et par bokstaver — ment å hjelpe med lengre ord. Klikk på et forslag for å sette inn ordet og åpne forklaringen.</p>
       </div>
 
       <div class="settings-group glass">
