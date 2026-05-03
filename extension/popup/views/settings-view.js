@@ -38,7 +38,7 @@
       onUiLanguageChange,
     } = deps;
     const showSection = deps.showSection || {
-      uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true, widget: true,
+      uiLanguage: true, darkmode: true, prediction: true, spellcheckAlternates: true, widget: true, ttsWidget: true,
     };
 
     const cleanups = [];
@@ -120,7 +120,7 @@
       })();
     }
 
-    // ── Widget toggle ──────────────────────────────────
+    // ── Widget toggle (Hurtigoppslag — double-click lookup card) ──
     if (showSection.widget !== false) {
       (async () => {
         const toggle = container.querySelector('#setting-widget');
@@ -131,6 +131,29 @@
         bind(toggle, 'change', async () => {
           await storage.set({ widgetEnabled: toggle.checked });
           runtime.sendMessage({ type: 'WIDGET_ENABLED_CHANGED', enabled: toggle.checked });
+        });
+      })();
+    }
+
+    // ── TTS-widget toggle (Uttaleknapp on text selection) ──
+    // Independent of Hurtigoppslag — pausing the on-page TTS bubble must
+    // not also kill the double-click lookup card. Migrates from legacy
+    // widgetEnabled if ttsWidgetEnabled has never been written, so users
+    // who had the combined toggle off keep both surfaces off.
+    if (showSection.ttsWidget !== false) {
+      (async () => {
+        const toggle = container.querySelector('#setting-tts-widget');
+        if (!toggle) return;
+        const stored = await storage.get('ttsWidgetEnabled');
+        if (stored === undefined || stored === null) {
+          const legacy = await storage.get('widgetEnabled');
+          toggle.checked = legacy !== false;
+        } else {
+          toggle.checked = stored !== false;
+        }
+        bind(toggle, 'change', async () => {
+          await storage.set({ ttsWidgetEnabled: toggle.checked });
+          runtime.sendMessage({ type: 'TTS_WIDGET_ENABLED_CHANGED', enabled: toggle.checked });
         });
       })();
     }

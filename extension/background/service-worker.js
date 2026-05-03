@@ -149,7 +149,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 // ── Message routing ──
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Relay settings changes to all content scripts
-  if (msg.type === 'LANGUAGE_CHANGED' || msg.type === 'PREDICTION_TOGGLED' || msg.type === 'AUTH_CHANGED' || msg.type === 'WIDGET_ENABLED_CHANGED') {
+  if (msg.type === 'LANGUAGE_CHANGED' || msg.type === 'PREDICTION_TOGGLED' || msg.type === 'AUTH_CHANGED' || msg.type === 'WIDGET_ENABLED_CHANGED' || msg.type === 'TTS_WIDGET_ENABLED_CHANGED') {
     broadcastToAllTabs(msg);
   }
 

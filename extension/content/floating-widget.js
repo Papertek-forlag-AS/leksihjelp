@@ -88,7 +88,8 @@
   let wordCharPositions = []; // [{word, charStart, charEnd}] for timing sync
   let wordTimingInterval = null; // For ElevenLabs word timing estimation
   let browserTtsCharIndex = 0; // Last known charIndex for browser TTS restart
-  let widgetEnabled = true;
+  let widgetEnabled = true;       // Hurtigoppslag (double-click → lookup card)
+  let ttsWidgetEnabled = true;    // Uttaleknapp (TTS bubble on text selection)
   let justDragged = false; // Prevents hideWidget after drag ends
   let justDblClicked = false; // Prevents TTS widget on double-click (lookup handles it)
 
@@ -105,10 +106,16 @@
 
   async function init() {
     await initI18n();
-    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'widgetEnabled', 'widgetFontSize', 'fontSizeMode', 'examMode', 'widgetPos']);
+    const stored = await chromeStorageGet(['isAuthenticated', 'language', 'widgetEnabled', 'ttsWidgetEnabled', 'widgetFontSize', 'fontSizeMode', 'examMode', 'widgetPos']);
     isAuthenticated = stored.isAuthenticated || false;
     currentLang = stored.language || 'en';
     widgetEnabled = stored.widgetEnabled !== false;
+    // Migrate from legacy combined widgetEnabled if ttsWidgetEnabled was
+    // never written, so users who turned the old combined toggle off keep
+    // both surfaces off until they explicitly re-enable each one.
+    ttsWidgetEnabled = stored.ttsWidgetEnabled !== undefined && stored.ttsWidgetEnabled !== null
+      ? stored.ttsWidgetEnabled !== false
+      : stored.widgetEnabled !== false;
     widgetFontSize = stored.widgetFontSize || FONT_SIZE_DEFAULT;
     fontSizeMode = stored.fontSizeMode || 'auto';
     examMode = !!stored.examMode;
@@ -158,7 +165,15 @@
       }
       if (msg.type === 'WIDGET_ENABLED_CHANGED') {
         widgetEnabled = msg.enabled;
-        if (!widgetEnabled) hideWidget();
+        // Hurtigoppslag controls the double-click lookup card; the TTS
+        // floater has its own toggle (ttsWidgetEnabled) and is not hidden
+        // here. If a lookup card is open, close it.
+        const card = document.getElementById('lexi-lookup-card');
+        if (!widgetEnabled && card) card.remove();
+      }
+      if (msg.type === 'TTS_WIDGET_ENABLED_CHANGED') {
+        ttsWidgetEnabled = msg.enabled;
+        if (!ttsWidgetEnabled) hideWidget();
       }
       if (msg.type === 'PLAY_TTS' && msg.text) {
         selectedText = msg.text;
@@ -219,7 +234,7 @@
           <button class="lh-font-btn lh-font-increase" title="${t('widget_font_larger')}">A+</button>
         </div>
         <div class="lh-header-actions">
-          <button class="lh-pause-widget" title="${t('nav_pause_title')}">⏸</button>
+          <button class="lh-pause-widget" title="${t('pause_tts_widget_title')}">⏸</button>
           <button class="lh-close" title="${t('widget_close')}">&times;</button>
         </div>
       </div>
@@ -435,6 +450,9 @@
   }
 
   function handleDoubleClick() {
+    // Double-click → Hurtigoppslag (lookup card). Gated on the
+    // Hurtigoppslag toggle (widgetEnabled), independent of the TTS
+    // bubble's own toggle.
     if (!widgetEnabled) return;
     justDblClicked = true;
     setTimeout(() => { justDblClicked = false; }, 50);
@@ -450,8 +468,9 @@
 
   // ── Text Selection ──
   function handleTextSelection(e) {
-    // Don't show widget when disabled
-    if (!widgetEnabled) return;
+    // Text-selection → TTS bubble. Gated on the TTS-widget toggle
+    // (ttsWidgetEnabled), independent of Hurtigoppslag.
+    if (!ttsWidgetEnabled) return;
     // Ignore mouseup that ends a drag operation
     if (justDragged) { justDragged = false; return; }
     // Ignore clicks inside the widget
@@ -535,10 +554,14 @@
   }
 
   function disableWidgetQuick() {
-    widgetEnabled = false;
-    chrome.storage.local.set({ widgetEnabled: false });
+    // Pause button on the TTS bubble — disables ONLY the TTS bubble
+    // (Uttaleknapp), not Hurtigoppslag. Persists ttsWidgetEnabled so the
+    // choice survives reloads, broadcasts so other tabs sync immediately.
+    ttsWidgetEnabled = false;
+    chrome.storage.local.set({ ttsWidgetEnabled: false });
+    try { chrome.runtime.sendMessage({ type: 'TTS_WIDGET_ENABLED_CHANGED', enabled: false }); } catch (_) {}
     hideWidget();
-    showToast(t('toast_widget_disabled'));
+    showToast(t('toast_tts_widget_disabled'));
   }
 
   function showToast(msg) {
