@@ -1521,6 +1521,43 @@
 /* Wechselpräposition motion vs location pair — stacked layout for narrow
    popovers (the spell-check popover is ~320px wide; flex-column avoids the
    awkward container-query / media-query dance). */
+#lexi-spell-overlay .lh-spell-pedagogy-visual {
+  margin: 12px 0;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-svg-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-svg-wrapper svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-visual-caption {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #64748b;
+  text-align: center;
+  font-style: italic;
+}
+
+#lexi-spell-overlay .lh-spell-pedagogy-extra {
+  margin-top: 12px;
+  padding: 8px 10px;
+  background: rgba(17, 180, 154, 0.08);
+  border-radius: 6px;
+  font-size: 12px;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
 #lexi-spell-overlay .lh-spell-pedagogy-wechsel {
   display: flex;
   flex-direction: column;

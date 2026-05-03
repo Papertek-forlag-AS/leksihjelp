@@ -918,11 +918,22 @@
     }
     parts.push(`</div>`);
 
-    // Summary + explanation paragraphs
+    // Summary + explanation paragraphs + general note
     const summary = pick(pedagogy.summary);
-    if (summary) parts.push(`<p class="lh-spell-pedagogy-summary">${escapeHtml(summary)}</p>`);
+    if (summary) parts.push(`<p class="lh-spell-pedagogy-summary">${sanitizeWarning(summary)}</p>`);
     const explanation = pick(pedagogy.explanation);
-    if (explanation) parts.push(`<p class="lh-spell-pedagogy-explanation">${escapeHtml(explanation)}</p>`);
+    if (explanation) parts.push(`<p class="lh-spell-pedagogy-explanation">${sanitizeWarning(explanation)}</p>`);
+    const noteMain = pick(pedagogy.note);
+    if (noteMain) parts.push(`<p class="lh-spell-pedagogy-explanation">${sanitizeWarning(noteMain)}</p>`);
+
+    // Visual aid (Phase 39 SVG support)
+    if (pedagogy.visual && pedagogy.visual.svg) {
+      const caption = pick(pedagogy.visual.caption);
+      parts.push(`<div class="lh-spell-pedagogy-visual">
+        <div class="lh-spell-pedagogy-svg-wrapper">${sanitizeWarning(pedagogy.visual.svg)}</div>
+        ${caption ? `<div class="lh-spell-pedagogy-visual-caption">${escapeHtml(caption)}</div>` : ''}
+      </div>`);
+    }
 
     // Examples (correct ✓ + incorrect ✗)
     const examples = Array.isArray(pedagogy.examples) ? pedagogy.examples : [];
@@ -944,6 +955,12 @@
         parts.push(`<div class="lh-spell-pedagogy-example-note"><em>${escapeHtml(note)}</em></div>`);
       }
       parts.push(`</div>`);
+    }
+
+    // Extra pro-tips
+    const extra = pick(pedagogy.extra);
+    if (extra) {
+      parts.push(`<div class="lh-spell-pedagogy-extra">${sanitizeWarning(extra)}</div>`);
     }
 
     // Wechselpräposition motion vs location pair
@@ -1504,6 +1521,19 @@
     const d = document.createElement('span');
     d.textContent = String(s ?? '');
     return d.innerHTML;
+  }
+
+  // Sanitize pedagogical warning HTML — allow em, strong, and SVG tags for visual aids.
+  function sanitizeWarning(html) {
+    return escapeHtml(html)
+      .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>')
+      .replace(/&lt;svg(.*?)&gt;/gi, '<svg$1>')
+      .replace(/&lt;\/svg&gt;/gi, '</svg>')
+      .replace(/&lt;g(.*?)&gt;/gi, '<g$1>')
+      .replace(/&lt;\/g&gt;/gi, '</g>')
+      .replace(/&lt;(circle|rect|line|polyline|polygon|text|path|ellipse)(.*?)&gt;/gi, '<$1$2>')
+      .replace(/&lt;\/(circle|rect|line|polyline|polygon|text|path|ellipse)&gt;/gi, '</$1>')
+      .replaceAll('&quot;', '"'); // restore attributes
   }
 
   // escapeHtml escapes &, <, >. Attribute values must ALSO escape " since

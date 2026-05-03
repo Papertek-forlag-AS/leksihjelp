@@ -93,7 +93,15 @@
     }
 
     function sanitizeWarning(html) {
-      return escapeHtml(html).replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>');
+      return escapeHtml(html)
+        .replace(/&lt;(\/?)(em|strong)&gt;/gi, '<$1$2>')
+        .replace(/&lt;svg(.*?)&gt;/gi, '<svg$1>')
+        .replace(/&lt;\/svg&gt;/gi, '</svg>')
+        .replace(/&lt;g(.*?)&gt;/gi, '<g$1>')
+        .replace(/&lt;\/g&gt;/gi, '</g>')
+        .replace(/&lt;(circle|rect|line|polyline|polygon|text|path|ellipse)(.*?)&gt;/gi, '<$1$2>')
+        .replace(/&lt;\/(circle|rect|line|polyline|polygon|text|path|ellipse)&gt;/gi, '</$1>')
+        .replaceAll('&quot;', '"'); // restore attributes
     }
 
     function bankToPos(bank) {
