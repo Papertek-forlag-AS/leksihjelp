@@ -1427,6 +1427,43 @@
       }
     }
 
+    // Always-visible widget language pill row inside the lookup card so the
+    // student can see which language the lookup is using and switch on the
+    // fly. Phase 30-04 Task 6 keeps the widget's lang LOCAL — clicking a
+    // pill here re-runs the lookup but does NOT touch shared `language`
+    // storage or broadcast LANGUAGE_CHANGED (intentional decoupling from
+    // popup writing-language).
+    {
+      const langsForPicker = [...BUNDLED_WIDGET_LANGS];
+      if (window.__lexiVocabStore) {
+        try {
+          const cached = await window.__lexiVocabStore.listCachedLanguages();
+          for (const c of cached) {
+            if (!langsForPicker.includes(c.language)) langsForPicker.push(c.language);
+          }
+        } catch {}
+      }
+      const pillStyle = (active) => `font-size:11px;padding:3px 8px;border-radius:6px;border:1px solid ${active ? '#11B49A' : 'rgba(0,0,0,0.08)'};background:${active ? 'rgba(17,180,154,0.12)' : 'rgba(255,255,255,0.6)'};color:${active ? '#11B49A' : '#475569'};font-weight:${active ? '700' : '500'};cursor:pointer;`;
+      const pillHtml = `<div class="lh-lookup-langs" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">`
+        + langsForPicker.map(lang => {
+            const active = lang === currentLang;
+            return `<button class="lh-lookup-lang" data-lang="${lang}" style="${pillStyle(active)}">${WIDGET_LANG_FLAGS[lang] || ''} ${WIDGET_LANG_LABELS[lang] || lang.toUpperCase()}</button>`;
+          }).join('')
+        + `</div>`;
+      const dragEl = card.querySelector('.lh-lookup-drag');
+      if (dragEl) dragEl.insertAdjacentHTML('afterend', pillHtml);
+      card.querySelectorAll('.lh-lookup-lang').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const lang = btn.dataset.lang;
+          if (lang === currentLang) return;
+          currentLang = lang;
+          readingLang = 'target';
+          if (typeof updateVoiceOptions === 'function') updateVoiceOptions();
+          showInlineLookup(word);
+        });
+      });
+    }
+
     (document.fullscreenElement || document.documentElement).appendChild(card);
     card.querySelector('#lh-lookup-close').addEventListener('click', () => card.remove());
     document.addEventListener('keydown', function esc(e) {
