@@ -174,9 +174,27 @@
     return _frBundledPromise;
   }
 
-  async function loadBigrams(lang) { return loadBundledSidecar(`bigrams-${lang}.json`); }
-  async function loadFrequency(lang) { return loadBundledSidecar(`freq-${lang}.json`); }
-  async function loadPitfalls(lang) { return loadBundledSidecar(`pitfalls-${lang}.json`); }
+  // Sidecar files only ship for a subset of languages — the rest get null
+  // (graceful no-op downstream). loadBundledSidecar already swallows 404s
+  // in JS, but the browser still logs `Failed to load resource` to the
+  // devtools console for every missing file. Gate the fetch by language
+  // to keep the console clean. Update these sets when a new sidecar gets
+  // added to extension/data/.
+  const BIGRAM_LANGS = new Set(['nb', 'nn']);
+  const FREQ_LANGS = new Set(['nb', 'nn']);
+  const PITFALL_LANGS = new Set(['en']);
+  async function loadBigrams(lang) {
+    if (!BIGRAM_LANGS.has(lang)) return null;
+    return loadBundledSidecar(`bigrams-${lang}.json`);
+  }
+  async function loadFrequency(lang) {
+    if (!FREQ_LANGS.has(lang)) return null;
+    return loadBundledSidecar(`freq-${lang}.json`);
+  }
+  async function loadPitfalls(lang) {
+    if (!PITFALL_LANGS.has(lang)) return null;
+    return loadBundledSidecar(`pitfalls-${lang}.json`);
+  }
   async function loadSister(lang) {
     const sister = lang === 'nb' ? 'nn' : lang === 'nn' ? 'nb' : null;
     if (!sister) return null;
